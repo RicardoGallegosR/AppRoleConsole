@@ -2,6 +2,7 @@
 using AppRoleConsole.Infrastructure.Security;
 using AppRoleConsole.Infrastructure.Sql;
 using AppRoleConsole.Infrastructure.SystemInfo;
+using Microsoft.Data.SqlClient;
 
 
 class Program {
@@ -13,55 +14,65 @@ class Program {
     const string APPROLE = AppConfig.Security.AppRole;
     const string APPROLE_PASS = AppConfig.Security.AppRolePass;
 
-    static int Main() {
-        using var datos = new DatosCpuGet();
-        string version = "", idEquipo = "", serie = "";
-        if (!datos.DatosC(ref version, ref idEquipo, ref serie)) {
-            Console.Error.WriteLine("Error obteniendo datos de CPU: " + datos.DescripcionError);
-            return 1;
-        }
-
-        Console.WriteLine($"Versión app : {version}");
-        Console.WriteLine($"ID equipo   : {idEquipo}");
-        Console.WriteLine($"Serie disco : {serie}");
+    public static async Task<int> Main() {
 
         string RollAcceso = "RollVfcVisual";
         string ClaveAcceso = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
         
         var conf = new RegWin();
         var appName = string.IsNullOrWhiteSpace(conf.DomainName) ? "" : conf.DomainName.Trim();
-/*
-        using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-        conn.Open();
+        /*
+                using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
+                conn.Open();
 
-        var repo = new SivevRepository();
+                var repo = new SivevRepository();
 
-        using (var scope = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
-            var r = repo.SpAppRollClaveGet(conn);
-            Console.WriteLine($"Return={r.ReturnCode}, MsgId={r.MensajeId}, Res={r.Resultado}");
-            Console.WriteLine($"Func='{r.FuncionAplicacion}', Clave='{r.ClaveAcceso}'");
-            //invertida = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
-            ClaveAcceso = r.ClaveAcceso;
-            RollAcceso = r.FuncionAplicacion;
-        }
-        conn.Close();
-        */
-        /*-------------------------------------------------------------------------------------------
+                using (var scope = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
+                    var r = repo.SpAppRollClaveGet(conn);
+                    Console.WriteLine($"Return={r.ReturnCode}, MsgId={r.MensajeId}, Res={r.Resultado}");
+                    Console.WriteLine($"Func='{r.FuncionAplicacion}', Clave='{r.ClaveAcceso}'");
+                    //invertida = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
+                    ClaveAcceso = r.ClaveAcceso;
+                    RollAcceso = r.FuncionAplicacion;
+                }
+                conn.Close();
+                */
+
+
+        /*---------------------------VALIDA BITACORA----------------------------------------------------------------
          */
-
-        Console.WriteLine("Intento de abrir la BDD con los roles originales");
 
         using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
         connApp.Open();
-        var repoApp = new SivevRepository();
 
-        Console.WriteLine($"Credenciales connApp: {connApp}\nRollAcceso: {RollAcceso}\nClaveAcceso:{ClaveAcceso}");
 
+
+
+        var repo = new SivevRepository();
+        conf.EstacionId = "BFFF8EA5-76A4-F011-811C-D09466400DBA";
+        // Si tu SP requiere AppRole, activa el scope aquí.
+        Console.WriteLine($"Estacion{conf.EstacionId}\nServer: {SERVER}\nBDD: {DB}\nuser: {SQL_USER}\nPass: {SQL_PASS}\napp: {appName}\nappRole: {RollAcceso}\nRolePass: {ClaveAcceso}");
         using (var scope = new AppRoleScope(connApp, RollAcceso, ClaveAcceso)) {
-            var r2 = repoApp.SpAppCredencialExisteHuella(connApp,"BFFF8EA5-76A4-F011-811C-D09466400DBA",151,16499);
-            Console.WriteLine($"MensajeId={r2.MensajeId}\nResultado={r2.Resultado}\nExisteHuella={r2.ExisteHuella}\nhuella {r2.Huella}");
-            }
-        connApp.Close();
+            var estId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA"); // tu estación
+
+
+
+            var r = await repo.SpAppAccesoIniciaAsync(
+                    conn:        connApp,
+                    estacionId:  estId,
+                    opcionMenuId:151,
+                    credencial:  16499,
+                    password:    "PASS1234",
+                    huella:      null
+                );
+            Console.WriteLine($"Return={r.ReturnCode}");
+            Console.WriteLine($"MensajeId={r.MensajeId}");
+            Console.WriteLine($"AccesoId={r.AccesoId}");
+
+        }
+
+        /*---------------------------VALIDA ESTACION----------------------------------------------------------------
+         */
 
 
         return 0;

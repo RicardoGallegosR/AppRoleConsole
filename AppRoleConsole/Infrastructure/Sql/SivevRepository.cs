@@ -68,7 +68,257 @@ namespace AppRoleConsole.Infrastructure.Sql {
                 Huella = huella
             };
 
+        }
+        public SpAppChecaCpuResult SpAppChecaCpu(SqlConnection conn, string estacionId, string aplicacion, string version, string identificadorEquipo, string serieDisco) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppChecaCpu";   // ajusta esquema/nombre si difiere
+            cmd.CommandTimeout = _timeout;
+
+            // Return value
+            var pRet = cmd.Parameters.Add("@iError", SqlDbType.Int);
+            pRet.Direction = ParameterDirection.ReturnValue;
+
+            // Outputs
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            // Inputs (ajusta tamaños según definición real del SP)
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.VarChar, 36) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@vcAplicacion", SqlDbType.VarChar, 64) { Value = aplicacion });
+            cmd.Parameters.Add(new SqlParameter("@vcVersion", SqlDbType.VarChar, 32) { Value = version });
+            cmd.Parameters.Add(new SqlParameter("@vcIdentificadorEquipo", SqlDbType.VarChar, 64) { Value = identificadorEquipo });
+            cmd.Parameters.Add(new SqlParameter("@vcSerieDisco", SqlDbType.VarChar, 64) { Value = serieDisco });
+
+            cmd.ExecuteNonQuery();
+
+            return new SpAppChecaCpuResult {
+                ReturnCode = (int)(pRet.Value ?? 0),
+                MensajeId = (int)(pMsg.Value ?? 0),
+                Resultado = (short)(pRes.Value ?? (short)0)
+            };
+        }
+
+        // no tiene permisos con el Roll visual
+        public SpBitacoraAplicacionesIniciaResult SpBitacoraAplicacionesInicia(SqlConnection conn, Guid estacionId) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivSpComun.SpBitacoraAplicacionesInicia";
+            cmd.CommandTimeout = _timeout;
+
+            // Return value (no necesita nombre especial; uso @ReturnCode por claridad)
+            var pRet = cmd.Parameters.Add("@ReturnCode", SqlDbType.Int);
+            pRet.Direction = ParameterDirection.ReturnValue;
+
+            // IN
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+
+            // OUT
+            var pOut = cmd.Parameters.Add("@uiBitacoraAplicacionId", SqlDbType.UniqueIdentifier);
+            pOut.Direction = ParameterDirection.Output;
+
+            cmd.ExecuteNonQuery();
+
+            // Convertir el OUTPUT (puede venir DBNull => Guid.Empty)
+            Guid bitId = Guid.Empty;
+            if (pOut.Value is Guid g) bitId = g;
+            else if (pOut.Value is System.Data.SqlTypes.SqlGuid sg && !sg.IsNull) bitId = sg.Value;
+
+            return new SpBitacoraAplicacionesIniciaResult {
+                ReturnCode = (int)(pRet.Value ?? 0),
+                BitacoraAplicacionId = bitId
+            };
+        }
+
+        // (Opcional) versión async
+        public async Task<SpBitacoraAplicacionesIniciaResult> SpBitacoraAplicacionesIniciaAsync(
+            SqlConnection conn, Guid estacionId, CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivSpComun.SpBitacoraAplicacionesInicia";
+            cmd.CommandTimeout = _timeout;
+
+            var pRet = cmd.Parameters.Add("@ReturnCode", SqlDbType.Int);
+            pRet.Direction = ParameterDirection.ReturnValue;
+
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+
+            var pOut = cmd.Parameters.Add("@uiBitacoraAplicacionId", SqlDbType.UniqueIdentifier);
+            pOut.Direction = ParameterDirection.Output;
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            Guid bitId = Guid.Empty;
+            if (pOut.Value is Guid g) bitId = g;
+            else if (pOut.Value is System.Data.SqlTypes.SqlGuid sg && !sg.IsNull) bitId = sg.Value;
+
+            return new SpBitacoraAplicacionesIniciaResult {
+                ReturnCode = (int)(pRet.Value ?? 0),
+                BitacoraAplicacionId = bitId
+            };
+        }
+
+
+
+        public SpAppProgramOnResult SpAppProgramOn(SqlConnection conn, Guid estacionId) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppProgramOn";
+            cmd.CommandTimeout = _timeout;
+
+            // return value (el SP retorna @@ERROR)
+            var pRet = cmd.Parameters.Add("@ReturnCode", SqlDbType.Int);
+            pRet.Direction = ParameterDirection.ReturnValue;
+
+            // outputs
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            // input
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+
+            cmd.ExecuteNonQuery();
+
+            return new SpAppProgramOnResult {
+                ReturnCode = (int)(pRet.Value ?? 0),
+                MensajeId = (int)(pMsg.Value ?? 0),
+                Resultado = (short)(pRes.Value ?? (short)0),
+            };
+        }
+
+
+
+
+        public async Task<AccesoIniciaResult> SpAppAccesoIniciaAsync(SqlConnection conn, Guid estacionId, short opcionMenuId, int credencial, string password, byte[] huella, CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SivAppComun.SpAppAccesoInicia";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Parámetros de entrada
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.SmallInt) { Value = opcionMenuId });
+            cmd.Parameters.Add(new SqlParameter("@iCredencial", SqlDbType.Int) { Value = credencial });
+            cmd.Parameters.Add(new SqlParameter("@vcPassword", SqlDbType.VarChar, 15) { Value = (object?)password ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@vbHuella", SqlDbType.VarBinary, -1) { Value = (object?)huella ?? Array.Empty<byte>() });
+
+            // Parámetros de salida
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) {
+                Direction = ParameterDirection.Output
+            };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.Output
+            };
+            var pAccesoId = new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) {
+                Direction = ParameterDirection.Output
+            };
+
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+            cmd.Parameters.Add(pAccesoId);
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            return new AccesoIniciaResult {
+                ReturnCode = (short)(pResultado.Value ?? (short)0),
+                MensajeId = (int)(pMensajeId.Value ?? 0),
+                AccesoId = pAccesoId.Value is Guid g ? g : Guid.Empty
+            };
+        }
+
+        public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(
+    SqlConnection conn,
+    Guid estacionId,
+    Guid accesoId,
+    CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "[VfcVisual].[SpAppVerificacionVisualIni]";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Entradas
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = accesoId });
+
+            // Salidas
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) {
+                Direction = ParameterDirection.Output
+            };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.Output
+            };
+            var pVerificacionId = new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) {
+                Direction = ParameterDirection.Output
+            };
+            var pProtocolo = new SqlParameter("@tiProtocoloVerificacionId", SqlDbType.TinyInt) {
+                Direction = ParameterDirection.Output
+            };
+            var pPlaca = new SqlParameter("@vcPlacaId", SqlDbType.VarChar, 11) {
+                Direction = ParameterDirection.Output
+            };
+
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+            cmd.Parameters.Add(pVerificacionId);
+            cmd.Parameters.Add(pProtocolo);
+            cmd.Parameters.Add(pPlaca);
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            // Mapear resultados
+            var res = new VerificacionVisualIniResult  {
+                MensajeId = (int)(pMensajeId.Value ?? 0),
+                Resultado = (short)(pResultado.Value ?? (short)0),
+                VerificacionId = pVerificacionId.Value is Guid g ? g : Guid.Empty,
+                ProtocoloVerificacionId = pProtocolo.Value is byte b ? b : (byte)0,
+                PlacaId = pPlaca.Value?.ToString() ?? "DESCONOCIDO"
+            };
+
+            return res;
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         }
-    }
-}
