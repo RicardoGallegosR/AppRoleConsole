@@ -1,4 +1,5 @@
-﻿using AppRoleConsole.Infrastructure.Config;
+﻿using AppRoleConsole.Domain.Models;
+using AppRoleConsole.Infrastructure.Config;
 using AppRoleConsole.Infrastructure.Security;
 using AppRoleConsole.Infrastructure.Sql;
 using AppRoleConsole.Infrastructure.SystemInfo;
@@ -21,6 +22,10 @@ class Program {
         
         var conf = new RegWin();
         var appName = string.IsNullOrWhiteSpace(conf.DomainName) ? "" : conf.DomainName.Trim();
+
+        Guid accesoId = Guid.Empty;
+        Guid estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
+
         /*
                 using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
                 conn.Open();
@@ -41,39 +46,58 @@ class Program {
 
         /*---------------------------VALIDA BITACORA----------------------------------------------------------------
          */
-
         using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-        connApp.Open();
-
-
-
+        await connApp.OpenAsync();
 
         var repo = new SivevRepository();
-        conf.EstacionId = "BFFF8EA5-76A4-F011-811C-D09466400DBA";
-        // Si tu SP requiere AppRole, activa el scope aquí.
-        Console.WriteLine($"Estacion{conf.EstacionId}\nServer: {SERVER}\nBDD: {DB}\nuser: {SQL_USER}\nPass: {SQL_PASS}\napp: {appName}\nappRole: {RollAcceso}\nRolePass: {ClaveAcceso}");
-        using (var scope = new AppRoleScope(connApp, RollAcceso, ClaveAcceso)) {
-            var estId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA"); // tu estación
+        using var scope = new AppRoleScope(connApp, RollAcceso, ClaveAcceso); 
 
+        try {
+            // 1) Abrir acceso
+            var r = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId:estacionId, opcionMenuId:151, credencial:  16499, password: "PASS1234", huella: null);
 
+            if (r.MensajeId != 0 || r.AccesoId == Guid.Empty) {
+                Console.WriteLine($"No se pudo iniciar acceso. MensajeId={r.MensajeId}, Return={r.ReturnCode}");
+                return 0; 
+            }
 
-            var r = await repo.SpAppAccesoIniciaAsync(
-                    conn:        connApp,
-                    estacionId:  estId,
-                    opcionMenuId:151,
-                    credencial:  16499,
-                    password:    "PASS1234",
-                    huella:      null
-                );
-            Console.WriteLine($"Return={r.ReturnCode}");
-            Console.WriteLine($"MensajeId={r.MensajeId}");
-            Console.WriteLine($"AccesoId={r.AccesoId}");
+            accesoId = r.AccesoId;
 
+            // 2) Visual Ini
+            var r2 = await repo.SpAppVerificacionVisualIniAsync(conn:connApp, estacionId: estacionId, accesoId:accesoId);
+
+            Console.WriteLine($"Resultado={r2.Resultado}  MensajeId={r2.MensajeId}");
+            Console.WriteLine($"VerificacionId={r2.VerificacionId}");
+            Console.WriteLine($"ProtocoloVerificacionId={r2.ProtocoloVerificacionId}");
+            Console.WriteLine($"PlacaId={r2.PlacaId}");
+
+            switch (r2.Resultado) {
+                case < 0:
+                    Console.WriteLine("Flujo con error (<0).");
+                    break;
+
+                case 0:
+                    Console.WriteLine("Continuar flujo (=0).");
+                    break;
+
+                case 1:
+                    Console.WriteLine("No hay pruebas");
+                    break;
+                default:
+                    Console.WriteLine($"Otro: {r2.Resultado}");
+                    break;
+            }
+        } catch (Exception ex) {
+            Console.WriteLine($"Excepción: {ex.Message}");
+        } finally {
+            if (accesoId != Guid.Empty) {
+                var fin = await repo.SpAppAccesoFinAsync(connApp, estacionId, accesoId);
+                Console.WriteLine($"[Fin Acceso] Resultado={fin.Resultado} MensajeId={fin.MensajeId} Return={fin.ReturnCode}");
+            }
         }
 
-        /*---------------------------VALIDA ESTACION----------------------------------------------------------------
+        /*---------------------------VALIDA SpAppVerificacionVisualIniAsync ----------------------------------------------------------------
          */
-
 
         return 0;
     }

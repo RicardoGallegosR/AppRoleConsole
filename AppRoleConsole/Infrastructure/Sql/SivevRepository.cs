@@ -250,11 +250,7 @@ namespace AppRoleConsole.Infrastructure.Sql {
             };
         }
 
-        public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(
-    SqlConnection conn,
-    Guid estacionId,
-    Guid accesoId,
-    CancellationToken ct = default) {
+        public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(SqlConnection conn, Guid estacionId,Guid accesoId, CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
@@ -303,6 +299,59 @@ namespace AppRoleConsole.Infrastructure.Sql {
             return res;
         }
 
+
+        public async Task<AccesoFinResult> SpAppAccesoFinAsync(SqlConnection conn, Guid _EstacionId, Guid _AccesoId, CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "[SivAppComun].[SpAppAccesoFin]";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Entradas
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = _EstacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = _AccesoId });
+
+            // Salidas
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) {
+                Direction = ParameterDirection.Output
+            };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.Output
+            };
+
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+
+            // Valor de retorno (RETURN @@ERROR)
+            var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+            cmd.Parameters.Add(pReturn);
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            return new AccesoFinResult {
+                Resultado = (short)(pResultado.Value ?? (short)0),
+                MensajeId = (int)(pMensajeId.Value ?? 0),
+                ReturnCode = pReturn.Value is int rc ? rc : 0
+            };
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
@@ -321,4 +370,4 @@ namespace AppRoleConsole.Infrastructure.Sql {
 
 
 
-        }
+}

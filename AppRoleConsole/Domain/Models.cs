@@ -53,4 +53,12 @@
         public byte ProtocoloVerificacionId { get; set; }   // @tiProtocoloVerificacionId
         public string PlacaId { get; set; } = "DESCONOCIDO";  // @vcPlacaId (varchar(11))
     }
+
+
+    public sealed class AccesoFinResult {
+        public short Resultado { get; set; }   // @siResultado
+        public int MensajeId { get; set; }   // @iMensajeId
+        public int ReturnCode { get; set; }  // RETURN(@@ERROR)
+        public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
+    }
 }
