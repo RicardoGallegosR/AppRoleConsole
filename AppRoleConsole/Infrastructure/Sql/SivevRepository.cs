@@ -29,7 +29,7 @@ namespace AppRoleConsole.Infrastructure.Sql {
             };
         }
 
-        public CredencialExisteHuellaResult SpAppCredencialExisteHuella(SqlConnection cnn, string uiEstacionId, short siOpcionMenuId, int iCredencial) {
+        public CredencialExisteHuellaResult SpAppCredencialExisteHuella(SqlConnection cnn, Guid uiEstacionId, short siOpcionMenuId, int iCredencial) {
             if (cnn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");
 
@@ -46,7 +46,7 @@ namespace AppRoleConsole.Infrastructure.Sql {
             var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
             pRes.Direction = ParameterDirection.Output;
 
-            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.VarChar, 36) { Value = uiEstacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = uiEstacionId });
             cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.Int) { Value = siOpcionMenuId }); // o SmallInt si aplica
             cmd.Parameters.Add(new SqlParameter("@iCredencial", SqlDbType.Int) { Value = iCredencial });
 
@@ -255,7 +255,7 @@ namespace AppRoleConsole.Infrastructure.Sql {
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "[VfcVisual].[SpAppVerificacionVisualIni]";
+            cmd.CommandText = "VfcVisual.SpAppVerificacionVisualIni";
             cmd.CommandType = CommandType.StoredProcedure;
 
             // Entradas
@@ -305,7 +305,7 @@ namespace AppRoleConsole.Infrastructure.Sql {
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "[SivAppComun].[SpAppAccesoFin]";
+            cmd.CommandText = "SivAppComun.SpAppAccesoFin";
             cmd.CommandType = CommandType.StoredProcedure;
 
             // Entradas
@@ -336,6 +336,111 @@ namespace AppRoleConsole.Infrastructure.Sql {
             };
         }
 
+        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync( SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible, CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "VfcVisual.SpAppCapturaVisualGet";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Entradas
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = accesoId });
+            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = verificacionId });
+            cmd.Parameters.Add(new SqlParameter("@vcElemento", SqlDbType.VarChar, 50) { Value = (object?)elemento ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@tiCombustible", SqlDbType.TinyInt) { Value = (object?)tiCombustible ?? 1 });
+
+            // Salidas
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+
+            // RETURN(@@ERROR)
+            var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+            cmd.Parameters.Add(pReturn);
+
+            var res = new CapturaVisualGetResult();
+
+            // Ejecuta y lee el resultset
+            using (var rdr = await cmd.ExecuteReaderAsync(ct)) {
+                while (await rdr.ReadAsync(ct)) {
+                    res.Items.Add(new CapturaVisualItem {
+                        CapturaVisualId = rdr.GetInt32(0),
+                        Elemento = rdr.IsDBNull(1) ? "" : rdr.GetString(1),
+                        Despliegue = rdr.IsDBNull(2) ? "" : rdr.GetString(2),
+                    });
+                }
+            }
+
+            // Mapear outputs
+            res.MensajeId = (int)(pMensajeId.Value ?? 0);
+            res.Resultado = (short)(pResultado.Value ?? (short)0);
+            res.ReturnCode = pReturn.Value is int v ? v : 0;
+
+            return res;
+        }
+
+
+            public async Task<AppTextoMensajeResult> SpAppTextoMensajeGetAsync( SqlConnection conn, int mensajeId,  CancellationToken ct = default) {
+                if (conn is null) throw new ArgumentNullException(nameof(conn));
+                if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SivAppComun.SpAppTextoMensajeGet";
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // Entradas
+                cmd.Parameters.Add(new SqlParameter("@iMensajeId", SqlDbType.Int) { Value = mensajeId });
+
+                // Salidas
+                var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt)  {
+                    Direction = ParameterDirection.Output
+                };
+                var pMensaje = new SqlParameter("@vcMensaje", SqlDbType.VarChar, 300)  {
+                    Direction = ParameterDirection.Output,
+                    // por si el proc no asigna:
+                    Value = "DESCONOCIDO"
+                };
+
+                cmd.Parameters.Add(pResultado);
+                cmd.Parameters.Add(pMensaje);
+
+                // RETURN(@@ERROR)
+                var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+                cmd.Parameters.Add(pReturn);
+
+                // No hay resultset, solo ejecuta
+                await cmd.ExecuteNonQueryAsync(ct);
+
+                // Mapear outputs
+                var res = new AppTextoMensajeResult{
+                    MensajeId = mensajeId,
+                    Resultado = pResultado.Value is short s ? s : Convert.ToInt16(pResultado.Value ?? 0),
+                    Mensaje = pMensaje.Value == DBNull.Value ? "DESCONOCIDO" : (string)pMensaje.Value,
+                    ReturnCode = pReturn.Value is int r ? r : Convert.ToInt32(pReturn.Value ?? 0),
+                };
+
+                return res;
+            }
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -353,21 +458,4 @@ namespace AppRoleConsole.Infrastructure.Sql {
 
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

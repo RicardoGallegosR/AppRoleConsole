@@ -3,6 +3,7 @@ using AppRoleConsole.Infrastructure.Config;
 using AppRoleConsole.Infrastructure.Security;
 using AppRoleConsole.Infrastructure.Sql;
 using AppRoleConsole.Infrastructure.SystemInfo;
+using AppRoleConsole.Infrastructure.Utils;
 using Microsoft.Data.SqlClient;
 
 
@@ -17,31 +18,48 @@ class Program {
 
     public static async Task<int> Main() {
 
-        string RollAcceso = "RollVfcVisual";
-        string ClaveAcceso = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
+        //string RollAcceso = "RollVfcVisual";
+        //string ClaveAcceso = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
         
+        string RollAcceso = string.Empty;
+        string ClaveAcceso = string.Empty;
         var conf = new RegWin();
         var appName = string.IsNullOrWhiteSpace(conf.DomainName) ? "" : conf.DomainName.Trim();
+        int MensajeId = 0;
 
         Guid accesoId = Guid.Empty;
+        Guid VerificacionId = Guid.Empty;
+        int ProtocoloVerificacionId = 0;
+        string PlacaId = string.Empty;
+        byte combustible = 1;
         Guid estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
 
-        /*
-                using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                conn.Open();
+        short opcionMenu = 151;
+        int credencial = 16499;
+        string passCredencial = "PASS1234";
 
-                var repo = new SivevRepository();
 
-                using (var scope = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
-                    var r = repo.SpAppRollClaveGet(conn);
-                    Console.WriteLine($"Return={r.ReturnCode}, MsgId={r.MensajeId}, Res={r.Resultado}");
-                    Console.WriteLine($"Func='{r.FuncionAplicacion}', Clave='{r.ClaveAcceso}'");
-                    //invertida = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
-                    ClaveAcceso = r.ClaveAcceso;
-                    RollAcceso = r.FuncionAplicacion;
-                }
-                conn.Close();
-                */
+        var repo = new SivevRepository();
+
+        using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
+        conn.Open();
+
+        var repo2 = new SivevRepository();
+
+        using (var scope2 = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
+            var r = repo2.SpAppRollClaveGet(conn);
+            await repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
+
+            if (r.MensajeId != 0) {
+                return 0;
+            }
+
+            var invertida = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
+            ClaveAcceso = invertida;
+            RollAcceso = r.FuncionAplicacion;
+        }
+        conn.Close();
+           
 
 
         /*---------------------------VALIDA BITACORA----------------------------------------------------------------
@@ -49,56 +67,58 @@ class Program {
         using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
         await connApp.OpenAsync();
 
-        var repo = new SivevRepository();
         using var scope = new AppRoleScope(connApp, RollAcceso, ClaveAcceso); 
 
         try {
-            // 1) Abrir acceso
-            var r = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId:estacionId, opcionMenuId:151, credencial:  16499, password: "PASS1234", huella: null);
+            // Abrir acceso
+            var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
+            await repo.PrintIfMsgAsync(connApp, "Fallo en SpAppCredencialExisteHuella", rinicial.MensajeId);
 
-            if (r.MensajeId != 0 || r.AccesoId == Guid.Empty) {
-                Console.WriteLine($"No se pudo iniciar acceso. MensajeId={r.MensajeId}, Return={r.ReturnCode}");
-                return 0; 
+            if (rinicial.Resultado != 0) {
+                return 0;
             }
+
+
+            var r = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId:estacionId, opcionMenuId:opcionMenu, credencial: credencial, password: passCredencial, huella: rinicial.Huella);
+            await repo.PrintIfMsgAsync(connApp, "Fallo en SpAppAccesoIniciaAsync", r.MensajeId);
+
 
             accesoId = r.AccesoId;
 
-            // 2) Visual Ini
+            // busca verificaciones en procesoid = 4
+            /*---------------------------VALIDA SpAppVerificacionVisualIni ----------------------------------------------------------------
+         */
             var r2 = await repo.SpAppVerificacionVisualIniAsync(conn:connApp, estacionId: estacionId, accesoId:accesoId);
+            await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppVerificacionVisualIniAsync y resultado: {r2.Resultado}", r2.MensajeId);
 
-            Console.WriteLine($"Resultado={r2.Resultado}  MensajeId={r2.MensajeId}");
-            Console.WriteLine($"VerificacionId={r2.VerificacionId}");
-            Console.WriteLine($"ProtocoloVerificacionId={r2.ProtocoloVerificacionId}");
-            Console.WriteLine($"PlacaId={r2.PlacaId}");
+            VerificacionId = r2.VerificacionId;
+            ProtocoloVerificacionId = r2.ProtocoloVerificacionId;
+            PlacaId = r2.PlacaId;   
 
-            switch (r2.Resultado) {
-                case < 0:
-                    Console.WriteLine("Flujo con error (<0).");
-                    break;
-
-                case 0:
-                    Console.WriteLine("Continuar flujo (=0).");
-                    break;
-
-                case 1:
-                    Console.WriteLine("No hay pruebas");
-                    break;
-                default:
-                    Console.WriteLine($"Otro: {r2.Resultado}");
-                    break;
+            if (r2.Resultado != 0) {
+                return 0;
             }
+
+
+
+
+            // proceso prueba Id = 5
+            /*---------------------------VALIDA SpAppCapturaVisualGetAsync ----------------------------------------------------------------
+         */
+            var r3 = await repo.SpAppCapturaVisualGetAsync(conn:connApp,estacionId: estacionId,accesoId:accesoId,verificacionId:VerificacionId,elemento:PlacaId, tiCombustible:combustible);
+            await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppCapturaVisualGetAsync resultado {r3.Resultado}", r3.MensajeId);
+
+
+
+
         } catch (Exception ex) {
             Console.WriteLine($"Excepción: {ex.Message}");
         } finally {
             if (accesoId != Guid.Empty) {
                 var fin = await repo.SpAppAccesoFinAsync(connApp, estacionId, accesoId);
-                Console.WriteLine($"[Fin Acceso] Resultado={fin.Resultado} MensajeId={fin.MensajeId} Return={fin.ReturnCode}");
+                //Console.WriteLine($"[Fin Acceso] Resultado={fin.Resultado} MensajeId={fin.MensajeId} Return={fin.ReturnCode}");
             }
         }
-
-        /*---------------------------VALIDA SpAppVerificacionVisualIniAsync ----------------------------------------------------------------
-         */
-
         return 0;
     }
 }

@@ -61,4 +61,25 @@
         public int ReturnCode { get; set; }  // RETURN(@@ERROR)
         public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
+
+    public sealed class CapturaVisualItem {
+        public int CapturaVisualId { get; set; }
+        public string Elemento { get; set; } = "";
+        public string Despliegue { get; set; } = "";
+    }
+
+    public sealed class CapturaVisualGetResult {
+        public short Resultado { get; set; }   // @siResultado
+        public int MensajeId { get; set; }   // @iMensajeId
+        public int ReturnCode { get; set; }   // RETURN(@@ERROR)
+        public List<CapturaVisualItem> Items { get; } = new();
+        public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
+    }
+
+    public sealed class AppTextoMensajeResult {
+        public short Resultado { get; init; }
+        public string Mensaje { get; init; } = "DESCONOCIDO";
+        public int MensajeId { get; init; }
+        public int ReturnCode { get; init; }   // valor de RETURN(@@ERROR) del proc
+    }
 }
