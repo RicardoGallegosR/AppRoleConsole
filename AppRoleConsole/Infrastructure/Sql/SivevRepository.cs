@@ -336,7 +336,15 @@ namespace AppRoleConsole.Infrastructure.Sql {
             };
         }
 
-        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync( SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible, CancellationToken ct = default) {
+        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync( 
+                        SqlConnection conn, 
+                        Guid estacionId,
+                        Guid accesoId,
+                        Guid verificacionId, 
+                        string? elemento, 
+                        byte? tiCombustible, 
+                        CancellationToken ct = default) {
+
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
@@ -367,63 +375,63 @@ namespace AppRoleConsole.Infrastructure.Sql {
             using (var rdr = await cmd.ExecuteReaderAsync(ct)) {
                 while (await rdr.ReadAsync(ct)) {
                     res.Items.Add(new CapturaVisualItem {
-                        CapturaVisualId = rdr.GetInt32(0),
+                        CapturaVisualId = rdr.GetInt16(0),
                         Elemento = rdr.IsDBNull(1) ? "" : rdr.GetString(1),
-                        Despliegue = rdr.IsDBNull(2) ? "" : rdr.GetString(2),
+                        Despliegue = !rdr.IsDBNull(2) && rdr.GetBoolean(2),
                     });
                 }
             }
 
             // Mapear outputs
-            res.MensajeId = (int)(pMensajeId.Value ?? 0);
-            res.Resultado = (short)(pResultado.Value ?? (short)0);
-            res.ReturnCode = pReturn.Value is int v ? v : 0;
+            res.MensajeId = pMensajeId.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensajeId.Value);
+            res.Resultado = pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value);
+            res.ReturnCode = pReturn.Value == DBNull.Value ? 0 : Convert.ToInt32(pReturn.Value);
 
             return res;
         }
 
 
-            public async Task<AppTextoMensajeResult> SpAppTextoMensajeGetAsync( SqlConnection conn, int mensajeId,  CancellationToken ct = default) {
-                if (conn is null) throw new ArgumentNullException(nameof(conn));
-                if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
+        public async Task<AppTextoMensajeResult> SpAppTextoMensajeGetAsync( SqlConnection conn, int mensajeId,  CancellationToken ct = default) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = "SivAppComun.SpAppTextoMensajeGet";
-                cmd.CommandType = CommandType.StoredProcedure;
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SivAppComun.SpAppTextoMensajeGet";
+            cmd.CommandType = CommandType.StoredProcedure;
 
-                // Entradas
-                cmd.Parameters.Add(new SqlParameter("@iMensajeId", SqlDbType.Int) { Value = mensajeId });
+            // Entradas
+            cmd.Parameters.Add(new SqlParameter("@iMensajeId", SqlDbType.Int) { Value = mensajeId });
 
-                // Salidas
-                var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt)  {
-                    Direction = ParameterDirection.Output
-                };
-                var pMensaje = new SqlParameter("@vcMensaje", SqlDbType.VarChar, 300)  {
-                    Direction = ParameterDirection.Output,
-                    // por si el proc no asigna:
-                    Value = "DESCONOCIDO"
-                };
+            // Salidas
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt)  {
+                Direction = ParameterDirection.Output
+            };
+            var pMensaje = new SqlParameter("@vcMensaje", SqlDbType.VarChar, 300)  {
+                Direction = ParameterDirection.Output,
+                // por si el proc no asigna:
+                Value = "DESCONOCIDO"
+            };
 
-                cmd.Parameters.Add(pResultado);
-                cmd.Parameters.Add(pMensaje);
+            cmd.Parameters.Add(pResultado);
+            cmd.Parameters.Add(pMensaje);
 
-                // RETURN(@@ERROR)
-                var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
-                cmd.Parameters.Add(pReturn);
+            // RETURN(@@ERROR)
+            var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+            cmd.Parameters.Add(pReturn);
 
-                // No hay resultset, solo ejecuta
-                await cmd.ExecuteNonQueryAsync(ct);
+            // No hay resultset, solo ejecuta
+            await cmd.ExecuteNonQueryAsync(ct);
 
-                // Mapear outputs
-                var res = new AppTextoMensajeResult{
-                    MensajeId = mensajeId,
-                    Resultado = pResultado.Value is short s ? s : Convert.ToInt16(pResultado.Value ?? 0),
-                    Mensaje = pMensaje.Value == DBNull.Value ? "DESCONOCIDO" : (string)pMensaje.Value,
-                    ReturnCode = pReturn.Value is int r ? r : Convert.ToInt32(pReturn.Value ?? 0),
-                };
+            // Mapear outputs
+            var res = new AppTextoMensajeResult{
+                MensajeId = mensajeId,
+                Resultado = pResultado.Value is short s ? s : Convert.ToInt16(pResultado.Value ?? 0),
+                Mensaje = pMensaje.Value == DBNull.Value ? "DESCONOCIDO" : (string)pMensaje.Value,
+                ReturnCode = pReturn.Value is int r ? r : Convert.ToInt32(pReturn.Value ?? 0),
+            };
 
-                return res;
-            }
+            return res;
+        }
         
 
 

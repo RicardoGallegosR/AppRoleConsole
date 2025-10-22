@@ -29,7 +29,7 @@ class Program {
 
         Guid accesoId = Guid.Empty;
         Guid VerificacionId = Guid.Empty;
-        int ProtocoloVerificacionId = 0;
+        byte ProtocoloVerificacionId = 0;
         string PlacaId = string.Empty;
         byte combustible = 1;
         Guid estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
@@ -49,11 +49,9 @@ class Program {
         using (var scope2 = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
             var r = repo2.SpAppRollClaveGet(conn);
             await repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
-
             if (r.MensajeId != 0) {
                 return 0;
             }
-
             var invertida = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
             ClaveAcceso = invertida;
             RollAcceso = r.FuncionAplicacion;
@@ -105,9 +103,14 @@ class Program {
             // proceso prueba Id = 5
             /*---------------------------VALIDA SpAppCapturaVisualGetAsync ----------------------------------------------------------------
          */
-            var r3 = await repo.SpAppCapturaVisualGetAsync(conn:connApp,estacionId: estacionId,accesoId:accesoId,verificacionId:VerificacionId,elemento:PlacaId, tiCombustible:combustible);
+            var r3 = await repo.SpAppCapturaVisualGetAsync(conn:connApp,estacionId: estacionId,accesoId:accesoId,verificacionId:VerificacionId,elemento:"DESCONOCIDO", tiCombustible:combustible);
             await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppCapturaVisualGetAsync resultado {r3.Resultado}", r3.MensajeId);
 
+
+            Console.WriteLine($"\n--- CapturaVisualGet: {r3.Items.Count} item(s) ---");
+            foreach (var it in r3.Items) {
+                Console.WriteLine($"Id={it.CapturaVisualId} | Elemento='{it.Elemento}' | Despliegue={(it.Despliegue ? "Sí" : "No")}");
+            }
 
 
 

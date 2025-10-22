@@ -63,9 +63,9 @@
     }
 
     public sealed class CapturaVisualItem {
-        public int CapturaVisualId { get; set; }
+        public short CapturaVisualId { get; set; }
         public string Elemento { get; set; } = "";
-        public string Despliegue { get; set; } = "";
+        public bool Despliegue { get; set; } = false;
     }
 
     public sealed class CapturaVisualGetResult {
