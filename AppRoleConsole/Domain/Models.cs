@@ -18,47 +18,42 @@
 
 
     public sealed class SpAppChecaCpuResult {
-        public int ReturnCode { get; init; }    // @iError (return value)
-        public int MensajeId { get; init; }     // @iMensajeId OUTPUT
-        public short Resultado { get; init; }   // @siResultado OUTPUT
+        public int ReturnCode { get; init; }
+        public int MensajeId { get; init; }
+        public short Resultado { get; init; }
     }
 
-
-
-    /// <summary>
-    /// Falla porque el Roll no tiene permisos de ejecucion 
-    /// </summary>
     public sealed class SpBitacoraAplicacionesIniciaResult {
-        public int ReturnCode { get; init; }            // valor de RETURN(@iError)
-        public Guid BitacoraAplicacionId { get; init; } // @uiBitacoraAplicacionId OUTPUT
+        public int ReturnCode { get; init; }
+        public Guid BitacoraAplicacionId { get; init; }
     }
 
     public sealed class SpAppProgramOnResult {
-        public int ReturnCode { get; init; } // @@ERROR que retorna el SP
-        public int MensajeId { get; init; } // @iMensajeId OUTPUT
-        public short Resultado { get; init; } // @siResultado OUTPUT
+        public int ReturnCode { get; init; }
+        public int MensajeId { get; init; }
+        public short Resultado { get; init; }
     }
 
 
     public sealed class AccesoIniciaResult {
-        public short ReturnCode { get; set; }          // @siResultado
-        public int MensajeId { get; set; }          // @iMensajeId
-        public Guid AccesoId { get; set; }          // @uiAccesoId
+        public short ReturnCode { get; set; }
+        public int MensajeId { get; set; }
+        public Guid AccesoId { get; set; }
     }
 
     public sealed class VerificacionVisualIniResult {
-        public int MensajeId { get; set; }                 // @iMensajeId
-        public short Resultado { get; set; }                 // @siResultado  (-? fuera / 0 continuar / 1 no hay pruebas)
-        public Guid VerificacionId { get; set; }            // @uiVerificacionId
-        public byte ProtocoloVerificacionId { get; set; }   // @tiProtocoloVerificacionId
-        public string PlacaId { get; set; } = "DESCONOCIDO";  // @vcPlacaId (varchar(11))
+        public int MensajeId { get; set; }
+        public short Resultado { get; set; }
+        public Guid VerificacionId { get; set; }
+        public byte ProtocoloVerificacionId { get; set; }
+        public string PlacaId { get; set; } = "DESCONOCIDO";
     }
 
 
     public sealed class AccesoFinResult {
-        public short Resultado { get; set; }   // @siResultado
-        public int MensajeId { get; set; }   // @iMensajeId
-        public int ReturnCode { get; set; }  // RETURN(@@ERROR)
+        public short Resultado { get; set; }
+        public int MensajeId { get; set; }
+        public int ReturnCode { get; set; }
         public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
 
@@ -69,9 +64,9 @@
     }
 
     public sealed class CapturaVisualGetResult {
-        public short Resultado { get; set; }   // @siResultado
-        public int MensajeId { get; set; }   // @iMensajeId
-        public int ReturnCode { get; set; }   // RETURN(@@ERROR)
+        public short Resultado { get; set; }
+        public int MensajeId { get; set; }
+        public int ReturnCode { get; set; }
         public List<CapturaVisualItem> Items { get; } = new();
         public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
@@ -80,6 +75,26 @@
         public short Resultado { get; init; }
         public string Mensaje { get; init; } = "DESCONOCIDO";
         public int MensajeId { get; init; }
-        public int ReturnCode { get; init; }   // valor de RETURN(@@ERROR) del proc
+        public int ReturnCode { get; init; }
     }
+
+
+    public sealed class CapturaInspeccionVisualNewSetResult {
+        public int MensajeId { get; set; }
+        public short Resultado { get; set; }
+        public bool CheckObd { get; set; }
+        public int ReturnCode { get; set; }
+        public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
+    }
+
+
+    public sealed class CapturaInspeccionObdSetResult {
+        public int MensajeId { get; set; }        
+        public short Resultado { get; set; }      
+        public int ReturnCode { get; set; }       
+        public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
+    }
+
+
+
 }

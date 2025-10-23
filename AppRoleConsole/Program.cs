@@ -39,6 +39,18 @@ class Program {
         string passCredencial = "PASS1234";
 
 
+        byte tiTaponCombustible = 0;
+        byte tiTaponAceite = 0;
+        byte tiBayonetaAceite = 0;
+        byte tiPortafiltroAire = 0;
+        byte tiTuboEscape = 0;
+        byte tiFugasMotorTrans = 0;
+        byte tiNeumaticos = 0;
+        byte tiComponentesEmisiones = 0;
+        byte tiMotorGobernado = 0;
+        int odometro = 0;
+
+
         var repo = new SivevRepository();
 
         using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
@@ -106,11 +118,50 @@ class Program {
             var r3 = await repo.SpAppCapturaVisualGetAsync(conn:connApp,estacionId: estacionId,accesoId:accesoId,verificacionId:VerificacionId,elemento:"DESCONOCIDO", tiCombustible:combustible);
             await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppCapturaVisualGetAsync resultado {r3.Resultado}", r3.MensajeId);
 
-
+            /* IMPRIME LAS COSAS DE TOÑO
             Console.WriteLine($"\n--- CapturaVisualGet: {r3.Items.Count} item(s) ---");
             foreach (var it in r3.Items) {
                 Console.WriteLine($"Id={it.CapturaVisualId} | Elemento='{it.Elemento}' | Despliegue={(it.Despliegue ? "Sí" : "No")}");
             }
+            */
+
+            var r4 = await repo.SpAppCapturaInspeccionVisualNewSetAsync(conn:connApp, verificacionId: VerificacionId, estacionId:estacionId, accesoId:accesoId,
+               tiTaponCombustible:tiTaponCombustible, tiTaponAceite: tiTaponAceite, tiBayonetaAceite: tiBayonetaAceite, tiPortafiltroAire: tiPortafiltroAire,
+               tiTuboEscape: tiTuboEscape, tiFugasMotorTrans: tiFugasMotorTrans, tiNeumaticos: tiNeumaticos, tiComponentesEmisiones: tiComponentesEmisiones, tiMotorGobernado:tiMotorGobernado, 
+               odometro:odometro);
+
+            await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppCapturaInspeccionVisualNewSetAsync resultado {r4.Resultado}", r4.MensajeId);
+
+            Console.WriteLine($"pCheckObd: {r4.CheckObd}");
+
+
+            var rObd = await repo.SpAppCapturaInspeccionObdSetAsync(
+                        conn: connApp, estacionId: estacionId, accesoId: accesoId, verificacionId: VerificacionId,
+                        vehiculoId: "DESCONOCIDO", tiConexionObd: 1, protocoloObd: "ISO 15765-4 CAN 11/500",  tiIntentos: 1, tiMil: 0, 
+                        siFallas: 0, codError: "", codErrorPend: "", tiSdciic: 1, tiSecc: 1, tiSc: 1, tiSso: 1, tiSci: 1, tiSccc: 0,
+                        tiSe: 0, tiSsa: 0, tiSfaa: 0, tiScso: 0, tiSrge: 0, voltsSwOff: 12.6m, voltsSwOn: 12.2m, rpmOff: 0, rpmOn: 820, rpmCheck: 800,
+                        leeMonitores: true, leeDtc: true, leeDtcPend: true, leeVin: true,  codigoProtocolo: 15765);
+
+            await repo.PrintIfMsgAsync(connApp, "SpAppCapturaInspeccionObdSetAsync", rObd.MensajeId);
+
+            if (!rObd.Ok) {
+                if (rObd.MensajeId == 0)
+                    Console.WriteLine($"No OK: Resultado={rObd.Resultado}, Return={rObd.ReturnCode}");
+                return 0;
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
