@@ -23,32 +23,56 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            Label lblGobiernoDeLa;
             pnlPrincipal = new Panel();
             pnlPanelCambios = new Panel();
             pnlFooter = new Panel();
-            pnlSeparadorFooterGrimsonII = new Panel();
-            pnlSeparadorFooterGrimsonI = new Panel();
-            pbxLogosVerificentros = new PictureBox();
-            pbxLogosSEDEMA = new PictureBox();
-            lblVerificaciónVehicularFoother = new Label();
-            lblDGCA = new Label();
+            pnlCentralFooter = new Panel();
+            pnlFooterCentral = new Panel();
+            pnlFooterCentro = new Panel();
             lblSEDEMAFooter = new Label();
+            lblDGCA = new Label();
+            pnlFooterDerecho = new Panel();
+            pnlSeparadorFooterGrimsonII = new Panel();
+            lblVerificaciónVehicularFoother = new Label();
+            pbxLogosVerificentros = new PictureBox();
+            panel1 = new Panel();
+            pnlFooterIquierdo = new Panel();
             lblCDMX = new Label();
-            lblGobiernoDeLa = new Label();
+            pnlSeparadorFooterGrimsonI = new Panel();
+            pbxLogosSEDEMA = new PictureBox();
             pnlSeparadorFooterAmarillo = new Panel();
             pnlMenuLateral = new Panel();
             panel2 = new Panel();
             btnApagar = new Button();
-            panel1 = new Panel();
+            pnlLateralIzquierdoCentral = new Panel();
             btnInspecionVisual = new Button();
+            lblGobiernoDeLa = new Label();
             pnlPrincipal.SuspendLayout();
             pnlFooter.SuspendLayout();
+            pnlCentralFooter.SuspendLayout();
+            pnlFooterCentral.SuspendLayout();
+            pnlFooterCentro.SuspendLayout();
+            pnlFooterDerecho.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbxLogosVerificentros).BeginInit();
+            panel1.SuspendLayout();
+            pnlFooterIquierdo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbxLogosSEDEMA).BeginInit();
             pnlMenuLateral.SuspendLayout();
             panel2.SuspendLayout();
-            panel1.SuspendLayout();
+            pnlLateralIzquierdoCentral.SuspendLayout();
             SuspendLayout();
+            // 
+            // lblGobiernoDeLa
+            // 
+            lblGobiernoDeLa.Dock = DockStyle.Top;
+            lblGobiernoDeLa.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblGobiernoDeLa.ForeColor = Color.FromArgb(159, 34, 65);
+            lblGobiernoDeLa.Location = new Point(0, 0);
+            lblGobiernoDeLa.Name = "lblGobiernoDeLa";
+            lblGobiernoDeLa.Size = new Size(166, 20);
+            lblGobiernoDeLa.TabIndex = 0;
+            lblGobiernoDeLa.Text = "GOBIERNO  DE  LA";
             // 
             // pnlPrincipal
             // 
@@ -74,15 +98,7 @@
             // pnlFooter
             // 
             pnlFooter.BackColor = Color.White;
-            pnlFooter.Controls.Add(pnlSeparadorFooterGrimsonII);
-            pnlFooter.Controls.Add(pnlSeparadorFooterGrimsonI);
-            pnlFooter.Controls.Add(pbxLogosVerificentros);
-            pnlFooter.Controls.Add(pbxLogosSEDEMA);
-            pnlFooter.Controls.Add(lblVerificaciónVehicularFoother);
-            pnlFooter.Controls.Add(lblDGCA);
-            pnlFooter.Controls.Add(lblSEDEMAFooter);
-            pnlFooter.Controls.Add(lblCDMX);
-            pnlFooter.Controls.Add(lblGobiernoDeLa);
+            pnlFooter.Controls.Add(pnlCentralFooter);
             pnlFooter.Controls.Add(pnlSeparadorFooterAmarillo);
             pnlFooter.Dock = DockStyle.Bottom;
             pnlFooter.Location = new Point(120, 398);
@@ -90,98 +106,158 @@
             pnlFooter.Size = new Size(699, 68);
             pnlFooter.TabIndex = 1;
             // 
+            // pnlCentralFooter
+            // 
+            pnlCentralFooter.BackColor = Color.DarkGray;
+            pnlCentralFooter.Controls.Add(pnlFooterCentral);
+            pnlCentralFooter.Dock = DockStyle.Fill;
+            pnlCentralFooter.Location = new Point(0, 10);
+            pnlCentralFooter.Name = "pnlCentralFooter";
+            pnlCentralFooter.Size = new Size(699, 58);
+            pnlCentralFooter.TabIndex = 1;
+            // 
+            // pnlFooterCentral
+            // 
+            pnlFooterCentral.BackColor = Color.WhiteSmoke;
+            pnlFooterCentral.Controls.Add(pnlFooterCentro);
+            pnlFooterCentral.Controls.Add(pnlFooterDerecho);
+            pnlFooterCentral.Controls.Add(panel1);
+            pnlFooterCentral.Dock = DockStyle.Fill;
+            pnlFooterCentral.Location = new Point(0, 0);
+            pnlFooterCentral.Name = "pnlFooterCentral";
+            pnlFooterCentral.Size = new Size(699, 58);
+            pnlFooterCentral.TabIndex = 2;
+            // 
+            // pnlFooterCentro
+            // 
+            pnlFooterCentro.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlFooterCentro.Controls.Add(lblSEDEMAFooter);
+            pnlFooterCentro.Controls.Add(lblDGCA);
+            pnlFooterCentro.Location = new Point(265, 0);
+            pnlFooterCentro.Name = "pnlFooterCentro";
+            pnlFooterCentro.Size = new Size(287, 58);
+            pnlFooterCentro.TabIndex = 0;
+            // 
+            // lblSEDEMAFooter
+            // 
+            lblSEDEMAFooter.Dock = DockStyle.Top;
+            lblSEDEMAFooter.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblSEDEMAFooter.ForeColor = Color.FromArgb(159, 34, 65);
+            lblSEDEMAFooter.Location = new Point(0, 0);
+            lblSEDEMAFooter.Name = "lblSEDEMAFooter";
+            lblSEDEMAFooter.Size = new Size(287, 15);
+            lblSEDEMAFooter.TabIndex = 3;
+            lblSEDEMAFooter.Text = "SEDEMA";
+            lblSEDEMAFooter.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblDGCA
+            // 
+            lblDGCA.Dock = DockStyle.Bottom;
+            lblDGCA.Font = new Font("Segoe UI", 9F);
+            lblDGCA.ForeColor = Color.FromArgb(159, 34, 65);
+            lblDGCA.Location = new Point(0, 28);
+            lblDGCA.Name = "lblDGCA";
+            lblDGCA.Size = new Size(287, 30);
+            lblDGCA.TabIndex = 0;
+            lblDGCA.Text = "DIRECCION GENERAL \r\nDE CALIDAD DEL AIRE";
+            lblDGCA.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // pnlFooterDerecho
+            // 
+            pnlFooterDerecho.Controls.Add(pnlSeparadorFooterGrimsonII);
+            pnlFooterDerecho.Controls.Add(lblVerificaciónVehicularFoother);
+            pnlFooterDerecho.Controls.Add(pbxLogosVerificentros);
+            pnlFooterDerecho.Dock = DockStyle.Right;
+            pnlFooterDerecho.Location = new Point(552, 0);
+            pnlFooterDerecho.Name = "pnlFooterDerecho";
+            pnlFooterDerecho.Size = new Size(147, 58);
+            pnlFooterDerecho.TabIndex = 1;
+            // 
             // pnlSeparadorFooterGrimsonII
             // 
             pnlSeparadorFooterGrimsonII.BackColor = Color.FromArgb(159, 34, 65);
-            pnlSeparadorFooterGrimsonII.Location = new Point(448, 15);
+            pnlSeparadorFooterGrimsonII.Dock = DockStyle.Left;
+            pnlSeparadorFooterGrimsonII.Location = new Point(0, 0);
             pnlSeparadorFooterGrimsonII.Name = "pnlSeparadorFooterGrimsonII";
-            pnlSeparadorFooterGrimsonII.Size = new Size(3, 50);
+            pnlSeparadorFooterGrimsonII.Size = new Size(3, 58);
             pnlSeparadorFooterGrimsonII.TabIndex = 3;
             // 
-            // pnlSeparadorFooterGrimsonI
+            // lblVerificaciónVehicularFoother
             // 
-            pnlSeparadorFooterGrimsonI.BackColor = Color.FromArgb(159, 34, 65);
-            pnlSeparadorFooterGrimsonI.Location = new Point(295, 14);
-            pnlSeparadorFooterGrimsonI.Name = "pnlSeparadorFooterGrimsonI";
-            pnlSeparadorFooterGrimsonI.Size = new Size(5, 50);
-            pnlSeparadorFooterGrimsonI.TabIndex = 2;
+            lblVerificaciónVehicularFoother.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            lblVerificaciónVehicularFoother.AutoSize = true;
+            lblVerificaciónVehicularFoother.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblVerificaciónVehicularFoother.ForeColor = Color.FromArgb(159, 34, 65);
+            lblVerificaciónVehicularFoother.Location = new Point(54, 16);
+            lblVerificaciónVehicularFoother.Name = "lblVerificaciónVehicularFoother";
+            lblVerificaciónVehicularFoother.Size = new Size(90, 30);
+            lblVerificaciónVehicularFoother.TabIndex = 0;
+            lblVerificaciónVehicularFoother.Text = "VERIFICACIÓN \r\nVEHICUALR";
             // 
             // pbxLogosVerificentros
             // 
             pbxLogosVerificentros.Image = Properties.Resources.Logos_VERIFICENTROS;
-            pbxLogosVerificentros.Location = new Point(459, 14);
+            pbxLogosVerificentros.Location = new Point(9, 3);
             pbxLogosVerificentros.Name = "pbxLogosVerificentros";
             pbxLogosVerificentros.Size = new Size(41, 49);
             pbxLogosVerificentros.SizeMode = PictureBoxSizeMode.StretchImage;
             pbxLogosVerificentros.TabIndex = 2;
             pbxLogosVerificentros.TabStop = false;
             // 
-            // pbxLogosSEDEMA
+            // panel1
             // 
-            pbxLogosSEDEMA.Image = Properties.Resources.Logos_SEDEMA;
-            pbxLogosSEDEMA.Location = new Point(48, 18);
-            pbxLogosSEDEMA.Name = "pbxLogosSEDEMA";
-            pbxLogosSEDEMA.Size = new Size(84, 45);
-            pbxLogosSEDEMA.SizeMode = PictureBoxSizeMode.StretchImage;
-            pbxLogosSEDEMA.TabIndex = 6;
-            pbxLogosSEDEMA.TabStop = false;
-            pbxLogosSEDEMA.UseWaitCursor = true;
-            pbxLogosSEDEMA.WaitOnLoad = true;
+            panel1.BackColor = Color.LightSkyBlue;
+            panel1.Controls.Add(pnlFooterIquierdo);
+            panel1.Controls.Add(pnlSeparadorFooterGrimsonI);
+            panel1.Controls.Add(pbxLogosSEDEMA);
+            panel1.Dock = DockStyle.Left;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(265, 58);
+            panel1.TabIndex = 0;
             // 
-            // lblVerificaciónVehicularFoother
+            // pnlFooterIquierdo
             // 
-            lblVerificaciónVehicularFoother.AutoSize = true;
-            lblVerificaciónVehicularFoother.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblVerificaciónVehicularFoother.ForeColor = Color.FromArgb(159, 34, 65);
-            lblVerificaciónVehicularFoother.Location = new Point(506, 23);
-            lblVerificaciónVehicularFoother.Name = "lblVerificaciónVehicularFoother";
-            lblVerificaciónVehicularFoother.Size = new Size(90, 30);
-            lblVerificaciónVehicularFoother.TabIndex = 5;
-            lblVerificaciónVehicularFoother.Text = "VERIFICACIÓN \r\nVEHICUALR";
-            // 
-            // lblDGCA
-            // 
-            lblDGCA.AutoSize = true;
-            lblDGCA.Font = new Font("Segoe UI", 9F);
-            lblDGCA.ForeColor = Color.FromArgb(159, 34, 65);
-            lblDGCA.Location = new Point(319, 34);
-            lblDGCA.Name = "lblDGCA";
-            lblDGCA.Size = new Size(124, 30);
-            lblDGCA.TabIndex = 4;
-            lblDGCA.Text = "DIRECCION GENERAL \r\nDE CALIDAD DEL AIRE";
-            // 
-            // lblSEDEMAFooter
-            // 
-            lblSEDEMAFooter.AutoSize = true;
-            lblSEDEMAFooter.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblSEDEMAFooter.ForeColor = Color.FromArgb(159, 34, 65);
-            lblSEDEMAFooter.Location = new Point(319, 19);
-            lblSEDEMAFooter.Name = "lblSEDEMAFooter";
-            lblSEDEMAFooter.Size = new Size(54, 15);
-            lblSEDEMAFooter.TabIndex = 3;
-            lblSEDEMAFooter.Text = "SEDEMA";
+            pnlFooterIquierdo.BackColor = Color.White;
+            pnlFooterIquierdo.Controls.Add(lblGobiernoDeLa);
+            pnlFooterIquierdo.Controls.Add(lblCDMX);
+            pnlFooterIquierdo.Dock = DockStyle.Fill;
+            pnlFooterIquierdo.Location = new Point(89, 0);
+            pnlFooterIquierdo.Name = "pnlFooterIquierdo";
+            pnlFooterIquierdo.Size = new Size(166, 58);
+            pnlFooterIquierdo.TabIndex = 1;
             // 
             // lblCDMX
             // 
-            lblCDMX.AutoSize = true;
+            lblCDMX.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             lblCDMX.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblCDMX.ForeColor = Color.FromArgb(159, 34, 65);
-            lblCDMX.Location = new Point(138, 39);
+            lblCDMX.Location = new Point(0, 29);
             lblCDMX.Name = "lblCDMX";
-            lblCDMX.Size = new Size(151, 20);
-            lblCDMX.TabIndex = 2;
+            lblCDMX.Size = new Size(170, 20);
+            lblCDMX.TabIndex = 0;
             lblCDMX.Text = "CIUDAD DE MEXICO";
             // 
-            // lblGobiernoDeLa
+            // pnlSeparadorFooterGrimsonI
             // 
-            lblGobiernoDeLa.AutoSize = true;
-            lblGobiernoDeLa.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblGobiernoDeLa.ForeColor = Color.FromArgb(159, 34, 65);
-            lblGobiernoDeLa.Location = new Point(138, 19);
-            lblGobiernoDeLa.Name = "lblGobiernoDeLa";
-            lblGobiernoDeLa.Size = new Size(134, 20);
-            lblGobiernoDeLa.TabIndex = 1;
-            lblGobiernoDeLa.Text = "GOBIERNO  DE  LA";
+            pnlSeparadorFooterGrimsonI.BackColor = Color.FromArgb(159, 34, 65);
+            pnlSeparadorFooterGrimsonI.Dock = DockStyle.Right;
+            pnlSeparadorFooterGrimsonI.Location = new Point(255, 0);
+            pnlSeparadorFooterGrimsonI.Name = "pnlSeparadorFooterGrimsonI";
+            pnlSeparadorFooterGrimsonI.Size = new Size(10, 58);
+            pnlSeparadorFooterGrimsonI.TabIndex = 2;
+            // 
+            // pbxLogosSEDEMA
+            // 
+            pbxLogosSEDEMA.BackColor = Color.White;
+            pbxLogosSEDEMA.Dock = DockStyle.Left;
+            pbxLogosSEDEMA.Image = Properties.Resources.Logos_SEDEMA;
+            pbxLogosSEDEMA.Location = new Point(0, 0);
+            pbxLogosSEDEMA.Name = "pbxLogosSEDEMA";
+            pbxLogosSEDEMA.Size = new Size(89, 58);
+            pbxLogosSEDEMA.SizeMode = PictureBoxSizeMode.StretchImage;
+            pbxLogosSEDEMA.TabIndex = 6;
+            pbxLogosSEDEMA.TabStop = false;
             // 
             // pnlSeparadorFooterAmarillo
             // 
@@ -196,7 +272,7 @@
             // 
             pnlMenuLateral.BackColor = Color.FromArgb(159, 34, 65);
             pnlMenuLateral.Controls.Add(panel2);
-            pnlMenuLateral.Controls.Add(panel1);
+            pnlMenuLateral.Controls.Add(pnlLateralIzquierdoCentral);
             pnlMenuLateral.Dock = DockStyle.Left;
             pnlMenuLateral.Location = new Point(0, 0);
             pnlMenuLateral.Name = "pnlMenuLateral";
@@ -206,6 +282,7 @@
             // panel2
             // 
             panel2.Controls.Add(btnApagar);
+            panel2.Dock = DockStyle.Bottom;
             panel2.Location = new Point(0, 383);
             panel2.Name = "panel2";
             panel2.Size = new Size(120, 83);
@@ -213,26 +290,27 @@
             // 
             // btnApagar
             // 
-            btnApagar.Dock = DockStyle.Bottom;
+            btnApagar.Dock = DockStyle.Fill;
             btnApagar.FlatAppearance.BorderSize = 0;
             btnApagar.FlatStyle = FlatStyle.Flat;
             btnApagar.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnApagar.ForeColor = Color.Transparent;
-            btnApagar.Location = new Point(0, 3);
+            btnApagar.Location = new Point(0, 0);
             btnApagar.Name = "btnApagar";
-            btnApagar.Size = new Size(120, 80);
-            btnApagar.TabIndex = 1;
+            btnApagar.Size = new Size(120, 83);
+            btnApagar.TabIndex = 0;
             btnApagar.Text = "Apagar";
             btnApagar.UseVisualStyleBackColor = true;
+            btnApagar.Click += btnApagar_Click;
             // 
-            // panel1
+            // pnlLateralIzquierdoCentral
             // 
-            panel1.Controls.Add(btnInspecionVisual);
-            panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(0, 0);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(120, 466);
-            panel1.TabIndex = 0;
+            pnlLateralIzquierdoCentral.Controls.Add(btnInspecionVisual);
+            pnlLateralIzquierdoCentral.Dock = DockStyle.Fill;
+            pnlLateralIzquierdoCentral.Location = new Point(0, 0);
+            pnlLateralIzquierdoCentral.Name = "pnlLateralIzquierdoCentral";
+            pnlLateralIzquierdoCentral.Size = new Size(120, 466);
+            pnlLateralIzquierdoCentral.TabIndex = 0;
             // 
             // btnInspecionVisual
             // 
@@ -264,12 +342,18 @@
             Load += LoginForm_Load;
             pnlPrincipal.ResumeLayout(false);
             pnlFooter.ResumeLayout(false);
-            pnlFooter.PerformLayout();
+            pnlCentralFooter.ResumeLayout(false);
+            pnlFooterCentral.ResumeLayout(false);
+            pnlFooterCentro.ResumeLayout(false);
+            pnlFooterDerecho.ResumeLayout(false);
+            pnlFooterDerecho.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pbxLogosVerificentros).EndInit();
+            panel1.ResumeLayout(false);
+            pnlFooterIquierdo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbxLogosSEDEMA).EndInit();
             pnlMenuLateral.ResumeLayout(false);
             panel2.ResumeLayout(false);
-            panel1.ResumeLayout(false);
+            pnlLateralIzquierdoCentral.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -292,6 +376,12 @@
         private Panel pnlSeparadorFooterGrimsonII;
         private Panel pnlPanelCambios;
         private Panel panel2;
+        private Panel pnlLateralIzquierdoCentral;
+        private Panel pnlCentralFooter;
+        private Panel pnlFooterCentral;
         private Panel panel1;
+        private Panel pnlFooterIquierdo;
+        private Panel pnlFooterDerecho;
+        private Panel pnlFooterCentro;
     }
 }

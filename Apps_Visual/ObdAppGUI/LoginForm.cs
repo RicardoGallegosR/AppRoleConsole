@@ -21,5 +21,13 @@ namespace Apps_Visual.ObdAppGUI {
         private void btnInspecionVisual_Click(object sender, EventArgs e) {
 
         }
+
+        private void btnApagar_Click(object sender, EventArgs e) {
+            var result = MessageBox.Show("¿Desea apagar la aplicación?","Confirmar salida", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes) {
+                Application.Exit();  // Cierra toda la app
+            }
+        }
     }
 }
