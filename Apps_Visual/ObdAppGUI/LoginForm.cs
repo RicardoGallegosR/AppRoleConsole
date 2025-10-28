@@ -7,12 +7,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+using Apps_Visual.ObdAppGUI.Views;
+
+
+
 
 namespace Apps_Visual.ObdAppGUI {
+
     public partial class frmBASE : Form {
+        private HomeView home;
+
+
         public frmBASE() {
             InitializeComponent();
+            pnlHome();
         }
+
+       
+        private void pnlHome () {
+            foreach (Control c in pnlPanelCambios.Controls)
+                c.Dispose();
+            pnlPanelCambios.Controls.Clear();
+            if (home == null || home.IsDisposed) {
+                home = new HomeView();
+            }
+            home.panelX = pnlPanelCambios.Width;
+            home.panelY = pnlPanelCambios.Height;
+            pnlPanelCambios.Controls.Add(home.GetPanel());
+            pnlPanelCambios.Dock = DockStyle.Fill;
+        }
+
+
 
         private void LoginForm_Load(object sender, EventArgs e) {
 
@@ -26,8 +52,12 @@ namespace Apps_Visual.ObdAppGUI {
             var result = MessageBox.Show("¿Desea apagar la aplicación?","Confirmar salida", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes) {
-                Application.Exit();  // Cierra toda la app
+                Application.Exit();  
+                //Process.Start("shutdown", "/s /t 0");
             }
         }
+
+       
+
     }
 }

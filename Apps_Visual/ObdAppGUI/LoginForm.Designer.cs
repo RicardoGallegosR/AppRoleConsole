@@ -88,12 +88,13 @@
             // 
             // pnlPanelCambios
             // 
-            pnlPanelCambios.BackColor = Color.Silver;
-            pnlPanelCambios.Dock = DockStyle.Fill;
+            pnlPanelCambios.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlPanelCambios.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            pnlPanelCambios.BackColor = Color.RosyBrown;
             pnlPanelCambios.Location = new Point(120, 0);
             pnlPanelCambios.Name = "pnlPanelCambios";
             pnlPanelCambios.Size = new Size(699, 398);
-            pnlPanelCambios.TabIndex = 2;
+            pnlPanelCambios.TabIndex = 0;
             // 
             // pnlFooter
             // 
@@ -146,7 +147,7 @@
             lblSEDEMAFooter.Location = new Point(0, 0);
             lblSEDEMAFooter.Name = "lblSEDEMAFooter";
             lblSEDEMAFooter.Size = new Size(287, 15);
-            lblSEDEMAFooter.TabIndex = 3;
+            lblSEDEMAFooter.TabIndex = 0;
             lblSEDEMAFooter.Text = "SEDEMA";
             lblSEDEMAFooter.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -321,7 +322,7 @@
             btnInspecionVisual.Location = new Point(3, 3);
             btnInspecionVisual.Name = "btnInspecionVisual";
             btnInspecionVisual.Size = new Size(117, 73);
-            btnInspecionVisual.TabIndex = 0;
+            btnInspecionVisual.TabIndex = 1;
             btnInspecionVisual.Text = "Inspección Visual";
             btnInspecionVisual.UseVisualStyleBackColor = true;
             btnInspecionVisual.Click += btnInspecionVisual_Click;
