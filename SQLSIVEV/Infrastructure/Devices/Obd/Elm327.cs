@@ -7,7 +7,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace AppRoleConsole.Infrastructure.Devices.Obd {
+namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public sealed class Elm327 : IDisposable {
         private readonly SerialPort _port;
 

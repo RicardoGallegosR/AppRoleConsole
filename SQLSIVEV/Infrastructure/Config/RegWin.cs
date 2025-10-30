@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppRoleConsole.Infrastructure.Config {
+namespace SQLSIVEV.Infrastructure.Config {
     public class RegWin : IDisposable {
         protected bool disposed = false;
         private const string HKEY_CLASSES_ROOT = "HKEY_CLASSES_ROOT";

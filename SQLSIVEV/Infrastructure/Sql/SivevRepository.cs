@@ -1,9 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
-using AppRoleConsole.Domain.Models;
+using SQLSIVEV.Domain.Models;
 
 
-namespace AppRoleConsole.Infrastructure.Sql {
+namespace SQLSIVEV.Infrastructure.Sql {
     public sealed class SivevRepository {
         private readonly int _timeout;
         public SivevRepository(int timeoutSeconds = 60) => _timeout = timeoutSeconds;

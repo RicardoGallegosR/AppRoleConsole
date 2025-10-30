@@ -90,11 +90,12 @@
             // 
             pnlPanelCambios.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlPanelCambios.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            pnlPanelCambios.BackColor = Color.RosyBrown;
+            pnlPanelCambios.BackColor = Color.White;
             pnlPanelCambios.Location = new Point(120, 0);
             pnlPanelCambios.Name = "pnlPanelCambios";
             pnlPanelCambios.Size = new Size(699, 398);
             pnlPanelCambios.TabIndex = 0;
+            pnlPanelCambios.Paint += pnlPanelCambios_Paint;
             // 
             // pnlFooter
             // 
@@ -319,7 +320,7 @@
             btnInspecionVisual.FlatStyle = FlatStyle.Flat;
             btnInspecionVisual.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnInspecionVisual.ForeColor = Color.Transparent;
-            btnInspecionVisual.Location = new Point(3, 3);
+            btnInspecionVisual.Location = new Point(0, 3);
             btnInspecionVisual.Name = "btnInspecionVisual";
             btnInspecionVisual.Size = new Size(117, 73);
             btnInspecionVisual.TabIndex = 1;

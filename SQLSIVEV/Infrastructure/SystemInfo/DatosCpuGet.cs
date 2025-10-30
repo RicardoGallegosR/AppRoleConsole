@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;    
 using System.Text;
 
-namespace AppRoleConsole.Infrastructure.SystemInfo {
+namespace SQLSIVEV.Infrastructure.SystemInfo {
     public sealed class DatosCpuGet : IDisposable {
         private bool _disposed;
 

@@ -1,10 +1,8 @@
-﻿using AppRoleConsole.Domain.Models;
-using AppRoleConsole.Infrastructure.Config;
-using AppRoleConsole.Infrastructure.Security;
-using AppRoleConsole.Infrastructure.Sql;
-using AppRoleConsole.Infrastructure.SystemInfo;
-using AppRoleConsole.Infrastructure.Utils;
-using Microsoft.Data.SqlClient;
+﻿using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Config;
+using SQLSIVEV.Infrastructure.Security;
+using SQLSIVEV.Infrastructure.Sql;
+using SQLSIVEV.Infrastructure.Utils;
 
 
 class Program {

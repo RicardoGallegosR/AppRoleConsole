@@ -1,4 +1,4 @@
-﻿namespace AppRoleConsole.Domain.Models {
+﻿namespace SQLSIVEV.Domain.Models {
 
     public sealed class SpAppRollClaveGetResult {
         public int ReturnCode { get; init; }

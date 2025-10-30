@@ -1,4 +1,4 @@
-﻿namespace AppRoleConsole.Domain.OBD {
+﻿namespace SQLSIVEV.Domain.OBD {
     public class ObdSnapshot {
         public string Protocolo { get; init; } = "desconocido";
         public string CalJoined { get; init; } = "desconocido";

@@ -23,12 +23,92 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "frmMensajes";
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMensajes));
+            pnlPrincipal = new Panel();
+            pnlMenu = new Panel();
+            btnCerrar = new Button();
+            txbMensaje = new TextBox();
+            pnlPrincipal.SuspendLayout();
+            pnlMenu.SuspendLayout();
+            SuspendLayout();
+            // 
+            // pnlPrincipal
+            // 
+            pnlPrincipal.BackColor = Color.White;
+            pnlPrincipal.Controls.Add(pnlMenu);
+            pnlPrincipal.Controls.Add(txbMensaje);
+            pnlPrincipal.Dock = DockStyle.Fill;
+            pnlPrincipal.Location = new Point(0, 0);
+            pnlPrincipal.Name = "pnlPrincipal";
+            pnlPrincipal.Size = new Size(800, 450);
+            pnlPrincipal.TabIndex = 0;
+            // 
+            // pnlMenu
+            // 
+            pnlMenu.BackColor = Color.FromArgb(159, 34, 65);
+            pnlMenu.Controls.Add(btnCerrar);
+            pnlMenu.Dock = DockStyle.Left;
+            pnlMenu.Location = new Point(0, 0);
+            pnlMenu.Name = "pnlMenu";
+            pnlMenu.Size = new Size(116, 450);
+            pnlMenu.TabIndex = 1;
+            // 
+            // btnCerrar
+            // 
+            btnCerrar.AutoSize = true;
+            btnCerrar.Dock = DockStyle.Fill;
+            btnCerrar.FlatStyle = FlatStyle.Flat;
+            btnCerrar.Font = new Font("Segoe UI", 20F);
+            btnCerrar.ForeColor = Color.White;
+            btnCerrar.Location = new Point(0, 0);
+            btnCerrar.Name = "btnCerrar";
+            btnCerrar.Size = new Size(116, 450);
+            btnCerrar.TabIndex = 1;
+            btnCerrar.Text = "Cerrar";
+            btnCerrar.UseVisualStyleBackColor = true;
+            btnCerrar.Click += btnCerrar_Click;
+            // 
+            // txbMensaje
+            // 
+            txbMensaje.BackColor = Color.White;
+            txbMensaje.CausesValidation = false;
+            txbMensaje.CharacterCasing = CharacterCasing.Upper;
+            txbMensaje.Dock = DockStyle.Right;
+            txbMensaje.Font = new Font("Segoe UI", 14F);
+            txbMensaje.Location = new Point(135, 0);
+            txbMensaje.Multiline = true;
+            txbMensaje.Name = "txbMensaje";
+            txbMensaje.RightToLeft = RightToLeft.No;
+            txbMensaje.ScrollBars = ScrollBars.Vertical;
+            txbMensaje.Size = new Size(665, 450);
+            txbMensaje.TabIndex = 0;
+            txbMensaje.Text = resources.GetString("txbMensaje.Text");
+            txbMensaje.TextAlign = HorizontalAlignment.Center;
+            // 
+            // frmMensajes
+            // 
+            AutoScaleMode = AutoScaleMode.None;
+            ClientSize = new Size(800, 450);
+            ControlBox = false;
+            Controls.Add(pnlPrincipal);
+            FormBorderStyle = FormBorderStyle.None;
+            MaximizeBox = false;
+            MdiChildrenMinimizedAnchorBottom = false;
+            MinimizeBox = false;
+            Name = "frmMensajes";
+            StartPosition = FormStartPosition.CenterScreen;
+            pnlPrincipal.ResumeLayout(false);
+            pnlPrincipal.PerformLayout();
+            pnlMenu.ResumeLayout(false);
+            pnlMenu.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Panel pnlPrincipal;
+        private Panel pnlMenu;
+        private Button btnCerrar;
+        private TextBox txbMensaje;
     }
 }

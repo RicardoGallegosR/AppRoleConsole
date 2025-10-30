@@ -1,4 +1,4 @@
-﻿namespace AppRoleConsole.Infrastructure.Config;
+﻿namespace SQLSIVEV.Infrastructure.Config;
 
 public static class AppConfig {
     public static class Sql {

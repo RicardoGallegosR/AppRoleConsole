@@ -12,6 +12,10 @@
 	<PackageReference Include="DotNetEnv" Version="3.1.1" />
 	<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
 	<PackageReference Include="System.IO.Ports" Version="9.0.10" />
-	<PackageReference Include="System.Management" Version="7.0.2" />
+	<PackageReference Include="System.Management" Version="9.0.10" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\SQLSIVEV\SQLSIVEV.csproj" />
 	</ItemGroup>
 </Project>

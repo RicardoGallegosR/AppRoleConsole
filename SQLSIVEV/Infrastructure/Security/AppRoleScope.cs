@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace AppRoleConsole.Infrastructure.Security {
+namespace SQLSIVEV.Infrastructure.Security {
     public sealed class AppRoleScope : IDisposable {
         private readonly SqlConnection _conn;
         private readonly byte[] _cookie;

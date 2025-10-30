@@ -1,10 +1,10 @@
 ﻿// Infrastructure/Utils/MessageUtils.cs
 using Microsoft.Data.SqlClient;
-using AppRoleConsole.Domain.Models;
-using AppRoleConsole.Infrastructure.Sql;
-using AppRoleConsole.Infrastructure.Security;
+using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Sql;
+using SQLSIVEV.Infrastructure.Security;
 
-namespace AppRoleConsole.Infrastructure.Utils;
+namespace SQLSIVEV.Infrastructure.Utils;
 
 public static class MessageUtils {
     /// Imprime el catálogo si MensajeId != 0. 
