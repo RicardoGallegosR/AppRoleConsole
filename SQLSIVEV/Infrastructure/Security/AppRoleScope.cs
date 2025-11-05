@@ -13,6 +13,7 @@ namespace SQLSIVEV.Infrastructure.Security {
             cmd.CommandText = "sp_setapprole";
             cmd.Parameters.Add(new SqlParameter("@rolename", SqlDbType.NVarChar, 128) { Value = role });
             cmd.Parameters.Add(new SqlParameter("@password", SqlDbType.NVarChar, 128) { Value = password });
+            //cmd.Parameters.Add(new SqlParameter("@password", SqlDbType.UniqueIdentifier));
             cmd.Parameters.Add(new SqlParameter("@fCreateCookie", SqlDbType.Bit) { Value = true });
             var pCookie = new SqlParameter("@cookie", SqlDbType.VarBinary, 8000) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(pCookie);

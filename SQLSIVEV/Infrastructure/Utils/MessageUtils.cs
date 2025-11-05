@@ -14,7 +14,7 @@ public static class MessageUtils {
 
 
 public static async Task<AppTextoMensajeResult?> PrintIfMsgAsync( this SivevRepository repo, SqlConnection conn, string contexto, int mensajeId, bool soloSiHayError = true, string? appRole = null,
-                                                                        string? appRolePass = null,  CancellationToken ct = default) {
+                                                                        string appRolePass = "",  CancellationToken ct = default) {
         if (soloSiHayError && mensajeId == 0)
             return null;
 

@@ -15,7 +15,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
+using Serilog;
+using Serilog.Exceptions;
+using Microsoft.Extensions.Configuration;
 
 
 namespace Apps_Visual.ObdAppGUI {
@@ -27,8 +29,8 @@ namespace Apps_Visual.ObdAppGUI {
         const string SQL_USER = AppConfig.Sql.User;
         const string SQL_PASS = AppConfig.Sql.Pass;
 
-        const string APPROLE = AppConfig.Security.AppRole;
-        const string APPROLE_PASS = AppConfig.Security.AppRolePass;
+        static string APPROLE = AppConfig.Security.AppRole();
+        static string APPROLE_PASS = AppConfig.Security.AppRolePass();
 
         string RollAcceso = string.Empty;
         string ClaveAcceso = string.Empty;
@@ -95,19 +97,20 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         public frmBASE() {
+            /*
             var conf = new RegWin();
             var appName = string.IsNullOrWhiteSpace(conf.DomainName) ? "" : conf.DomainName.Trim();
             var repo = new SivevRepository();
-
+            */
 
 
 
 
             InitializeComponent();
-            pnlHome();
+            //pnlHome();
         }
 
-
+        /*
         private void pnlHome() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
@@ -121,13 +124,13 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Dock = DockStyle.Fill;
         }
 
-
+        */
 
         private async void LoginForm_Load(object sender, EventArgs e) {
-            await InicioAsync();
+            //await InicioAsync();
         }
 
-
+        /*
         private async Task InicioAsync() {
             btnInspecionVisual.Enabled = false;
 
@@ -143,7 +146,7 @@ namespace Apps_Visual.ObdAppGUI {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
             try {
 
-                var ok = await TestConexionAsync(/* cts.Token */);
+                var ok = await TestConexionAsync(/* cts.Token /*//*);
 
                 if (ok == 1) {
                     _statusDlg.Mensaje = "Conectado.";
@@ -202,7 +205,7 @@ namespace Apps_Visual.ObdAppGUI {
 
 
 
-
+        */
 
         private void btnInspecionVisual_Click(object sender, EventArgs e) {
 

@@ -11,8 +11,8 @@ class Program {
     const string SQL_USER = AppConfig.Sql.User;
     const string SQL_PASS = AppConfig.Sql.Pass;
 
-    const string APPROLE = AppConfig.Security.AppRole;
-    const string APPROLE_PASS = AppConfig.Security.AppRolePass;
+    static string APPROLE = AppConfig.Security.AppRole();
+    static string APPROLE_PASS = AppConfig.Security.AppRolePass();
 
     public static async Task<int> Main() {
 

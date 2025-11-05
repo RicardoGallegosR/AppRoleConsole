@@ -1,5 +1,6 @@
 ﻿using DotNetEnv;
 using Microsoft.Win32;
+using SQLSIVEV.Infrastructure.Config.Cifrados;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +12,12 @@ using System.Threading.Tasks;
 namespace SQLSIVEV.Infrastructure.Config {
     public class RegWin : IDisposable {
         protected bool disposed = false;
-        private const string HKEY_CLASSES_ROOT = "HKEY_CLASSES_ROOT";
-        private const string HKEY_CURRENT_USER = "HKEY_CURRENT_USER";
-        private const string HKEY_LOCAL_MACHINE = "HKEY_LOCAL_MACHINE";
-        private const string HKEY_USERS = "HKEY_USERS";
-        private const string HKEY_PERFORMANCE_DATA = "HKEY_PERFORMANCE_DATA";
-        private const string HKEY_CURRENT_CONFIG = "HKEY_CURRENT_CONFIG";
-        private const string HKEY_DYN_DATA = "HKEY_DYN_DATA";
         private const string SubKey = @"SOFTWARE\SIVEV";
-        private const string LLaveCompleta = "HKEY_LOCAL_MACHINE\\SOFTWARE\\SIVEV";
         private RegistryKey? RegKey;
-        private readonly string Valor;
-        private readonly string[,] ControlReg;
+
+        private readonly EncryptConfig _enc; 
+
+
 
         #region Datos del Sistema
         internal static string mvarCentro = "";
@@ -82,11 +77,6 @@ namespace SQLSIVEV.Infrastructure.Config {
         #endregion
 
         #region Seguridad (Cifrado)
-        private readonly string sMasterPassWord;
-        private readonly string sPropKey;
-        private readonly string cipherText;
-        private readonly string passPhrase;
-
 
         private readonly string saltValue;
         private readonly string hashAlgorithm;
@@ -198,7 +188,7 @@ namespace SQLSIVEV.Infrastructure.Config {
                     this.initVector,
                     this.keySize
                 );
-                Console.WriteLine($"nombre de la propiedad{nombrePropiedad}, Valor {valorOriginal}");
+                Console.WriteLine($"nombre de la propiedad {nombrePropiedad}, Valor {valorOriginal}");
                 this.GuardaValor(SubKey, nombrePropiedad, valorCifrado);
             } catch (Exception ex) {
                 ErrorProceso?.Invoke(new ErrorProcesoArgs(
@@ -317,19 +307,87 @@ namespace SQLSIVEV.Infrastructure.Config {
         }*/
 
 
-        public string EstacionId {
+        public Guid EstacionId {
             get {
-                var v = LeerValor<string>(nameof(EstacionId));
-                Console.WriteLine($"EstacionId leído: '{v}' (Length: {v?.Length})");
+                var v = LeerValor<Guid>(nameof(EstacionId));
+                Console.WriteLine($"EstacionId leído: '{v}'");
                 return v;
             }
             set => EscribirValor(nameof(EstacionId), value);
         }
 
+        public Guid ClaveAccesoId {
+            get {
+                var v = LeerValor<Guid>(nameof(ClaveAccesoId));
+                return v;
+            }
+            set => EscribirValor(nameof(ClaveAccesoId), value);
+        }
+
+        
+
+
+
+
         public short VelocidadPuerto {
             get => LeerValor<short>(nameof(VelocidadPuerto));
             set => EscribirValor(nameof(VelocidadPuerto), ((int)value).ToString());
         }
+
+        public string APPNAME {
+            get {
+                var v = LeerValor<string>(nameof(APPNAME));
+                return v;
+            }
+            set => EscribirValor(nameof(APPNAME), value);
+        }
+
+
+
+        public string AppRolePass {
+            get {
+                var v = LeerValor<string>(nameof(AppRolePass));
+                Console.WriteLine($"AppRolePass leído: '{v}'");
+                return v;
+            }
+            set => EscribirValor(nameof(AppRolePass), value);
+        }
+
+        public string AppRole {
+            get => LeerValor<string>(nameof(AppRole));
+            set => EscribirValor(nameof(AppRole), value);
+        }
+
+        public string SQL_USER {
+            get => LeerValor<string>(nameof(SQL_USER));
+            set => EscribirValor(nameof(SQL_USER), value);
+        }
+
+        public string SQL_PASS {
+            get => LeerValor<string>(nameof(SQL_PASS));
+            set => EscribirValor(nameof(SQL_PASS), value);
+        }
+
+        // Acceso a Roles Sivev
+
+        public string APPROLE {
+            get => LeerValor<string>(nameof(APPROLE));
+            set => EscribirValor(nameof(APPROLE), value);
+        }
+
+
+        public Guid APPROLE_PASS {
+            get => LeerValor<Guid>(nameof(APPROLE_PASS));
+            set => EscribirValor(nameof(APPROLE_PASS), value);
+        }
+
+
+
+
+        // Acceso a Roles Aplicacion
+        public string APPROLE_VISUAL { get; set; }
+        public Guid APPROLE_PASS_VISUAL { get; set; }
+
 
         #endregion
 
@@ -642,6 +700,47 @@ namespace SQLSIVEV.Infrastructure.Config {
             return flag;
         }
 
+        // Claves que SÍ se deben inicializar para estación Visual
+        private static readonly HashSet<string> ClavesVisual = new(StringComparer.OrdinalIgnoreCase) {
+            nameof(SqlServerName),
+            nameof(BaseSql),
+            nameof(SQL_USER),
+            nameof(SQL_PASS),
+            nameof(APPNAME),
+
+            nameof(APPROLE),
+            nameof(APPROLE_PASS),
+
+            nameof(APPROLE_VISUAL),
+            nameof(APPROLE_PASS_VISUAL),
+
+            nameof(EstacionId),
+            nameof(OpcionMenuId),
+            nameof(ClaveAccesoId)
+        };
+
+        public bool ActualizaLlavesVisual() {
+            bool flag = false;
+            try {
+                if (!ChecaSubllave(SubKey) && !CreaSubllave(SubKey))
+                    throw new ApplicationException($"No se pudo crear la subclave '{SubKey}'");
+
+                using var key = Registry.LocalMachine.OpenSubKey(SubKey);
+                foreach (var kvp in ValoresPorDefecto) {
+                    if (!ClavesVisual.Contains(kvp.Key)) continue;              // <- filtro Visual
+                    if (key?.GetValue(kvp.Key) is not null) continue;           // ya existe, no tocar
+
+                    EscribirValor(kvp.Key, kvp.Value);
+                    flag = true;
+                }
+            } catch (Exception ex) {
+                ErrorProceso?.Invoke(new ErrorProcesoArgs("SivevLib", nameof(RegWin), nameof(ActualizaLlavesVisual),
+                    ex.HResult, ex.Message, 0));
+            }
+            return flag;
+        }
+
+
         //creado por mi
         public bool GuardaTodosLosValores() {
             bool flag = false;
@@ -757,23 +856,76 @@ namespace SQLSIVEV.Infrastructure.Config {
         }
 
 
-        public RegWin() {
-            string baseDir = AppContext.BaseDirectory;
-            string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", ".."));
-            string envPath = Path.Combine(projectRoot, ".env");
-            Env.Load(envPath);
-
-            this.saltValue = Environment.GetEnvironmentVariable("SALT_VALUE") ?? "s@1tValue";
-            this.hashAlgorithm = Environment.GetEnvironmentVariable("HASH_ALGORITHM") ?? "SHA1";
-            this.passwordIterations = int.Parse(Environment.GetEnvironmentVariable("PASSWORD_ITERATIONS") ?? "2");
-            this.initVector = Environment.GetEnvironmentVariable("INIT_VECTOR") ?? "@1B2c3D4e5F6g7H8";
-            this.keySize = int.Parse(Environment.GetEnvironmentVariable("KEY_SIZE") ?? "256");
-
-            //Console.WriteLine($"Valores iniciales\n{saltValue}\n{hashAlgorithm}\n{passwordIterations}\n{initVector}\n{keySize}\n");
+        public RegWin(EncryptConfig cfg) {
+            saltValue = cfg.SaltValue;
+            hashAlgorithm = cfg.HashAlgorithm;
+            passwordIterations = cfg.PasswordIterations;
+            initVector = cfg.InitVector;
+            keySize = cfg.KeySize;
         }
 
-        public static RegWin CrearDesdeEstacion(estacion datos) {
-            Console.WriteLine($"EstacionId desde datos: '{datos.EstacionId}' (Length: {datos.EstacionId?.Length})");
+        public RegWin() {
+            // 2.1: intenta .env si está
+            TryLoadFromEnv(out var fromEnv);
+
+            if (fromEnv is not null) {
+                saltValue = fromEnv.SaltValue;
+                hashAlgorithm = fromEnv.HashAlgorithm;
+                passwordIterations = fromEnv.PasswordIterations;
+                initVector = fromEnv.InitVector;
+                keySize = fromEnv.KeySize;
+            } else {
+                // 2.2: fallback al hardcode
+                var cfg = Cifrados.Cifrados.Default;
+                saltValue = cfg.SaltValue;
+                hashAlgorithm = cfg.HashAlgorithm;
+                passwordIterations = cfg.PasswordIterations;
+                initVector = cfg.InitVector;
+                keySize = cfg.KeySize;
+            }
+        }
+
+        private static void TryLoadFromEnv(out EncryptConfig? cfg) {
+            cfg = null;
+            try {
+                // Carga simple del .env en el mismo folder del exe
+                var baseDir = AppContext.BaseDirectory;
+                var envPath = Path.Combine(baseDir, ".env");
+                if (File.Exists(envPath))
+                    DotNetEnv.Env.Load(envPath);
+                else
+                    DotNetEnv.Env.Load(); // por si hay variables en proceso
+
+                var salt = Environment.GetEnvironmentVariable("SALT_VALUE");
+                var hash = Environment.GetEnvironmentVariable("HASH_ALGORITHM");
+                var passIt = Environment.GetEnvironmentVariable("PASSWORD_ITERATIONS");
+                var iv = Environment.GetEnvironmentVariable("INIT_VECTOR");
+                var ks = Environment.GetEnvironmentVariable("KEY_SIZE");
+
+                // si no hay nada, salimos
+                if (string.IsNullOrWhiteSpace(salt) &&
+                    string.IsNullOrWhiteSpace(hash) &&
+                    string.IsNullOrWhiteSpace(passIt) &&
+                    string.IsNullOrWhiteSpace(iv) &&
+                    string.IsNullOrWhiteSpace(ks)) {
+                    return;
+                }
+
+                cfg = new EncryptConfig {
+                    SaltValue = string.IsNullOrWhiteSpace(salt) ? "s@1tValue" : salt,
+                    HashAlgorithm = string.IsNullOrWhiteSpace(hash) ? "SHA1" : hash,
+                    PasswordIterations = int.TryParse(passIt, out var it) ? it : 2,
+                    InitVector = string.IsNullOrWhiteSpace(iv) ? "@1B2c3D4e5F6g7H8" : iv,
+                    KeySize = int.TryParse(ks, out var ksz) ? ksz : 256
+                };
+            } catch {
+                cfg = null;
+            }
+        }
+
+
+        public static RegWin CrearDesdeEstacion(Estaciones.estacion datos) {
+            Console.WriteLine($"EstacionId desde datos: '{datos.EstacionId}'");
 
             return new RegWin {
                 Centro = (short)datos.Centro,
@@ -796,6 +948,41 @@ namespace SQLSIVEV.Infrastructure.Config {
 
             };
         }
+
+
+        public static RegWin CrearEstacionVisual(Estaciones.estacionVisual datos) {
+            Console.WriteLine($"Crear estación visual");
+
+            return new RegWin {
+
+
+                SqlServerName = datos.SqlServerName,
+                BaseSql = datos.BaseDatos,
+                SQL_USER = datos.SQL_USER,
+                SQL_PASS = datos.SQL_PASS,
+                APPNAME =  datos.APPNAME,
+
+                APPROLE = datos.APPROLE,
+                APPROLE_PASS = datos.APPROLE_PASS,
+
+                APPROLE_VISUAL = datos.APPROLE_VISUAL,
+                APPROLE_PASS_VISUAL = datos.APPROLE_PASS_VISUAL,
+
+                ClaveAccesoId = datos.ClaveAccesoId,
+
+                EstacionId = datos.EstacionId,
+                OpcionMenuId =  datos.opcionMenu
+
+            };
+        }
+
+
+
+
+
+
+
+
 
         public void ImprimirValoresDesdeRegistro() {
             Console.WriteLine("== Valores leídos del registro (descifrados) ==");
@@ -834,25 +1021,5 @@ namespace SQLSIVEV.Infrastructure.Config {
         }
 
         #endregion
-    }
-    public class estacion {
-        public short PuertoMCEP { get; set; }
-        public short PuertoMCS { get; set; }
-        public short PuertoMCT { get; set; }
-        public short PuertoMEM { get; set; }
-        public short PuertoMSM { get; set; }
-        public short PuertoOpacimetro { get; set; }
-        public string SqlServerName { get; set; }
-        public string BaseDatos { get; set; }
-        public string DireccionIP { get; set; }
-        public string Dominio { get; set; }
-        public string NombreCPU { get; set; }
-        public int Centro { get; set; }
-        public short Estacion { get; set; }
-        public string EstacionId { get; set; }
-        //public Guid EstacionId { get; set; }
-        public short DebugActivo { get; set; }
-        public short NivelActivo { get; set; }
-        public short ConectaSF { get; set; }
     }
 }
