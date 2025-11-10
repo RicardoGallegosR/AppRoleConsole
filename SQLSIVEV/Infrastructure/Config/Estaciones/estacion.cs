@@ -20,7 +20,7 @@ namespace SQLSIVEV.Infrastructure.Config.Estaciones {
         public int Centro { get; set; }
         public short Estacion { get; set; }
         //public string EstacionId { get; set; }
-        public Guid EstacionId { get; set; }
+        public string EstacionId { get; set; }
         public short DebugActivo { get; set; }
         public short NivelActivo { get; set; }
         public short ConectaSF { get; set; }

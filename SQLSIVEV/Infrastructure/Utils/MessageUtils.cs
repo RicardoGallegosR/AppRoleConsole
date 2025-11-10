@@ -1,5 +1,4 @@
-﻿// Infrastructure/Utils/MessageUtils.cs
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Security;

@@ -1,4 +1,7 @@
 ﻿using Apps_Visual.ObdAppGUI.Views;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Exceptions;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config;
 using SQLSIVEV.Infrastructure.Security;
@@ -15,100 +18,117 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using Serilog;
-using Serilog.Exceptions;
-using Microsoft.Extensions.Configuration;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 
 namespace Apps_Visual.ObdAppGUI {
 
     public partial class frmBASE : Form {
         #region Variables para funcionamiento
-        const string SERVER = AppConfig.Sql.Server;
-        const string DB = AppConfig.Sql.Database;
-        const string SQL_USER = AppConfig.Sql.User;
-        const string SQL_PASS = AppConfig.Sql.Pass;
+        private string SERVER, DB, SQL_USER, SQL_PASS, APPNAME, APPROLE, APPROLE_PASS,
+            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId, accesoId,
+            VerificacionId , PlacaId;
 
-        static string APPROLE = AppConfig.Security.AppRole();
-        static string APPROLE_PASS = AppConfig.Security.AppRolePass();
+        private short opcionMenu;
+        private int MensajeId, odometro;
 
-        string RollAcceso = string.Empty;
-        string ClaveAcceso = string.Empty;
-        int MensajeId = 0;
-
-        Guid accesoId = Guid.Empty;
-        Guid VerificacionId = Guid.Empty;
-        byte ProtocoloVerificacionId = 0;
-        string PlacaId = string.Empty;
-        byte combustible = 1;
+        private byte ProtocoloVerificacionId, combustible,  tiTaponCombustible,
+            tiTaponAceite, tiBayonetaAceite, tiPortafiltroAire, tiTuboEscape, tiFugasMotorTrans,
+            tiNeumaticos,tiMotorGobernado;
+        
+        
+        private readonly ILogger _baseLog;
+        private readonly string  _usedDir;
 
         /*
-        Guid estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
-
-        short opcionMenu = 151;
         int credencial = 16499;
         string passCredencial = "PASS1234";
         */
-
-        byte tiTaponCombustible = 0;
-        byte tiTaponAceite = 0;
-        byte tiBayonetaAceite = 0;
-        byte tiPortafiltroAire = 0;
-        byte tiTuboEscape = 0;
-        byte tiFugasMotorTrans = 0;
-        byte tiNeumaticos = 0;
-        byte tiComponentesEmisiones = 0;
-        byte tiMotorGobernado = 0;
-        int odometro = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         private HomeView home;
         private frmMensajes _statusDlg;
         #endregion
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public frmBASE() {
-            /*
-            var conf = new RegWin();
-            var appName = string.IsNullOrWhiteSpace(conf.DomainName) ? "" : conf.DomainName.Trim();
-            var repo = new SivevRepository();
-            */
-
-
-
 
             InitializeComponent();
-            //pnlHome();
+            _usedDir = Logs.Init(AppRun.RunId, "frmBASE");
+            using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.frmBASE")) {
+                Log.Information("Inicio runId={RunId}. Carpeta usada={Dir}", AppRun.RunId, _usedDir);
+            }
+            if (LecturaRegedit()) {
+                BloquearEstacion();
+            }
+
+            
         }
+
+        private bool LecturaRegedit() {
+            bool vacio(string s) => string.IsNullOrWhiteSpace(s);
+
+            SERVER = AppConfig.Sql.SqlServerName() ?? "";
+            DB = AppConfig.Sql.BaseSql() ?? "";
+            SQL_USER = AppConfig.Sql.SQL_USER() ?? "";
+            SQL_PASS = AppConfig.Sql.SQL_PASS() ?? "";
+            APPNAME = AppConfig.Sql.APPNAME() ?? "";
+
+            APPROLE = AppConfig.RollInicial.APPROLE() ?? "";
+            APPROLE_PASS = AppConfig.RollInicial.APPROLE_PASS() ?? "";
+
+            RollAccesoVisual = AppConfig.RollVisual.APPROLE_VISUAL() ?? "";
+            RollAccesoVisualAcceso = AppConfig.RollVisual.APPROLE_PASS_VISUAL() ?? "";
+
+            opcionMenu = AppConfig.CredencialesRegEdit.OpcionMenu();
+            estacionId = AppConfig.CredencialesRegEdit.EstacionId() ?? "";
+            claveAccesoId = AppConfig.CredencialesRegEdit.ClaveAccesoId() ?? "";
+
+            using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.LecturaRegedit")) {
+                Log.Information(
+                "|| Lectura de REGEDIT " +
+                "|| SERVER: {SERVER}, " +
+                "|| DB: {DB}, " +
+                "|| SQL_USER: {SQL_USER}, " +
+                "|| SQL_PASS: {SQL_PASS}, " +
+                "|| APPNAME: {APPNAME}, " +
+                "|| APPROLE: {APPROLE}, " +
+                "|| APPROLE_PASS: {APPROLE_PASS}, " +
+                "|| RollAccesoVisual: {RollAccesoVisual}, " +
+                "|| RollAccesoVisualAcceso: {RollAccesoVisualAcceso}, " +
+                "|| opcionMenu: {opcionMenu}, " +
+                "|| estacionId: {estacionId}, " +
+                "|| AccesoId: {claveAccesoId} " +
+                "|| DirLogs: {UsedDir}",
+                SERVER, DB, SQL_USER, Logs.Mask(SQL_PASS),
+                APPNAME, APPROLE, Logs.Mask(APPROLE_PASS),
+                RollAccesoVisual, RollAccesoVisualAcceso, opcionMenu, Logs.Mask(estacionId),
+                 Logs.Mask(claveAccesoId), _usedDir);
+            
+            }
+            return vacio(SERVER)
+                 || vacio(DB)
+                 || vacio(SQL_USER)
+                 || vacio(SQL_PASS)
+                 || vacio(APPNAME)
+                 || vacio(APPROLE)
+                 || vacio(APPROLE_PASS)
+                 || vacio(estacionId)
+                 || opcionMenu <= 0;
+        }
+
+        private void BloquearEstacion () {
+            Log.Error("Estación No configurada");
+
+        }
+
+
+
+
+
+
+
+
+
 
         /*
         private void pnlHome() {
@@ -127,6 +147,8 @@ namespace Apps_Visual.ObdAppGUI {
         */
 
         private async void LoginForm_Load(object sender, EventArgs e) {
+            Application.Exit();
+            Close();
             //await InicioAsync();
         }
 
@@ -215,6 +237,7 @@ namespace Apps_Visual.ObdAppGUI {
             var result = MessageBox.Show("¿Desea apagar la aplicación?","Confirmar salida", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes) {
+                Log.CloseAndFlush();
                 Application.Exit();
                 //Process.Start("shutdown", "/s /t 0");
             }
@@ -223,5 +246,29 @@ namespace Apps_Visual.ObdAppGUI {
         private void pnlPanelCambios_Paint(object sender, PaintEventArgs e) {
 
         }
+
+
+
+
+
+
+
+        
+
+        private void AplicarTemaRecursivo(Control root, System.Drawing.Color color) {
+            foreach (Control c in root.Controls) {
+                if (c is Panel p) p.BackColor = color;
+                if (c.HasChildren) AplicarTemaRecursivo(c, color);
+            }
+        }
+
+
+
+
+
+
+
+
+
     }
 }

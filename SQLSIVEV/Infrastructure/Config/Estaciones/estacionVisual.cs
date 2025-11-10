@@ -18,19 +18,19 @@ namespace SQLSIVEV.Infrastructure.Config.Estaciones {
 
         // Acceso a Roles Sivev
         public string APPROLE { get; set; }
-        public Guid APPROLE_PASS { get; set; }
+        public string APPROLE_PASS { get; set; }
 
         // Acceso a Roles Aplicacion
         public string APPROLE_VISUAL { get; set; }
-        public Guid APPROLE_PASS_VISUAL { get; set; }
+        public string APPROLE_PASS_VISUAL { get; set; }
 
 
 
 
         // Obtenido
-        public Guid ClaveAccesoId { get; set; }
+        public string ClaveAccesoId { get; set; }
 
-        public Guid EstacionId { get; set; }
+        public string EstacionId { get; set; }
 
         public short opcionMenu { get; set; }
     }

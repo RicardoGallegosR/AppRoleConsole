@@ -4,6 +4,7 @@ using SQLSIVEV.Infrastructure.Config.Cifrados;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -207,40 +208,31 @@ namespace SQLSIVEV.Infrastructure.Config {
         public T LeerValor<T>(string nombrePropiedad) {
             try {
                 using var key = Registry.LocalMachine.OpenSubKey(SubKey);
-                var raw = key?.GetValue(nombrePropiedad);
-                string? valorEncriptado = raw is byte[] bytes
-            ? Encoding.UTF8.GetString(bytes)
-            : raw?.ToString();
+                var rawObj = key?.GetValue(nombrePropiedad);
+                string? raw = rawObj is byte[] b ? Encoding.UTF8.GetString(b) : rawObj?.ToString();
 
-                if (string.IsNullOrWhiteSpace(valorEncriptado))
-                    return default!;
+                if (string.IsNullOrWhiteSpace(raw)) return default!;
 
-                string desencriptado = this.Desencriptacion(
-            valorEncriptado,
-            nombrePropiedad,
-            this.saltValue,
-            this.hashAlgorithm,
-            this.passwordIterations,
-            this.initVector,
-            this.keySize
-        );
-
-                if (string.IsNullOrWhiteSpace(desencriptado))
-                    return default!;
-
-                // Si se espera un string y parece un GUID, devuelve el string del GUID completo
-                if (typeof(T) == typeof(string) &&
-                    nombrePropiedad.Contains("Id", StringComparison.OrdinalIgnoreCase) &&
-                    Guid.TryParse(desencriptado, out var guid))
-                    return (T)(object)guid.ToString();
-
-                if (typeof(T) == typeof(Guid)) {
-                    return (T)(object)Guid.Parse(desencriptado);
+                // Intenta descifrar; si falla, usa raw (compatibilidad)
+                string plano;
+                try {
+                    plano = this.Desencriptacion(raw, nombrePropiedad, this.saltValue, this.hashAlgorithm,
+                                                 this.passwordIterations, this.initVector, this.keySize);
+                    if (string.IsNullOrWhiteSpace(plano)) plano = raw;
+                } catch {
+                    plano = raw;
                 }
 
-                return (T)Convert.ChangeType(desencriptado, typeof(T));
-            } catch (Exception ex) {
-                Console.WriteLine($"Error al leer '{nombrePropiedad}': {ex.Message}");
+                if (typeof(T) == typeof(Guid))
+                    return (T)(object)(Guid.TryParse(plano, out var g) ? g : Guid.Empty);
+
+                if (typeof(T) == typeof(string)) return (T)(object)plano;
+                if (typeof(T) == typeof(int)) return (T)(object)int.Parse(plano);
+                if (typeof(T) == typeof(short)) return (T)(object)short.Parse(plano);
+                if (typeof(T) == typeof(bool)) return (T)(object)bool.Parse(plano);
+
+                return (T)Convert.ChangeType(plano, typeof(T));
+            } catch {
                 return default!;
             }
         }
@@ -307,18 +299,14 @@ namespace SQLSIVEV.Infrastructure.Config {
         }*/
 
 
-        public Guid EstacionId {
-            get {
-                var v = LeerValor<Guid>(nameof(EstacionId));
-                Console.WriteLine($"EstacionId leído: '{v}'");
-                return v;
-            }
+        public string EstacionId {
+            get => LeerValor<string>(nameof(EstacionId));
             set => EscribirValor(nameof(EstacionId), value);
         }
 
-        public Guid ClaveAccesoId {
+        public string ClaveAccesoId {
             get {
-                var v = LeerValor<Guid>(nameof(ClaveAccesoId));
+                var v = LeerValor<string>(nameof(ClaveAccesoId));
                 return v;
             }
             set => EscribirValor(nameof(ClaveAccesoId), value);
@@ -376,8 +364,8 @@ namespace SQLSIVEV.Infrastructure.Config {
         }
 
 
-        public Guid APPROLE_PASS {
-            get => LeerValor<Guid>(nameof(APPROLE_PASS));
+        public string APPROLE_PASS {
+            get => LeerValor<string>(nameof(APPROLE_PASS));
             set => EscribirValor(nameof(APPROLE_PASS), value);
         }
 
@@ -386,7 +374,11 @@ namespace SQLSIVEV.Infrastructure.Config {
 
         // Acceso a Roles Aplicacion
         public string APPROLE_VISUAL { get; set; }
-        public Guid APPROLE_PASS_VISUAL { get; set; }
+
+        public string APPROLE_PASS_VISUAL {
+            get => LeerValor<string>(nameof(APPROLE_PASS_VISUAL));
+            set => EscribirValor(nameof(APPROLE_PASS_VISUAL), value);
+        }
 
 
         #endregion

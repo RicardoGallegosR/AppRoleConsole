@@ -1,52 +1,31 @@
-﻿
-namespace SQLSIVEV.Infrastructure.Config {
-
+﻿namespace SQLSIVEV.Infrastructure.Config {
     public static class AppConfig {
+        // Reutiliza una sola instancia
+        private static readonly Lazy<RegWin> _reg = new(() => new RegWin());
+        private static RegWin Reg => _reg.Value;
 
         public static class Sql {
-
-            public const string Server   = "192.168.16.8";
-            public const string Database = "Sivev";
-            public const string User     = "SivevCentros";
-            public const string Pass     = "CentrosSivev";
-
+            public static string SqlServerName() => Reg.SqlServerName;
+            public static string BaseSql() => Reg.BaseSql;
+            public static string SQL_USER() => Reg.SQL_USER;
+            public static string SQL_PASS() => Reg.SQL_PASS;
+            public static string APPNAME() => Reg.APPNAME;
         }
 
-
-        public class CredencialesRegEdit {
-
-            public static int OpcionMenu() { return new RegWin().OpcionMenuId; }
-
-            public static Guid estacionId() { return new RegWin().EstacionId; }
-
-            public static string SqlServerName() { return new RegWin().SqlServerName; }
-            public static string BaseSql() { return new RegWin().BaseSql; }
-            public static string appName() { return new RegWin().DomainName; }
-
-
-
-
-
-
+        public static class RollInicial {
+            public static string APPROLE() => Reg.APPROLE;
+            public static string APPROLE_PASS() => Reg.APPROLE_PASS;
         }
 
-        public class Security {
-            public const string _AppRole     = "RollSivev";
-            public const string _AppRolePass = "53CE7B6E-1426-403A-857E-A890BB63BFE6";
-
-            public static string AppRole() => new RegWin().AppRole;
-
-            public static string AppRolePass() => new RegWin().AppRolePass;
+        public static class RollVisual {
+            public static string APPROLE_VISUAL() => Reg.APPROLE_VISUAL;
+            public static string APPROLE_PASS_VISUAL() => Reg.APPROLE_PASS_VISUAL;
         }
 
-
-
-
-
-
-
-
-
-
+        public static class CredencialesRegEdit {
+            public static short OpcionMenu() => Reg.OpcionMenuId;
+            public static string EstacionId() => Reg.EstacionId;
+            public static string ClaveAccesoId() => Reg.ClaveAccesoId;
+        }
     }
 }

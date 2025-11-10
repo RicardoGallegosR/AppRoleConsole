@@ -6,13 +6,14 @@ using SQLSIVEV.Infrastructure.Utils;
 
 
 class Program {
-    const string SERVER = AppConfig.Sql.Server;
-    const string DB = AppConfig.Sql.Database;
-    const string SQL_USER = AppConfig.Sql.User;
-    const string SQL_PASS = AppConfig.Sql.Pass;
 
-    static string APPROLE = AppConfig.Security.AppRole();
-    static string APPROLE_PASS = AppConfig.Security.AppRolePass();
+    static string SERVER = AppConfig.Sql.SqlServerName();
+    static string DB = AppConfig.Sql.BaseSql();
+    static string SQL_USER = AppConfig.Sql.SQL_USER();
+    static string SQL_PASS = AppConfig.Sql.SQL_PASS();
+
+    static string APPROLE = AppConfig.RollInicial.APPROLE();
+    static string APPROLE_PASS = AppConfig.RollInicial.APPROLE_PASS();
 
     public static async Task<int> Main() {
 
@@ -56,7 +57,7 @@ class Program {
 
         var repo2 = new SivevRepository();
 
-        using (var scope2 = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
+        using (var scope2 = new AppRoleScope(conn, APPROLE, APPROLE_PASS.ToString())) {
             var r = repo2.SpAppRollClaveGet(conn);
             await repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
             if (r.MensajeId != 0) {
