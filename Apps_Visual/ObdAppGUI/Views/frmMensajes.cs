@@ -1,23 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace Apps_Visual.ObdAppGUI.Views {
+﻿namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmMensajes : Form {
         private string _mensaje = string.Empty;
         private bool _Cerrar = true;
+
+
+        public frmMensajes() {
+            InitializeComponent();
+        }
+
+        
+        public frmMensajes(string mensaje) : this() {
+            Mensaje = mensaje;
+        }
+
         public string Mensaje {
             get => _mensaje;
             set {
                 _mensaje = value ?? string.Empty;
                 if (txbMensaje != null) txbMensaje.Text = _mensaje;
             }
+        }
+        private void txbMensaje_KeyDown(object sender, KeyEventArgs e) {
+            e.SuppressKeyPress = true;
         }
 
         public bool Cerrar {
@@ -28,12 +32,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
-        public frmMensajes() {
-            InitializeComponent();
-        }
-
-        
-        private void btnCerrar_Click(object sender, EventArgs e) => this.Close();
-
+        private void btnCerrar_Click(object sender, EventArgs e) => Close();
     }
 }

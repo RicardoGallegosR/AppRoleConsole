@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<instrumentationManifest xmlns="http://schemas.microsoft.com/win/2004/08/events">
+	<instrumentation>
+		<events>
+			<provider name="SIVEV"
+					  guid="{B7A2E0B1-3C7F-4C2F-9C3E-2C8B8E5AF001}"
+					  symbol="SIVEV_Provider"
+					  resourceFileName="%SystemRoot%\System32\wevtapi.dll"
+					  messageFileName="%SystemRoot%\System32\wevtapi.dll">
+
+				<channels>
+					<!-- Aparecerá en: Registros de aplicaciones y servicios -> SIVEV -->
+					<channel name="SIVEV"
+							 chid="SIVEV"
+							 type="Operational"
+							 enabled="true"
+							 access="O:BAG:SYD:(A;;0x3;;;SY)(A;;0x3;;;BA)(A;;0x3;;;BU)"/>
+					<!-- SY=SYSTEM, BA=Administrators, BU=Builtin Users; 0x3 = Read(0x1)+Write(0x2) -->
+				</channels>
+
+				<events>
+					<event value="1" level="win:Informational" template="T1" channel="SIVEV" symbol="InfoEvent"/>
+					<event value="2" level="win:Warning"       template="T1" channel="SIVEV" symbol="WarnEvent"/>
+					<event value="3" level="win:Error"         template="T1" channel="SIVEV" symbol="ErrorEvent"/>
+				</events>
+
+				<templates>
+					<template tid="T1">
+						<data name="Where"   inType="win:UnicodeString"/>
+						<data name="Message" inType="win:UnicodeString"/>
+					</template>
+				</templates>
+			</provider>
+		</events>
+	</instrumentation>
+
+	<localization>
+		<resources culture="en-US">
+			<stringTable/>
+		</resources>
+	</localization>
+</instrumentationManifest>
+

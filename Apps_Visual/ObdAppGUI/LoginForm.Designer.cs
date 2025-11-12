@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            Label lblGobiernoDeLa;
+            lblGobiernoDeLa = new Label();
             pnlPrincipal = new Panel();
             pnlPanelCambios = new Panel();
             pnlFooter = new Panel();
@@ -43,11 +43,10 @@
             pbxLogosSEDEMA = new PictureBox();
             pnlSeparadorFooterAmarillo = new Panel();
             pnlMenuLateral = new Panel();
-            panel2 = new Panel();
+            pnlLateralIzquierdoAbajo = new Panel();
             btnApagar = new Button();
             pnlLateralIzquierdoCentral = new Panel();
             btnInspecionVisual = new Button();
-            lblGobiernoDeLa = new Label();
             pnlPrincipal.SuspendLayout();
             pnlFooter.SuspendLayout();
             pnlCentralFooter.SuspendLayout();
@@ -59,7 +58,7 @@
             pnlFooterIquierdo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbxLogosSEDEMA).BeginInit();
             pnlMenuLateral.SuspendLayout();
-            panel2.SuspendLayout();
+            pnlLateralIzquierdoAbajo.SuspendLayout();
             pnlLateralIzquierdoCentral.SuspendLayout();
             SuspendLayout();
             // 
@@ -133,6 +132,7 @@
             // pnlFooterCentro
             // 
             pnlFooterCentro.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlFooterCentro.BackColor = SystemColors.Window;
             pnlFooterCentro.Controls.Add(lblSEDEMAFooter);
             pnlFooterCentro.Controls.Add(lblDGCA);
             pnlFooterCentro.Location = new Point(265, 0);
@@ -220,7 +220,7 @@
             // 
             // pnlFooterIquierdo
             // 
-            pnlFooterIquierdo.BackColor = Color.White;
+            pnlFooterIquierdo.BackColor = Color.WhiteSmoke;
             pnlFooterIquierdo.Controls.Add(lblGobiernoDeLa);
             pnlFooterIquierdo.Controls.Add(lblCDMX);
             pnlFooterIquierdo.Dock = DockStyle.Fill;
@@ -273,7 +273,7 @@
             // pnlMenuLateral
             // 
             pnlMenuLateral.BackColor = Color.FromArgb(159, 34, 65);
-            pnlMenuLateral.Controls.Add(panel2);
+            pnlMenuLateral.Controls.Add(pnlLateralIzquierdoAbajo);
             pnlMenuLateral.Controls.Add(pnlLateralIzquierdoCentral);
             pnlMenuLateral.Dock = DockStyle.Left;
             pnlMenuLateral.Location = new Point(0, 0);
@@ -281,14 +281,14 @@
             pnlMenuLateral.Size = new Size(120, 466);
             pnlMenuLateral.TabIndex = 0;
             // 
-            // panel2
+            // pnlLateralIzquierdoAbajo
             // 
-            panel2.Controls.Add(btnApagar);
-            panel2.Dock = DockStyle.Bottom;
-            panel2.Location = new Point(0, 383);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(120, 83);
-            panel2.TabIndex = 1;
+            pnlLateralIzquierdoAbajo.Controls.Add(btnApagar);
+            pnlLateralIzquierdoAbajo.Dock = DockStyle.Bottom;
+            pnlLateralIzquierdoAbajo.Location = new Point(0, 383);
+            pnlLateralIzquierdoAbajo.Name = "pnlLateralIzquierdoAbajo";
+            pnlLateralIzquierdoAbajo.Size = new Size(120, 83);
+            pnlLateralIzquierdoAbajo.TabIndex = 1;
             // 
             // btnApagar
             // 
@@ -354,7 +354,7 @@
             pnlFooterIquierdo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbxLogosSEDEMA).EndInit();
             pnlMenuLateral.ResumeLayout(false);
-            panel2.ResumeLayout(false);
+            pnlLateralIzquierdoAbajo.ResumeLayout(false);
             pnlLateralIzquierdoCentral.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -377,7 +377,7 @@
         private PictureBox pbxLogosVerificentros;
         private Panel pnlSeparadorFooterGrimsonII;
         private Panel pnlPanelCambios;
-        private Panel panel2;
+        private Panel pnlLateralIzquierdoAbajo;
         private Panel pnlLateralIzquierdoCentral;
         private Panel pnlCentralFooter;
         private Panel pnlFooterCentral;

@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+using Apps_Visual.UI.Theme;
+using Microsoft.Data.SqlClient;
+
 
 
 namespace Apps_Visual.ObdAppGUI {
@@ -51,18 +54,93 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         public frmBASE() {
-
             InitializeComponent();
             _usedDir = Logs.Init(AppRun.RunId, "frmBASE");
-            using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.frmBASE")) {
-                Log.Information("Inicio runId={RunId}. Carpeta usada={Dir}", AppRun.RunId, _usedDir);
-            }
-            if (LecturaRegedit()) {
-                BloquearEstacion();
-            }
 
-            
+
+            this.Load += async (_, __) => {
+                using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.frmBASE"))
+                    Log.Information("Inicio runId={RunId}. Carpeta usada={Dir}", AppRun.RunId, _usedDir);
+
+
+                await Task.Delay(200);
+                if (LecturaRegedit()) {
+                    BloquearEstacionRegEdit();
+                }else {
+                    if (!await SpAppRollClaveGet()) {
+                        BloquearEstacionSqlTest();
+                    } else {
+                        pnlHome();
+                    }
+                }
+            };
         }
+
+        private async Task< bool> SpAppRollClaveGet() {
+            try {
+                await using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, APPNAME);
+                await conn.OpenAsync();
+
+                //MessageBox.Show($"SERVER: {SERVER}, DB: {DB}, SQL_USER: {SQL_USER}, SQL_PASS: {SQL_PASS}, APPNAME: {APPNAME}");
+                //MessageBox.Show($"APPROLE: {APPROLE}, APPROLE_PASS: {APPROLE_PASS.ToString()}");
+
+                using (var scope = new AppRoleScope(conn, APPROLE, "53CE7B6E-1426-403A-857E-A890BB63BFE6")) {
+                    var repo = new SivevRepository();
+                    var r = repo.SpAppRollClaveGet(conn);
+                    var MensajesSQL = await  repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
+                    if (r.MensajeId != 0) {
+                        Log.Error($"Error frmBASE.SpAppRollClaveGet en MensajeId {MensajesSQL.ToString()}");
+                        using (var dlg = new frmMensajes($"Error frmBASE.SpAppRollClaveGet en MensajeId {MensajesSQL.ToString()}")) {
+                            dlg.StartPosition = FormStartPosition.CenterParent;
+                            dlg.TopMost = true;
+                            dlg.ShowDialog(this);
+                        }
+                        return false;
+                    }
+                    RollAccesoVisualAcceso = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
+                    RollAccesoVisual = r.FuncionAplicacion;
+                    Log.Information($"Valores regresados {Logs.Mask(RollAccesoVisualAcceso)} y {Logs.Mask(RollAccesoVisual)}");
+                }
+                return true;
+            } catch (SqlException ex) {
+                Log.Error(ex, $"Fallo de conexión a SQL {ex.Message}");
+                using (var dlg = new frmMensajes($"Fallo de conexión a SQL {ex.Message}")) {
+                    dlg.StartPosition = FormStartPosition.CenterParent;
+                    dlg.TopMost = true;
+                    dlg.ShowDialog(this);
+                }
+                return false;
+            }
+        }
+
+
+
+
+
+
+        private void BloquearEstacionSqlTest() {
+            pnlLateralIzquierdoCentral.BackColor = AppColors.BloqueoPorSQLPanel;
+            btnInspecionVisual.Enabled = false;
+            btnInspecionVisual.ForeColor = AppColors.BloqueoPorSQLTexto;
+            pnlLateralIzquierdoAbajo.BackColor = AppColors.BloqueoPorSQLPanel;
+            btnApagar.ForeColor = AppColors.BloqueoPorSQLTexto;
+
+
+            pnlSeparadorFooterGrimsonI.BackColor = AppColors.BloqueoPorSQLPanel;
+            pnlSeparadorFooterGrimsonII.BackColor = AppColors.BloqueoPorSQLPanel;
+
+            pnlSeparadorFooterAmarillo.BackColor = AppColors.BloqueoPorSqlPanelSecundario;
+
+            lblCDMX.ForeColor = AppColors.BloqueoPorSQLTexto;
+            lblDGCA.ForeColor = AppColors.BloqueoPorSQLTexto;
+
+
+            lblSEDEMAFooter.ForeColor = AppColors.BloqueoPorSQLTexto;
+            lblVerificaciónVehicularFoother.ForeColor = AppColors.BloqueoPorSQLTexto;
+            lblGobiernoDeLa.ForeColor = AppColors.BloqueoPorSQLTexto;
+        }
+
+
 
         private bool LecturaRegedit() {
             bool vacio(string s) => string.IsNullOrWhiteSpace(s);
@@ -116,21 +194,36 @@ namespace Apps_Visual.ObdAppGUI {
                  || opcionMenu <= 0;
         }
 
-        private void BloquearEstacion () {
-            Log.Error("Estación No configurada");
+        private void BloquearEstacionRegEdit() {
+            Log.Error("Estación no configurada");
+            pnlLateralIzquierdoCentral.BackColor = AppColors.BloqueoPorRegEditPanel;
+            btnInspecionVisual.Enabled = false;
+            pnlLateralIzquierdoAbajo.BackColor = AppColors.BloqueoPorRegEditPanel;
+            btnApagar.ForeColor = AppColors.BloqueoPorRegEditTexto;
+
+
+            pnlSeparadorFooterGrimsonI.BackColor = AppColors.BloqueoPorRegEditTexto;
+            pnlSeparadorFooterGrimsonII.BackColor = AppColors.BloqueoPorRegEditTexto;
+
+            pnlSeparadorFooterAmarillo.BackColor = AppColors.BloqueoPorRegEditPanelSecundario;
+
+            lblCDMX.ForeColor = AppColors.BloqueoPorRegEditTexto;
+            lblDGCA.ForeColor = AppColors.BloqueoPorRegEditTexto;
+            
+            lblSEDEMAFooter.ForeColor = AppColors.BloqueoPorRegEditTexto;
+            lblVerificaciónVehicularFoother.ForeColor = AppColors.BloqueoPorRegEditTexto;
+            lblGobiernoDeLa.ForeColor = AppColors.BloqueoPorRegEditTexto;
+
+            using (var dlg = new frmMensajes("Estación no configurada\n Contactar a Calidad del Aire")) {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.TopMost = true;
+                dlg.ShowDialog(this);
+            }
+
+
 
         }
 
-
-
-
-
-
-
-
-
-
-        /*
         private void pnlHome() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
@@ -144,90 +237,15 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Dock = DockStyle.Fill;
         }
 
-        */
+        
 
         private async void LoginForm_Load(object sender, EventArgs e) {
-            Application.Exit();
-            Close();
+            //Application.Exit();
+            //Close();
             //await InicioAsync();
         }
 
-        /*
-        private async Task InicioAsync() {
-            btnInspecionVisual.Enabled = false;
-
-            if (_statusDlg != null && !_statusDlg.IsDisposed)
-                _statusDlg.Close();
-
-            _statusDlg = new frmMensajes { Mensaje = "Conectando a la base de datos…" };
-            _statusDlg.Cerrar = false;
-            _statusDlg.Show(this);
-
-            this.UseWaitCursor = true;
-
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
-            try {
-
-                var ok = await TestConexionAsync(/* cts.Token /*//*);
-
-                if (ok == 1) {
-                    _statusDlg.Mensaje = "Conectado.";
-                    _statusDlg.Cerrar = true;
-                    
-                    btnInspecionVisual.Enabled = true;
-
-                    // Deja ver el mensaje un instante y cierra
-                    await Task.Delay(900);
-                    if (_statusDlg is { IsDisposed: false }) _statusDlg.Close();
-                } else {
-                    _statusDlg.Mensaje = "No se pudo conectar.\n Manda ticket";
-                }
-            } catch (OperationCanceledException) {
-                _statusDlg.Mensaje = "Tiempo de espera agotado al conectar.";
-
-            } catch (Exception ex) {
-                _statusDlg.Mensaje = "Error al conectar. \n Manda ticket";
-                using var msm = new frmMensajes { Mensaje = $"Error: {ex.Message}" };
-                msm.Show(this);
-            } finally {
-                this.UseWaitCursor = false;
-                _statusDlg.Cerrar = true;
-            }
-        }
-
-
-
-
-        private async Task<int> TestConexionAsync() {
-            var conf = new RegWin();
-            var appName = string.IsNullOrWhiteSpace(conf.DomainName)
-        ? string.Empty
-        : conf.DomainName.Trim();
-
-            await using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-            await conn.OpenAsync();
-
-            var repo = new SivevRepository();
-
-            using (var scope = new AppRoleScope(conn, APPROLE, APPROLE_PASS)) {
-                // Si tienes versión async del SP, úsala: await repo.SpAppRollClaveGetAsync(conn)
-                var r = repo.SpAppRollClaveGet(conn);
-
-                await repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
-                if (r.MensajeId != 0)
-                    return 0; // 0 = fallo
-
-                var invertida = new string((r.ClaveAcceso ?? string.Empty).Reverse().ToArray());
-                ClaveAcceso = invertida;
-                RollAcceso = r.FuncionAplicacion;
-            }
-
-            return 1;
-        }
-
-
-
-        */
+        
 
         private void btnInspecionVisual_Click(object sender, EventArgs e) {
 
@@ -252,15 +270,6 @@ namespace Apps_Visual.ObdAppGUI {
 
 
 
-
-        
-
-        private void AplicarTemaRecursivo(Control root, System.Drawing.Color color) {
-            foreach (Control c in root.Controls) {
-                if (c is Panel p) p.BackColor = color;
-                if (c.HasChildren) AplicarTemaRecursivo(c, color);
-            }
-        }
 
 
 

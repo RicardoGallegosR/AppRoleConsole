@@ -78,10 +78,12 @@
             txbMensaje.Location = new Point(135, 0);
             txbMensaje.Multiline = true;
             txbMensaje.Name = "txbMensaje";
+            txbMensaje.ReadOnly = true;
             txbMensaje.RightToLeft = RightToLeft.No;
             txbMensaje.ScrollBars = ScrollBars.Vertical;
             txbMensaje.Size = new Size(665, 450);
             txbMensaje.TabIndex = 0;
+            txbMensaje.TabStop = false;
             txbMensaje.Text = resources.GetString("txbMensaje.Text");
             txbMensaje.TextAlign = HorizontalAlignment.Center;
             // 

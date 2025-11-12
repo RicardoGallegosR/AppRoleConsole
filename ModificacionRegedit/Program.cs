@@ -13,11 +13,11 @@ class Program {
         var ev = new estacionVisual  {
             SqlServerName = "SIVSRV9915",
             BaseDatos     = "SIVEV",
-            SQL_USER      = "ServerCentros",
-            SQL_PASS      = "CentrosServer",
+            SQL_USER      = "SivevCentros",
+            SQL_PASS      = "CentrosSivev",
             APPNAME       = "SivAppVfcVisual",
             APPROLE       = "RollSivev",
-            APPROLE_PASS  = "53CE7B6E-1426-403A-857E-A890BB63BFE6",
+            APPROLE_PASS  = "53CE7B6E-1426-403A-857E-A890BB63BFE6",//"53CE7B6E-1426-403A-857E-A890BB63BFE6"
             EstacionId    = "BFFF8EA5-76A4-F011-811C-D09466400DBA",
             opcionMenu    = 151,
             APPROLE_VISUAL        = "RollVfcVisual",

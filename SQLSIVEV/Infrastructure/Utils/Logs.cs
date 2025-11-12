@@ -103,9 +103,9 @@ namespace SQLSIVEV.Infrastructure.Utils {
                 )
                 //*
                  .WriteTo.EventLog(
-                    source: "SIVEV-Visual",
+                    source: "SIVEV",
                     logName: "SIVEV",
-                    manageEventSource: true,
+                    manageEventSource: false, // true en caso de ser admin
                     restrictedToMinimumLevel: LogEventLevel.Information
                 )//*/
                 .CreateLogger();
