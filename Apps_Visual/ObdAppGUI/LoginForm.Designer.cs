@@ -94,7 +94,6 @@
             pnlPanelCambios.Name = "pnlPanelCambios";
             pnlPanelCambios.Size = new Size(699, 398);
             pnlPanelCambios.TabIndex = 0;
-            pnlPanelCambios.Paint += pnlPanelCambios_Paint;
             // 
             // pnlFooter
             // 

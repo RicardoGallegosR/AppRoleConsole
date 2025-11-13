@@ -6,6 +6,13 @@ using System.Text;
 using Serilog.Sinks.EventLog;
 using Serilog.Events;
 
+using System;
+using System.IO;
+// using System.Text;
+using Serilog.Core;
+// using Serilog.Context;
+// using Serilog.Events;
+
 
 namespace SQLSIVEV.Infrastructure.Utils {
     public static class Logs {
@@ -70,7 +77,7 @@ namespace SQLSIVEV.Infrastructure.Utils {
             return prop?.GetValue(sender)?.ToString();
         }
 
-
+        /*
         public static string Init(string runId, string metodo, string? forcedDir = @"C:\LogsSMA") {
             var primary   = forcedDir;
             var secondary = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "LogsSMA");
@@ -101,11 +108,43 @@ namespace SQLSIVEV.Infrastructure.Utils {
                     encoding: Encoding.UTF8,
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} | {Level:u3} | {Where} | {UserShort} | {Message:lj}{NewLine}{Exception}"
                 )
+                .CreateLogger();
+
+            Log.Information("Serilog inicializado. Dir={LogDir} RunId={RunId}", logDir, runId);
+            return logDir;
+        }
+*/
+        public static string Init(string runId, string metodo, string? forcedDir = @"C:\LogsSMA") {
+            var primary   = forcedDir;
+            var secondary = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "LogsSMA");
+            var tertiary  = Path.Combine(Path.GetTempPath(), "LogsSMA");
+
+            var logDir = EnsureWritableDirectory(primary)
+          ?? EnsureWritableDirectory(secondary)
+          ?? EnsureWritableDirectory(tertiary)
+          ?? AppContext.BaseDirectory;
+
+            var logFile = Path.Combine(logDir, $"sma-{runId}.log"); // 1 archivo por sesión
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.WithProperty("App", metodo)
+                .Enrich.WithProperty("Machine", Environment.MachineName)
+                .Enrich.WithProperty("UserShort", Environment.UserName.ToUpperInvariant())
+                .Enrich.WithProperty("RunId", runId)
+                .Enrich.FromLogContext()
+                .WriteTo.File(
+                    path: logFile,
+                    rollingInterval: RollingInterval.Infinite,
+                    shared: true,
+                    encoding: Encoding.UTF8,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} | {Level:u3} | {Where} | {UserShort} | {Message:lj}{NewLine}{Exception}"
+                )
                 //*
-                 .WriteTo.EventLog(
+                .WriteTo.EventLog(
                     source: "SIVEV",
                     logName: "SIVEV",
-                    manageEventSource: false, // true en caso de ser admin
+                    manageEventSource: false,
                     restrictedToMinimumLevel: LogEventLevel.Information
                 )//*/
                 .CreateLogger();
@@ -113,6 +152,38 @@ namespace SQLSIVEV.Infrastructure.Utils {
             Log.Information("Serilog inicializado. Dir={LogDir} RunId={RunId}", logDir, runId);
             return logDir;
         }
+
+        public static string GetBaseDirFromRun(string runId, string? forcedDir = @"C:\LogsSMA") {
+            var primary   = forcedDir;
+            var secondary = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "LogsSMA");
+            var tertiary  = Path.Combine(Path.GetTempPath(), "LogsSMA");
+
+            return EnsureWritableDirectory(primary)
+                ?? EnsureWritableDirectory(secondary)
+                ?? EnsureWritableDirectory(tertiary)
+                ?? AppContext.BaseDirectory;
+        }
+
+        public static Logger CreateAuditLogger(string auditFile, string metodo) {
+            // NOTA: quita WriteTo.Async si prefieres 100% forense sin cola asíncrona.
+            return new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.WithProperty("App", metodo)
+                .Enrich.WithProperty("Machine", Environment.MachineName)
+                .Enrich.WithProperty("UserShort", Environment.UserName.ToUpperInvariant())
+                .Enrich.WithProperty("RunId", AppRun.RunId)
+                .Enrich.FromLogContext()
+                //.WriteTo.File(auditFile, shared:true, encoding:Encoding.UTF8, outputTemplate: "...") // Sin Async = más forense
+                .WriteTo.Async(a => a.File(
+                    path: auditFile,
+                    shared: true,
+                    encoding: Encoding.UTF8,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} | {Level:u3} | {Where} | {UserShort} | {Message:lj}{NewLine}{Exception}"
+                ))
+                .CreateLogger();
+        }
+
+
 
         private static string? EnsureWritableDirectory(string? dir) {
             if (string.IsNullOrWhiteSpace(dir)) return null;

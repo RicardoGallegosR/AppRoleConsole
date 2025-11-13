@@ -1,5 +1,8 @@
 ﻿using Apps_Visual.ObdAppGUI.Views;
+using Apps_Visual.UI.Theme;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic.Devices;
 using Serilog;
 using Serilog.Exceptions;
 using SQLSIVEV.Domain.Models;
@@ -19,8 +22,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-using Apps_Visual.UI.Theme;
-using Microsoft.Data.SqlClient;
 
 
 
@@ -50,11 +51,14 @@ namespace Apps_Visual.ObdAppGUI {
 
         private HomeView home;
         private frmMensajes _statusDlg;
+        private frmAuth frmcredenciales;
         #endregion
 
-
+        #region inicio
         public frmBASE() {
             InitializeComponent();
+            btnInspecionVisual.Enabled = false;
+
             _usedDir = Logs.Init(AppRun.RunId, "frmBASE");
 
 
@@ -70,12 +74,16 @@ namespace Apps_Visual.ObdAppGUI {
                     if (!await SpAppRollClaveGet()) {
                         BloquearEstacionSqlTest();
                     } else {
+                        Log.Information("Se ha revisado el registro de windows y las configuraciones son correctas, problemas por aqui no son :)");
                         pnlHome();
+                        Log.CloseAndFlush();
                     }
                 }
             };
         }
+        #endregion
 
+        #region SpAppRollClaveGet
         private async Task< bool> SpAppRollClaveGet() {
             try {
                 await using var conn = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, APPNAME);
@@ -139,9 +147,9 @@ namespace Apps_Visual.ObdAppGUI {
             lblVerificaciónVehicularFoother.ForeColor = AppColors.BloqueoPorSQLTexto;
             lblGobiernoDeLa.ForeColor = AppColors.BloqueoPorSQLTexto;
         }
+        #endregion
 
-
-
+        #region Regedit
         private bool LecturaRegedit() {
             bool vacio(string s) => string.IsNullOrWhiteSpace(s);
 
@@ -223,8 +231,13 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         }
+        #endregion
 
         private void pnlHome() {
+            Log.Information("pnlHome se accede para el inicio del panel de home");
+            btnInspecionVisual.Enabled = true;
+            Log.Information("Se habilita btnInspecionVisual");
+
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
@@ -245,10 +258,69 @@ namespace Apps_Visual.ObdAppGUI {
             //await InicioAsync();
         }
 
-        
+
 
         private void btnInspecionVisual_Click(object sender, EventArgs e) {
+            btnInspecionVisual.Enabled = false;
+            var traceId   = Guid.NewGuid().ToString("N");
+            var tsStamp   = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+            var shortId   = traceId[..6];
 
+            var baseDir   = Logs.GetBaseDirFromRun(AppRun.RunId);
+            var auditDir  = Path.Combine(baseDir, "audit");
+            Directory.CreateDirectory(auditDir);
+
+            var auditFile = Path.Combine(auditDir, $"InspeccionVisual-{AppRun.RunId}-{tsStamp}-{shortId}.log");
+
+            using var audit = Logs.CreateAuditLogger(auditFile, metodo: "btnInspeccionVisual_Click");
+            
+            using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.frmBASE.btnInspeccionVisual_Click"))
+            using (Serilog.Context.LogContext.PushProperty("TraceId", traceId))
+            using (Serilog.Context.LogContext.PushProperty("Evento", "Visual.Inspeccion"))
+            using (Serilog.Context.LogContext.PushProperty("Canal", "Audit")) {
+                audit.Information("Se inicializa prueba.");
+                ValidarHuella();
+
+
+
+
+
+            }
+        }
+
+
+        private async Task<bool> ValidarHuella() {
+            foreach (Control c in pnlPanelCambios.Controls)
+                c.Dispose();
+            pnlPanelCambios.Controls.Clear();
+            if (frmcredenciales == null || frmcredenciales.IsDisposed) {
+                frmcredenciales = new frmAuth();
+            }
+            frmcredenciales.panelX = pnlPanelCambios.Width;
+            frmcredenciales.panelY = pnlPanelCambios.Height;
+
+            /*
+            frmcredenciales.estacionId = Guid.Parse(estacionId);
+            frmcredenciales.SERVER = SERVER; 
+            frmcredenciales.DB = DB;
+            frmcredenciales.SQL_USER = SQL_USER;
+            frmcredenciales.SQL_PASS = SQL_PASS;
+            frmcredenciales.appName = APPNAME;
+            frmcredenciales.APPROLE = APPROLE;
+            frmcredenciales.APPROLE_PASS = APPROLE_PASS;
+            frmcredenciales.opcionMenu = opcionMenu;
+            */
+
+
+            pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
+            pnlPanelCambios.Dock = DockStyle.Fill;
+
+
+
+
+
+
+            return false;
         }
 
         private void btnApagar_Click(object sender, EventArgs e) {
@@ -260,15 +332,6 @@ namespace Apps_Visual.ObdAppGUI {
                 //Process.Start("shutdown", "/s /t 0");
             }
         }
-
-        private void pnlPanelCambios_Paint(object sender, PaintEventArgs e) {
-
-        }
-
-
-
-
-
 
 
 

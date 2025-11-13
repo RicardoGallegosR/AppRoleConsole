@@ -98,8 +98,7 @@ class Program {
             /*---------------------------VALIDA SpAppVerificacionVisualIni ----------------------------------------------------------------
          */
             var r2 = await repo.SpAppVerificacionVisualIniAsync(conn:connApp, estacionId: estacionId, accesoId:accesoId);
-            await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppVerificacionVisualIniAsync y resultado: {r2.Resultado}", r2.MensajeId);
-
+  
             VerificacionId = r2.VerificacionId;
             ProtocoloVerificacionId = r2.ProtocoloVerificacionId;
             PlacaId = r2.PlacaId;   

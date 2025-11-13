@@ -82,8 +82,8 @@
             tlpCredenciales.Controls.Add(txbCredencial, 1, 1);
             tlpCredenciales.Controls.Add(txbPassword, 1, 3);
             tlpCredenciales.Controls.Add(btnAcceder, 1, 5);
-            tlpCredenciales.Dock = DockStyle.Bottom;
-            tlpCredenciales.Location = new Point(0, 125);
+            tlpCredenciales.Dock = DockStyle.Fill;
+            tlpCredenciales.Location = new Point(0, 0);
             tlpCredenciales.Name = "tlpCredenciales";
             tlpCredenciales.RowCount = 6;
             tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
@@ -92,7 +92,7 @@
             tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 23.287672F));
             tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
             tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Absolute, 71F));
-            tlpCredenciales.Size = new Size(800, 325);
+            tlpCredenciales.Size = new Size(800, 450);
             tlpCredenciales.TabIndex = 0;
             // 
             // lblCredencial
@@ -101,7 +101,7 @@
             lblCredencial.Font = new Font("Segoe UI", 20F);
             lblCredencial.Location = new Point(233, 0);
             lblCredencial.Name = "lblCredencial";
-            lblCredencial.Size = new Size(278, 73);
+            lblCredencial.Size = new Size(278, 115);
             lblCredencial.TabIndex = 0;
             lblCredencial.Text = "Credencial";
             lblCredencial.TextAlign = ContentAlignment.BottomLeft;
@@ -110,9 +110,9 @@
             // 
             lblPassword.Dock = DockStyle.Fill;
             lblPassword.Font = new Font("Segoe UI", 20F);
-            lblPassword.Location = new Point(233, 124);
+            lblPassword.Location = new Point(233, 196);
             lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(278, 44);
+            lblPassword.Size = new Size(278, 69);
             lblPassword.TabIndex = 0;
             lblPassword.Text = "Contraseña";
             lblPassword.TextAlign = ContentAlignment.BottomLeft;
@@ -121,7 +121,7 @@
             // 
             txbCredencial.Dock = DockStyle.Fill;
             txbCredencial.Font = new Font("Segoe UI", 20F);
-            txbCredencial.Location = new Point(233, 76);
+            txbCredencial.Location = new Point(233, 118);
             txbCredencial.Name = "txbCredencial";
             txbCredencial.Size = new Size(278, 43);
             txbCredencial.TabIndex = 0;
@@ -131,7 +131,7 @@
             // 
             txbPassword.Dock = DockStyle.Fill;
             txbPassword.Font = new Font("Segoe UI", 20F);
-            txbPassword.Location = new Point(233, 171);
+            txbPassword.Location = new Point(233, 268);
             txbPassword.Name = "txbPassword";
             txbPassword.Size = new Size(278, 43);
             txbPassword.TabIndex = 0;
@@ -145,7 +145,7 @@
             btnAcceder.FlatStyle = FlatStyle.Flat;
             btnAcceder.Font = new Font("Segoe UI", 18F);
             btnAcceder.ForeColor = Color.White;
-            btnAcceder.Location = new Point(233, 254);
+            btnAcceder.Location = new Point(233, 380);
             btnAcceder.Name = "btnAcceder";
             btnAcceder.Size = new Size(278, 42);
             btnAcceder.TabIndex = 0;
