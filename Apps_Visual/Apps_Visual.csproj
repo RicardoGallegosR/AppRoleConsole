@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ObdAppGUI\Views\frmAuth.resx~RF1efbe212.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />

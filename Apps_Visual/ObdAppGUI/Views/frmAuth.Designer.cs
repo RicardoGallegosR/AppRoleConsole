@@ -86,12 +86,12 @@
             tlpCredenciales.Location = new Point(0, 0);
             tlpCredenciales.Name = "tlpCredenciales";
             tlpCredenciales.RowCount = 6;
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 23.394495F));
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 20.0913239F));
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 23.287672F));
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
-            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Absolute, 71F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 15.7894735F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 15.7894735F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 15.7894735F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 15.7894735F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 15.7894735F));
+            tlpCredenciales.RowStyles.Add(new RowStyle(SizeType.Percent, 21.0526314F));
             tlpCredenciales.Size = new Size(800, 450);
             tlpCredenciales.TabIndex = 0;
             // 
@@ -101,7 +101,7 @@
             lblCredencial.Font = new Font("Segoe UI", 20F);
             lblCredencial.Location = new Point(233, 0);
             lblCredencial.Name = "lblCredencial";
-            lblCredencial.Size = new Size(278, 115);
+            lblCredencial.Size = new Size(278, 71);
             lblCredencial.TabIndex = 0;
             lblCredencial.Text = "Credencial";
             lblCredencial.TextAlign = ContentAlignment.BottomLeft;
@@ -110,9 +110,9 @@
             // 
             lblPassword.Dock = DockStyle.Fill;
             lblPassword.Font = new Font("Segoe UI", 20F);
-            lblPassword.Location = new Point(233, 196);
+            lblPassword.Location = new Point(233, 142);
             lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(278, 69);
+            lblPassword.Size = new Size(278, 71);
             lblPassword.TabIndex = 0;
             lblPassword.Text = "Contraseña";
             lblPassword.TextAlign = ContentAlignment.BottomLeft;
@@ -121,22 +121,23 @@
             // 
             txbCredencial.Dock = DockStyle.Fill;
             txbCredencial.Font = new Font("Segoe UI", 20F);
-            txbCredencial.Location = new Point(233, 118);
+            txbCredencial.Location = new Point(233, 74);
             txbCredencial.Name = "txbCredencial";
             txbCredencial.Size = new Size(278, 43);
-            txbCredencial.TabIndex = 0;
+            txbCredencial.TabIndex = 1;
             txbCredencial.TextAlign = HorizontalAlignment.Center;
             // 
             // txbPassword
             // 
             txbPassword.Dock = DockStyle.Fill;
             txbPassword.Font = new Font("Segoe UI", 20F);
-            txbPassword.Location = new Point(233, 268);
+            txbPassword.Location = new Point(233, 216);
             txbPassword.Name = "txbPassword";
             txbPassword.Size = new Size(278, 43);
-            txbPassword.TabIndex = 0;
+            txbPassword.TabIndex = 2;
             txbPassword.TextAlign = HorizontalAlignment.Center;
             txbPassword.UseSystemPasswordChar = true;
+            txbPassword.KeyDown += txbPassword_KeyDown;
             // 
             // btnAcceder
             // 
@@ -145,10 +146,10 @@
             btnAcceder.FlatStyle = FlatStyle.Flat;
             btnAcceder.Font = new Font("Segoe UI", 18F);
             btnAcceder.ForeColor = Color.White;
-            btnAcceder.Location = new Point(233, 380);
+            btnAcceder.Location = new Point(233, 358);
             btnAcceder.Name = "btnAcceder";
             btnAcceder.Size = new Size(278, 42);
-            btnAcceder.TabIndex = 0;
+            btnAcceder.TabIndex = 3;
             btnAcceder.Text = "Acceder";
             btnAcceder.UseVisualStyleBackColor = false;
             btnAcceder.Click += btnAcceder_Click;

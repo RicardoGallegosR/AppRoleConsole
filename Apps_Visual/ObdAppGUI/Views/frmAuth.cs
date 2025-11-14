@@ -20,24 +20,207 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmAuth : Form {
         public Guid estacionId = Guid.Empty, accesoId;
+        //public string estacionId = string.Empty, accesoId;
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
             appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty;
         public int credencial = 0, panelX = 0, panelY = 0;
         public short opcionMenu = 0;
 
 
+        public bool ExisteHuella;
+        public byte[] Huella;
+
+
         public frmAuth() {
             InitializeComponent();
             txbCredencial.TextChanged += (s, ev) => SanitizeByRegex(txbCredencial, @"[^0-9]");
             txbPassword.TextChanged += (s, ev) => SanitizeByRegex(txbPassword, @"[^a-zA-Z0-9]");
-            txbCredencial.MaxLength = 6; 
+            txbCredencial.MaxLength = 6;
             txbPassword.MaxLength = 32;
+            
             txbCredencial.PreviewKeyDown += txbCredencial_PreviewKeyDown;
             txbCredencial.TextChanged += txbCredencial_TextChanged; // solo este
         }
 
 
-        private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(string SERVER, string DB, string SQL_USER, string SQL_PASS, string appName, string APPROLE, string APPROLE_PASS, Guid estacionId, short opcionMenu, int credencial) {
+        private void btnAcceder_Click(object sender, EventArgs e) {
+            ActivacionBotonAcceder();
+        }
+
+        private void txbCredencial_TextChanged(object sender, EventArgs e) {
+            var tb = (TextBox)sender;
+            int sel = tb.SelectionStart;
+            string original = tb.Text;
+            string limpio = new string(original.Where(char.IsDigit).ToArray());
+            if (original != limpio) {
+                int removidosIzq = original.Take(sel).Count(c => !char.IsDigit(c));
+                tb.Text = limpio;
+                tb.SelectionStart = Math.Max(sel - removidosIzq, 0);
+            }
+        }
+        private async void txbCredencial_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                e.IsInputKey = true;
+
+                credencial = validaCredencialNumerico(txbCredencial.Text);
+
+                bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
+
+                if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
+                       && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS) && estacionId != Guid.Empty) {
+                    var r = await CredencialExisteHuella(
+                                        SERVER: SERVER,
+                                        DB: DB,
+                                        SQL_USER: SQL_USER,
+                                        SQL_PASS: SQL_PASS,
+                                        appName: appName,
+                                        APPROLE: APPROLE,
+                                        APPROLE_PASS: APPROLE_PASS,
+                                        estacionId: estacionId,
+                                        opcionMenu: opcionMenu,
+                                        credencial: credencial
+                                    );
+                    if (r.MensajeId == 0) {
+                        lblCredencial.Enabled = false;
+                        txbCredencial.Enabled = false;
+
+                        ExisteHuella = r.ExisteHuella;
+                        Huella = r.Huella;
+
+                        if (!ExisteHuella) {
+                            btnAcceder.Enabled = true;
+                            btnAcceder.Visible = true;
+                            txbPassword.Enabled = true;
+                            txbPassword.Visible = true;
+                            lblPassword.Visible = true;
+
+                        } else {
+                            MostrarMensaje($"Se debe crear la libreria de huella");
+                        }
+
+
+                        // MODIFICAR CON URGENCIA ////////////////////////////////////////////////////////////////////////////////////////
+                    } else {
+                        var repo = new SivevRepository();
+                        try {
+                            using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
+                            await connApp.OpenAsync();
+                            using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                                try {
+                                    var rMensaje = await repo.PrintIfMsgAsync(connApp, "Fallo en CredencialExisteHuella()", r.MensajeId);
+                                    MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() Mesaje: {rMensaje.Mensaje}");
+
+                                } catch (Exception ex) {
+                                    MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                                }
+                            }
+                        } catch (Exception ex2) {
+                            //MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex2.Message}");
+                        }
+                        txbCredencial.Text = string.Empty;
+                    }
+                } else {
+                    using (var dlg = new frmMensajes(
+                            $"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}")) {
+                        dlg.StartPosition = FormStartPosition.CenterParent;
+                        dlg.TopMost = true;
+                        dlg.ShowDialog(this);
+                    }
+                }
+            }
+        }
+
+        private void txbCredencial_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Control && e.KeyCode == Keys.V) {
+                var clip = Clipboard.GetText();
+                if (string.IsNullOrEmpty(clip) || !clip.All(char.IsDigit))
+                    e.SuppressKeyPress = true;
+                return;
+            }
+            if (e.KeyCode == Keys.Enter) {
+                e.SuppressKeyPress = true;
+                var txt = txbCredencial.Text.Trim();
+                if (int.TryParse(txt, out var valor) && valor > 100) {
+
+                }
+            } else {
+                txbCredencial.SelectAll();
+                txbCredencial.Focus();
+            }
+        }
+
+
+        private async void ActivacionBotonAcceder() {
+            btnAcceder.Enabled = false;
+            txbPassword.Enabled = false;
+            lblPassword.Enabled = false;
+
+            var r = await GetAccesoSQL(
+                                        SERVER: SERVER,
+                                        DB: DB,
+                                        SQL_USER: SQL_USER,
+                                        SQL_PASS: SQL_PASS,
+                                        appName: appName,
+                                        APPROLE: APPROLE,
+                                        APPROLE_PASS: APPROLE_PASS,
+                                        estacionId: estacionId,
+                                        opcionMenu: opcionMenu,
+                                        credencial: credencial
+                );
+
+           
+        }
+
+        private async Task<AccesoIniciaResult>  GetAccesoSQL (string SERVER, string DB, string SQL_USER, string SQL_PASS, 
+            string appName, string APPROLE, string APPROLE_PASS, Guid estacionId, short opcionMenu, int credencial) {
+            int _mensaje = 0;
+            short _resultado = 0;
+            Guid _AccesoSql = Guid.Empty;
+
+            var repo = new SivevRepository();
+
+            try {
+                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
+                await connApp.OpenAsync();
+                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                    try {
+
+                        var rinicial = await repo.SpAppAccesoIniciaAsync( conn:connApp,estacionId: estacionId, opcionMenuId:opcionMenu,
+                                                                    credencial:credencial,password:txbPassword.Text, huella:Huella);
+                        _resultado = rinicial.ReturnCode;
+                        _mensaje = rinicial.MensajeId;
+                        _AccesoSql = rinicial.AccesoId;
+
+
+                        if (_mensaje != 0) {
+                            var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCredencialExisteHuella MensajeId {_mensaje}", _mensaje);
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella MensajeId = {_mensaje}: {error.Mensaje}");
+                            ResetForm();
+                        } 
+                    } catch (Exception ex) {
+                        MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                    } 
+                    /*
+                    finally {
+                        scope.Dispose();    
+                        connApp.Close();
+                    }
+                    */
+                }
+            } catch (Exception e) {
+                MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
+            }
+
+            return new AccesoIniciaResult {
+                MensajeId = _mensaje,
+                ReturnCode = _resultado,
+                AccesoId = _AccesoSql
+            };
+        }
+
+
+        private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(string SERVER, string DB, string SQL_USER, string SQL_PASS, string appName, string APPROLE, string APPROLE_PASS, Guid estacionId
+            , short opcionMenu, int credencial) {
             int _mensaje = 0;
             short _resultado =  0;
             bool _existeHuella = false;
@@ -47,43 +230,30 @@ namespace Apps_Visual.ObdAppGUI.Views {
             try {
                 using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
                 await connApp.OpenAsync();
-                using var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS);
-                try {
+                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                    try {
+                        var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
+                        _resultado = rinicial.Resultado;
+                        _mensaje = rinicial.MensajeId;
+                        _existeHuella = rinicial.ExisteHuella;
+                        _huella = rinicial.Huella;
 
-                    // Abrir acceso
-                    var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
-                    _resultado = rinicial.Resultado;
-                    _mensaje = rinicial.MensajeId;
-                    _existeHuella = rinicial.ExisteHuella;
-                    _huella = rinicial.Huella;
-
-                    if (_mensaje != 0) {
-                        var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", _mensaje);
-                        using (var dlg = new frmMensajes($"Error en SpAppCredencialExisteHuella {error.Mensaje}")) {
-                            dlg.StartPosition = FormStartPosition.CenterParent;
-                            dlg.TopMost = true;
-                            dlg.ShowDialog(this);
+                        if (_mensaje != 0) {
+                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", _mensaje);
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella {error.Mensaje}");
                         }
+                    } catch (Exception ex) {
+                        MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                    } 
+                    /*
+                    finally {
+                        scope.Dispose();
+                        connApp.Close();
                     }
-
-                } catch (Exception ex) {
-                    using (var dlg = new frmMensajes($"Error en SpAppCredencialExisteHuella {ex.Message}")) {
-                        dlg.StartPosition = FormStartPosition.CenterParent;
-                        dlg.TopMost = true;
-                        dlg.ShowDialog(this);
-                    }
-                } finally {
-                    if (accesoId != Guid.Empty) {
-                        var fin = await repo.SpAppAccesoFinAsync(connApp, estacionId, accesoId);
-                        using (var dlg = new frmMensajes($"[Fin Acceso] Resultado={fin.Resultado} MensajeId={fin.MensajeId} Return={fin.ReturnCode}")) {
-                            dlg.StartPosition = FormStartPosition.CenterParent;
-                            dlg.TopMost = true;
-                            dlg.ShowDialog(this);
-                        }
-                    }
+                    */
                 }
-            } catch {
-                Console.WriteLine("");
+            } catch (Exception e) {
+                MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
             }
 
             return new CredencialExisteHuellaResult {
@@ -100,104 +270,19 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
 
-        private int validaCredencialNumerico(string strcredencial) {
-            if (int.TryParse(strcredencial, out int credencial)) {
-                return credencial;
-            } else {
-                using (var dlg = new frmMensajes($"Solo números en la credencial")) {
-                    dlg.StartPosition = FormStartPosition.CenterParent;
-                    dlg.TopMost = true;
-                    dlg.ShowDialog(this);
-                }
-            }
-            return 0;
-        }
 
 
 
-        private void btnAcceder_Click(object sender, EventArgs e) {
-
-        }
-
-        private void txbCredencial_TextChanged(object sender, EventArgs e) {
-            var tb = (TextBox)sender;
-            int sel = tb.SelectionStart;
-            string original = tb.Text;
-            string limpio = new string(original.Where(char.IsDigit).ToArray());
-            if (original != limpio) {
-                int removidosIzq = original.Take(sel).Count(c => !char.IsDigit(c));
-                tb.Text = limpio;
-                tb.SelectionStart = Math.Max(sel - removidosIzq, 0);
-            }
-        }
-        private void txbCredencial_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
-            if (e.KeyCode == Keys.Enter) {
-                e.IsInputKey = true;
-
-                credencial = validaCredencialNumerico(txbCredencial.Text);
-                
-                bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
-
-                if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
-                       && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS) && estacionId != Guid.Empty) {
-
-                    /*
-                    var r = await  CredencialExisteHuella(SERVER: SERVER, DB: DB, SQL_USER: SQL_USER,SQL_PASS: SQL_PASS,
-                        appName: appName, APPROLE: APPROLE, APPROLE_PASS: APPROLE_PASS, estacionId: estacionId,
-                        opcionMenu: opcionMenu, credencial: credencial);
-
-                    */
-                    /*
-                     ##############################################################################
-                     */
-                    /*
-                    var huellaInfo = (r.Huella == null) ? "null" : $"{r.Huella.Length} bytes";
-                    using (var dlg = new frmMensajes(
-                        $"MensajeId: {r.MensajeId}\nResultado: {r.Resultado}\nExisteHuella: {r.ExisteHuella}\nHuella: {huellaInfo}")) {
-                        dlg.StartPosition = FormStartPosition.CenterParent;
-                        dlg.TopMost = true;
-                        dlg.ShowDialog(this);
-                    }
-                    */
 
 
 
-                } else {
-                    using (var dlg = new frmMensajes(
-                            $"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}")) {
-                        dlg.StartPosition = FormStartPosition.CenterParent;
-                        dlg.TopMost = true;
-                        dlg.ShowDialog(this);
-                    }
-                }
-            }
-        }
 
 
-        private async void txbCredencial_KeyDown(object sender, KeyEventArgs e) {
-            if (e.Control && e.KeyCode == Keys.V) {
-                var clip = Clipboard.GetText();
-                if (string.IsNullOrEmpty(clip) || !clip.All(char.IsDigit))
-                    e.SuppressKeyPress = true;
-                return;
-            }
 
-            if (e.KeyCode == Keys.Enter) {
-                e.SuppressKeyPress = true;
-                var txt = txbCredencial.Text.Trim();
-                if (int.TryParse(txt, out var valor) && valor > 100) {
-
-                }
-            } else {
-                txbCredencial.SelectAll();
-                txbCredencial.Focus();
-            }
-        }
-    
 
 
         private void frmAuth_Load(object sender, EventArgs e) {
-            
+
         }
 
         private void SanitizeByRegex(TextBox tb, string invalidPattern) {
@@ -220,10 +305,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return pnlPrincipal;
         }
         private void ResetForm() {
+            lblCredencial.Enabled = true;
+            txbCredencial.Enabled = true;
+
             btnAcceder.Enabled = false;
             btnAcceder.Visible = false;
             txbPassword.Enabled = false;
-            txbPassword.Visible = false;    
+            txbPassword.Visible = false;
             lblPassword.Visible = false;
 
 
@@ -237,5 +325,32 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
+        private void txbPassword_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                if (txbPassword.Text.Length < 4) {
+                    MessageBox.Show("Debe tener mínimo 4 caracteres.");
+                    return;
+                }else {
+                    ActivacionBotonAcceder();
+                }
+            }
+        }
+
+        private void MostrarMensaje(string mensaje) {
+            using (var dlg = new frmMensajes(mensaje)) {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.TopMost = true;
+                dlg.ShowDialog(this);
+            }
+        }
+
+        private int validaCredencialNumerico(string strcredencial) {
+            if (int.TryParse(strcredencial, out int credencial)) {
+                return credencial;
+            } else {
+                MostrarMensaje($"Solo números en la credencial");
+            }
+            return 0;
+        }
     }
 }

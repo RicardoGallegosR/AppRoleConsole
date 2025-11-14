@@ -34,7 +34,7 @@ namespace Apps_Visual.ObdAppGUI {
             VerificacionId , PlacaId;
 
         private short opcionMenu;
-        private int MensajeId, odometro;
+        private int MensajeId, odometro, credencial;
 
         private byte ProtocoloVerificacionId, combustible,  tiTaponCombustible,
             tiTaponAceite, tiBayonetaAceite, tiPortafiltroAire, tiTuboEscape, tiFugasMotorTrans,
@@ -50,7 +50,6 @@ namespace Apps_Visual.ObdAppGUI {
         */
 
         private HomeView home;
-        private frmMensajes _statusDlg;
         private frmAuth frmcredenciales;
         #endregion
 
@@ -109,6 +108,9 @@ namespace Apps_Visual.ObdAppGUI {
                     RollAccesoVisual = r.FuncionAplicacion;
                     Log.Information($"Valores regresados {Logs.Mask(RollAccesoVisualAcceso)} y {Logs.Mask(RollAccesoVisual)}");
                 }
+
+
+
                 return true;
             } catch (SqlException ex) {
                 Log.Error(ex, $"Fallo de conexión a SQL {ex.Message}");
@@ -299,24 +301,28 @@ namespace Apps_Visual.ObdAppGUI {
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
 
-            /*
-            frmcredenciales.estacionId = Guid.Parse(estacionId);
+
+            ///*
+            frmcredenciales.estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
+
+
             frmcredenciales.SERVER = SERVER; 
             frmcredenciales.DB = DB;
             frmcredenciales.SQL_USER = SQL_USER;
             frmcredenciales.SQL_PASS = SQL_PASS;
             frmcredenciales.appName = APPNAME;
-            frmcredenciales.APPROLE = APPROLE;
-            frmcredenciales.APPROLE_PASS = APPROLE_PASS;
+            //MostrarMensaje($"APPROLE: {RollAccesoVisual}, PASS: {RollAccesoVisualAcceso}");
+            frmcredenciales.APPROLE = RollAccesoVisual;
+            frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
             frmcredenciales.opcionMenu = opcionMenu;
-            */
+            //*/
 
 
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
-            pnlPanelCambios.Dock = DockStyle.Fill;
+            //pnlPanelCambios.Dock = DockStyle.Fill;
 
 
-
+            
 
 
 
@@ -335,7 +341,13 @@ namespace Apps_Visual.ObdAppGUI {
 
 
 
-
+        private void MostrarMensaje(string mensaje) {
+            using (var dlg = new frmMensajes(mensaje)) {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.TopMost = true;
+                dlg.ShowDialog(this);
+            }
+        }
 
 
 

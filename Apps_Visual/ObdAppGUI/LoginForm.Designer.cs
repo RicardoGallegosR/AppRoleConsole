@@ -300,6 +300,7 @@
             btnApagar.Name = "btnApagar";
             btnApagar.Size = new Size(120, 83);
             btnApagar.TabIndex = 0;
+            btnApagar.TabStop = false;
             btnApagar.Text = "Apagar";
             btnApagar.UseVisualStyleBackColor = true;
             btnApagar.Click += btnApagar_Click;
