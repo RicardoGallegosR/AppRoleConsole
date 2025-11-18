@@ -17,20 +17,7 @@ namespace Apps_Visual.UI.Theme {
         public static readonly Color BloqueoPorSqlPanelSecundario = Color.FromArgb(112, 23, 5);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        public static readonly Color AprobadoInspeccionVisual = Color.FromArgb(96, 168, 219);
 
 
 

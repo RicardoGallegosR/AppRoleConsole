@@ -19,6 +19,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmAuth : Form {
+        public event Action<Guid> AccesoObtenido;
         public Guid estacionId = Guid.Empty, accesoId;
         //public string estacionId = string.Empty, accesoId;
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
@@ -97,9 +98,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         } else {
                             MostrarMensaje($"Se debe crear la libreria de huella");
                         }
-
-
-                        // MODIFICAR CON URGENCIA ////////////////////////////////////////////////////////////////////////////////////////
                     } else {
                         var repo = new SivevRepository();
                         try {
@@ -115,17 +113,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                 }
                             }
                         } catch (Exception ex2) {
-                            //MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex2.Message}");
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex2.Message}");
                         }
                         txbCredencial.Text = string.Empty;
                     }
                 } else {
-                    using (var dlg = new frmMensajes(
-                            $"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}")) {
-                        dlg.StartPosition = FormStartPosition.CenterParent;
-                        dlg.TopMost = true;
-                        dlg.ShowDialog(this);
-                    }
+                    MostrarMensaje($"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}");
                 }
             }
         }
@@ -168,7 +161,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                         credencial: credencial
                 );
 
-           
+            accesoId = r.AccesoId;
+            AccesoObtenido?.Invoke(accesoId);
+
+
         }
 
         private async Task<AccesoIniciaResult>  GetAccesoSQL (string SERVER, string DB, string SQL_USER, string SQL_PASS, 
@@ -200,12 +196,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     } catch (Exception ex) {
                         MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
                     } 
-                    /*
-                    finally {
-                        scope.Dispose();    
-                        connApp.Close();
-                    }
-                    */
                 }
             } catch (Exception e) {
                 MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
@@ -245,12 +235,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     } catch (Exception ex) {
                         MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
                     } 
-                    /*
-                    finally {
-                        scope.Dispose();
-                        connApp.Close();
-                    }
-                    */
                 }
             } catch (Exception e) {
                 MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
@@ -263,23 +247,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 Huella = _huella
             };
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         private void frmAuth_Load(object sender, EventArgs e) {
 
@@ -314,8 +281,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbPassword.Visible = false;
             lblPassword.Visible = false;
 
-
-
             if (panelX == 0 && panelY == 0) {
                 pnlPrincipal.Size = new Size(Width, Height);
                 pnlPrincipal.Location = new Point((int)Math.Ceiling(.004 * Width), 0);
@@ -324,6 +289,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 pnlPrincipal.Location = new Point((int)Math.Ceiling(.004 * panelX), 0);
             }
         }
+
+
 
         private void txbPassword_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {

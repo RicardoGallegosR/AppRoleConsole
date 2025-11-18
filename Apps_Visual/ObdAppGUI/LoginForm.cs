@@ -262,7 +262,7 @@ namespace Apps_Visual.ObdAppGUI {
 
 
 
-        private void btnInspecionVisual_Click(object sender, EventArgs e) {
+        private async void btnInspecionVisual_Click(object sender, EventArgs e){
             btnInspecionVisual.Enabled = false;
             var traceId   = Guid.NewGuid().ToString("N");
             var tsStamp   = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
@@ -281,14 +281,25 @@ namespace Apps_Visual.ObdAppGUI {
             using (Serilog.Context.LogContext.PushProperty("Evento", "Visual.Inspeccion"))
             using (Serilog.Context.LogContext.PushProperty("Canal", "Audit")) {
                 audit.Information("Se inicializa prueba.");
-                ValidarHuella();
+
+                await ValidarHuella();
+                audit.Information($"Se guarda con el accesoId: {accesoId}");
+                await ListadoVisual();
 
 
-
-
-
+                //pnlHome();
             }
         }
+
+
+        private async Task<bool> ListadoVisual() {
+
+
+
+
+            return false;
+        }
+
 
 
         private async Task<bool> ValidarHuella() {
@@ -297,6 +308,8 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Clear();
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
+                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                //return true;
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
@@ -311,7 +324,6 @@ namespace Apps_Visual.ObdAppGUI {
             frmcredenciales.SQL_USER = SQL_USER;
             frmcredenciales.SQL_PASS = SQL_PASS;
             frmcredenciales.appName = APPNAME;
-            //MostrarMensaje($"APPROLE: {RollAccesoVisual}, PASS: {RollAccesoVisualAcceso}");
             frmcredenciales.APPROLE = RollAccesoVisual;
             frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
             frmcredenciales.opcionMenu = opcionMenu;
@@ -319,19 +331,18 @@ namespace Apps_Visual.ObdAppGUI {
 
 
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
-            //pnlPanelCambios.Dock = DockStyle.Fill;
-
-
-            
-
-
 
             return false;
         }
 
         private void btnApagar_Click(object sender, EventArgs e) {
-            var result = MessageBox.Show("¿Desea apagar la aplicación?","Confirmar salida", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
-
+            var result = MessageBox.Show(
+                "¿Desea apagar la aplicación?",
+                "Confirmar salida",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2  // ← "No" por defecto
+            );
             if (result == DialogResult.Yes) {
                 Log.CloseAndFlush();
                 Application.Exit();
@@ -350,9 +361,9 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
 
-
-
-
-
+        private void Frmcredenciales_AccesoObtenido(Guid acceso) {
+            accesoId = acceso.ToString();  
+            MostrarMensaje($"Se muestra el acceso obtenido: {accesoId}");
+        }
     }
 }

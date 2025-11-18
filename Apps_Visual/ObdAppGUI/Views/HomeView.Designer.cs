@@ -24,44 +24,65 @@
         /// </summary>
         private void InitializeComponent() {
             pnlHomeView = new Panel();
+            scpDoble = new SplitContainer();
             pbxCarro = new PictureBox();
             lblVerificacionVehicularHomeView = new Label();
             lblSedemaTitulo = new Label();
             pnlHomeView.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)scpDoble).BeginInit();
+            scpDoble.Panel1.SuspendLayout();
+            scpDoble.Panel2.SuspendLayout();
+            scpDoble.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbxCarro).BeginInit();
             SuspendLayout();
             // 
             // pnlHomeView
             // 
             pnlHomeView.BackColor = Color.White;
-            pnlHomeView.Controls.Add(pbxCarro);
-            pnlHomeView.Controls.Add(lblVerificacionVehicularHomeView);
+            pnlHomeView.Controls.Add(scpDoble);
             pnlHomeView.Controls.Add(lblSedemaTitulo);
-            pnlHomeView.Dock = DockStyle.Fill;
             pnlHomeView.Location = new Point(0, 0);
             pnlHomeView.Name = "pnlHomeView";
             pnlHomeView.Size = new Size(900, 524);
             pnlHomeView.TabIndex = 0;
             // 
+            // scpDoble
+            // 
+            scpDoble.Dock = DockStyle.Fill;
+            scpDoble.Location = new Point(0, 80);
+            scpDoble.Name = "scpDoble";
+            // 
+            // scpDoble.Panel1
+            // 
+            scpDoble.Panel1.Controls.Add(pbxCarro);
+            // 
+            // scpDoble.Panel2
+            // 
+            scpDoble.Panel2.Controls.Add(lblVerificacionVehicularHomeView);
+            scpDoble.Size = new Size(900, 444);
+            scpDoble.SplitterDistance = 536;
+            scpDoble.TabIndex = 0;
+            scpDoble.TabStop = false;
+            // 
             // pbxCarro
             // 
             pbxCarro.Dock = DockStyle.Fill;
             pbxCarro.Image = Properties.Resources.coche_electrico;
-            pbxCarro.Location = new Point(0, 80);
+            pbxCarro.Location = new Point(0, 0);
             pbxCarro.Name = "pbxCarro";
-            pbxCarro.Size = new Size(672, 444);
+            pbxCarro.Size = new Size(536, 444);
             pbxCarro.SizeMode = PictureBoxSizeMode.CenterImage;
             pbxCarro.TabIndex = 1;
             pbxCarro.TabStop = false;
             // 
             // lblVerificacionVehicularHomeView
             // 
-            lblVerificacionVehicularHomeView.Dock = DockStyle.Right;
+            lblVerificacionVehicularHomeView.Dock = DockStyle.Fill;
             lblVerificacionVehicularHomeView.Font = new Font("Segoe UI", 24F);
             lblVerificacionVehicularHomeView.ForeColor = Color.FromArgb(159, 34, 65);
-            lblVerificacionVehicularHomeView.Location = new Point(672, 80);
+            lblVerificacionVehicularHomeView.Location = new Point(0, 0);
             lblVerificacionVehicularHomeView.Name = "lblVerificacionVehicularHomeView";
-            lblVerificacionVehicularHomeView.Size = new Size(228, 444);
+            lblVerificacionVehicularHomeView.Size = new Size(360, 444);
             lblVerificacionVehicularHomeView.TabIndex = 0;
             lblVerificacionVehicularHomeView.Text = "VERIFICACIÓN\r\nVEHICULAR\r\n";
             lblVerificacionVehicularHomeView.TextAlign = ContentAlignment.MiddleCenter;
@@ -88,6 +109,10 @@
             Text = "HomeView";
             Load += HomeView_Load;
             pnlHomeView.ResumeLayout(false);
+            scpDoble.Panel1.ResumeLayout(false);
+            scpDoble.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)scpDoble).EndInit();
+            scpDoble.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbxCarro).EndInit();
             ResumeLayout(false);
         }
@@ -98,5 +123,6 @@
         private Label lblSedemaTitulo;
         private Label lblVerificacionVehicularHomeView;
         private PictureBox pbxCarro;
+        private SplitContainer scpDoble;
     }
 }
