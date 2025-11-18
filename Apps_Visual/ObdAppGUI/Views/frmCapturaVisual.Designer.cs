@@ -266,6 +266,7 @@
             btnSiguente.TabIndex = 10;
             btnSiguente.Text = "Siguiente";
             btnSiguente.UseVisualStyleBackColor = true;
+            btnSiguente.Click += btnSiguente_Click;
             // 
             // pnlTopListadoVisual
             // 

@@ -51,6 +51,7 @@ namespace Apps_Visual.ObdAppGUI {
 
         private HomeView home;
         private frmAuth frmcredenciales;
+        private frmCapturaVisual CapturaVisual;
         #endregion
 
         #region inicio
@@ -284,7 +285,13 @@ namespace Apps_Visual.ObdAppGUI {
 
                 await ValidarHuella();
                 audit.Information($"Se guarda con el accesoId: {accesoId}");
-                await ListadoVisual();
+
+
+                // Validamos Verificacion 
+                await ValidaVerificación();
+
+
+                //await ListadoVisual();
 
 
                 //pnlHome();
@@ -292,17 +299,7 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
 
-        private async Task<bool> ListadoVisual() {
-
-
-
-
-            return false;
-        }
-
-
-
-        private async Task<bool> ValidarHuella() {
+        private async Task<bool> ValidaVerificación() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
@@ -319,7 +316,7 @@ namespace Apps_Visual.ObdAppGUI {
             frmcredenciales.estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
 
 
-            frmcredenciales.SERVER = SERVER; 
+            frmcredenciales.SERVER = SERVER;
             frmcredenciales.DB = DB;
             frmcredenciales.SQL_USER = SQL_USER;
             frmcredenciales.SQL_PASS = SQL_PASS;
@@ -335,6 +332,55 @@ namespace Apps_Visual.ObdAppGUI {
             return false;
         }
 
+
+
+
+
+        private async Task<bool> ListadoVisual() {
+
+
+
+
+            return false;
+        }
+
+
+
+        private async Task<bool> ValidarHuella( 
+            
+            ) {
+            foreach (Control c in pnlPanelCambios.Controls)
+                c.Dispose();
+            pnlPanelCambios.Controls.Clear();
+            
+
+
+
+            return false;
+        }
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #region Apagar
         private void btnApagar_Click(object sender, EventArgs e) {
             var result = MessageBox.Show(
                 "¿Desea apagar la aplicación?",
@@ -349,9 +395,10 @@ namespace Apps_Visual.ObdAppGUI {
                 //Process.Start("shutdown", "/s /t 0");
             }
         }
+        #endregion
 
 
-
+        #region Utilerias
         private void MostrarMensaje(string mensaje) {
             using (var dlg = new frmMensajes(mensaje)) {
                 dlg.StartPosition = FormStartPosition.CenterParent;
@@ -365,5 +412,6 @@ namespace Apps_Visual.ObdAppGUI {
             accesoId = acceso.ToString();  
             MostrarMensaje($"Se muestra el acceso obtenido: {accesoId}");
         }
+        #endregion
     }
 }

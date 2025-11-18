@@ -21,7 +21,7 @@ public static async Task<AppTextoMensajeResult?> PrintIfMsgAsync( this SivevRepo
 
             using var _scope = new AppRoleScope(conn, appRole, appRolePass);
             var msgScoped = await repo.SpAppTextoMensajeGetAsync(conn: conn, mensajeId: mensajeId, ct);
-            Console.WriteLine($"\n{contexto}, code {mensajeId}: {msgScoped.Mensaje}");
+            Console.WriteLine($"\n{contexto}, code {mensajeId}_: {msgScoped.Mensaje}");
             return msgScoped;
         }
 
