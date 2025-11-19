@@ -11,6 +11,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -18,6 +19,13 @@ using System.Xml.Linq;
 
 namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmCapturaVisual : Form {
+
+        #region Declaracion de variables :D
+        private readonly Dictionary<short, CheckBox> _mapCvToCheckBox = new();
+        private Size _formSizeInicial;
+        private float _fontSizeInicial;
+
+
         /*
         public Guid _estacionId = Guid.Empty, _accesoId = Guid.Empty;
         
@@ -26,21 +34,27 @@ namespace Apps_Visual.ObdAppGUI.Views {
         //*/
 
         public event Action<bool> HabilitarPruebas;
-        public Guid _verificacionId = Guid.Empty;
+        public event Action<string> _placa2;
+        public event Action<Guid> _verificacionId2;
+        
+        
+        private Guid _verificacionId = Guid.Empty;
+
+
         public byte _protocoloVerificacíon;
 
         //*
         private Guid _estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
         private Guid _accesoId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
 
-        private string 
-            SERVER = "192.168.16.8", 
-            DB = "SIVEV", 
-            SQL_USER = "SivevCentros", 
+        private string
+            SERVER = "192.168.16.8",
+            DB = "SIVEV",
+            SQL_USER = "SivevCentros",
             SQL_PASS = "CentrosSivev",
-            appName = "SivAppVfcVisual", 
-            APPROLE = "RollVfcVisual", 
-            APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5", 
+            appName = "SivAppVfcVisual",
+            APPROLE = "RollVfcVisual",
+            APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5",
             _placa = string.Empty;
         //*/
         public int panelX = 0, panelY = 0;
@@ -49,11 +63,19 @@ namespace Apps_Visual.ObdAppGUI.Views {
              tiTuboEscape = 0, tiFugasMotorTrans = 0, tiNeumaticos = 0, tiComponentesEmisiones = 0,
              tiMotorGobernado = 0;
 
-        int odometro = 0;
+        public int odometro = 0;
 
+        #endregion
 
+        #region Constructores :D
         public frmCapturaVisual() {
             InitializeComponent();
+            txbOdometro.TextChanged += (s, ev) => SanitizeByRegex(txbOdometro, @"[^0-9]");
+            txbOdometro.MaxLength = 7;
+            
+            //_formSizeInicial = this.Size;
+            _fontSizeInicial = this.Font.Size;
+
             ConfigurarCheckBox(cbTaponCombustible, "Contiene Tapon de Combustible");
             ConfigurarCheckBox(cbTaponAceite, "Contiene Tapon de Aceite");
             ConfigurarCheckBox(cbBayonetaAceite, "Contiene Bayoneta de Aceite");
@@ -63,6 +85,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
             ConfigurarCheckBox(cbNeumaticos, "Contiene Neumáticos");
             ConfigurarCheckBox(cbComponentesEmisiones, "Contiene Componentes de Emisiones");
             ConfigurarCheckBox(cbMotorGobernado, "Contiene Motor de Gobernado");
+            InicializarMapaCapturaVisual();
+            txbOdometro.KeyDown += txbOdometro_KeyDown;
+            this.Resize += frmCapturaVisual_Resize;
+
             ResetForm();
             //this.Load += frmCapturaVisual_Load;
 
@@ -87,12 +113,32 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     estacionId: _estacionId,
                     AccesoId: _accesoId
                 );
+
                 if (r.MensajeId == 0) {
                     lblPlaca.Text = r.PlacaId;
                     _placa = r.PlacaId;
                     _verificacionId = r.VerificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
+                    txbOdometro.Enabled = true;
                     /*######################################*/
+                    var r2 = await BanderasAEvaluar ( 
+                        SERVER: SERVER,
+                        DB: DB,
+                        SQL_USER: SQL_USER,
+                        SQL_PASS: SQL_PASS,
+                        appName: appName,
+                        APPROLE: APPROLE,
+                        APPROLE_PASS: APPROLE_PASS,
+                        estacionId: _estacionId,
+                        AccesoId: _accesoId,
+                        verificacionId:_verificacionId,
+                        elemento:"DESCONOCIDO", 
+                        combustible:0 );
+
+                    if (r2.MensajeId == 0) {
+                        AplicarCapturaVisual(r2.Items);
+                    } 
+
 
                 } else {
                     foreach (Control c in pnlPrincipal.Controls)
@@ -108,21 +154,112 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 HabilitarPruebas?.Invoke(true);
             }
         }
+        #endregion
 
 
+        private async void btnSiguente_Click(object sender, EventArgs e) {
+            QuizVisual();
+        }
 
+        private async void QuizVisual() {
+            tiTaponCombustible      = cbTaponCombustible.Checked        ? (byte)1 : (byte)0;
+            tiTaponAceite           = cbTaponAceite.Checked             ? (byte)1 : (byte)0;
+            tiBayonetaAceite        = cbBayonetaAceite.Checked          ? (byte)1 : (byte)0;
+            tiPortafiltroAire       = cbPortaFiltroAire.Checked         ? (byte)1 : (byte)0;
+            tiTuboEscape            = cbTuboEscape.Checked              ? (byte)1 : (byte)0;
+            tiFugasMotorTrans       = cbFugasMotorTrans.Checked         ? (byte)1 : (byte)0;
+            tiNeumaticos            = cbNeumaticos.Checked              ? (byte)1 : (byte)0;
+            tiComponentesEmisiones  = cbComponentesEmisiones.Checked    ? (byte)1 : (byte)0;
+            tiMotorGobernado        = cbMotorGobernado.Checked          ? (byte)1 : (byte)0;
+            
+            
+            if (int.TryParse(txbOdometro.Text, out int _odometro)
+                   && _odometro > 0
+                   && lblPlaca.Text != "PlacaID") {
+                odometro = _odometro;
+            }
+            
+            var r = await CapturaInspeccionVisual (
+                        SERVER: SERVER,
+                        DB: DB,
+                        SQL_USER: SQL_USER,
+                        SQL_PASS: SQL_PASS,
+                        appName: appName,
+                        APPROLE: APPROLE,
+                        APPROLE_PASS: APPROLE_PASS,
+                        estacionId: _estacionId,
+                        AccesoId: _accesoId,
+                        verificacionId:_verificacionId,
+                        tiTaponCombustible:tiTaponCombustible, 
+                        tiTaponAceite: tiTaponAceite, 
+                        tiBayonetaAceite: tiBayonetaAceite, 
+                        tiPortafiltroAire: tiPortafiltroAire,
+                        tiTuboEscape: tiTuboEscape,
+                        tiFugasMotorTrans: tiFugasMotorTrans, 
+                        tiNeumaticos: tiNeumaticos, 
+                        tiComponentesEmisiones: tiComponentesEmisiones, 
+                        tiMotorGobernado:tiMotorGobernado,
+                        odometro:odometro);
+            if (r.MensajeId == 0) {
+                MostrarMensaje($"Mensaje: {r.MensajeId}, CheckObd: {r.CheckObd}, Resultado: {r.Resultado}");
+                _verificacionId2?.Invoke(_verificacionId);
+                _placa2?.Invoke(_placa);
+            }
+
+        }
 
         #region Configuración Inicial :D
+
+        #region Modificar los checbox conforme a la BDD
+        private void InicializarMapaCapturaVisual() {
+            _mapCvToCheckBox[2] = cbBayonetaAceite;
+            _mapCvToCheckBox[11] = cbBayonetaAceite;
+            _mapCvToCheckBox[18] = cbBayonetaAceite;
+            _mapCvToCheckBox[26] = cbBayonetaAceite;
+
+            _mapCvToCheckBox[8] = cbComponentesEmisiones;
+            _mapCvToCheckBox[17] = cbComponentesEmisiones;
+            _mapCvToCheckBox[24] = cbComponentesEmisiones;
+            _mapCvToCheckBox[32] = cbComponentesEmisiones;
+
+            _mapCvToCheckBox[15] = cbFugasMotorTrans;
+            _mapCvToCheckBox[22] = cbFugasMotorTrans;
+            _mapCvToCheckBox[30] = cbFugasMotorTrans;
+
+            _mapCvToCheckBox[4] = cbPortaFiltroAire;
+            _mapCvToCheckBox[13] = cbPortaFiltroAire;
+            _mapCvToCheckBox[20] = cbPortaFiltroAire;
+            _mapCvToCheckBox[28] = cbPortaFiltroAire;
+
+            _mapCvToCheckBox[5] = cbTuboEscape;
+            _mapCvToCheckBox[9] = cbTuboEscape;
+            _mapCvToCheckBox[14] = cbTuboEscape;
+            _mapCvToCheckBox[21] = cbTuboEscape;
+            _mapCvToCheckBox[29] = cbTuboEscape;
+
+            _mapCvToCheckBox[1] = cbTaponCombustible;
+            _mapCvToCheckBox[25] = cbTaponCombustible;
+
+            _mapCvToCheckBox[3] = cbTaponAceite;
+            _mapCvToCheckBox[12] = cbTaponAceite;
+            _mapCvToCheckBox[27] = cbTaponAceite;
+
+            _mapCvToCheckBox[10] = cbMotorGobernado;
+        }
+        #endregion
+
+
+        #region de los colores y para el enter seleccion
         private void CheckBox_CheckedChanged(object sender, EventArgs e) {
             var chk = (CheckBox)sender;
             var textoBase = chk.Tag.ToString();
 
             if (chk.Checked) {
                 chk.Text = textoBase;
-                chk.ForeColor = AppColors.AprobadoInspeccionVisual;   // azul
+                chk.ForeColor = AppColors.AprobadoInspeccionVisual;
             } else {
                 chk.Text = "NO " + textoBase;
-                chk.ForeColor = AppColors.InstitucionalPrimario;       // vino
+                chk.ForeColor = AppColors.InstitucionalPrimario;
             }
         }
 
@@ -138,64 +275,63 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         private void ConfigurarCheckBox(CheckBox chk, string textoBase) {
-            // Guardamos el texto original sin "NO"
             chk.Tag = textoBase;
 
-            // Estado inicial
             chk.Text = "NO " + textoBase;
             chk.ForeColor = AppColors.InstitucionalPrimario;
 
-            // Eventos genéricos
             chk.CheckedChanged += CheckBox_CheckedChanged;
             chk.KeyDown += CheckBox_KeyDown;
         }
-
+        #endregion
 
         #region formatear
+
         public Panel GetPanel() {
             ResetForm();
             return pnlPrincipal;
         }
 
         private void ResetForm() {
-            cbBayonetaAceite.Enabled = true;
-            cbBayonetaAceite.Visible = true;
+            cbBayonetaAceite.Enabled = false;
+            cbBayonetaAceite.Visible = false;
             cbBayonetaAceite.Checked = false;
 
-
-            cbComponentesEmisiones.Enabled = true;
-            cbComponentesEmisiones.Visible = true;
+            cbComponentesEmisiones.Enabled = false;
+            cbComponentesEmisiones.Visible = false;
             cbComponentesEmisiones.Checked = false;
 
-            cbFugasMotorTrans.Visible = true;
-            cbFugasMotorTrans.Enabled = true;
+            cbFugasMotorTrans.Visible = false;
+            cbFugasMotorTrans.Enabled = false;
             cbFugasMotorTrans.Checked = false;
 
-            cbMotorGobernado.Enabled = true;
-            cbMotorGobernado.Visible = true;
+            cbMotorGobernado.Enabled = false;
+            cbMotorGobernado.Visible = false;
             cbMotorGobernado.Checked = false;
 
-            cbNeumaticos.Enabled = true;
-            cbNeumaticos.Visible = true;
+            cbNeumaticos.Enabled = false;
+            cbNeumaticos.Visible = false;
             cbNeumaticos.Checked = false;
 
-            cbPortaFiltroAire.Enabled = true;
-            cbPortaFiltroAire.Visible = true;
+            cbPortaFiltroAire.Enabled = false;
+            cbPortaFiltroAire.Visible = false;
             cbPortaFiltroAire.Checked = false;
 
-            cbTaponAceite.Enabled = true;
-            cbTaponAceite.Visible = true;   
+            cbTaponAceite.Enabled = false;
+            cbTaponAceite.Visible = false;   
             cbTaponAceite.Checked = false;
 
-            cbTaponCombustible.Enabled = true;
-            cbTaponCombustible.Visible = true;
+            cbTaponCombustible.Enabled = false;
+            cbTaponCombustible.Visible = false;
             cbTaponCombustible.Checked = false;
 
-            cbTuboEscape.Enabled = true;
-            cbTuboEscape.Visible = true;    
+            cbTuboEscape.Enabled = false;
+            cbTuboEscape.Visible = false;    
             cbTuboEscape.Checked = false;
 
             btnSiguente.Enabled = false;
+
+            txbOdometro.Enabled = false;
 
 
             if (panelX == 0 && panelY == 0) {
@@ -211,204 +347,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #endregion
 
-
-        private void Combistible (int combustible) {
-            // GASOLINA
-            if (combustible == 1) {
-                cbBayonetaAceite.Enabled = true;
-                cbBayonetaAceite.Visible = true;
-
-                cbComponentesEmisiones.Enabled = true;
-                cbComponentesEmisiones.Visible = true;
-
-                cbFugasMotorTrans.Visible = true;
-                cbFugasMotorTrans.Enabled = true;
-
-                cbMotorGobernado.Enabled = false;
-                cbMotorGobernado.Visible = false;
-
-                cbNeumaticos.Enabled = true;
-                cbNeumaticos.Visible = true;
-
-                cbPortaFiltroAire.Enabled = true;
-                cbPortaFiltroAire.Visible = true;
-
-                cbTaponAceite.Enabled = true;
-                cbTaponAceite.Visible = true;
-
-                cbTaponCombustible.Enabled = true;
-                cbTaponCombustible.Visible = true;
-
-                cbTuboEscape.Enabled = true;
-                cbTuboEscape.Visible = true;
-
-
-                // DIESEL
-            } else if (combustible == 2) {
-                cbBayonetaAceite.Enabled = false;
-                cbBayonetaAceite.Visible = false;
-
-                cbComponentesEmisiones.Enabled = false;
-                cbComponentesEmisiones.Visible = false;
-
-                cbFugasMotorTrans.Visible = false;
-                cbFugasMotorTrans.Enabled = false;
-
-                cbMotorGobernado.Enabled = true;
-                cbMotorGobernado.Visible = true;
-
-                cbNeumaticos.Enabled = false;
-                cbNeumaticos.Visible = false;
-
-                cbPortaFiltroAire.Enabled = false;
-                cbPortaFiltroAire.Visible = false;
-
-                cbTaponAceite.Enabled = false;
-                cbTaponAceite.Visible = false;
-
-                cbTaponCombustible.Enabled = false;
-                cbTaponCombustible.Visible = false;
-
-                cbTuboEscape.Enabled = true;
-                cbTuboEscape.Visible = true;
-
-                //GAS LP
-            } else if (combustible == 3) {
-                cbBayonetaAceite.Enabled = true;
-                cbBayonetaAceite.Visible = true;
-
-                cbComponentesEmisiones.Enabled = false;
-                cbComponentesEmisiones.Visible = false;
-
-                cbFugasMotorTrans.Visible = false;
-                cbFugasMotorTrans.Enabled = false;
-
-                cbMotorGobernado.Enabled = false;
-                cbMotorGobernado.Visible = false;
-
-                cbNeumaticos.Enabled = false;
-                cbNeumaticos.Visible = false;
-
-                cbPortaFiltroAire.Enabled = true;
-                cbPortaFiltroAire.Visible = true;
-
-                cbTaponAceite.Enabled = true;
-                cbTaponAceite.Visible = true;
-
-                cbTaponCombustible.Enabled = false;
-                cbTaponCombustible.Visible = false;
-
-                cbTuboEscape.Enabled = true;
-                cbTuboEscape.Visible = true;
-
-                //GAS NC
-            } else if (combustible == 4) {
-                cbBayonetaAceite.Enabled = true;
-                cbBayonetaAceite.Visible = true;
-
-                cbComponentesEmisiones.Enabled = false;
-                cbComponentesEmisiones.Visible = false;
-
-                cbFugasMotorTrans.Visible = false;
-                cbFugasMotorTrans.Enabled = false;
-
-                cbMotorGobernado.Enabled = false;
-                cbMotorGobernado.Visible = false;
-
-                cbNeumaticos.Enabled = false;
-                cbNeumaticos.Visible = false;
-
-                cbPortaFiltroAire.Enabled = true;
-                cbPortaFiltroAire.Visible = true;
-
-                cbTaponAceite.Enabled = true;
-                cbTaponAceite.Visible = true;
-
-                cbTaponCombustible.Enabled = false;
-                cbTaponCombustible.Visible = false;
-
-                cbTuboEscape.Enabled = true;
-                cbTuboEscape.Visible = true;
-
-
-                // HIBRIDO(GASOLINA)
-            } else if (combustible == 5) {
-                cbBayonetaAceite.Enabled = true;
-                cbBayonetaAceite.Visible = true;
-
-                cbComponentesEmisiones.Enabled = true;
-                cbComponentesEmisiones.Visible = true;
-
-                cbFugasMotorTrans.Visible = true;
-                cbFugasMotorTrans.Enabled = true;
-
-                cbMotorGobernado.Enabled = false;
-                cbMotorGobernado.Visible = false;
-
-                cbNeumaticos.Enabled = true;
-                cbNeumaticos.Visible = true;
-
-                cbPortaFiltroAire.Enabled = true;
-                cbPortaFiltroAire.Visible = true;
-
-                cbTaponAceite.Enabled = true;
-                cbTaponAceite.Visible = true;
-
-                cbTaponCombustible.Enabled = true;
-                cbTaponCombustible.Visible = true;
-
-                cbTuboEscape.Enabled = true;
-                cbTuboEscape.Visible = true;
-            }
-        }
-
-
-        private void ConversionCheckBox(int CapturaVisual, string elemento, bool despliegue) {
-            if (CapturaVisual == 2 || CapturaVisual == 11 || CapturaVisual == 18 || CapturaVisual == 26) {
-                cbBayonetaAceite.Text = "NO CONTIENE " + elemento;
-                cbBayonetaAceite.Visible = despliegue;
-                cbBayonetaAceite.Enabled = despliegue;
-            } else if (CapturaVisual == 8 || CapturaVisual == 17 || CapturaVisual == 24 || CapturaVisual == 32) {
-                cbComponentesEmisiones.Text = "NO CONTIENE " + elemento;
-                cbComponentesEmisiones.Visible = despliegue;
-                cbComponentesEmisiones.Enabled = despliegue;
-            } else if (CapturaVisual == 4 || CapturaVisual == 15 || CapturaVisual == 22 || CapturaVisual == 30) {
-                cbFugasMotorTrans.Text = "NO CONTIENE " + elemento;
-                cbFugasMotorTrans.Visible = despliegue;
-                cbFugasMotorTrans.Enabled = despliegue;
-            } else if (CapturaVisual == 7 || CapturaVisual == 16 || CapturaVisual == 23 || CapturaVisual == 31) {
-                cbNeumaticos.Text = "NO CONTIENE " + elemento;
-                cbNeumaticos.Visible = despliegue;
-                cbNeumaticos.Enabled = despliegue;
-            } else if (CapturaVisual == 4 || CapturaVisual == 13 || CapturaVisual == 20 || CapturaVisual == 28) { 
-                cbPortaFiltroAire.Text = "NO CONTIENE " + elemento;
-                cbPortaFiltroAire.Visible = despliegue;
-                cbPortaFiltroAire.Enabled = despliegue;
-            } else if (CapturaVisual == 5 || CapturaVisual == 9 || CapturaVisual == 14 || CapturaVisual == 21 || CapturaVisual == 29) {
-                cbTuboEscape.Text = "NO CONTIENE " + elemento;
-                cbTuboEscape.Visible = despliegue;
-                cbTuboEscape.Enabled = despliegue;
-            } else if (CapturaVisual == 1 || CapturaVisual == 25) {
-                cbTaponCombustible.Text = "NO CONTIENE " + elemento;
-                cbTaponCombustible.Visible = despliegue;
-                cbTaponCombustible.Enabled = despliegue;
-            } else if (CapturaVisual == 3 || CapturaVisual == 12 || CapturaVisual == 9 || CapturaVisual == 27) {
-                cbTaponAceite.Text = "NO CONTIENE " + elemento;
-                cbTaponAceite.Visible = despliegue;
-                cbTaponAceite.Enabled = despliegue;
-            } else if (CapturaVisual == 10) {
-                cbMotorGobernado.Text = "NO CONTIENE " + elemento;
-                cbMotorGobernado.Visible = despliegue;
-                cbMotorGobernado.Enabled = despliegue;
-            }
-        }
-
-
-        private void btnSiguente_Click(object sender, EventArgs e) {
-
-        }
-
-
         #region SQL
         #region primer store 
         private async Task<VerificacionVisualIniResult> GetAccesoSQLVerificaciones(string SERVER, string DB, string SQL_USER, string SQL_PASS,
@@ -418,7 +356,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             short _resultado = 0;
             Guid _verificacion = Guid.Empty;
             byte _protocoloVerificacionId = (byte)0;
-            string _placa = "DESCONOCIDO";
 
             var repo = new SivevRepository();
 
@@ -471,6 +408,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #endregion
 
+        #region Segundo store
         private async Task<CapturaVisualGetResult> BanderasAEvaluar(
                                                                         string SERVER,
                                                                         string DB,
@@ -530,9 +468,238 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             return result;
         }
+        #endregion
 
+        #region Tercer store
+        private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(
+                                                                        string SERVER,
+                                                                        string DB,
+                                                                        string SQL_USER,
+                                                                        string SQL_PASS,
+                                                                        string appName,
+                                                                        string APPROLE,
+                                                                        string APPROLE_PASS,
+                                                                        Guid estacionId,
+                                                                        Guid AccesoId,
+                                                                        Guid verificacionId,
+                                                                        byte tiTaponCombustible, 
+                                                                        byte tiTaponAceite, 
+                                                                        byte tiBayonetaAceite, 
+                                                                        byte tiPortafiltroAire,
+                                                                        byte tiTuboEscape, 
+                                                                        byte tiFugasMotorTrans, 
+                                                                        byte tiNeumaticos, 
+                                                                        byte tiComponentesEmisiones,
+                                                                        byte tiMotorGobernado, 
+                                                                        int odometro ) {
+            var repo = new SivevRepository();
+            var result = new CapturaInspeccionVisualNewSetResult();
+
+            try {
+                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
+                await connApp.OpenAsync();
+
+                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                    try {
+                        var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
+                                                                                conn: connApp,
+                                                                                verificacionId: verificacionId,
+                                                                                estacionId: estacionId,
+                                                                                accesoId: AccesoId,
+                                                                                
+                                                                                tiTaponCombustible:tiTaponCombustible, 
+                                                                                tiTaponAceite: tiTaponAceite, 
+
+                                                                                tiBayonetaAceite: tiBayonetaAceite, 
+                                                                                tiPortafiltroAire: tiPortafiltroAire,
+                                                                                
+                                                                                tiTuboEscape: tiTuboEscape,
+                                                                                tiFugasMotorTrans: tiFugasMotorTrans, 
+                                                                                
+                                                                                tiNeumaticos: tiNeumaticos, 
+                                                                                tiComponentesEmisiones: tiComponentesEmisiones,
+                                                                                
+                                                                                tiMotorGobernado:tiMotorGobernado,
+                                                                                odometro:odometro
+                                                                            );
+                        result.Resultado = r.Resultado;
+                        result.MensajeId = r.MensajeId;
+                        result.ReturnCode = r.ReturnCode;
+                        result.CheckObd = r.CheckObd;
+
+                        if (result.MensajeId != 0) {
+                            var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
+                            var msg = error?.Mensaje ?? "Mensaje no disponible";
+                            MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
+                        }
+                    } catch (Exception ex) {
+                        MostrarMensaje($"Error de la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {ex.Message}");
+                    }
+                }
+            } catch (Exception e) {
+                MostrarMensaje($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
+            }
+
+            return result;
+        }
+        #endregion
 
         #region utils
+
+        private void frmCapturaVisual_Resize(object sender, EventArgs e) {
+            float factor = (float)this.Width / _formSizeInicial.Width;
+            ///*
+            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
+            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 50f));
+            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 24f));
+            //*/
+
+
+
+            lblTitulo.Font = new Font(
+                lblTitulo.Font.FontFamily,
+                Titulo1,
+                lblTitulo.Font.Style
+            );
+
+
+            lblPlaca.Font = new Font(
+                lblPlaca.Font.FontFamily,
+                Titulo2,
+                lblPlaca.Font.Style
+            );
+
+            cbBayonetaAceite.Font = new Font(
+                cbBayonetaAceite.Font.FontFamily,
+                Titulo3,
+                cbBayonetaAceite.Font.Style
+            );
+
+            cbComponentesEmisiones.Font = new Font(
+                cbComponentesEmisiones.Font.FontFamily,
+                Titulo3,
+                cbComponentesEmisiones.Font.Style
+            );
+
+            cbFugasMotorTrans.Font = new Font(
+                cbFugasMotorTrans.Font.FontFamily,
+                Titulo3,
+                cbFugasMotorTrans.Font.Style
+            );
+
+            cbMotorGobernado.Font = new Font(
+                cbMotorGobernado.Font.FontFamily,
+                Titulo3,
+                cbMotorGobernado.Font.Style
+            );
+
+
+            cbNeumaticos.Font = new Font(
+                cbNeumaticos.Font.FontFamily,
+                Titulo3,
+                cbNeumaticos.Font.Style
+            );
+
+            cbPortaFiltroAire.Font = new Font(
+                cbPortaFiltroAire.Font.FontFamily,
+                Titulo3,
+                cbPortaFiltroAire.Font.Style
+            );
+
+            cbTaponAceite.Font = new Font(
+                cbTaponAceite.Font.FontFamily,
+                Titulo3,
+                cbTaponAceite.Font.Style
+            );
+
+            cbTuboEscape.Font = new Font(
+                cbTuboEscape.Font.FontFamily,
+                Titulo3,
+                cbTuboEscape.Font.Style
+            );
+
+            cbTaponCombustible.Font = new Font(
+                cbTaponCombustible.Font.FontFamily,
+                Titulo3,
+                cbTaponCombustible.Font.Style
+            );
+
+            btnSiguente.Font = new Font(
+                btnSiguente.Font.FontFamily,
+                Titulo3,
+                btnSiguente.Font.Style
+            );
+
+            lblOdometro.Font = new Font(
+                lblOdometro.Font.FontFamily,
+                Titulo3,
+                lblOdometro.Font.Style
+            );
+
+            txbOdometro.Font = new Font(
+                txbOdometro.Font.FontFamily,
+                Titulo3,
+                txbOdometro.Font.Style
+            );
+
+        }
+
+
+
+        private void txbOdometro_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                e.SuppressKeyPress = true; // para que no haga beep ni brinque de línea
+
+                if (int.TryParse(txbOdometro.Text, out int odometro)
+                    && odometro > 0
+                    && lblPlaca.Text != "PlacaID") {
+                    btnSiguente.Enabled = true;
+                    QuizVisual();
+                } else {
+                    btnSiguente.Enabled = false;
+                }
+            }
+        }
+
+
+        private void SanitizeByRegex(TextBox tb, string invalidPattern) {
+            string original = tb.Text;
+            int sel = tb.SelectionStart;
+
+            string cleaned = Regex.Replace(original, invalidPattern, "");
+
+            if (original != cleaned) {
+                int left = Math.Min(sel, original.Length);
+                int removedLeft = Regex.Matches(original.Substring(0, left), invalidPattern).Count;
+
+                tb.Text = cleaned;
+                tb.SelectionStart = Math.Max(sel - removedLeft, 0);
+            }
+        }
+        private void AplicarCapturaVisual(IReadOnlyList<CapturaVisualItem> items) {
+
+            var allChecks = new[] {
+                cbBayonetaAceite, cbComponentesEmisiones, cbFugasMotorTrans,
+                cbNeumaticos, cbPortaFiltroAire, cbTuboEscape,
+                cbTaponCombustible, cbTaponAceite, cbMotorGobernado
+            };
+
+            foreach (var chk in allChecks) {
+                chk.Visible = false;
+                chk.Enabled = false;
+                chk.Checked = false;
+            }
+
+            foreach (var it in items) {
+                if (!_mapCvToCheckBox.TryGetValue(it.CapturaVisualId, out var chk))
+                    continue;
+
+                chk.Text = "NO CONTIENE " + it.Elemento;
+                chk.Visible = it.Despliegue;
+                chk.Enabled = it.Despliegue;
+            }
+        }
+
         private void MostrarMensaje(string mensaje) {
             using (var dlg = new frmMensajes(mensaje)) {
                 dlg.StartPosition = FormStartPosition.CenterParent;

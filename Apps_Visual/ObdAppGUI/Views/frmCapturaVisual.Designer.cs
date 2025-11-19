@@ -74,9 +74,9 @@
             pnlCentral.Controls.Add(spcPrincipal);
             pnlCentral.Controls.Add(pnlCentralFooter);
             pnlCentral.Dock = DockStyle.Fill;
-            pnlCentral.Location = new Point(0, 88);
+            pnlCentral.Location = new Point(0, 108);
             pnlCentral.Name = "pnlCentral";
-            pnlCentral.Size = new Size(800, 446);
+            pnlCentral.Size = new Size(800, 426);
             pnlCentral.TabIndex = 1;
             // 
             // spcPrincipal
@@ -94,7 +94,7 @@
             // 
             spcPrincipal.Panel2.BackColor = Color.White;
             spcPrincipal.Panel2.Controls.Add(tlpOdometro);
-            spcPrincipal.Size = new Size(800, 395);
+            spcPrincipal.Size = new Size(800, 375);
             spcPrincipal.SplitterDistance = 548;
             spcPrincipal.TabIndex = 2;
             // 
@@ -125,7 +125,7 @@
             tlpTabla.RowStyles.Add(new RowStyle(SizeType.Percent, 11.261261F));
             tlpTabla.RowStyles.Add(new RowStyle(SizeType.Percent, 11.261261F));
             tlpTabla.RowStyles.Add(new RowStyle(SizeType.Percent, 9.90991F));
-            tlpTabla.Size = new Size(548, 395);
+            tlpTabla.Size = new Size(548, 375);
             tlpTabla.TabIndex = 0;
             // 
             // cbMotorGobernado
@@ -133,9 +133,9 @@
             cbMotorGobernado.AutoSize = true;
             cbMotorGobernado.Dock = DockStyle.Fill;
             cbMotorGobernado.ForeColor = Color.FromArgb(159, 34, 65);
-            cbMotorGobernado.Location = new Point(3, 355);
+            cbMotorGobernado.Location = new Point(3, 339);
             cbMotorGobernado.Name = "cbMotorGobernado";
-            cbMotorGobernado.Size = new Size(542, 37);
+            cbMotorGobernado.Size = new Size(542, 33);
             cbMotorGobernado.TabIndex = 9;
             cbMotorGobernado.Text = "No Contiene Motor Gobernado";
             cbMotorGobernado.UseVisualStyleBackColor = true;
@@ -145,9 +145,9 @@
             cbComponentesEmisiones.AutoSize = true;
             cbComponentesEmisiones.Dock = DockStyle.Fill;
             cbComponentesEmisiones.ForeColor = Color.FromArgb(159, 34, 65);
-            cbComponentesEmisiones.Location = new Point(3, 311);
+            cbComponentesEmisiones.Location = new Point(3, 297);
             cbComponentesEmisiones.Name = "cbComponentesEmisiones";
-            cbComponentesEmisiones.Size = new Size(542, 38);
+            cbComponentesEmisiones.Size = new Size(542, 36);
             cbComponentesEmisiones.TabIndex = 8;
             cbComponentesEmisiones.Text = "No Contiene Componentes de Emisiones";
             cbComponentesEmisiones.UseVisualStyleBackColor = true;
@@ -157,9 +157,9 @@
             cbNeumaticos.AutoSize = true;
             cbNeumaticos.Dock = DockStyle.Fill;
             cbNeumaticos.ForeColor = Color.FromArgb(159, 34, 65);
-            cbNeumaticos.Location = new Point(3, 267);
+            cbNeumaticos.Location = new Point(3, 255);
             cbNeumaticos.Name = "cbNeumaticos";
-            cbNeumaticos.Size = new Size(542, 38);
+            cbNeumaticos.Size = new Size(542, 36);
             cbNeumaticos.TabIndex = 7;
             cbNeumaticos.Text = "No Contiene Neumaticos ";
             cbNeumaticos.UseVisualStyleBackColor = true;
@@ -169,9 +169,9 @@
             cbFugasMotorTrans.AutoSize = true;
             cbFugasMotorTrans.Dock = DockStyle.Fill;
             cbFugasMotorTrans.ForeColor = Color.FromArgb(159, 34, 65);
-            cbFugasMotorTrans.Location = new Point(3, 223);
+            cbFugasMotorTrans.Location = new Point(3, 213);
             cbFugasMotorTrans.Name = "cbFugasMotorTrans";
-            cbFugasMotorTrans.Size = new Size(542, 38);
+            cbFugasMotorTrans.Size = new Size(542, 36);
             cbFugasMotorTrans.TabIndex = 6;
             cbFugasMotorTrans.Text = "No Contiene  Fugas de Motor de transmisión";
             cbFugasMotorTrans.UseVisualStyleBackColor = true;
@@ -181,9 +181,9 @@
             cbTuboEscape.AutoSize = true;
             cbTuboEscape.Dock = DockStyle.Fill;
             cbTuboEscape.ForeColor = Color.FromArgb(159, 34, 65);
-            cbTuboEscape.Location = new Point(3, 179);
+            cbTuboEscape.Location = new Point(3, 171);
             cbTuboEscape.Name = "cbTuboEscape";
-            cbTuboEscape.Size = new Size(542, 38);
+            cbTuboEscape.Size = new Size(542, 36);
             cbTuboEscape.TabIndex = 5;
             cbTuboEscape.Text = "No Contiene Sistema de Escape";
             cbTuboEscape.UseVisualStyleBackColor = true;
@@ -193,9 +193,9 @@
             cbPortaFiltroAire.AutoSize = true;
             cbPortaFiltroAire.Dock = DockStyle.Fill;
             cbPortaFiltroAire.ForeColor = Color.FromArgb(159, 34, 65);
-            cbPortaFiltroAire.Location = new Point(3, 135);
+            cbPortaFiltroAire.Location = new Point(3, 129);
             cbPortaFiltroAire.Name = "cbPortaFiltroAire";
-            cbPortaFiltroAire.Size = new Size(542, 38);
+            cbPortaFiltroAire.Size = new Size(542, 36);
             cbPortaFiltroAire.TabIndex = 4;
             cbPortaFiltroAire.Text = "No Contiene Porta Filtro de Aire";
             cbPortaFiltroAire.UseVisualStyleBackColor = true;
@@ -205,9 +205,9 @@
             cbBayonetaAceite.AutoSize = true;
             cbBayonetaAceite.Dock = DockStyle.Fill;
             cbBayonetaAceite.ForeColor = Color.FromArgb(159, 34, 65);
-            cbBayonetaAceite.Location = new Point(3, 91);
+            cbBayonetaAceite.Location = new Point(3, 87);
             cbBayonetaAceite.Name = "cbBayonetaAceite";
-            cbBayonetaAceite.Size = new Size(542, 38);
+            cbBayonetaAceite.Size = new Size(542, 36);
             cbBayonetaAceite.TabIndex = 3;
             cbBayonetaAceite.Text = "No Contiene Bayoneta de Aceite";
             cbBayonetaAceite.UseVisualStyleBackColor = true;
@@ -217,9 +217,9 @@
             cbTaponAceite.AutoSize = true;
             cbTaponAceite.Dock = DockStyle.Fill;
             cbTaponAceite.ForeColor = Color.FromArgb(159, 34, 65);
-            cbTaponAceite.Location = new Point(3, 47);
+            cbTaponAceite.Location = new Point(3, 45);
             cbTaponAceite.Name = "cbTaponAceite";
-            cbTaponAceite.Size = new Size(542, 38);
+            cbTaponAceite.Size = new Size(542, 36);
             cbTaponAceite.TabIndex = 2;
             cbTaponAceite.Text = "No Contiene Tapon de Aceite";
             cbTaponAceite.UseVisualStyleBackColor = true;
@@ -231,7 +231,7 @@
             cbTaponCombustible.ForeColor = Color.FromArgb(159, 34, 65);
             cbTaponCombustible.Location = new Point(3, 3);
             cbTaponCombustible.Name = "cbTaponCombustible";
-            cbTaponCombustible.Size = new Size(542, 38);
+            cbTaponCombustible.Size = new Size(542, 36);
             cbTaponCombustible.TabIndex = 1;
             cbTaponCombustible.Text = "No Contiene Tapon de Combustible";
             cbTaponCombustible.UseVisualStyleBackColor = true;
@@ -253,7 +253,7 @@
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 5.8139534F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 17.44186F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 38.3720932F));
-            tlpOdometro.Size = new Size(248, 395);
+            tlpOdometro.Size = new Size(248, 375);
             tlpOdometro.TabIndex = 0;
             // 
             // lblPlaca
@@ -264,37 +264,41 @@
             lblPlaca.ForeColor = Color.FromArgb(159, 34, 65);
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
-            lblPlaca.Size = new Size(242, 151);
+            lblPlaca.Size = new Size(242, 143);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "PlacaID";
+            lblPlaca.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblOdometro
             // 
             lblOdometro.AutoSize = true;
+            lblOdometro.Dock = DockStyle.Fill;
             lblOdometro.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblOdometro.ForeColor = Color.FromArgb(159, 34, 65);
-            lblOdometro.Location = new Point(3, 173);
+            lblOdometro.Location = new Point(3, 164);
             lblOdometro.Name = "lblOdometro";
-            lblOdometro.Size = new Size(100, 25);
+            lblOdometro.Size = new Size(242, 65);
             lblOdometro.TabIndex = 0;
             lblOdometro.Text = "Odometro";
+            lblOdometro.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // txbOdometro
             // 
             txbOdometro.Dock = DockStyle.Fill;
             txbOdometro.Font = new Font("Segoe UI", 14F);
-            txbOdometro.Location = new Point(3, 244);
+            txbOdometro.Location = new Point(3, 232);
             txbOdometro.Name = "txbOdometro";
             txbOdometro.Size = new Size(242, 32);
             txbOdometro.TabIndex = 10;
+            txbOdometro.TextAlign = HorizontalAlignment.Center;
             // 
             // pnlRellenoOdometro
             // 
             pnlRellenoOdometro.BackColor = Color.FromArgb(188, 149, 92);
             pnlRellenoOdometro.Dock = DockStyle.Fill;
-            pnlRellenoOdometro.Location = new Point(3, 154);
+            pnlRellenoOdometro.Location = new Point(3, 146);
             pnlRellenoOdometro.Name = "pnlRellenoOdometro";
-            pnlRellenoOdometro.Size = new Size(242, 16);
+            pnlRellenoOdometro.Size = new Size(242, 15);
             pnlRellenoOdometro.TabIndex = 11;
             // 
             // pnlCentralFooter
@@ -302,7 +306,7 @@
             pnlCentralFooter.BackColor = Color.White;
             pnlCentralFooter.Controls.Add(btnSiguente);
             pnlCentralFooter.Dock = DockStyle.Bottom;
-            pnlCentralFooter.Location = new Point(0, 395);
+            pnlCentralFooter.Location = new Point(0, 375);
             pnlCentralFooter.Name = "pnlCentralFooter";
             pnlCentralFooter.Size = new Size(800, 51);
             pnlCentralFooter.TabIndex = 1;
@@ -314,9 +318,9 @@
             btnSiguente.FlatStyle = FlatStyle.Flat;
             btnSiguente.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSiguente.ForeColor = Color.FromArgb(159, 34, 65);
-            btnSiguente.Location = new Point(661, 0);
+            btnSiguente.Location = new Point(600, 0);
             btnSiguente.Name = "btnSiguente";
-            btnSiguente.Size = new Size(139, 51);
+            btnSiguente.Size = new Size(200, 51);
             btnSiguente.TabIndex = 11;
             btnSiguente.Text = "Siguiente";
             btnSiguente.UseVisualStyleBackColor = true;
@@ -329,20 +333,22 @@
             pnlTopListadoVisual.Dock = DockStyle.Top;
             pnlTopListadoVisual.Location = new Point(0, 0);
             pnlTopListadoVisual.Name = "pnlTopListadoVisual";
-            pnlTopListadoVisual.Size = new Size(800, 88);
+            pnlTopListadoVisual.Size = new Size(800, 108);
             pnlTopListadoVisual.TabIndex = 0;
             // 
             // lblTitulo
             // 
-            lblTitulo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             lblTitulo.AutoSize = true;
+            lblTitulo.Dock = DockStyle.Fill;
+            lblTitulo.FlatStyle = FlatStyle.Flat;
             lblTitulo.Font = new Font("Segoe UI", 48F);
             lblTitulo.ForeColor = Color.FromArgb(159, 34, 65);
-            lblTitulo.Location = new Point(159, 0);
+            lblTitulo.Location = new Point(0, 0);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(524, 86);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Inspección Visual";
+            lblTitulo.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // frmCapturaVisual
             // 
