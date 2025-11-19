@@ -128,6 +128,13 @@ class Program {
                tiTuboEscape: tiTuboEscape, tiFugasMotorTrans: tiFugasMotorTrans, tiNeumaticos: tiNeumaticos, tiComponentesEmisiones: tiComponentesEmisiones, tiMotorGobernado:tiMotorGobernado, 
                odometro:odometro);
 
+
+
+
+
+
+
+
             await repo.PrintIfMsgAsync(connApp, $"Fallo en SpAppCapturaInspeccionVisualNewSetAsync resultado {r4.Resultado}", r4.MensajeId);
 
             Console.WriteLine($"pCheckObd: {r4.CheckObd}");

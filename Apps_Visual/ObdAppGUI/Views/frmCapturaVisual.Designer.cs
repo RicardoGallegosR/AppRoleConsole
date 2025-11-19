@@ -36,7 +36,11 @@
             cbBayonetaAceite = new CheckBox();
             cbTaponAceite = new CheckBox();
             cbTaponCombustible = new CheckBox();
+            tlpOdometro = new TableLayoutPanel();
             lblPlaca = new Label();
+            lblOdometro = new Label();
+            txbOdometro = new TextBox();
+            pnlRellenoOdometro = new Panel();
             pnlCentralFooter = new Panel();
             btnSiguente = new Button();
             pnlTopListadoVisual = new Panel();
@@ -48,6 +52,7 @@
             spcPrincipal.Panel2.SuspendLayout();
             spcPrincipal.SuspendLayout();
             tlpTabla.SuspendLayout();
+            tlpOdometro.SuspendLayout();
             pnlCentralFooter.SuspendLayout();
             pnlTopListadoVisual.SuspendLayout();
             SuspendLayout();
@@ -88,7 +93,7 @@
             // spcPrincipal.Panel2
             // 
             spcPrincipal.Panel2.BackColor = Color.White;
-            spcPrincipal.Panel2.Controls.Add(lblPlaca);
+            spcPrincipal.Panel2.Controls.Add(tlpOdometro);
             spcPrincipal.Size = new Size(800, 395);
             spcPrincipal.SplitterDistance = 548;
             spcPrincipal.TabIndex = 2;
@@ -231,17 +236,66 @@
             cbTaponCombustible.Text = "No Contiene Tapon de Combustible";
             cbTaponCombustible.UseVisualStyleBackColor = true;
             // 
+            // tlpOdometro
+            // 
+            tlpOdometro.BackColor = Color.White;
+            tlpOdometro.ColumnCount = 1;
+            tlpOdometro.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpOdometro.Controls.Add(lblPlaca, 0, 0);
+            tlpOdometro.Controls.Add(lblOdometro, 0, 2);
+            tlpOdometro.Controls.Add(txbOdometro, 0, 3);
+            tlpOdometro.Controls.Add(pnlRellenoOdometro, 0, 1);
+            tlpOdometro.Dock = DockStyle.Fill;
+            tlpOdometro.Location = new Point(0, 0);
+            tlpOdometro.Name = "tlpOdometro";
+            tlpOdometro.RowCount = 4;
+            tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 38.3720932F));
+            tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 5.8139534F));
+            tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 17.44186F));
+            tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 38.3720932F));
+            tlpOdometro.Size = new Size(248, 395);
+            tlpOdometro.TabIndex = 0;
+            // 
             // lblPlaca
             // 
             lblPlaca.Dock = DockStyle.Fill;
             lblPlaca.FlatStyle = FlatStyle.Flat;
             lblPlaca.Font = new Font("Segoe UI", 36F);
             lblPlaca.ForeColor = Color.FromArgb(159, 34, 65);
-            lblPlaca.Location = new Point(0, 0);
+            lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
-            lblPlaca.Size = new Size(248, 395);
+            lblPlaca.Size = new Size(242, 151);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "PlacaID";
+            // 
+            // lblOdometro
+            // 
+            lblOdometro.AutoSize = true;
+            lblOdometro.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblOdometro.ForeColor = Color.FromArgb(159, 34, 65);
+            lblOdometro.Location = new Point(3, 173);
+            lblOdometro.Name = "lblOdometro";
+            lblOdometro.Size = new Size(100, 25);
+            lblOdometro.TabIndex = 0;
+            lblOdometro.Text = "Odometro";
+            // 
+            // txbOdometro
+            // 
+            txbOdometro.Dock = DockStyle.Fill;
+            txbOdometro.Font = new Font("Segoe UI", 14F);
+            txbOdometro.Location = new Point(3, 244);
+            txbOdometro.Name = "txbOdometro";
+            txbOdometro.Size = new Size(242, 32);
+            txbOdometro.TabIndex = 10;
+            // 
+            // pnlRellenoOdometro
+            // 
+            pnlRellenoOdometro.BackColor = Color.FromArgb(188, 149, 92);
+            pnlRellenoOdometro.Dock = DockStyle.Fill;
+            pnlRellenoOdometro.Location = new Point(3, 154);
+            pnlRellenoOdometro.Name = "pnlRellenoOdometro";
+            pnlRellenoOdometro.Size = new Size(242, 16);
+            pnlRellenoOdometro.TabIndex = 11;
             // 
             // pnlCentralFooter
             // 
@@ -263,7 +317,7 @@
             btnSiguente.Location = new Point(661, 0);
             btnSiguente.Name = "btnSiguente";
             btnSiguente.Size = new Size(139, 51);
-            btnSiguente.TabIndex = 10;
+            btnSiguente.TabIndex = 11;
             btnSiguente.Text = "Siguiente";
             btnSiguente.UseVisualStyleBackColor = true;
             btnSiguente.Click += btnSiguente_Click;
@@ -307,6 +361,8 @@
             spcPrincipal.ResumeLayout(false);
             tlpTabla.ResumeLayout(false);
             tlpTabla.PerformLayout();
+            tlpOdometro.ResumeLayout(false);
+            tlpOdometro.PerformLayout();
             pnlCentralFooter.ResumeLayout(false);
             pnlTopListadoVisual.ResumeLayout(false);
             pnlTopListadoVisual.PerformLayout();
@@ -333,5 +389,9 @@
         private CheckBox cbPortaFiltroAire;
         private CheckBox cbBayonetaAceite;
         private CheckBox cbMotorGobernado;
+        private TableLayoutPanel tlpOdometro;
+        private Label lblOdometro;
+        private TextBox txbOdometro;
+        private Panel pnlRellenoOdometro;
     }
 }

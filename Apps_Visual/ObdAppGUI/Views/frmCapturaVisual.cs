@@ -160,40 +160,42 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void ResetForm() {
             cbBayonetaAceite.Enabled = true;
             cbBayonetaAceite.Visible = true;
-            cbBayonetaAceite.Checked = true;
+            cbBayonetaAceite.Checked = false;
 
 
             cbComponentesEmisiones.Enabled = true;
             cbComponentesEmisiones.Visible = true;
-            cbComponentesEmisiones.Checked = true;
+            cbComponentesEmisiones.Checked = false;
 
             cbFugasMotorTrans.Visible = true;
             cbFugasMotorTrans.Enabled = true;
-            cbFugasMotorTrans.Checked = true;
+            cbFugasMotorTrans.Checked = false;
 
             cbMotorGobernado.Enabled = true;
             cbMotorGobernado.Visible = true;
-            cbMotorGobernado.Checked = true;
+            cbMotorGobernado.Checked = false;
 
             cbNeumaticos.Enabled = true;
             cbNeumaticos.Visible = true;
-            cbNeumaticos.Checked = true;
+            cbNeumaticos.Checked = false;
 
             cbPortaFiltroAire.Enabled = true;
             cbPortaFiltroAire.Visible = true;
-            cbPortaFiltroAire.Checked = true;
+            cbPortaFiltroAire.Checked = false;
 
             cbTaponAceite.Enabled = true;
             cbTaponAceite.Visible = true;   
-            cbTaponAceite.Checked = true;
+            cbTaponAceite.Checked = false;
 
             cbTaponCombustible.Enabled = true;
             cbTaponCombustible.Visible = true;
-            cbTaponCombustible.Checked = true;
+            cbTaponCombustible.Checked = false;
 
             cbTuboEscape.Enabled = true;
             cbTuboEscape.Visible = true;    
-            cbTuboEscape.Checked = true;
+            cbTuboEscape.Checked = false;
+
+            btnSiguente.Enabled = false;
 
 
             if (panelX == 0 && panelY == 0) {
@@ -210,8 +212,196 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
 
+        private void Combistible (int combustible) {
+            // GASOLINA
+            if (combustible == 1) {
+                cbBayonetaAceite.Enabled = true;
+                cbBayonetaAceite.Visible = true;
+
+                cbComponentesEmisiones.Enabled = true;
+                cbComponentesEmisiones.Visible = true;
+
+                cbFugasMotorTrans.Visible = true;
+                cbFugasMotorTrans.Enabled = true;
+
+                cbMotorGobernado.Enabled = false;
+                cbMotorGobernado.Visible = false;
+
+                cbNeumaticos.Enabled = true;
+                cbNeumaticos.Visible = true;
+
+                cbPortaFiltroAire.Enabled = true;
+                cbPortaFiltroAire.Visible = true;
+
+                cbTaponAceite.Enabled = true;
+                cbTaponAceite.Visible = true;
+
+                cbTaponCombustible.Enabled = true;
+                cbTaponCombustible.Visible = true;
+
+                cbTuboEscape.Enabled = true;
+                cbTuboEscape.Visible = true;
 
 
+                // DIESEL
+            } else if (combustible == 2) {
+                cbBayonetaAceite.Enabled = false;
+                cbBayonetaAceite.Visible = false;
+
+                cbComponentesEmisiones.Enabled = false;
+                cbComponentesEmisiones.Visible = false;
+
+                cbFugasMotorTrans.Visible = false;
+                cbFugasMotorTrans.Enabled = false;
+
+                cbMotorGobernado.Enabled = true;
+                cbMotorGobernado.Visible = true;
+
+                cbNeumaticos.Enabled = false;
+                cbNeumaticos.Visible = false;
+
+                cbPortaFiltroAire.Enabled = false;
+                cbPortaFiltroAire.Visible = false;
+
+                cbTaponAceite.Enabled = false;
+                cbTaponAceite.Visible = false;
+
+                cbTaponCombustible.Enabled = false;
+                cbTaponCombustible.Visible = false;
+
+                cbTuboEscape.Enabled = true;
+                cbTuboEscape.Visible = true;
+
+                //GAS LP
+            } else if (combustible == 3) {
+                cbBayonetaAceite.Enabled = true;
+                cbBayonetaAceite.Visible = true;
+
+                cbComponentesEmisiones.Enabled = false;
+                cbComponentesEmisiones.Visible = false;
+
+                cbFugasMotorTrans.Visible = false;
+                cbFugasMotorTrans.Enabled = false;
+
+                cbMotorGobernado.Enabled = false;
+                cbMotorGobernado.Visible = false;
+
+                cbNeumaticos.Enabled = false;
+                cbNeumaticos.Visible = false;
+
+                cbPortaFiltroAire.Enabled = true;
+                cbPortaFiltroAire.Visible = true;
+
+                cbTaponAceite.Enabled = true;
+                cbTaponAceite.Visible = true;
+
+                cbTaponCombustible.Enabled = false;
+                cbTaponCombustible.Visible = false;
+
+                cbTuboEscape.Enabled = true;
+                cbTuboEscape.Visible = true;
+
+                //GAS NC
+            } else if (combustible == 4) {
+                cbBayonetaAceite.Enabled = true;
+                cbBayonetaAceite.Visible = true;
+
+                cbComponentesEmisiones.Enabled = false;
+                cbComponentesEmisiones.Visible = false;
+
+                cbFugasMotorTrans.Visible = false;
+                cbFugasMotorTrans.Enabled = false;
+
+                cbMotorGobernado.Enabled = false;
+                cbMotorGobernado.Visible = false;
+
+                cbNeumaticos.Enabled = false;
+                cbNeumaticos.Visible = false;
+
+                cbPortaFiltroAire.Enabled = true;
+                cbPortaFiltroAire.Visible = true;
+
+                cbTaponAceite.Enabled = true;
+                cbTaponAceite.Visible = true;
+
+                cbTaponCombustible.Enabled = false;
+                cbTaponCombustible.Visible = false;
+
+                cbTuboEscape.Enabled = true;
+                cbTuboEscape.Visible = true;
+
+
+                // HIBRIDO(GASOLINA)
+            } else if (combustible == 5) {
+                cbBayonetaAceite.Enabled = true;
+                cbBayonetaAceite.Visible = true;
+
+                cbComponentesEmisiones.Enabled = true;
+                cbComponentesEmisiones.Visible = true;
+
+                cbFugasMotorTrans.Visible = true;
+                cbFugasMotorTrans.Enabled = true;
+
+                cbMotorGobernado.Enabled = false;
+                cbMotorGobernado.Visible = false;
+
+                cbNeumaticos.Enabled = true;
+                cbNeumaticos.Visible = true;
+
+                cbPortaFiltroAire.Enabled = true;
+                cbPortaFiltroAire.Visible = true;
+
+                cbTaponAceite.Enabled = true;
+                cbTaponAceite.Visible = true;
+
+                cbTaponCombustible.Enabled = true;
+                cbTaponCombustible.Visible = true;
+
+                cbTuboEscape.Enabled = true;
+                cbTuboEscape.Visible = true;
+            }
+        }
+
+
+        private void ConversionCheckBox(int CapturaVisual, string elemento, bool despliegue) {
+            if (CapturaVisual == 2 || CapturaVisual == 11 || CapturaVisual == 18 || CapturaVisual == 26) {
+                cbBayonetaAceite.Text = "NO CONTIENE " + elemento;
+                cbBayonetaAceite.Visible = despliegue;
+                cbBayonetaAceite.Enabled = despliegue;
+            } else if (CapturaVisual == 8 || CapturaVisual == 17 || CapturaVisual == 24 || CapturaVisual == 32) {
+                cbComponentesEmisiones.Text = "NO CONTIENE " + elemento;
+                cbComponentesEmisiones.Visible = despliegue;
+                cbComponentesEmisiones.Enabled = despliegue;
+            } else if (CapturaVisual == 4 || CapturaVisual == 15 || CapturaVisual == 22 || CapturaVisual == 30) {
+                cbFugasMotorTrans.Text = "NO CONTIENE " + elemento;
+                cbFugasMotorTrans.Visible = despliegue;
+                cbFugasMotorTrans.Enabled = despliegue;
+            } else if (CapturaVisual == 7 || CapturaVisual == 16 || CapturaVisual == 23 || CapturaVisual == 31) {
+                cbNeumaticos.Text = "NO CONTIENE " + elemento;
+                cbNeumaticos.Visible = despliegue;
+                cbNeumaticos.Enabled = despliegue;
+            } else if (CapturaVisual == 4 || CapturaVisual == 13 || CapturaVisual == 20 || CapturaVisual == 28) { 
+                cbPortaFiltroAire.Text = "NO CONTIENE " + elemento;
+                cbPortaFiltroAire.Visible = despliegue;
+                cbPortaFiltroAire.Enabled = despliegue;
+            } else if (CapturaVisual == 5 || CapturaVisual == 9 || CapturaVisual == 14 || CapturaVisual == 21 || CapturaVisual == 29) {
+                cbTuboEscape.Text = "NO CONTIENE " + elemento;
+                cbTuboEscape.Visible = despliegue;
+                cbTuboEscape.Enabled = despliegue;
+            } else if (CapturaVisual == 1 || CapturaVisual == 25) {
+                cbTaponCombustible.Text = "NO CONTIENE " + elemento;
+                cbTaponCombustible.Visible = despliegue;
+                cbTaponCombustible.Enabled = despliegue;
+            } else if (CapturaVisual == 3 || CapturaVisual == 12 || CapturaVisual == 9 || CapturaVisual == 27) {
+                cbTaponAceite.Text = "NO CONTIENE " + elemento;
+                cbTaponAceite.Visible = despliegue;
+                cbTaponAceite.Enabled = despliegue;
+            } else if (CapturaVisual == 10) {
+                cbMotorGobernado.Text = "NO CONTIENE " + elemento;
+                cbMotorGobernado.Visible = despliegue;
+                cbMotorGobernado.Enabled = despliegue;
+            }
+        }
 
 
         private void btnSiguente_Click(object sender, EventArgs e) {
