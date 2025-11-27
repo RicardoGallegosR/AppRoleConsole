@@ -151,11 +151,14 @@ class Program {
                         vehiculoId: "DESCONOCIDO", 
                         tiConexionObd: 1, 
                         protocoloObd: "ISO 15765-4 CAN 11/500",  
+                        
                         tiIntentos: 1, 
+                        
                         tiMil: 0, 
                         siFallas: 0,
                         codError: "", 
                         codErrorPend: "", 
+                        
                         tiSdciic: 1, 
                         tiSecc: 1, 
                         tiSc: 1, 
@@ -167,10 +170,13 @@ class Program {
                         tiSfaa: 0, 
                         tiScso: 0, 
                         tiSrge: 0, 
+                        
                         voltsSwOff: 12.6m, 
                         voltsSwOn: 12.2m, 
+                        
                         rpmOff: 0, 
                         rpmOn: 820, 
+                        
                         rpmCheck: 800,
                         leeMonitores: true, 
                         leeDtc: true, 

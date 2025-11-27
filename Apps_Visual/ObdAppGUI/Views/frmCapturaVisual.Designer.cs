@@ -132,7 +132,7 @@
             // 
             cbMotorGobernado.AutoSize = true;
             cbMotorGobernado.Dock = DockStyle.Fill;
-            cbMotorGobernado.ForeColor = Color.FromArgb(159, 34, 65);
+            cbMotorGobernado.ForeColor = Color.Black;
             cbMotorGobernado.Location = new Point(3, 339);
             cbMotorGobernado.Name = "cbMotorGobernado";
             cbMotorGobernado.Size = new Size(542, 33);
@@ -144,7 +144,7 @@
             // 
             cbComponentesEmisiones.AutoSize = true;
             cbComponentesEmisiones.Dock = DockStyle.Fill;
-            cbComponentesEmisiones.ForeColor = Color.FromArgb(159, 34, 65);
+            cbComponentesEmisiones.ForeColor = Color.Black;
             cbComponentesEmisiones.Location = new Point(3, 297);
             cbComponentesEmisiones.Name = "cbComponentesEmisiones";
             cbComponentesEmisiones.Size = new Size(542, 36);
@@ -156,7 +156,7 @@
             // 
             cbNeumaticos.AutoSize = true;
             cbNeumaticos.Dock = DockStyle.Fill;
-            cbNeumaticos.ForeColor = Color.FromArgb(159, 34, 65);
+            cbNeumaticos.ForeColor = Color.Black;
             cbNeumaticos.Location = new Point(3, 255);
             cbNeumaticos.Name = "cbNeumaticos";
             cbNeumaticos.Size = new Size(542, 36);
@@ -168,7 +168,7 @@
             // 
             cbFugasMotorTrans.AutoSize = true;
             cbFugasMotorTrans.Dock = DockStyle.Fill;
-            cbFugasMotorTrans.ForeColor = Color.FromArgb(159, 34, 65);
+            cbFugasMotorTrans.ForeColor = Color.Black;
             cbFugasMotorTrans.Location = new Point(3, 213);
             cbFugasMotorTrans.Name = "cbFugasMotorTrans";
             cbFugasMotorTrans.Size = new Size(542, 36);
@@ -180,7 +180,7 @@
             // 
             cbTuboEscape.AutoSize = true;
             cbTuboEscape.Dock = DockStyle.Fill;
-            cbTuboEscape.ForeColor = Color.FromArgb(159, 34, 65);
+            cbTuboEscape.ForeColor = Color.Black;
             cbTuboEscape.Location = new Point(3, 171);
             cbTuboEscape.Name = "cbTuboEscape";
             cbTuboEscape.Size = new Size(542, 36);
@@ -192,7 +192,7 @@
             // 
             cbPortaFiltroAire.AutoSize = true;
             cbPortaFiltroAire.Dock = DockStyle.Fill;
-            cbPortaFiltroAire.ForeColor = Color.FromArgb(159, 34, 65);
+            cbPortaFiltroAire.ForeColor = Color.Black;
             cbPortaFiltroAire.Location = new Point(3, 129);
             cbPortaFiltroAire.Name = "cbPortaFiltroAire";
             cbPortaFiltroAire.Size = new Size(542, 36);
@@ -204,7 +204,7 @@
             // 
             cbBayonetaAceite.AutoSize = true;
             cbBayonetaAceite.Dock = DockStyle.Fill;
-            cbBayonetaAceite.ForeColor = Color.FromArgb(159, 34, 65);
+            cbBayonetaAceite.ForeColor = Color.Black;
             cbBayonetaAceite.Location = new Point(3, 87);
             cbBayonetaAceite.Name = "cbBayonetaAceite";
             cbBayonetaAceite.Size = new Size(542, 36);
@@ -216,7 +216,7 @@
             // 
             cbTaponAceite.AutoSize = true;
             cbTaponAceite.Dock = DockStyle.Fill;
-            cbTaponAceite.ForeColor = Color.FromArgb(159, 34, 65);
+            cbTaponAceite.ForeColor = Color.Black;
             cbTaponAceite.Location = new Point(3, 45);
             cbTaponAceite.Name = "cbTaponAceite";
             cbTaponAceite.Size = new Size(542, 36);
@@ -228,7 +228,7 @@
             // 
             cbTaponCombustible.AutoSize = true;
             cbTaponCombustible.Dock = DockStyle.Fill;
-            cbTaponCombustible.ForeColor = Color.FromArgb(159, 34, 65);
+            cbTaponCombustible.ForeColor = Color.Black;
             cbTaponCombustible.Location = new Point(3, 3);
             cbTaponCombustible.Name = "cbTaponCombustible";
             cbTaponCombustible.Size = new Size(542, 36);
@@ -261,7 +261,7 @@
             lblPlaca.Dock = DockStyle.Fill;
             lblPlaca.FlatStyle = FlatStyle.Flat;
             lblPlaca.Font = new Font("Segoe UI", 36F);
-            lblPlaca.ForeColor = Color.FromArgb(159, 34, 65);
+            lblPlaca.ForeColor = Color.Black;
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
             lblPlaca.Size = new Size(242, 143);
@@ -274,7 +274,7 @@
             lblOdometro.AutoSize = true;
             lblOdometro.Dock = DockStyle.Fill;
             lblOdometro.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblOdometro.ForeColor = Color.FromArgb(159, 34, 65);
+            lblOdometro.ForeColor = Color.Black;
             lblOdometro.Location = new Point(3, 164);
             lblOdometro.Name = "lblOdometro";
             lblOdometro.Size = new Size(242, 65);
@@ -294,7 +294,7 @@
             // 
             // pnlRellenoOdometro
             // 
-            pnlRellenoOdometro.BackColor = Color.FromArgb(188, 149, 92);
+            pnlRellenoOdometro.BackColor = Color.Transparent;
             pnlRellenoOdometro.Dock = DockStyle.Fill;
             pnlRellenoOdometro.Location = new Point(3, 146);
             pnlRellenoOdometro.Name = "pnlRellenoOdometro";
@@ -342,7 +342,7 @@
             lblTitulo.Dock = DockStyle.Fill;
             lblTitulo.FlatStyle = FlatStyle.Flat;
             lblTitulo.Font = new Font("Segoe UI", 48F);
-            lblTitulo.ForeColor = Color.FromArgb(159, 34, 65);
+            lblTitulo.ForeColor = Color.Black;
             lblTitulo.Location = new Point(0, 0);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(524, 86);

@@ -5,7 +5,8 @@ namespace Apps_Visual {
             ApplicationConfiguration.Initialize();
             //Application.Run(new ObdAppGUI.frmBASE());
             //Application.Run(new ObdAppGUI.Views.frmAuth());
-            Application.Run(new ObdAppGUI.Views.frmCapturaVisual());
+            //Application.Run(new ObdAppGUI.Views.frmCapturaVisual());
+            Application.Run(new ObdAppGUI.Views.frmOBD());
         }
     }
 }

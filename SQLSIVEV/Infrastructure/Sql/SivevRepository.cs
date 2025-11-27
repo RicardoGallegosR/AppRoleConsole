@@ -490,24 +490,34 @@ namespace SQLSIVEV.Infrastructure.Sql {
         public async Task<CapturaInspeccionObdSetResult> SpAppCapturaInspeccionObdSetAsync(
                                                                                             SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId,
                                                                                             string vehiculoId,            // @vcVehiculoId (VIN leído por OBD o 'DESCONOCIDO')
-                                                                                            byte tiConexionObd,           // @tiConexionObd
+                                                                                            byte ? tiConexionObd,           // @tiConexionObd
                                                                                             string protocoloObd,          // @vcProtocoloObd (p.ej. 'ISO 15765-4 CAN 11/500')
-                                                                                            byte tiIntentos,              // @tiIntentos
-                                                                                            byte tiMil,                   // @tiMil (bits: usr/obd)
-                                                                                            byte siFallas,                // @siFallas  (tinyint en SP, sí: usa byte)
+                                                                                            byte ? tiIntentos,              // @tiIntentos
+                                                                                            byte ? tiMil,                   // @tiMil (bits: usr/obd)
+                                                                                            byte ? siFallas,                // @siFallas  (tinyint en SP, sí: usa byte)
                                                                                             string codError,              // @vcCodigoError
                                                                                             string codErrorPend,          // @vcCodigoErrorPendiente
-                                                                                            byte tiSdciic, byte tiSecc, byte tiSc, byte tiSso, byte tiSci, byte tiSccc, byte tiSe, byte tiSsa, byte tiSfaa, byte tiScso, byte tiSrge,
-                                                                                            decimal voltsSwOff,           // @dVoltsSwOff  decimal(4,1)
-                                                                                            decimal voltsSwOn,            // @dVoltsSwOn   decimal(4,1)
-                                                                                            short rpmOff,                 // @siRpmOff     smallint
-                                                                                            short rpmOn,                  // @siRpmOn      smallint
-                                                                                            short rpmCheck,               // @siRpmCheck   smallint
-                                                                                            bool leeMonitores,            // @bLeeMonitores
-                                                                                            bool leeDtc,                  // @bLeeDtc
-                                                                                            bool leeDtcPend,              // @bLeeDtcPend
-                                                                                            bool leeVin,                  // @bLeeVin
-                                                                                            short codigoProtocolo,        // @siCodigoProtocolo (smallint)
+                                                                                            byte ? tiSdciic, 
+                                                                                            byte ? tiSecc, 
+                                                                                            byte ? tiSc, 
+                                                                                            byte ? tiSso,
+                                                                                            byte ? tiSci, 
+                                                                                            byte ? tiSccc,
+                                                                                            byte ? tiSe,
+                                                                                            byte ? tiSsa,
+                                                                                            byte ? tiSfaa,
+                                                                                            byte ? tiScso,
+                                                                                            byte ? tiSrge,
+                                                                                            decimal ? voltsSwOff,           // @dVoltsSwOff  decimal(4,1)
+                                                                                            decimal ? voltsSwOn,            // @dVoltsSwOn   decimal(4,1)
+                                                                                            short ? rpmOff,                 // @siRpmOff     smallint
+                                                                                            short ? rpmOn,                  // @siRpmOn      smallint
+                                                                                            short ? rpmCheck,               // @siRpmCheck   smallint
+                                                                                            bool ? leeMonitores,            // @bLeeMonitores
+                                                                                            bool ? leeDtc,                  // @bLeeDtc
+                                                                                            bool ? leeDtcPend,              // @bLeeDtcPend
+                                                                                            bool ? leeVin,                  // @bLeeVin
+                                                                                            short ? codigoProtocolo,        // @siCodigoProtocolo (smallint)
                                                                                             CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);

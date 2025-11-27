@@ -13,8 +13,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         public Elm327(string portName, int baud = 38400, int readTimeoutMs = 3000, int writeTimeoutMs = 1000) {
             // Acepta \\.\COMX o COMX
-            var p = portName.StartsWith(@"\\.\", StringComparison.OrdinalIgnoreCase)
-                    ? portName.Substring(4) : portName;
+            var p = portName.StartsWith(@"\\.\", StringComparison.OrdinalIgnoreCase) ? portName.Substring(4) : portName;
 
             _port = new SerialPort(p, baud) {
                 Parity = Parity.None,
@@ -163,7 +162,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             var resp = ExecRaw("0902", 10000);
 
             // Tokeniza en bytes hex de 2 dígitos
-            var hex = System.Text.RegularExpressions.Regex.Matches(resp, "[0-9A-Fa-f]{2}")
+            var hex = Regex.Matches(resp, "[0-9A-Fa-f]{2}")
                         .Select(m => m.Value.ToUpperInvariant())
                         .ToList();
 
@@ -171,7 +170,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             var parts = new Dictionary<string, List<byte>>();
 
             for (int i = 0; i + 2 < hex.Count; i++) {
-                if (hex[i] == "49" && hex[i + 1] == "02" && System.Text.RegularExpressions.Regex.IsMatch(hex[i + 2], "^0[0-9A-F]$")) {
+                if (hex[i] == "49" && hex[i + 1] == "02" && Regex.IsMatch(hex[i + 2], "^0[0-9A-F]$")) {
                     string part = hex[i + 2];   // "01","02","03","04",...
                     if (!parts.TryGetValue(part, out var list)) {
                         list = new List<byte>(8);
@@ -184,7 +183,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     while (j < hex.Count) {
                         // ¿nuevo bloque 49 02 xx? Entonces termina esta parte
                         if (j + 2 < hex.Count && hex[j] == "49" && hex[j + 1] == "02" &&
-                            System.Text.RegularExpressions.Regex.IsMatch(hex[j + 2], "^0[0-9A-F]$"))
+                            Regex.IsMatch(hex[j + 2], "^0[0-9A-F]$"))
                             break;
 
                         if (byte.TryParse(hex[j], NumberStyles.HexNumber, null, out var b)) {
@@ -345,7 +344,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
         // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
-        private System.Collections.Generic.List<string> ReadDtcsInternal(string cmd, string respPrefix) {
+        private List<string> ReadDtcsInternal(string cmd, string respPrefix) {
             // Salida limpia para evitar headers y bytes de transporte
             ExecRaw("ATCAF1", 600);  // auto-format ON
             ExecRaw("ATH0", 600);  // sin headers
@@ -361,7 +360,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             // Busca el prefijo de respuesta (43 para 03, 47 para 07)
             int k = tokens.FindIndex(t => t == respPrefix);
-            if (k < 0) return new System.Collections.Generic.List<string>();
+            if (k < 0) return new List<string>();
 
             // Bytes de datos después del prefijo
             var data = new List<byte>();
@@ -378,7 +377,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 data.RemoveAt(0);
 
             // Forma pares A,B y decodifica, ignorando 00 00 (padding)
-            var dtcs = new System.Collections.Generic.List<string>();
+            var dtcs = new List<string>();
             for (int i = 0; i + 1 < data.Count; i += 2) {
                 byte A = data[i], B = data[i + 1];
                 if (A == 0x00 && B == 0x00) continue;
@@ -393,13 +392,13 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             }
             return dtcs;
         }
-        public System.Collections.Generic.List<string> ReadStoredDtcs()
+        public List<string> ReadStoredDtcs()
             => ReadDtcsInternal("03", "43");  // modo 03 → respuesta 43     
 
-        public System.Collections.Generic.List<string> ReadCurrentDtcs()
+        public List<string> ReadCurrentDtcs()
             => ReadDtcsInternal("07", "47");  // modo 07 → respuesta 47
 
-        public System.Collections.Generic.List<string> ReadPermanentDtcs()
+        public List<string> ReadPermanentDtcs()
             => ReadDtcsInternal("0A", "4A");  // modo 0A → respuesta 4A
 
 
@@ -437,7 +436,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 };
 
                 // Heurística estándar: bit 3 de B indica tipo de ignición:
-                // 0 = Spark (gasolina), 1 = Compression (diésel)
+                // 0 = Spark        (gasolina),
+                // 1 = Compression  (diésel)
                 bool compressionIgnition = (B & 0x08) != 0;
 
                 // Monitores "continuos" (se reportan siempre en B y su "complete" en C)
@@ -452,14 +452,24 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 AddCont("COMPONENT_MONITORING", 2);
 
                 // Para los no continuos:
-                // Spark:   disponibilidad en C, complete en D, bits 0..7:
-                //          [0]CATALYST, [1]HEATED_CATALYST, [2]EVAPORATIVE_SYSTEM,
-                //          [3]SECONDARY_AIR_SYSTEM, [4]A/C_REFRIGERANT,
-                //          [5]OXYGEN_SENSOR, [6]OXYGEN_SENSOR_HEATER, [7]EGR_VVT_SYSTEM
+                // Spark(gasolina): disponibilidad en C, complete en D, bits 0..7:
+                //          [0]CATALYST,
+                //          [1]HEATED_CATALYST,
+                //          [2]EVAPORATIVE_SYSTEM,
+                //          [3]SECONDARY_AIR_SYSTEM,
+                //          [4]A/C_REFRIGERANT,
+                //          [5]OXYGEN_SENSOR,
+                //          [6]OXYGEN_SENSOR_HEATER,
+                //          [7]EGR_VVT_SYSTEM
+
                 // Diesel:  disponibilidad en C, complete en D, bits típicos:
                 //          usaremos un mapeo común en la práctica: 
-                //          [0]NMHC_CATALYST, [1]NOX_SCR_AFTERTREATMENT, [2]BOOST_PRESSURE,
-                //          [3]EXHAUST_GAS_SENSOR, [4]PM_FILTER, [7]EGR_VVT_SYSTEM
+                //          [0].-NMHC_CATALYST,
+                //          [1].-NOX_SCR_AFTERTREATMENT,
+                //          [2].-BOOST_PRESSURE,
+                //          [3].-EXHAUST_GAS_SENSOR,
+                //          [4].-PM_FILTER,
+                //          [7].-EGR_VVT_SYSTEM
                 if (!compressionIgnition) {
                     var sparkMap = new (string name, int bit)[] {
                         ("CATALYST_MONITORING", 0),
