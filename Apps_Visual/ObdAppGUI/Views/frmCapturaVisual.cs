@@ -26,7 +26,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private float _fontSizeInicial;
 
 
-        /*
+        //*
         public Guid _estacionId = Guid.Empty, _accesoId = Guid.Empty;
         
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
@@ -39,11 +39,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
         
         
         private Guid _verificacionId = Guid.Empty;
-
-
         public byte _protocoloVerificacíon;
 
-        //*
+        /*
         private Guid _estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
         private Guid _accesoId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
 

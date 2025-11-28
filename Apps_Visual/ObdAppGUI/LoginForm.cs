@@ -34,6 +34,7 @@ namespace Apps_Visual.ObdAppGUI {
             VerificacionId , PlacaId;
 
         private Guid _estacionId = Guid.Empty;
+        private Guid _AccesoIdObtenido = Guid.Empty;
         private short opcionMenu;
         private TaskCompletionSource<bool>? _tcsAcceso;
         private int MensajeId, odometro, credencial;
@@ -46,10 +47,6 @@ namespace Apps_Visual.ObdAppGUI {
         private readonly ILogger _baseLog;
         private readonly string  _usedDir;
 
-        /*
-        int credencial = 16499;
-        string passCredencial = "PASS1234";
-        */
 
         private HomeView home;
         private frmAuth frmcredenciales;
@@ -319,7 +316,6 @@ namespace Apps_Visual.ObdAppGUI {
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
                 frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
-                //return true;
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
@@ -356,32 +352,30 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Clear();
 
             
-            if (frmcredenciales == null || frmcredenciales.IsDisposed) {
-                frmcredenciales = new frmAuth();
-                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+            if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                CapturaVisual = new frmCapturaVisual();
+                //frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
                 //return true;
             }
-            /*
-            frmcredenciales.panelX = pnlPanelCambios.Width;
-            frmcredenciales.panelY = pnlPanelCambios.Height;
+            //*
+            CapturaVisual.panelX = pnlPanelCambios.Width;
+            CapturaVisual.panelY = pnlPanelCambios.Height;
 
 
             ///*
-            frmcredenciales.estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
+            CapturaVisual._estacionId = _estacionId;
 
 
-            frmcredenciales.SERVER = SERVER;
-            frmcredenciales.DB = DB;
-            frmcredenciales.SQL_USER = SQL_USER;
-            frmcredenciales.SQL_PASS = SQL_PASS;
-            frmcredenciales.appName = APPNAME;
-            frmcredenciales.APPROLE = RollAccesoVisual;
-            frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
-            frmcredenciales.opcionMenu = opcionMenu;
-            
+            CapturaVisual.SERVER = SERVER;
+            CapturaVisual.DB = DB;
+            CapturaVisual.SQL_USER = SQL_USER;
+            CapturaVisual.SQL_PASS = SQL_PASS;
+            CapturaVisual.appName = APPNAME;
+            CapturaVisual.APPROLE = RollAccesoVisual;
+            CapturaVisual.APPROLE_PASS = RollAccesoVisualAcceso;
+            CapturaVisual._accesoId = _AccesoIdObtenido;
 
-
-            pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
+            pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
             //*/
 
 
@@ -455,6 +449,7 @@ namespace Apps_Visual.ObdAppGUI {
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
             if (ok) {
+                _AccesoIdObtenido = accesoObtenido;
                 pnlPanelCambios.Controls.Clear();
                 frmcredenciales.Dispose();
                 frmcredenciales = null;
