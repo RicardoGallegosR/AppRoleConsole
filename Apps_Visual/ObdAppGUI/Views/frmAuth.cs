@@ -38,7 +38,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbPassword.TextChanged += (s, ev) => SanitizeByRegex(txbPassword, @"[^a-zA-Z0-9]");
             txbCredencial.MaxLength = 6;
             txbPassword.MaxLength = 32;
-            
+            txbCredencial.Focus();
+
             txbCredencial.PreviewKeyDown += txbCredencial_PreviewKeyDown;
             txbCredencial.TextChanged += txbCredencial_TextChanged; // solo este
         }
@@ -81,6 +82,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                         opcionMenu: opcionMenu,
                                         credencial: credencial
                                     );
+                    /*
+                    MessageBox.Show($@"
+                        SERVER: {SERVER}, DB: {DB}, SQL_USER: {SQL_USER}, SQL_PASS: {SQL_PASS}
+                       appName: {appName},  APPROLE {APPROLE} APPROLE_PASS {APPROLE_PASS}
+                        estacionId {estacionId}
+                        ");
+                    */
                     if (r.MensajeId == 0) {
                         lblCredencial.Enabled = false;
                         txbCredencial.Enabled = false;
@@ -93,6 +101,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             btnAcceder.Visible = true;
                             txbPassword.Enabled = true;
                             txbPassword.Visible = true;
+                            txbPassword.Focus();
                             lblPassword.Visible = true;
 
                         } else {
@@ -101,24 +110,26 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     } else {
                         var repo = new SivevRepository();
                         try {
-                            using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                            await connApp.OpenAsync();
-                            using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                                try {
-                                    var rMensaje = await repo.PrintIfMsgAsync(connApp, "Fallo en CredencialExisteHuella()", r.MensajeId);
-                                    MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() Mesaje: {rMensaje.Mensaje}");
+                            using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
+                                await connApp.OpenAsync();
+                                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                                    try {
+                                        var rMensaje = await repo.PrintIfMsgAsync(connApp, $"Fallo en CredencialExisteHuella()", r.MensajeId);
+                                        MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() con la credencial {credencial} Mensaje: {rMensaje.Mensaje}");
 
-                                } catch (Exception ex) {
-                                    MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                                    } catch (Exception ex) {
+                                        MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial {credencial}: {ex.Message}");
+                                    }
                                 }
+
                             }
                         } catch (Exception ex2) {
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex2.Message}");
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial {credencial}: {ex2.Message}");
                         }
                         txbCredencial.Text = string.Empty;
                     }
                 } else {
-                    MostrarMensaje($"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}");
+                    //MostrarMensaje($"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}");
                 }
             }
         }
@@ -147,6 +158,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             btnAcceder.Enabled = false;
             txbPassword.Enabled = false;
             lblPassword.Enabled = false;
+            txbCredencial.Focus();
 
             var r = await GetAccesoSQL(
                                         SERVER: SERVER,
@@ -159,12 +171,20 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                         estacionId: estacionId,
                                         opcionMenu: opcionMenu,
                                         credencial: credencial
-                );
+            );
+            Guid accesoNormalizado = Guid.Empty;
+            if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
+                accesoNormalizado = r.AccesoId;
+            }
+            AccesoObtenido?.Invoke(accesoNormalizado);
 
-            accesoId = r.AccesoId;
-            AccesoObtenido?.Invoke(accesoId);
-
-
+            if (accesoNormalizado == Guid.Empty) {
+                btnAcceder.Enabled = true;
+                txbPassword.Text = "";
+                txbPassword.Enabled = true;
+                lblPassword.Enabled = true;
+                txbPassword.Focus();
+            }
         }
 
         private async Task<AccesoIniciaResult>  GetAccesoSQL (string SERVER, string DB, string SQL_USER, string SQL_PASS, 
@@ -190,7 +210,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                         if (_mensaje != 0) {
                             var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCredencialExisteHuella MensajeId {_mensaje}", _mensaje);
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella MensajeId = {_mensaje}: {error.Mensaje}");
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella :( MensajeId = {_mensaje}: {error.Mensaje}");
                             ResetForm();
                         } 
                     } catch (Exception ex) {
@@ -233,11 +253,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             MostrarMensaje($"Error en SpAppCredencialExisteHuella {error.Mensaje}");
                         }
                     } catch (Exception ex) {
-                        MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                        MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} : {ex.Message}");
                     } 
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
+                MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} :  {e.Message}");
             }
 
             return new CredencialExisteHuellaResult {
@@ -274,7 +294,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void ResetForm() {
             lblCredencial.Enabled = true;
             txbCredencial.Enabled = true;
-
+            
             btnAcceder.Enabled = false;
             btnAcceder.Visible = false;
             txbPassword.Enabled = false;
@@ -288,6 +308,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 pnlPrincipal.Size = new Size((int)Math.Ceiling(.98 * panelX), (int)Math.Ceiling(.95 * panelY));
                 pnlPrincipal.Location = new Point((int)Math.Ceiling(.004 * panelX), 0);
             }
+            txbCredencial.Focus();
         }
 
 
@@ -295,7 +316,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void txbPassword_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
                 if (txbPassword.Text.Length < 4) {
-                    MessageBox.Show("Debe tener mínimo 4 caracteres.");
+                    MostrarMensaje("Debe tener mínimo 4 caracteres.");
                     return;
                 }else {
                     ActivacionBotonAcceder();

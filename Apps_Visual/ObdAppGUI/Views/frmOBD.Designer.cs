@@ -209,7 +209,6 @@
             tlpPrincipal.RowStyles.Add(new RowStyle());
             tlpPrincipal.Size = new Size(835, 589);
             tlpPrincipal.TabIndex = 2;
-            //tlpPrincipal.Paint += tlpPrincipal_Paint;
             // 
             // lblResultado
             // 
@@ -862,7 +861,6 @@
             lblSecondaryAirSystem.Size = new Size(144, 15);
             lblSecondaryAirSystem.TabIndex = 0;
             lblSecondaryAirSystem.Text = "Secondary Air System (SE)";
-            //lblSecondaryAirSystem.Click += lblSecondaryAirSystem_Click;
             // 
             // lblOxygenSensor
             // 
@@ -881,7 +879,6 @@
             lblDisponibleOxygenSensor.Size = new Size(21, 15);
             lblDisponibleOxygenSensor.TabIndex = 0;
             lblDisponibleOxygenSensor.Text = "no";
-            //lblDisponibleOxygenSensor.Click += lblDisponibleOxygenSensor_Click;
             // 
             // lblCompletoOxygenSensor
             // 

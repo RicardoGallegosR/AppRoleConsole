@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Devices.Obd;
 using SQLSIVEV.Infrastructure.Security;
 using SQLSIVEV.Infrastructure.Sql;
+using SQLSIVEV.Infrastructure.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +14,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SQLSIVEV.Infrastructure.Utils;
 
 
 
@@ -31,13 +32,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region Credenciales de la bdd
         /*
-        public string   SERVER = string.Empty, 
-                        DB = string.Empty, 
-                        SQL_USER = string.Empty, 
-                        SQL_PASS = string.Empty,
-                        appName = string.Empty, 
-                        APPROLE = string.Empty, 
-                        APPROLE_PASS = string.Empty;
+        public string   _SERVER = string.Empty, 
+                        _DB = string.Empty, 
+                        _SQL_USER = string.Empty, 
+                        _SQL_PASS = string.Empty,
+                        _appName = string.Empty, 
+                        _APPROLE = string.Empty, 
+                        _APPROLE_PASS = string.Empty;
         
         public Guid     _accesoId = Guid.Empty,
                         _verificacionId = Guid.Empty,
@@ -50,15 +51,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private Guid _verificacionId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
 
         private string
-            SERVER = "192.168.16.8",
-            DB = "SIVEV",
-            SQL_USER = "SivevCentros",
-            SQL_PASS = "CentrosSivev",
-            appName = "SivAppVfcVisual",
-            APPROLE = "RollVfcVisual",
-            APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
+            _SERVER = "192.168.16.8",
+            _DB = "SIVEV",
+            _SQL_USER = "SivevCentros",
+            _SQL_PASS = "CentrosSivev",
+            _appName = "SivAppVfcVisual",
+            _APPROLE = "RollVfcVisual",
+            _APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
 
-        public int credencial = 0, panelX = 0, panelY = 0;
+        public int _credencial = 0, _panelX = 0, _panelY = 0;
 
         #endregion
 
@@ -81,7 +82,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             btnFinalizarPruebaOBD.Enabled = false;
             this.Resize += frmCapturaVisual_Resize;
         }
-
+        #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
             btnConectar.Text = "Conectando ...";
             lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_placa}";
@@ -98,6 +99,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //LecturasIniciales a = randy.LecturasPrincipales();
             ResultadoOBD = randy.SpSetObd();
 
+            #region Asignacion de Monitores
             lblCompletoComponent.Text = GetCompletoText(ResultadoOBD.Sc);
             lblDisponibleComponent.Text = GetDisponibleText(ResultadoOBD.Sc);
 
@@ -130,7 +132,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblCompletoOxygenSensorHeater.Text = GetCompletoText(ResultadoOBD.Srge);
             lblDisponibleOxygenSensorHeater.Text = GetDisponibleText(ResultadoOBD.Srge);
-
+            #endregion
 
 
 
@@ -173,6 +175,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             tlpMonitores.Visible = true;
             btnFinalizarPruebaOBD.Enabled = true;
         }
+        #endregion
+
 
         #region ResetPanel
         private void ResetForm() {
@@ -280,19 +284,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         accesoId: AccesoId,
                         verificacionId: verificacionId,
 
-
-
                         vehiculoId: o.VehiculoId,
                         tiConexionObd: o.ConexionOb,
                         protocoloObd: o.ProtocoloObd,
-
                         tiIntentos: o.Intentos,
-
                         tiMil: o.Mil,
                         siFallas: o.Fallas,
                         codError: o.CodError,
                         codErrorPend: o.CodErrorPend,
-
                         tiSdciic: o.Sdciic,
                         tiSecc: o.Secc,
                         tiSc: o.Sc,
@@ -304,13 +303,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         tiSfaa: o.Sfaa,
                         tiScso: o.Scso,
                         tiSrge: o.Srge,
-
                         voltsSwOff: o.VoltsSwOff,
                         voltsSwOn: o.VoltsSwOn,
-
                         rpmOff: o.RpmOff,
                         rpmOn: o.RpmOn,
-
                         rpmCheck: o.RpmCheck,
                         leeMonitores: o.LeeMonitores,
                         leeDtc: o.LeeDtc,
@@ -626,8 +622,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         #region INSERTAR EN LA BDD
-        private void btnFinalizarPruebaOBD_Click(object sender, EventArgs e) {
-
+        private async void btnFinalizarPruebaOBD_Click(object sender, EventArgs e) {
+            await CapturaInspeccionVisual(SERVER: _SERVER, DB: _DB, SQL_USER: _SQL_USER, SQL_PASS: _SQL_PASS,
+                                    appName: _appName, APPROLE: _APPROLE, APPROLE_PASS: _APPROLE_PASS,
+                                    estacionId: _estacionId, AccesoId: _accesoId, verificacionId: _verificacionId,
+                                    o: ResultadoOBD);
         }
         #endregion
 

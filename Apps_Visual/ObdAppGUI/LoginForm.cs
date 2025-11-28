@@ -30,10 +30,12 @@ namespace Apps_Visual.ObdAppGUI {
     public partial class frmBASE : Form {
         #region Variables para funcionamiento
         private string SERVER, DB, SQL_USER, SQL_PASS, APPNAME, APPROLE, APPROLE_PASS,
-            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId, accesoId,
+            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId, _accesoId,
             VerificacionId , PlacaId;
 
+        private Guid _estacionId = Guid.Empty;
         private short opcionMenu;
+        private TaskCompletionSource<bool>? _tcsAcceso;
         private int MensajeId, odometro, credencial;
 
         private byte ProtocoloVerificacionId, combustible,  tiTaponCombustible,
@@ -172,6 +174,8 @@ namespace Apps_Visual.ObdAppGUI {
             estacionId = AppConfig.CredencialesRegEdit.EstacionId() ?? "";
             claveAccesoId = AppConfig.CredencialesRegEdit.ClaveAccesoId() ?? "";
 
+            _estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
+
             using (Serilog.Context.LogContext.PushProperty("Where", "Apps_Visual.ObdAppGUI.LecturaRegedit")) {
                 Log.Information(
                 "|| Lectura de REGEDIT " +
@@ -236,6 +240,7 @@ namespace Apps_Visual.ObdAppGUI {
         }
         #endregion
 
+        #region metodo home
         private void pnlHome() {
             Log.Information("pnlHome se accede para el inicio del panel de home");
             btnInspecionVisual.Enabled = true;
@@ -252,16 +257,16 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Add(home.GetPanel());
             pnlPanelCambios.Dock = DockStyle.Fill;
         }
+        #endregion
 
-        
-
+        #region Inicio de inspeccion visual
         private async void LoginForm_Load(object sender, EventArgs e) {
             //Application.Exit();
             //Close();
             //await InicioAsync();
         }
 
-
+        #endregion
 
         private async void btnInspecionVisual_Click(object sender, EventArgs e){
             btnInspecionVisual.Enabled = false;
@@ -284,12 +289,17 @@ namespace Apps_Visual.ObdAppGUI {
                 audit.Information("Se inicializa prueba.");
 
                 await ValidarHuella();
-                audit.Information($"Se guarda con el accesoId: {accesoId}");
+                audit.Information($"Se guarda con el accesoId: {_accesoId}");
 
 
                 // Validamos Verificacion 
-                await ValidaVerificación();
+                bool accesoValido = await ValidaCredencial();
 
+                if (!accesoValido) {
+                    return;
+                }
+                
+                await ListadoVisual();
 
                 //await ListadoVisual();
 
@@ -299,15 +309,59 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
 
-        private async Task<bool> ValidaVerificación() {
+        private async Task<bool> ValidaCredencial() {
+            _tcsAcceso = new TaskCompletionSource<bool>();
+
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
+            ///*
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
                 frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
                 //return true;
             }
+            frmcredenciales.panelX = pnlPanelCambios.Width;
+            frmcredenciales.panelY = pnlPanelCambios.Height;
+
+
+            ///*
+            frmcredenciales.estacionId = _estacionId;
+
+
+            frmcredenciales.SERVER = SERVER;
+            frmcredenciales.DB = DB;
+            frmcredenciales.SQL_USER = SQL_USER;
+            frmcredenciales.SQL_PASS = SQL_PASS;
+            frmcredenciales.appName = APPNAME;
+            frmcredenciales.APPROLE = RollAccesoVisual;
+            frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
+            frmcredenciales.opcionMenu = opcionMenu;
+            
+
+
+            pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
+
+            bool ok = await _tcsAcceso.Task;
+            return ok;
+        }
+
+
+
+
+
+        private async Task<bool> ListadoVisual() {
+            foreach (Control c in pnlPanelCambios.Controls)
+                c.Dispose();
+            pnlPanelCambios.Controls.Clear();
+
+            
+            if (frmcredenciales == null || frmcredenciales.IsDisposed) {
+                frmcredenciales = new frmAuth();
+                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                //return true;
+            }
+            /*
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
 
@@ -324,21 +378,11 @@ namespace Apps_Visual.ObdAppGUI {
             frmcredenciales.APPROLE = RollAccesoVisual;
             frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
             frmcredenciales.opcionMenu = opcionMenu;
-            //*/
+            
 
 
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
-
-            return false;
-        }
-
-
-
-
-
-        private async Task<bool> ListadoVisual() {
-
-
+            //*/
 
 
             return false;
@@ -408,9 +452,14 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
 
-        private void Frmcredenciales_AccesoObtenido(Guid acceso) {
-            accesoId = acceso.ToString();  
-            MostrarMensaje($"Se muestra el acceso obtenido: {accesoId}");
+        private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
+            bool ok = accesoObtenido != Guid.Empty;
+            if (ok) {
+                pnlPanelCambios.Controls.Clear();
+                frmcredenciales.Dispose();
+                frmcredenciales = null;
+            }
+            _tcsAcceso?.TrySetResult(ok);
         }
         #endregion
     }
