@@ -24,9 +24,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
         //public string estacionId = string.Empty, accesoId;
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
             appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty;
+        private Size _formSizeInicial;
+        private float _fontSizeInicial;
+
         public int credencial = 0, panelX = 0, panelY = 0;
         public short opcionMenu = 0;
 
+        
 
         public bool ExisteHuella;
         public byte[] Huella;
@@ -42,6 +46,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             txbCredencial.PreviewKeyDown += txbCredencial_PreviewKeyDown;
             txbCredencial.TextChanged += txbCredencial_TextChanged; // solo este
+                                                                    //this.Resize += frmAuth_Resize;
+            _fontSizeInicial = this.Font.Size;
+            ResetForm();
         }
 
 
@@ -238,23 +245,24 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
-                        var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
-                        _resultado = rinicial.Resultado;
-                        _mensaje = rinicial.MensajeId;
-                        _existeHuella = rinicial.ExisteHuella;
-                        _huella = rinicial.Huella;
+                using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
+                    await connApp.OpenAsync();
+                    using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                        try {
+                            var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
+                            _resultado = rinicial.Resultado;
+                            _mensaje = rinicial.MensajeId;
+                            _existeHuella = rinicial.ExisteHuella;
+                            _huella = rinicial.Huella;
 
-                        if (_mensaje != 0) {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", _mensaje);
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella {error.Mensaje}");
+                            if (_mensaje != 0) {
+                                var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", _mensaje);
+                                MostrarMensaje($"Error en SpAppCredencialExisteHuella {error.Mensaje}");
+                            }
+                        } catch (Exception ex) {
+                            MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} : {ex.Message}");
                         }
-                    } catch (Exception ex) {
-                        MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} : {ex.Message}");
-                    } 
+                    }
                 }
             } catch (Exception e) {
                 MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} :  {e.Message}");
@@ -292,6 +300,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return pnlPrincipal;
         }
         private void ResetForm() {
+            this.Resize += frmAuth_Resize;
             lblCredencial.Enabled = true;
             txbCredencial.Enabled = true;
             
@@ -340,5 +349,59 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
             return 0;
         }
+
+        #region Tamaño de la letra en AUTOMATICO
+        private void frmAuth_Resize(object sender, EventArgs e) {
+            float factor = (float)this.Width / _formSizeInicial.Width;
+            ///*
+            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
+            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 35f));
+            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 40f));
+            //*/
+            
+            lblTituloLogin.Font = new Font(
+                lblTituloLogin.Font.FontFamily,
+                Titulo1,
+                lblTituloLogin.Font.Style
+            );
+
+            lblCredencial.Font = new Font(
+                lblCredencial.Font.FontFamily,
+                Titulo3,
+                lblCredencial.Font.Style
+            );
+            lblPassword.Font = new Font(
+                lblPassword.Font.FontFamily,
+                Titulo3,
+                lblPassword.Font.Style
+            );
+            txbCredencial.Font = new Font(
+                txbCredencial.Font.FontFamily,
+                Titulo3,
+                txbCredencial.Font.Style
+            );
+            txbPassword.Font = new Font(
+                txbPassword.Font.FontFamily,
+                Titulo3,
+                txbPassword.Font.Style
+            );
+
+            btnAcceder.Font = new Font(
+                btnAcceder.Font.FontFamily,
+                Titulo3,
+                btnAcceder.Font.Style
+            );
+            //*/
+
+        }
+        public void InicializarTamanoYFuente() {
+            if (panelX > 0 && panelY > 0) {
+                this.Size = new Size(panelX, panelY);
+            }
+            _formSizeInicial = this.Size;
+            _fontSizeInicial = lblTituloLogin.Font.Size;
+        }
+        #endregion
+
     }
 }

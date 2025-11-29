@@ -251,6 +251,7 @@ namespace Apps_Visual.ObdAppGUI {
             }
             home.panelX = pnlPanelCambios.Width;
             home.panelY = pnlPanelCambios.Height;
+            home.InicializarTamanoYFuente();
             pnlPanelCambios.Controls.Add(home.GetPanel());
             pnlPanelCambios.Dock = DockStyle.Fill;
         }
@@ -285,17 +286,18 @@ namespace Apps_Visual.ObdAppGUI {
             using (Serilog.Context.LogContext.PushProperty("Canal", "Audit")) {
                 audit.Information("Se inicializa prueba.");
 
-                await ValidarHuella();
-                audit.Information($"Se guarda con el accesoId: {_accesoId}");
+                //await ValidarHuella();
+                
 
 
                 // Validamos Verificacion 
                 bool accesoValido = await ValidaCredencial();
-
+                
                 if (!accesoValido) {
+                    audit.Information($"Acceso no valido: {accesoValido}");
                     return;
                 }
-                
+                audit.Information($"Se guarda con el accesoId: {_AccesoIdObtenido}");
                 await ListadoVisual();
 
                 //await ListadoVisual();
@@ -305,20 +307,22 @@ namespace Apps_Visual.ObdAppGUI {
             }
         }
 
-
+        #region Credenciales :D
         private async Task<bool> ValidaCredencial() {
             _tcsAcceso = new TaskCompletionSource<bool>();
 
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
+                
             pnlPanelCambios.Controls.Clear();
             ///*
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
-                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                //frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
+            frmcredenciales.InicializarTamanoYFuente();
 
 
             ///*
@@ -341,7 +345,7 @@ namespace Apps_Visual.ObdAppGUI {
             bool ok = await _tcsAcceso.Task;
             return ok;
         }
-
+        #endregion
 
 
 
@@ -360,12 +364,8 @@ namespace Apps_Visual.ObdAppGUI {
             //*
             CapturaVisual.panelX = pnlPanelCambios.Width;
             CapturaVisual.panelY = pnlPanelCambios.Height;
-
-
+            CapturaVisual.InicializarTamanoYFuente();
             ///*
-            CapturaVisual._estacionId = _estacionId;
-
-
             CapturaVisual.SERVER = SERVER;
             CapturaVisual.DB = DB;
             CapturaVisual.SQL_USER = SQL_USER;
@@ -374,29 +374,44 @@ namespace Apps_Visual.ObdAppGUI {
             CapturaVisual.APPROLE = RollAccesoVisual;
             CapturaVisual.APPROLE_PASS = RollAccesoVisualAcceso;
             CapturaVisual._accesoId = _AccesoIdObtenido;
+            CapturaVisual._estacionId = _estacionId;
 
             pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
             //*/
 
+            bool ok = await CapturaVisual.InicializarAsync();
+            //MostrarMensaje($"Respuesta de CapturaVisual {ok}");
+            if (ok) { 
+                //btnInspecionVisual.Enabled = true;
+            } else {
+                pnlPanelCambios.Controls.Clear();
+                CapturaVisual.Dispose();
+                CapturaVisual = null;
+                if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                    home = new HomeView();
+                    home.panelX = pnlPanelCambios.Width;
+                    home.panelY = pnlPanelCambios.Height;
+                    home.InicializarTamanoYFuente();
+                    pnlPanelCambios.Controls.Add(home.GetPanel());
+                    pnlPanelCambios.Dock = DockStyle.Fill;
+                    btnInspecionVisual.Enabled = true;
+                }
 
-            return false;
+            }
+                return ok;
         }
 
 
-
+        /*
         private async Task<bool> ValidarHuella( 
             
             ) {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
-            
-
-
-
             return false;
         }
-
+        */
 
 
         

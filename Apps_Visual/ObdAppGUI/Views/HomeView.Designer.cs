@@ -49,7 +49,7 @@
             // scpDoble
             // 
             scpDoble.Dock = DockStyle.Fill;
-            scpDoble.Location = new Point(0, 80);
+            scpDoble.Location = new Point(0, 128);
             scpDoble.Name = "scpDoble";
             // 
             // scpDoble.Panel1
@@ -59,7 +59,7 @@
             // scpDoble.Panel2
             // 
             scpDoble.Panel2.Controls.Add(lblVerificacionVehicularHomeView);
-            scpDoble.Size = new Size(900, 444);
+            scpDoble.Size = new Size(900, 396);
             scpDoble.SplitterDistance = 536;
             scpDoble.TabIndex = 0;
             scpDoble.TabStop = false;
@@ -70,7 +70,7 @@
             pbxCarro.Image = Properties.Resources.coche_electrico;
             pbxCarro.Location = new Point(0, 0);
             pbxCarro.Name = "pbxCarro";
-            pbxCarro.Size = new Size(536, 444);
+            pbxCarro.Size = new Size(536, 396);
             pbxCarro.SizeMode = PictureBoxSizeMode.CenterImage;
             pbxCarro.TabIndex = 1;
             pbxCarro.TabStop = false;
@@ -78,11 +78,11 @@
             // lblVerificacionVehicularHomeView
             // 
             lblVerificacionVehicularHomeView.Dock = DockStyle.Fill;
-            lblVerificacionVehicularHomeView.Font = new Font("Segoe UI", 24F);
+            lblVerificacionVehicularHomeView.Font = new Font("Segoe UI", 30F);
             lblVerificacionVehicularHomeView.ForeColor = Color.FromArgb(159, 34, 65);
             lblVerificacionVehicularHomeView.Location = new Point(0, 0);
             lblVerificacionVehicularHomeView.Name = "lblVerificacionVehicularHomeView";
-            lblVerificacionVehicularHomeView.Size = new Size(360, 444);
+            lblVerificacionVehicularHomeView.Size = new Size(360, 396);
             lblVerificacionVehicularHomeView.TabIndex = 0;
             lblVerificacionVehicularHomeView.Text = "VERIFICACIÓN\r\nVEHICULAR\r\n";
             lblVerificacionVehicularHomeView.TextAlign = ContentAlignment.MiddleCenter;
@@ -94,7 +94,7 @@
             lblSedemaTitulo.ForeColor = Color.FromArgb(159, 34, 65);
             lblSedemaTitulo.Location = new Point(0, 0);
             lblSedemaTitulo.Name = "lblSedemaTitulo";
-            lblSedemaTitulo.Size = new Size(900, 80);
+            lblSedemaTitulo.Size = new Size(900, 128);
             lblSedemaTitulo.TabIndex = 0;
             lblSedemaTitulo.Text = "SEDEMA";
             lblSedemaTitulo.TextAlign = ContentAlignment.MiddleCenter;

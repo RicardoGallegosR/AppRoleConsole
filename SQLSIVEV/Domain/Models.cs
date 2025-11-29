@@ -28,6 +28,13 @@
         public Guid BitacoraAplicacionId { get; init; }
     }
 
+    public sealed class SpAppAccesoFin {
+        public int iMensajeId { get; set; }
+        public short siResultado { get; set; }
+        public Guid uiEstacionId { get; set; }
+        public Guid uiAccesoId { get; set; }
+    }
+
     public sealed class SpAppProgramOnResult {
         public int ReturnCode { get; init; }
         public int MensajeId { get; init; }

@@ -61,6 +61,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
              tiTuboEscape = 0, tiFugasMotorTrans = 0, tiNeumaticos = 0, tiComponentesEmisiones = 0,
              tiMotorGobernado = 0;
 
+        private int _MensajeSQL = 0;
+
         public int odometro = 0;
 
         #endregion
@@ -85,7 +87,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             ConfigurarCheckBox(cbMotorGobernado, "Contiene Motor de Gobernado");
             InicializarMapaCapturaVisual();
             txbOdometro.KeyDown += txbOdometro_KeyDown;
-            this.Resize += frmCapturaVisual_Resize;
 
             ResetForm();
             //this.Load += frmCapturaVisual_Load;
@@ -93,7 +94,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
            
 
         }
+
+
         private async void frmCapturaVisual_Load(object sender, EventArgs e) {
+            
+            /*
             bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
             if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
@@ -118,7 +123,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     _verificacionId = r.VerificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
                     txbOdometro.Enabled = true;
-                    /*######################################*/
+                    //######################################
                     var r2 = await BanderasAEvaluar ( 
                         SERVER: SERVER,
                         DB: DB,
@@ -151,6 +156,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 pnlPrincipal.Controls.Clear();
                 HabilitarPruebas?.Invoke(true);
             }
+            //*/
         }
         #endregion
 
@@ -290,7 +296,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return pnlPrincipal;
         }
 
-        private void ResetForm() {
+        private async void ResetForm() {
+            this.Resize += frmCapturaVisual_Resize;
             cbBayonetaAceite.Enabled = false;
             cbBayonetaAceite.Visible = false;
             cbBayonetaAceite.Checked = false;
@@ -330,7 +337,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             btnSiguente.Enabled = false;
 
             txbOdometro.Enabled = false;
+            txbOdometro.Visible = false;
 
+            lblTitulo.Visible = false;
+            lblOdometro.Visible = false;
+            lblPlaca.Visible = false;
 
             if (panelX == 0 && panelY == 0) {
                 pnlPrincipal.Size = new Size(Width, Height);
@@ -341,6 +352,96 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
         #endregion
+        
+        
+        public async Task<bool> InicializarAsync() {
+            lblTitulo.Visible = true;
+            lblTitulo.Text = "Buscando Verificaciones disponibles";
+            bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
+
+            if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
+                && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS)
+                && _estacionId != Guid.Empty
+                && _accesoId != Guid.Empty) {
+
+                var r = await GetAccesoSQLVerificaciones(
+                    SERVER: SERVER,
+                    DB: DB,
+                    SQL_USER: SQL_USER,
+                    SQL_PASS: SQL_PASS,
+                    appName: appName,
+                    APPROLE: APPROLE,
+                    APPROLE_PASS: APPROLE_PASS,
+                    estacionId: _estacionId,
+                    AccesoId: _accesoId
+                );
+                _MensajeSQL = r.MensajeId;
+
+                if (_MensajeSQL == 0) {
+                    await Task.Delay(1000);
+                    //MostrarMensaje($"Verificacion encontrada: {r.VerificacionId}");
+
+                    lblTitulo.Text = "Inspección Visual";
+                    lblPlaca.Visible = true;
+                    lblOdometro.Visible = true;    
+                    txbOdometro.Visible = true;
+
+                    lblPlaca.Text = r.PlacaId;
+                    _placa = r.PlacaId;
+                    _verificacionId = r.VerificacionId;
+                    _protocoloVerificacíon = r.ProtocoloVerificacionId;
+                    txbOdometro.Enabled = true;
+                    var r2 = await BanderasAEvaluar(
+                        SERVER: SERVER,
+                        DB: DB,
+                        SQL_USER: SQL_USER,
+                        SQL_PASS: SQL_PASS,
+                        appName: appName,
+                        APPROLE: APPROLE,
+                        APPROLE_PASS: APPROLE_PASS,
+                        estacionId: _estacionId,
+                        AccesoId: _accesoId,
+                        verificacionId: _verificacionId,
+                        elemento: "DESCONOCIDO",
+                        combustible: 0
+                    );
+
+                    if (r2.MensajeId == 0) {
+                        AplicarCapturaVisual(r2.Items);
+                    }
+
+                    // aquí podrías notificar _placa2 y _verificacionId2 si quieres
+                    _placa2?.Invoke(_placa);
+                    _verificacionId2?.Invoke(_verificacionId);
+
+                    return true; // inicialización OK
+                } else {
+                    if (_MensajeSQL != 0) {
+                        var repo = new SivevRepository();
+                        using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
+                            await connApp.OpenAsync();
+                            using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                                var error = await repo.PrintIfMsgAsync(connApp, "Error en GetAccesoSQLVerificaciones", _MensajeSQL);
+                                var fin = await repo.SpAppAccesoFinAsync(connApp, _estacionId, _accesoId);
+                                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
+                            }
+                        }
+                        
+                    }
+                    HabilitarPruebas?.Invoke(false);
+                    return false;
+                }
+            } else {
+                MostrarMensaje($"No se pasaron los datos de la configuración...\nSERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {_estacionId}");
+                foreach (Control c in pnlPrincipal.Controls)
+                    c.Dispose();
+                pnlPrincipal.Controls.Clear();
+                HabilitarPruebas?.Invoke(false);
+                return false;
+            }
+        }
+
+        
 
 
         #endregion
@@ -458,7 +559,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     }
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.BanderasAEvaluar: {e.Message}");
+                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.BanderasAEvaluar: {e.Message}");
                 result.MensajeId = -2;
                 result.Resultado = -2;
                 result.ReturnCode = -2;
@@ -499,6 +600,16 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
                     try {
+                        MostrarMensaje($@"Banderas: tiTaponCombustible:{tiTaponCombustible},
+                            tiTaponAceite: {tiTaponAceite},
+                            tiBayonetaAceite: {tiBayonetaAceite}, 
+                            PortafiltroAire: {tiPortafiltroAire},
+                            tiTuboEscape: {tiTuboEscape},
+                            tiFugasMotorTrans: {tiFugasMotorTrans},
+                            tiNeumaticos: {tiNeumaticos},
+                            tiComponentesEmisiones: {tiComponentesEmisiones},
+                            tiMotorGobernado: {tiMotorGobernado},
+                            odometro: {odometro}");
                         var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
                                                                                 conn: connApp,
                                                                                 verificacionId: verificacionId,
@@ -543,15 +654,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #region utils
-
+       
+        #region Tamaño de la letra en AUTOMATICO
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
             ///*
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 50f));
-            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 24f));
+            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 30f));
             //*/
-
 
 
             lblTitulo.Font = new Font(
@@ -641,8 +752,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
             );
 
         }
+        public void InicializarTamanoYFuente() {
+            if (panelX > 0 && panelY > 0) {
+                this.Size = new Size(panelX, panelY);
+            }
+            _formSizeInicial = this.Size;
+            _fontSizeInicial = lblTitulo.Font.Size;
+        }
 
-
+        
 
         private void txbOdometro_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
@@ -658,7 +776,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 }
             }
         }
-
+        
 
         private void SanitizeByRegex(TextBox tb, string invalidPattern) {
             string original = tb.Text;
@@ -674,6 +792,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 tb.SelectionStart = Math.Max(sel - removedLeft, 0);
             }
         }
+        #endregion
         private void AplicarCapturaVisual(IReadOnlyList<CapturaVisualItem> items) {
 
             var allChecks = new[] {
@@ -698,6 +817,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
+
+        # region MostrarMensaje
         private void MostrarMensaje(string mensaje) {
             using (var dlg = new frmMensajes(mensaje)) {
                 dlg.StartPosition = FormStartPosition.CenterParent;
@@ -705,6 +826,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 dlg.ShowDialog(this);
             }
         }
+        #endregion
         #endregion
         #endregion
 
