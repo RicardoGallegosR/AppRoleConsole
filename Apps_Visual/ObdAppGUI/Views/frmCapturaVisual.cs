@@ -24,6 +24,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private readonly Dictionary<short, CheckBox> _mapCvToCheckBox = new();
         private Size _formSizeInicial;
         private float _fontSizeInicial;
+        private TaskCompletionSource<bool>? _tcsResultado;
 
 
         //*
@@ -34,6 +35,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         //*/
 
         public event Action<bool> HabilitarPruebas;
+        public event Action<bool> _checkOBD;
         public event Action<string> _placa2;
         public event Action<Guid> _verificacionId2;
         
@@ -41,20 +43,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private Guid _verificacionId = Guid.Empty;
         public byte _protocoloVerificacíon;
 
-        /*
-        private Guid _estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
-        private Guid _accesoId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
-
-        private string
-            SERVER = "192.168.16.8",
-            DB = "SIVEV",
-            SQL_USER = "SivevCentros",
-            SQL_PASS = "CentrosSivev",
-            appName = "SivAppVfcVisual",
-            APPROLE = "RollVfcVisual",
-            APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5",
-            _placa = string.Empty;
-        //*/
         public int panelX = 0, panelY = 0;
 
         private byte tiTaponCombustible = 0, tiTaponAceite = 0, tiBayonetaAceite = 0, tiPortafiltroAire = 0,
@@ -62,7 +50,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
              tiMotorGobernado = 0;
 
         private int _MensajeSQL = 0;
-
         public int odometro = 0;
 
         #endregion
@@ -70,6 +57,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Constructores :D
         public frmCapturaVisual() {
             InitializeComponent();
+            txbOdometro.TextChanged += TxbOdometro_TextChanged;
             txbOdometro.TextChanged += (s, ev) => SanitizeByRegex(txbOdometro, @"[^0-9]");
             txbOdometro.MaxLength = 7;
             
@@ -87,77 +75,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
             ConfigurarCheckBox(cbMotorGobernado, "Contiene Motor de Gobernado");
             InicializarMapaCapturaVisual();
             txbOdometro.KeyDown += txbOdometro_KeyDown;
-
             ResetForm();
-            //this.Load += frmCapturaVisual_Load;
-
            
-
         }
 
 
-        private async void frmCapturaVisual_Load(object sender, EventArgs e) {
-            
-            /*
-            bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
-
-            if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
-                       && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS) && _estacionId != Guid.Empty
-                       && _accesoId != Guid.Empty) {
-
-                var r = await GetAccesoSQLVerificaciones(
-                    SERVER: SERVER,
-                    DB: DB,
-                    SQL_USER: SQL_USER,
-                    SQL_PASS: SQL_PASS,
-                    appName: appName,
-                    APPROLE: APPROLE,
-                    APPROLE_PASS: APPROLE_PASS,
-                    estacionId: _estacionId,
-                    AccesoId: _accesoId
-                );
-
-                if (r.MensajeId == 0) {
-                    lblPlaca.Text = r.PlacaId;
-                    _placa = r.PlacaId;
-                    _verificacionId = r.VerificacionId;
-                    _protocoloVerificacíon = r.ProtocoloVerificacionId;
-                    txbOdometro.Enabled = true;
-                    //######################################
-                    var r2 = await BanderasAEvaluar ( 
-                        SERVER: SERVER,
-                        DB: DB,
-                        SQL_USER: SQL_USER,
-                        SQL_PASS: SQL_PASS,
-                        appName: appName,
-                        APPROLE: APPROLE,
-                        APPROLE_PASS: APPROLE_PASS,
-                        estacionId: _estacionId,
-                        AccesoId: _accesoId,
-                        verificacionId:_verificacionId,
-                        elemento:"DESCONOCIDO", 
-                        combustible:0 );
-
-                    if (r2.MensajeId == 0) {
-                        AplicarCapturaVisual(r2.Items);
-                    } 
-
-
-                } else {
-                    foreach (Control c in pnlPrincipal.Controls)
-                        c.Dispose();
-                    pnlPrincipal.Controls.Clear();
-                    HabilitarPruebas?.Invoke(true);
-                }
-            } else {
-                MostrarMensaje($"Se rompio la conexion SQL, Revisar la configuracion SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {_estacionId}");
-                foreach (Control c in pnlPrincipal.Controls)
-                    c.Dispose();
-                pnlPrincipal.Controls.Clear();
-                HabilitarPruebas?.Invoke(true);
-            }
-            //*/
-        }
+        
         #endregion
 
 
@@ -166,17 +89,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private async void QuizVisual() {
-            tiTaponCombustible      = cbTaponCombustible.Checked        ? (byte)1 : (byte)0;
-            tiTaponAceite           = cbTaponAceite.Checked             ? (byte)1 : (byte)0;
-            tiBayonetaAceite        = cbBayonetaAceite.Checked          ? (byte)1 : (byte)0;
-            tiPortafiltroAire       = cbPortaFiltroAire.Checked         ? (byte)1 : (byte)0;
-            tiTuboEscape            = cbTuboEscape.Checked              ? (byte)1 : (byte)0;
-            tiFugasMotorTrans       = cbFugasMotorTrans.Checked         ? (byte)1 : (byte)0;
-            tiNeumaticos            = cbNeumaticos.Checked              ? (byte)1 : (byte)0;
-            tiComponentesEmisiones  = cbComponentesEmisiones.Checked    ? (byte)1 : (byte)0;
-            tiMotorGobernado        = cbMotorGobernado.Checked          ? (byte)1 : (byte)0;
-            
-            
+            tiTaponCombustible       = ValorCheckboxNegado(cbTaponCombustible       );
+            tiTaponAceite            = ValorCheckboxNegado(cbTaponAceite            );
+            tiBayonetaAceite         = ValorCheckboxNegado(cbBayonetaAceite         );
+            tiPortafiltroAire        = ValorCheckboxNegado(cbPortaFiltroAire        );
+            tiTuboEscape             = ValorCheckboxNegado(cbTuboEscape             );
+            tiFugasMotorTrans        = ValorCheckboxNegado(cbFugasMotorTrans        );
+            tiNeumaticos             = ValorCheckboxNegado(cbNeumaticos             );
+            tiComponentesEmisiones   = ValorCheckboxNegado(cbComponentesEmisiones   );
+            tiMotorGobernado         = ValorCheckboxNegado(cbMotorGobernado         );
+
+
+
             if (int.TryParse(txbOdometro.Text, out int _odometro)
                    && _odometro > 0
                    && lblPlaca.Text != "PlacaID") {
@@ -205,12 +129,38 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         tiMotorGobernado:tiMotorGobernado,
                         odometro:odometro);
             if (r.MensajeId == 0) {
-                MostrarMensaje($"Mensaje: {r.MensajeId}, CheckObd: {r.CheckObd}, Resultado: {r.Resultado}");
+                await Task.Delay(500);
+
+                //MostrarMensaje($"DESDE EL HIJO Mensaje: {r.MensajeId}, CheckObd: {r.CheckObd}, Resultado: {r.Resultado}");
                 _verificacionId2?.Invoke(_verificacionId);
                 _placa2?.Invoke(_placa);
+                _checkOBD?.Invoke(r.CheckObd);
+
+                _tcsResultado?.TrySetResult(true);
+            } else {
+                _tcsResultado?.TrySetResult(false);
             }
 
         }
+
+
+
+
+        public void SetCallbacks(Action<string> placaCallback,
+                                 Action<Guid> verificacionCallback,
+                                 Action<bool> checkOBDCall) {
+            _placa2 = placaCallback;
+            _verificacionId2 = verificacionCallback;
+            _checkOBD = checkOBDCall;
+        }
+
+        // El padre va a esperar esta Task
+        public Task<bool> EsperarResultadoAsync() {
+            _tcsResultado = new TaskCompletionSource<bool>();
+            return _tcsResultado.Task;
+        }
+
+
 
         #region Configuración Inicial :D
 
@@ -249,43 +199,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _mapCvToCheckBox[27] = cbTaponAceite;
 
             _mapCvToCheckBox[10] = cbMotorGobernado;
-        }
-        #endregion
-
-
-        #region de los colores y para el enter seleccion
-        private void CheckBox_CheckedChanged(object sender, EventArgs e) {
-            var chk = (CheckBox)sender;
-            var textoBase = chk.Tag.ToString();
-
-            if (chk.Checked) {
-                chk.Text = textoBase;
-                chk.ForeColor = AppColors.AprobadoInspeccionVisual;
-            } else {
-                chk.Text = "NO " + textoBase;
-                chk.ForeColor = AppColors.InstitucionalPrimario;
-            }
-        }
-
-
-
-        private void CheckBox_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.Enter) {
-                e.SuppressKeyPress = true;
-                var chk = (CheckBox)sender;
-                chk.Checked = !chk.Checked;
-            }
-        }
-
-
-        private void ConfigurarCheckBox(CheckBox chk, string textoBase) {
-            chk.Tag = textoBase;
-
-            chk.Text = "NO " + textoBase;
-            chk.ForeColor = AppColors.InstitucionalPrimario;
-
-            chk.CheckedChanged += CheckBox_CheckedChanged;
-            chk.KeyDown += CheckBox_KeyDown;
         }
         #endregion
 
@@ -378,19 +291,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 _MensajeSQL = r.MensajeId;
 
                 if (_MensajeSQL == 0) {
-                    await Task.Delay(1000);
-                    //MostrarMensaje($"Verificacion encontrada: {r.VerificacionId}");
-
+                    await Task.Delay(500);
                     lblTitulo.Text = "Inspección Visual";
                     lblPlaca.Visible = true;
                     lblOdometro.Visible = true;    
                     txbOdometro.Visible = true;
+                    txbOdometro.Enabled = true;
 
                     lblPlaca.Text = r.PlacaId;
                     _placa = r.PlacaId;
                     _verificacionId = r.VerificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
-                    txbOdometro.Enabled = true;
+                    
                     var r2 = await BanderasAEvaluar(
                         SERVER: SERVER,
                         DB: DB,
@@ -409,12 +321,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     if (r2.MensajeId == 0) {
                         AplicarCapturaVisual(r2.Items);
                     }
-
-                    // aquí podrías notificar _placa2 y _verificacionId2 si quieres
-                    _placa2?.Invoke(_placa);
-                    _verificacionId2?.Invoke(_verificacionId);
-
-                    return true; // inicialización OK
+                    return true; 
                 } else {
                     if (_MensajeSQL != 0) {
                         var repo = new SivevRepository();
@@ -600,6 +507,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
                     try {
+                        /*
                         MostrarMensaje($@"Banderas: tiTaponCombustible:{tiTaponCombustible},
                             tiTaponAceite: {tiTaponAceite},
                             tiBayonetaAceite: {tiBayonetaAceite}, 
@@ -610,6 +518,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             tiComponentesEmisiones: {tiComponentesEmisiones},
                             tiMotorGobernado: {tiMotorGobernado},
                             odometro: {odometro}");
+                        */
                         var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
                                                                                 conn: connApp,
                                                                                 verificacionId: verificacionId,
@@ -652,7 +561,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return result;
         }
         #endregion
-
+        #endregion
+        
         #region utils
        
         #region Tamaño de la letra en AUTOMATICO
@@ -674,7 +584,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblPlaca.Font = new Font(
                 lblPlaca.Font.FontFamily,
-                Titulo2,
+                Titulo1,
                 lblPlaca.Font.Style
             );
 
@@ -741,13 +651,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblOdometro.Font = new Font(
                 lblOdometro.Font.FontFamily,
-                Titulo3,
+                Titulo2,
                 lblOdometro.Font.Style
             );
 
             txbOdometro.Font = new Font(
                 txbOdometro.Font.FontFamily,
-                Titulo3,
+                Titulo2,
                 txbOdometro.Font.Style
             );
 
@@ -814,9 +724,62 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 chk.Text = "NO CONTIENE " + it.Elemento;
                 chk.Visible = it.Despliegue;
                 chk.Enabled = it.Despliegue;
+                chk.Checked = !it.Despliegue;
+            }
+        }
+        private byte ValorCheckboxNegado(CheckBox chk) {
+            // Si no es visible, siempre es 0 (false)
+            if (!chk.Visible)
+                return 0;
+
+            // Si es visible, invertimos el Checked:
+            // Checked = true  → 0
+            // Checked = false → 1
+            return chk.Checked ? (byte)0 : (byte)1;
+        }
+        
+        private void CheckBox_CheckedChanged(object sender, EventArgs e) {
+            var chk = (CheckBox)sender;
+            var textoBase = chk.Tag.ToString();
+
+            if (chk.Checked) {
+                chk.Text = textoBase;
+                chk.ForeColor = AppColors.AprobadoInspeccionVisual;
+            } else {
+                chk.Text = "NO " + textoBase;
+                chk.ForeColor = AppColors.black;
             }
         }
 
+
+
+        private void CheckBox_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                e.SuppressKeyPress = true;
+                var chk = (CheckBox)sender;
+                chk.Checked = !chk.Checked;
+            }
+        }
+
+
+        private void ConfigurarCheckBox(CheckBox chk, string textoBase) {
+            chk.Tag = textoBase;
+
+            chk.Text = "NO " + textoBase;
+            chk.ForeColor = AppColors.InstitucionalPrimario;
+
+            chk.CheckedChanged += CheckBox_CheckedChanged;
+            chk.KeyDown += CheckBox_KeyDown;
+        }
+        private void TxbOdometro_TextChanged(object sender, EventArgs e) {
+            // Si NO está vacío, habilita; si está vacío, deshabilita
+            btnSiguente.Enabled = !string.IsNullOrWhiteSpace(txbOdometro.Text);
+        }
+
+        private async void frmCapturaVisual_Load(object sender, EventArgs e) {
+
+        }
+        #endregion
 
         # region MostrarMensaje
         private void MostrarMensaje(string mensaje) {
@@ -826,8 +789,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 dlg.ShowDialog(this);
             }
         }
-        #endregion
-        #endregion
         #endregion
 
     }

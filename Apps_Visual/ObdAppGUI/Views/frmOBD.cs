@@ -29,9 +29,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private LecturasIniciales lecturasIniciales;
         private ObdMonitoresLuzMil obdMonitoresLuzMil;
         private ObdResultado ResultadoOBD;
+        private TaskCompletionSource<bool>? _tcsResultado;
 
         #region Credenciales de la bdd
-        /*
+        //*
         public string   _SERVER = string.Empty, 
                         _DB = string.Empty, 
                         _SQL_USER = string.Empty, 
@@ -45,19 +46,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         _estacionId = Guid.Empty;
 
         //*/
-
-        private Guid _estacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA");
-        private Guid _accesoId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
-        private Guid _verificacionId = Guid.Parse("94A18C29-ABC1-F011-811C-D09466400DBA");
-
-        private string
-            _SERVER = "192.168.16.8",
-            _DB = "SIVEV",
-            _SQL_USER = "SivevCentros",
-            _SQL_PASS = "CentrosSivev",
-            _appName = "SivAppVfcVisual",
-            _APPROLE = "RollVfcVisual",
-            _APPROLE_PASS = "95801B7A-4577-A5D0-952E-BD3D89757EA5";
 
         public int _credencial = 0, _panelX = 0, _panelY = 0;
 
@@ -179,7 +167,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         #region ResetPanel
+        public Panel GetPanel() {
+            ResetForm();
+            return pnlPrincipal;
+        }
+
         private void ResetForm() {
+            lblLecturaOBD.Text = $"Diagnostico OBD {_placa}";
             lblrModoALista.Text = "";
             //lblrModo0ALista.Text = "";
             lblrModo7Lista.Text = "";
@@ -345,12 +339,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
             ///*
-            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
+            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 40f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 24f));
             float Titulo4 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
             //*/
 
+            lblLecturaOBD.Font = new Font(
+                lblLecturaOBD.Font.FontFamily,
+                Titulo1,
+                lblLecturaOBD.Font.Style
+            );
 
 
             pnlTopPrincipal.Font = new Font(
@@ -490,21 +489,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             lblrVIN.Font = new Font(
                 lblrVIN.Font.FontFamily,
                 Titulo4,
@@ -589,6 +573,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         }
+
+
+        public void InicializarTamanoYFuente() {
+            if (_panelX > 0 && _panelY > 0) {
+                this.Size = new Size(_panelX, _panelY);
+            }
+            _formSizeInicial = this.Size;
+            _fontSizeInicial = lblMonitorTitulo.Font.Size;
+        }
         #endregion
 
 
@@ -623,10 +616,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region INSERTAR EN LA BDD
         private async void btnFinalizarPruebaOBD_Click(object sender, EventArgs e) {
+            /*
             await CapturaInspeccionVisual(SERVER: _SERVER, DB: _DB, SQL_USER: _SQL_USER, SQL_PASS: _SQL_PASS,
                                     appName: _appName, APPROLE: _APPROLE, APPROLE_PASS: _APPROLE_PASS,
                                     estacionId: _estacionId, AccesoId: _accesoId, verificacionId: _verificacionId,
                                     o: ResultadoOBD);
+            */
+            _tcsResultado?.TrySetResult(true);
+
+        }
+        public Task<bool> EsperarResultadoAsync() {
+            _tcsResultado = new TaskCompletionSource<bool>();
+            return _tcsResultado.Task;
         }
         #endregion
 

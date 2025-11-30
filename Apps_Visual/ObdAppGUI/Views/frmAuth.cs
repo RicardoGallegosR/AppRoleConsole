@@ -21,7 +21,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmAuth : Form {
         public event Action<Guid> AccesoObtenido;
         public Guid estacionId = Guid.Empty, accesoId;
-        //public string estacionId = string.Empty, accesoId;
+
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
             appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty;
         private Size _formSizeInicial;
@@ -45,8 +45,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbCredencial.Focus();
 
             txbCredencial.PreviewKeyDown += txbCredencial_PreviewKeyDown;
-            txbCredencial.TextChanged += txbCredencial_TextChanged; // solo este
-                                                                    //this.Resize += frmAuth_Resize;
+            txbCredencial.TextChanged += txbCredencial_TextChanged; 
             _fontSizeInicial = this.Font.Size;
             ResetForm();
         }
@@ -89,13 +88,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                         opcionMenu: opcionMenu,
                                         credencial: credencial
                                     );
-                    /*
-                    MessageBox.Show($@"
-                        SERVER: {SERVER}, DB: {DB}, SQL_USER: {SQL_USER}, SQL_PASS: {SQL_PASS}
-                       appName: {appName},  APPROLE {APPROLE} APPROLE_PASS {APPROLE_PASS}
-                        estacionId {estacionId}
-                        ");
-                    */
                     if (r.MensajeId == 0) {
                         lblCredencial.Enabled = false;
                         txbCredencial.Enabled = false;
@@ -183,6 +175,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
                 accesoNormalizado = r.AccesoId;
             }
+            await Task.Delay(500);
             AccesoObtenido?.Invoke(accesoNormalizado);
 
             if (accesoNormalizado == Guid.Empty) {
@@ -353,11 +346,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Tamaño de la letra en AUTOMATICO
         private void frmAuth_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
-            ///*
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 35f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 40f));
-            //*/
             
             lblTituloLogin.Font = new Font(
                 lblTituloLogin.Font.FontFamily,
@@ -391,7 +382,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 Titulo3,
                 btnAcceder.Font.Style
             );
-            //*/
 
         }
         public void InicializarTamanoYFuente() {

@@ -94,9 +94,9 @@
             // 
             spcPrincipal.Panel2.BackColor = Color.White;
             spcPrincipal.Panel2.Controls.Add(tlpOdometro);
-            spcPrincipal.Size = new Size(800, 375);
+            spcPrincipal.Size = new Size(800, 325);
             spcPrincipal.SplitterDistance = 548;
-            spcPrincipal.TabIndex = 2;
+            spcPrincipal.TabIndex = 0;
             // 
             // tlpTabla
             // 
@@ -125,7 +125,7 @@
             tlpTabla.RowStyles.Add(new RowStyle());
             tlpTabla.RowStyles.Add(new RowStyle());
             tlpTabla.RowStyles.Add(new RowStyle());
-            tlpTabla.Size = new Size(548, 375);
+            tlpTabla.Size = new Size(548, 325);
             tlpTabla.TabIndex = 0;
             // 
             // cbMotorGobernado
@@ -135,7 +135,7 @@
             cbMotorGobernado.ForeColor = Color.Black;
             cbMotorGobernado.Location = new Point(3, 283);
             cbMotorGobernado.Name = "cbMotorGobernado";
-            cbMotorGobernado.Size = new Size(542, 89);
+            cbMotorGobernado.Size = new Size(542, 39);
             cbMotorGobernado.TabIndex = 9;
             cbMotorGobernado.Text = "No Contiene Motor Gobernado";
             cbMotorGobernado.UseVisualStyleBackColor = true;
@@ -253,7 +253,7 @@
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 5.8139534F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 17.44186F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 38.3720932F));
-            tlpOdometro.Size = new Size(248, 375);
+            tlpOdometro.Size = new Size(248, 325);
             tlpOdometro.TabIndex = 0;
             // 
             // lblPlaca
@@ -264,10 +264,10 @@
             lblPlaca.ForeColor = Color.Black;
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
-            lblPlaca.Size = new Size(242, 143);
+            lblPlaca.Size = new Size(242, 124);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "PlacaID";
-            lblPlaca.TextAlign = ContentAlignment.MiddleCenter;
+            lblPlaca.TextAlign = ContentAlignment.TopCenter;
             // 
             // lblOdometro
             // 
@@ -275,9 +275,9 @@
             lblOdometro.Dock = DockStyle.Fill;
             lblOdometro.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblOdometro.ForeColor = Color.Black;
-            lblOdometro.Location = new Point(3, 164);
+            lblOdometro.Location = new Point(3, 142);
             lblOdometro.Name = "lblOdometro";
-            lblOdometro.Size = new Size(242, 65);
+            lblOdometro.Size = new Size(242, 56);
             lblOdometro.TabIndex = 0;
             lblOdometro.Text = "Odometro";
             lblOdometro.TextAlign = ContentAlignment.MiddleCenter;
@@ -286,7 +286,7 @@
             // 
             txbOdometro.Dock = DockStyle.Fill;
             txbOdometro.Font = new Font("Segoe UI", 14F);
-            txbOdometro.Location = new Point(3, 232);
+            txbOdometro.Location = new Point(3, 201);
             txbOdometro.Name = "txbOdometro";
             txbOdometro.Size = new Size(242, 32);
             txbOdometro.TabIndex = 10;
@@ -296,9 +296,9 @@
             // 
             pnlRellenoOdometro.BackColor = Color.Transparent;
             pnlRellenoOdometro.Dock = DockStyle.Fill;
-            pnlRellenoOdometro.Location = new Point(3, 146);
+            pnlRellenoOdometro.Location = new Point(3, 127);
             pnlRellenoOdometro.Name = "pnlRellenoOdometro";
-            pnlRellenoOdometro.Size = new Size(242, 15);
+            pnlRellenoOdometro.Size = new Size(242, 12);
             pnlRellenoOdometro.TabIndex = 11;
             // 
             // pnlCentralFooter
@@ -306,9 +306,9 @@
             pnlCentralFooter.BackColor = Color.White;
             pnlCentralFooter.Controls.Add(btnSiguente);
             pnlCentralFooter.Dock = DockStyle.Bottom;
-            pnlCentralFooter.Location = new Point(0, 375);
+            pnlCentralFooter.Location = new Point(0, 325);
             pnlCentralFooter.Name = "pnlCentralFooter";
-            pnlCentralFooter.Size = new Size(800, 51);
+            pnlCentralFooter.Size = new Size(800, 101);
             pnlCentralFooter.TabIndex = 1;
             // 
             // btnSiguente
@@ -318,9 +318,9 @@
             btnSiguente.FlatStyle = FlatStyle.Flat;
             btnSiguente.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSiguente.ForeColor = Color.FromArgb(159, 34, 65);
-            btnSiguente.Location = new Point(600, 0);
+            btnSiguente.Location = new Point(439, 0);
             btnSiguente.Name = "btnSiguente";
-            btnSiguente.Size = new Size(200, 51);
+            btnSiguente.Size = new Size(361, 101);
             btnSiguente.TabIndex = 11;
             btnSiguente.Text = "Siguiente";
             btnSiguente.UseVisualStyleBackColor = true;

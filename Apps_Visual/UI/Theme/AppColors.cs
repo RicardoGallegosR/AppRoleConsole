@@ -25,6 +25,7 @@ namespace Apps_Visual.UI.Theme {
 
         public static readonly Color InstitucionalPrimario = Color.FromArgb(159, 34, 65);
         public static readonly Color InstitucionalSecundario = Color.FromArgb(188, 149, 92);
+        public static readonly Color black = Color.Black;
 
 
 

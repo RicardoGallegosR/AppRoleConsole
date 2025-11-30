@@ -30,18 +30,23 @@ namespace Apps_Visual.ObdAppGUI {
     public partial class frmBASE : Form {
         #region Variables para funcionamiento
         private string SERVER, DB, SQL_USER, SQL_PASS, APPNAME, APPROLE, APPROLE_PASS,
-            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId, _accesoId,
-            VerificacionId , PlacaId;
+            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId;
+        
+        private string _placa = string.Empty;
+        private Guid _verificacionId = Guid.Empty;
 
         private Guid _estacionId = Guid.Empty;
         private Guid _AccesoIdObtenido = Guid.Empty;
+        private bool _RealizarPruebaOBD = false;
         private short opcionMenu;
         private TaskCompletionSource<bool>? _tcsAcceso;
-        private int MensajeId, odometro, credencial;
 
-        private byte ProtocoloVerificacionId, combustible,  tiTaponCombustible,
-            tiTaponAceite, tiBayonetaAceite, tiPortafiltroAire, tiTuboEscape, tiFugasMotorTrans,
-            tiNeumaticos,tiMotorGobernado;
+
+        // OBTENCION DE CREDENCIALES VISUAL
+
+
+
+
         
         
         private readonly ILogger _baseLog;
@@ -51,6 +56,7 @@ namespace Apps_Visual.ObdAppGUI {
         private HomeView home;
         private frmAuth frmcredenciales;
         private frmCapturaVisual CapturaVisual;
+        private frmOBD PruebaOBD;
         #endregion
 
         #region inicio
@@ -292,18 +298,24 @@ namespace Apps_Visual.ObdAppGUI {
 
                 // Validamos Verificacion 
                 bool accesoValido = await ValidaCredencial();
-                
+
                 if (!accesoValido) {
                     audit.Information($"Acceso no valido: {accesoValido}");
                     return;
                 }
                 audit.Information($"Se guarda con el accesoId: {_AccesoIdObtenido}");
-                await ListadoVisual();
+                
+                bool pruebaVisual = await ListadoVisual();
+                if (!pruebaVisual) {
+                    audit.Information($"No pasa a prueba OBD: {pruebaVisual}");
+                    return;
+                }
 
-                //await ListadoVisual();
-
-
-                //pnlHome();
+                bool PruebaOBD = await PruebaOBDPanel();
+                if (!PruebaOBD) {
+                    audit.Information($"No pasa la prueba OBD: {PruebaOBD}");
+                    return;
+                }
             }
         }
 
@@ -318,7 +330,7 @@ namespace Apps_Visual.ObdAppGUI {
             ///*
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
-                //frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
@@ -347,9 +359,7 @@ namespace Apps_Visual.ObdAppGUI {
         }
         #endregion
 
-
-
-
+        #region Prueba Visual
         private async Task<bool> ListadoVisual() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
@@ -358,14 +368,16 @@ namespace Apps_Visual.ObdAppGUI {
             
             if (CapturaVisual == null || CapturaVisual.IsDisposed) {
                 CapturaVisual = new frmCapturaVisual();
-                //frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
-                //return true;
+
+                CapturaVisual.SetCallbacks(
+                    placa => { _placa = placa; },
+                    verId => { _verificacionId = verId; },
+                    pasaObd => { _RealizarPruebaOBD = pasaObd; }
+                );
             }
-            //*
             CapturaVisual.panelX = pnlPanelCambios.Width;
             CapturaVisual.panelY = pnlPanelCambios.Height;
             CapturaVisual.InicializarTamanoYFuente();
-            ///*
             CapturaVisual.SERVER = SERVER;
             CapturaVisual.DB = DB;
             CapturaVisual.SQL_USER = SQL_USER;
@@ -377,13 +389,9 @@ namespace Apps_Visual.ObdAppGUI {
             CapturaVisual._estacionId = _estacionId;
 
             pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
-            //*/
-
-            bool ok = await CapturaVisual.InicializarAsync();
-            //MostrarMensaje($"Respuesta de CapturaVisual {ok}");
-            if (ok) { 
-                //btnInspecionVisual.Enabled = true;
-            } else {
+            bool VerificacionesDisponibles = await CapturaVisual.InicializarAsync();
+            
+            if (!VerificacionesDisponibles) {
                 pnlPanelCambios.Controls.Clear();
                 CapturaVisual.Dispose();
                 CapturaVisual = null;
@@ -396,41 +404,78 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
                 }
-
+                return false;
             }
-                return ok;
+            bool ok = await CapturaVisual.EsperarResultadoAsync();
+
+            if (!_RealizarPruebaOBD) {
+                pnlPanelCambios.Controls.Clear();
+                CapturaVisual.Dispose();
+                CapturaVisual = null;
+                if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                    home = new HomeView();
+                    home.panelX = pnlPanelCambios.Width;
+                    home.panelY = pnlPanelCambios.Height;
+                    home.InicializarTamanoYFuente();
+                    pnlPanelCambios.Controls.Add(home.GetPanel());
+                    pnlPanelCambios.Dock = DockStyle.Fill;
+                    btnInspecionVisual.Enabled = true;
+                }
+                return false;
+            }
+            //MostrarMensaje($"PLACA: {_placa}, VERIFICACION: {_verificacionId}, OBD: {_RealizarPruebaOBD}");
+
+            return _RealizarPruebaOBD;
         }
+        #endregion
 
-
-        /*
-        private async Task<bool> ValidarHuella( 
-            
-            ) {
+        #region Prueba OBD
+        private async Task<bool> PruebaOBDPanel() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
+
+            if (PruebaOBD == null || PruebaOBD.IsDisposed) {
+                PruebaOBD = new frmOBD();
+            }
+            PruebaOBD._panelX = pnlPanelCambios.Width;
+            PruebaOBD._panelY = pnlPanelCambios.Height;
+            PruebaOBD.InicializarTamanoYFuente();
+            PruebaOBD._SERVER = SERVER;
+            PruebaOBD._DB = DB;
+            PruebaOBD._SQL_USER = SQL_USER;
+            PruebaOBD._SQL_PASS = SQL_PASS;
+            PruebaOBD._appName = APPNAME;
+            PruebaOBD._APPROLE = RollAccesoVisual;
+            PruebaOBD._APPROLE_PASS = RollAccesoVisualAcceso;
+            PruebaOBD._placa = _placa;
+            PruebaOBD._verificacionId = _verificacionId;
+            PruebaOBD._accesoId = _AccesoIdObtenido;
+            PruebaOBD._estacionId = _estacionId;
+            
+            
+            pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
+
+
+            bool ok = await PruebaOBD.EsperarResultadoAsync();
+            if (ok) {
+                pnlPanelCambios.Controls.Clear();
+                CapturaVisual.Dispose();
+                CapturaVisual = null;
+                if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                    home = new HomeView();
+                    home.panelX = pnlPanelCambios.Width;
+                    home.panelY = pnlPanelCambios.Height;
+                    home.InicializarTamanoYFuente();
+                    pnlPanelCambios.Controls.Add(home.GetPanel());
+                    pnlPanelCambios.Dock = DockStyle.Fill;
+                    btnInspecionVisual.Enabled = true;
+                }
+                return false;
+            }
             return false;
         }
-        */
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #endregion
 
 
         #region Apagar
