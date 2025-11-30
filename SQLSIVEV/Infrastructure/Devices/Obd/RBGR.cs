@@ -8,7 +8,7 @@
         private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A;
 
         private string _port = "COM4", _vin = string.Empty, _calJoined = string.Empty, 
-            _dtcList03 = string.Empty, _dtcList07 = string.Empty, _dtcList0A = string.Empty, _protocolo = string.Empty;
+            _dtcList03 = string.Empty, _dtcList07 = string.Empty, _dtcList0A = string.Empty, _protocolo = string.Empty, _cvn = string.Empty;
         private string[] _cal;
         private const byte SIN_COMUNICACION = 4;
 
@@ -241,6 +241,27 @@
 
                     _vinFromObd = (!string.IsNullOrWhiteSpace(_vin) && !string.Equals(_vin, "DESCONOCIDO", StringComparison.OrdinalIgnoreCase)) ? true : false;
 
+                    // NUEVOS VALORES 
+                    _distMilKm = TryQuery<int?>("DISTANCE_W_MIL", () => elm.ReadDistanceWithMilKm(), null, errores);
+                    _distSinceClrKm = TryQuery<int?>("DISTANCE_SINCE_DTC_CLEAR", () => elm.ReadDistanceSinceClearKm(), null, errores);
+                    _runTimeMilMin = TryQuery<int?>("RUN_TIME_MIL", () => elm.ReadRunTimeMilMinutes(), null, errores);
+                    _timeSinceClr = TryQuery<int?>("TIME_SINCE_DTC_CLEARED", () => elm.ReadTimeSinceDtcClearedMinutes(), null, errores);
+                    _cvn = TryQuery<string>(
+                        "CVN",
+                        () => {
+                            var lista = elm.ReadCvns(); // List<string> o null
+
+                            if (lista != null && lista.Count > 0)
+                                return string.Join(" || ", lista);
+
+                            return "DESCONOCIDO";
+                        },
+                        "DESCONOCIDO",
+                        errores
+                    );
+                    _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);
+
+
                     var status = TryQuery<Elm327.MonitorStatus?>("STATUS", () => elm.ReadStatus(), null, errores);
                     if (status is { } st) { 
                         foreach (var name in expected) {
@@ -304,7 +325,18 @@
                         RpmOn = 0,              //
                         RpmCheck = 0,           //
 
-                        mensaje = ""
+                        mensaje = "",
+
+                        // NUEVOS VALORES :D
+                        distMilKm = _distMilKm,
+                        distSinceClrKm = _distSinceClrKm,
+                        runTimeMilMin = _runTimeMilMin,
+                        timeSinceClr = _timeSinceClr,
+                        cvn = _cvn,
+                        cal = _cal
+                        
+                        
+
                     };
                 }
             } catch (Exception ex) {
@@ -340,7 +372,12 @@
                 LeeDtc = false,
                 LeeDtcPend = false,
                 LeeVin = false,
-                mensaje = mensaje
+                mensaje = mensaje,
+                distMilKm = _distMilKm,
+                distSinceClrKm = _distSinceClrKm,
+                runTimeMilMin = _runTimeMilMin,
+                timeSinceClr = _timeSinceClr
+
             };
         }
         #endregion

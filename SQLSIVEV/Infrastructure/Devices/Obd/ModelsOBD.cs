@@ -85,6 +85,16 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         public bool? LeeDtcPend { get; set; }
         public bool? LeeVin { get; set; }
         public string? mensaje { get; set; }
+
+        // NUEVOS VALORES 
+        public int? distMilKm { get; set; }
+        public int? distSinceClrKm { get; set; }
+        public int? runTimeMilMin { get; set; }
+        public int? timeSinceClr { get; set; }
+
+        public string? cvn { get; set; }
+        public string[] cal { get; init; }
+
     }
 
 }

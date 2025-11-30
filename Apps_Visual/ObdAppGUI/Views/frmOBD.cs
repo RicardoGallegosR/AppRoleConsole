@@ -33,14 +33,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region Credenciales de la bdd
         //*
-        public string   _SERVER = string.Empty, 
-                        _DB = string.Empty, 
-                        _SQL_USER = string.Empty, 
+        public string   _SERVER = string.Empty,
+                        _DB = string.Empty,
+                        _SQL_USER = string.Empty,
                         _SQL_PASS = string.Empty,
-                        _appName = string.Empty, 
-                        _APPROLE = string.Empty, 
+                        _appName = string.Empty,
+                        _APPROLE = string.Empty,
                         _APPROLE_PASS = string.Empty;
-        
+
         public Guid     _accesoId = Guid.Empty,
                         _verificacionId = Guid.Empty,
                         _estacionId = Guid.Empty;
@@ -64,6 +64,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _fontSizeInicial = this.Font.Size;
 
             InitializeComponent();
+            WindowState = FormWindowState.Maximized;
             ResetForm();
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
@@ -120,6 +121,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblCompletoOxygenSensorHeater.Text = GetCompletoText(ResultadoOBD.Srge);
             lblDisponibleOxygenSensorHeater.Text = GetDisponibleText(ResultadoOBD.Srge);
+
+
+            // NUEVOS VALORES 
+            lblrOdometroLuzMil.Text = $"{ResultadoOBD.distSinceClrKm} km";
+            lblrRunTimeMil.Text = $"{ResultadoOBD.runTimeMilMin} min";
+            /*
+             public int? distMilKm { get; set; }
+        public int? distSinceClrKm { get; set; }
+        public int? runTimeMilMin { get; set; }
+        public int? timeSinceClr { get; set; }
+             */
+
             #endregion
 
 
@@ -130,7 +143,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblrVIN.Text = ResultadoOBD.VehiculoId;
             lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
             lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
-            //lblrCalId.Text = (a.cal != null && a.cal.Length > 0) ? string.Join(" || ", a.cal) : "";
+            lblrCalId.Text = (ResultadoOBD.cal != null && ResultadoOBD.cal.Length > 0) ? string.Join(" || ", ResultadoOBD.cal) : "";
             lblrBateria.Text = ResultadoOBD.VoltsSwOff.ToString();
 
             // luz mil
@@ -144,11 +157,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
             // limpieza de dtc
-            //lblrOBDClear.Text = a.distSinceClrKm.ToString(); // distMilKm
-            //lblrRunTimeMil.Text = a.runTimeMilMin.ToString();
+            lblrOBDClear.Text = ResultadoOBD.distSinceClrKm.ToString(); // distMilKm
+            //lblrRunTimeMil.Text = ResultadoOBD.runTimeMilMin.ToString();
 
             //CVN:
-            //lblrCalibrationVerificationNumber.Text = "Prueba 3";
+            lblrCalibrationVerificationNumber.Text = ResultadoOBD.cvn;
             //*/
 
 
@@ -236,19 +249,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
         #endregion
 
-
-
-
-
-
-
-
-
-
-
-
-        #region Base de datos 
-
         #region Primer store
         private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(
                                                                         string SERVER,
@@ -329,9 +329,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return result;
         }
         #endregion
-        #endregion
-
-
 
         #region Utils
 
@@ -613,7 +610,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #endregion
 
-
         #region INSERTAR EN LA BDD
         private async void btnFinalizarPruebaOBD_Click(object sender, EventArgs e) {
             /*
@@ -632,6 +628,22 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         private void frmOBD_Load(object sender, EventArgs e) {
+
+        }
+
+        private void lblModo3Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblrModo7Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblDTCClear_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblOBDClear_Click(object sender, EventArgs e) {
 
         }
     }

@@ -150,6 +150,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             } catch { return null; }
         }
 
+        #region Lectura de vin
+
         // Lee VIN (modo 09 PID 02), concatenando frames 49 02 01/02/03
         public string? ReadVin() {
             // Salida limpia para modo 09
@@ -230,8 +232,64 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             }
             return string.IsNullOrWhiteSpace(vin) ? null : vin;
         }
+        #endregion
 
+        #region Lectura de CVN
+        public List<string> ReadCvns() {
+            // Configuración similar a ReadVin (modo 09 “limpio”)
+            ExecRaw("ATCAF1", 600);  // auto-format
+            ExecRaw("ATH0", 600);  // sin headers
+            ExecRaw("ATS0", 600);  // sin espacios
+            ExecRaw("ATAT1", 600);  // adaptive timing
+            ExecRaw("ATST96", 600);  // un poco más de espera
 
+            var resp = ExecRaw("0906", 8000); // Modo 09, PID 06 (CVN)
+
+            if (string.IsNullOrWhiteSpace(resp))
+                return new List<string>();
+
+            // Tokeniza en bytes hex de 2 dígitos
+            var hex = Regex.Matches(resp, "[0-9A-Fa-f]{2]")
+                   .Cast<Match>()
+                   .Select(m => m.Value.ToUpperInvariant())
+                   .ToList();
+
+            var cvnList = new List<string>();
+
+            for (int i = 0; i + 3 < hex.Count; i++) {
+                // Buscamos bloques tipo: 49 06 01 / 02 / 03...
+                if (hex[i] == "49" && hex[i + 1] == "06" &&
+                    Regex.IsMatch(hex[i + 2], "^0[0-9A-F]$")) // "01","02","03"...
+                {
+                    int j = i + 3; // aquí empiezan los bytes de CVN
+                    var bytesCvn = new List<string>();
+
+                    // Leemos hasta toparnos con otro "49 06 xx" o fin de datos
+                    while (j < hex.Count &&
+                          !(j + 2 < hex.Count &&
+                            hex[j] == "49" && hex[j + 1] == "06" &&
+                            Regex.IsMatch(hex[j + 2], "^0[0-9A-F]$"))) {
+                        bytesCvn.Add(hex[j]);
+                        j++;
+                    }
+
+                    if (bytesCvn.Count > 0) {
+                        // CVN como string hex continuo, ej: "1791BC82"
+                        var cvn = string.Concat(bytesCvn);
+                        cvnList.Add(cvn);
+                    }
+
+                    i = j - 1; // avanzamos el cursor principal
+                }
+            }
+
+            // Limpieza básica: quitar vacíos y duplicados
+            return cvnList
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToList();
+        }
+        #endregion 
 
 
         public double? ReadVoltage() {
