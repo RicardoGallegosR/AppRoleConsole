@@ -20,6 +20,7 @@ class Program {
             APPROLE_PASS  = "53CE7B6E-1426-403A-857E-A890BB63BFE6",//"53CE7B6E-1426-403A-857E-A890BB63BFE6"
             EstacionId    = "BFFF8EA5-76A4-F011-811C-D09466400DBA",
             opcionMenu    = 151,
+            // Estos no van en el regEdit
             APPROLE_VISUAL        = "RollVfcVisual",
             APPROLE_PASS_VISUAL   = "95801B7A-4577-A5D0-952E-BD3D89757EA5",
             ClaveAccesoId   =      string.Empty

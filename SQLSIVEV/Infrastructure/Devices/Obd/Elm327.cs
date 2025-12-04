@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
-using System.Threading;
 using System.Text.RegularExpressions;
-using System.Globalization;
+using System.Threading;
 
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public sealed class Elm327 : IDisposable {
@@ -346,6 +347,32 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             var ab = ReadPidAB("014E", 3000);
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
+
+
+
+        // Solicitados por Toñin Cara de pan :D
+        public int? TiempoTotalSegundosOperacionMotor() {
+            var ab = ReadPidAB("011F", 3000);
+            return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
+        }
+
+        /*
+                0   → se borraron códigos hace nada y casi no se ha usado el coche.
+             3–10   → se borraron hace poco, pero el coche ya se ha usado algunos días/trayectos.
+                50+ → borrado relativamente antiguo (varias semanas/meses de uso).
+                255 → tope; muchos coches se quedan ahí hasta que vuelvas a borrar DTC.
+
+
+        Cómo lo puedes interpretar en tu trabajo,s ves pocos warm-ups y monitores incompletos, huele a:
+                -> "Borraron códigos poco antes de la verificación".
+        Si ves muchos warm-ups y monitores completos, sugiere:
+                -> 0 "Uso normal desde hace tiempo".
+        */
+        public int? WarmUpsSinceCodesCleared() {
+            var ab = ReadPidAB("0130", 3000);
+            return ab.HasValue ? (int?)ab.Value.A : null;
+        }
+
 
         // Calibration ID(s) (modo 09 PID 04) — puede devolver 1..N IDs
         public string[] ReadCalibrationIds() {

@@ -26,6 +26,7 @@
             pnlPrincipal = new Panel();
             splitContainer1 = new SplitContainer();
             tlpPrincipal = new TableLayoutPanel();
+            lblrOperacionMotor = new Label();
             lblResultado = new Label();
             lblCalId = new Label();
             lblRMP = new Label();
@@ -40,6 +41,7 @@
             lblTitulo2 = new Label();
             lblCalibrationVerificationNumber = new Label();
             lblrCalibrationVerificationNumber = new Label();
+            lblOperacionMotor = new Label();
             lblLuzMil = new Label();
             lblrLuzMil = new Label();
             lblOdometroLuzMil = new Label();
@@ -50,6 +52,8 @@
             lblrDTCClear = new Label();
             lblOBDClear = new Label();
             lblrOBDClear = new Label();
+            lblWarmsUp = new Label();
+            lblrWarmsUp = new Label();
             lblModo3Lista = new Label();
             lblrModo3Lista = new Label();
             lblModo7Lista = new Label();
@@ -57,6 +61,7 @@
             lblModoALista = new Label();
             lblrModoALista = new Label();
             tlpMonitores = new TableLayoutPanel();
+            lblTempRefriegerante = new Label();
             lblCompletoMisfire = new Label();
             lblDisponibleMisfire = new Label();
             lblMisfire = new Label();
@@ -108,6 +113,13 @@
             lblNoxScrAftertreatment = new Label();
             lblDisponibleNoxScrAftertreatment = new Label();
             lblCompletoNoxScrAftertreatment = new Label();
+            lblCargaCalculaMotor = new Label();
+            lblrCargaCalculaMotor = new Label();
+            lblrTempRefriegerante = new Label();
+            lblSTFT = new Label();
+            lblrSTFT = new Label();
+            lblLTFT = new Label();
+            lblrLTFT = new Label();
             pnlFooterPrincipal = new Panel();
             btnFinalizarPruebaOBD = new Button();
             pnlTopPrincipal = new Panel();
@@ -158,6 +170,7 @@
             tlpPrincipal.ColumnCount = 2;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34.44181F));
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65.5582F));
+            tlpPrincipal.Controls.Add(lblrOperacionMotor, 1, 7);
             tlpPrincipal.Controls.Add(lblResultado, 1, 0);
             tlpPrincipal.Controls.Add(lblCalId, 0, 5);
             tlpPrincipal.Controls.Add(lblRMP, 0, 4);
@@ -172,43 +185,60 @@
             tlpPrincipal.Controls.Add(lblTitulo2, 0, 0);
             tlpPrincipal.Controls.Add(lblCalibrationVerificationNumber, 0, 6);
             tlpPrincipal.Controls.Add(lblrCalibrationVerificationNumber, 1, 6);
-            tlpPrincipal.Controls.Add(lblLuzMil, 0, 7);
-            tlpPrincipal.Controls.Add(lblrLuzMil, 1, 7);
-            tlpPrincipal.Controls.Add(lblOdometroLuzMil, 0, 8);
-            tlpPrincipal.Controls.Add(lblrOdometroLuzMil, 1, 8);
-            tlpPrincipal.Controls.Add(lblRunTimeMil, 0, 9);
-            tlpPrincipal.Controls.Add(lblrRunTimeMil, 1, 9);
-            tlpPrincipal.Controls.Add(lblDTCClear, 0, 10);
-            tlpPrincipal.Controls.Add(lblrDTCClear, 1, 10);
-            tlpPrincipal.Controls.Add(lblOBDClear, 0, 11);
-            tlpPrincipal.Controls.Add(lblrOBDClear, 1, 11);
-            tlpPrincipal.Controls.Add(lblModo3Lista, 0, 12);
-            tlpPrincipal.Controls.Add(lblrModo3Lista, 1, 12);
-            tlpPrincipal.Controls.Add(lblModo7Lista, 0, 13);
-            tlpPrincipal.Controls.Add(lblrModo7Lista, 1, 13);
-            tlpPrincipal.Controls.Add(lblModoALista, 0, 14);
-            tlpPrincipal.Controls.Add(lblrModoALista, 1, 14);
+            tlpPrincipal.Controls.Add(lblOperacionMotor, 0, 7);
+            tlpPrincipal.Controls.Add(lblLuzMil, 0, 8);
+            tlpPrincipal.Controls.Add(lblrLuzMil, 1, 8);
+            tlpPrincipal.Controls.Add(lblOdometroLuzMil, 0, 9);
+            tlpPrincipal.Controls.Add(lblrOdometroLuzMil, 1, 9);
+            tlpPrincipal.Controls.Add(lblRunTimeMil, 0, 10);
+            tlpPrincipal.Controls.Add(lblrRunTimeMil, 1, 10);
+            tlpPrincipal.Controls.Add(lblDTCClear, 0, 11);
+            tlpPrincipal.Controls.Add(lblrDTCClear, 1, 11);
+            tlpPrincipal.Controls.Add(lblOBDClear, 0, 12);
+            tlpPrincipal.Controls.Add(lblrOBDClear, 1, 12);
+            tlpPrincipal.Controls.Add(lblWarmsUp, 0, 13);
+            tlpPrincipal.Controls.Add(lblrWarmsUp, 1, 13);
+            tlpPrincipal.Controls.Add(lblModo3Lista, 0, 14);
+            tlpPrincipal.Controls.Add(lblrModo3Lista, 1, 14);
+            tlpPrincipal.Controls.Add(lblModo7Lista, 0, 15);
+            tlpPrincipal.Controls.Add(lblrModo7Lista, 1, 15);
+            tlpPrincipal.Controls.Add(lblModoALista, 0, 16);
+            tlpPrincipal.Controls.Add(lblrModoALista, 1, 16);
             tlpPrincipal.Dock = DockStyle.Fill;
             tlpPrincipal.Location = new Point(0, 0);
             tlpPrincipal.Name = "tlpPrincipal";
-            tlpPrincipal.RowCount = 15;
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
-            tlpPrincipal.RowStyles.Add(new RowStyle());
+            tlpPrincipal.RowCount = 20;
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpPrincipal.Size = new Size(421, 432);
             tlpPrincipal.TabIndex = 2;
+            // 
+            // lblrOperacionMotor
+            // 
+            lblrOperacionMotor.AutoSize = true;
+            lblrOperacionMotor.Location = new Point(148, 140);
+            lblrOperacionMotor.Name = "lblrOperacionMotor";
+            lblrOperacionMotor.Size = new Size(112, 15);
+            lblrOperacionMotor.TabIndex = 43;
+            lblrOperacionMotor.Text = "lblrOperacionMotor";
             // 
             // lblResultado
             // 
@@ -225,7 +255,7 @@
             lblCalId.AutoSize = true;
             lblCalId.Font = new Font("Segoe UI", 9F);
             lblCalId.ForeColor = Color.Black;
-            lblCalId.Location = new Point(3, 75);
+            lblCalId.Location = new Point(3, 100);
             lblCalId.Name = "lblCalId";
             lblCalId.Size = new Size(46, 15);
             lblCalId.TabIndex = 0;
@@ -236,7 +266,7 @@
             lblRMP.AutoSize = true;
             lblRMP.Font = new Font("Segoe UI", 9F);
             lblRMP.ForeColor = Color.Black;
-            lblRMP.Location = new Point(3, 60);
+            lblRMP.Location = new Point(3, 80);
             lblRMP.Name = "lblRMP";
             lblRMP.Size = new Size(35, 15);
             lblRMP.TabIndex = 0;
@@ -247,7 +277,7 @@
             lblBateria.AutoSize = true;
             lblBateria.Font = new Font("Segoe UI", 9F);
             lblBateria.ForeColor = Color.Black;
-            lblBateria.Location = new Point(3, 45);
+            lblBateria.Location = new Point(3, 60);
             lblBateria.Name = "lblBateria";
             lblBateria.Size = new Size(45, 15);
             lblBateria.TabIndex = 4;
@@ -258,7 +288,7 @@
             lblProtocoloOBD.AutoSize = true;
             lblProtocoloOBD.Font = new Font("Segoe UI", 9F);
             lblProtocoloOBD.ForeColor = Color.Black;
-            lblProtocoloOBD.Location = new Point(3, 30);
+            lblProtocoloOBD.Location = new Point(3, 40);
             lblProtocoloOBD.Name = "lblProtocoloOBD";
             lblProtocoloOBD.Size = new Size(62, 15);
             lblProtocoloOBD.TabIndex = 1;
@@ -269,7 +299,7 @@
             lblVin.AutoSize = true;
             lblVin.Font = new Font("Segoe UI", 9F);
             lblVin.ForeColor = Color.Black;
-            lblVin.Location = new Point(3, 15);
+            lblVin.Location = new Point(3, 20);
             lblVin.Name = "lblVin";
             lblVin.Size = new Size(29, 15);
             lblVin.TabIndex = 0;
@@ -279,7 +309,7 @@
             // 
             lblrCalId.AutoSize = true;
             lblrCalId.Font = new Font("Segoe UI", 9F);
-            lblrCalId.Location = new Point(148, 75);
+            lblrCalId.Location = new Point(148, 100);
             lblrCalId.Name = "lblrCalId";
             lblrCalId.Size = new Size(51, 15);
             lblrCalId.TabIndex = 0;
@@ -289,7 +319,7 @@
             // 
             lblrRPM.AutoSize = true;
             lblrRPM.Font = new Font("Segoe UI", 9F);
-            lblrRPM.Location = new Point(148, 60);
+            lblrRPM.Location = new Point(148, 80);
             lblrRPM.Name = "lblrRPM";
             lblrRPM.Size = new Size(49, 15);
             lblrRPM.TabIndex = 0;
@@ -299,7 +329,7 @@
             // 
             lblrBateria.AutoSize = true;
             lblrBateria.Font = new Font("Segoe UI", 9F);
-            lblrBateria.Location = new Point(148, 45);
+            lblrBateria.Location = new Point(148, 60);
             lblrBateria.Name = "lblrBateria";
             lblrBateria.Size = new Size(60, 15);
             lblrBateria.TabIndex = 21;
@@ -309,7 +339,7 @@
             // 
             lblrProtocoloOBD.AutoSize = true;
             lblrProtocoloOBD.Font = new Font("Segoe UI", 9F);
-            lblrProtocoloOBD.Location = new Point(148, 30);
+            lblrProtocoloOBD.Location = new Point(148, 40);
             lblrProtocoloOBD.Name = "lblrProtocoloOBD";
             lblrProtocoloOBD.Size = new Size(100, 15);
             lblrProtocoloOBD.TabIndex = 19;
@@ -319,7 +349,7 @@
             // 
             lblrVIN.AutoSize = true;
             lblrVIN.Font = new Font("Segoe UI", 9F);
-            lblrVIN.Location = new Point(148, 15);
+            lblrVIN.Location = new Point(148, 20);
             lblrVIN.Name = "lblrVIN";
             lblrVIN.Size = new Size(43, 15);
             lblrVIN.TabIndex = 17;
@@ -340,7 +370,7 @@
             lblCalibrationVerificationNumber.AutoSize = true;
             lblCalibrationVerificationNumber.Font = new Font("Segoe UI", 9F);
             lblCalibrationVerificationNumber.ForeColor = Color.Black;
-            lblCalibrationVerificationNumber.Location = new Point(3, 90);
+            lblCalibrationVerificationNumber.Location = new Point(3, 120);
             lblCalibrationVerificationNumber.Name = "lblCalibrationVerificationNumber";
             lblCalibrationVerificationNumber.Size = new Size(34, 15);
             lblCalibrationVerificationNumber.TabIndex = 16;
@@ -350,18 +380,27 @@
             // 
             lblrCalibrationVerificationNumber.AutoSize = true;
             lblrCalibrationVerificationNumber.Font = new Font("Segoe UI", 9F);
-            lblrCalibrationVerificationNumber.Location = new Point(148, 90);
+            lblrCalibrationVerificationNumber.Location = new Point(148, 120);
             lblrCalibrationVerificationNumber.Name = "lblrCalibrationVerificationNumber";
             lblrCalibrationVerificationNumber.Size = new Size(185, 15);
             lblrCalibrationVerificationNumber.TabIndex = 0;
             lblrCalibrationVerificationNumber.Text = "lblrCalibrationVerificationNumber";
+            // 
+            // lblOperacionMotor
+            // 
+            lblOperacionMotor.AutoSize = true;
+            lblOperacionMotor.Location = new Point(3, 140);
+            lblOperacionMotor.Name = "lblOperacionMotor";
+            lblOperacionMotor.Size = new Size(95, 15);
+            lblOperacionMotor.TabIndex = 42;
+            lblOperacionMotor.Text = "OperacionMotor";
             // 
             // lblLuzMil
             // 
             lblLuzMil.AutoSize = true;
             lblLuzMil.Font = new Font("Segoe UI", 9F);
             lblLuzMil.ForeColor = Color.Black;
-            lblLuzMil.Location = new Point(3, 105);
+            lblLuzMil.Location = new Point(3, 160);
             lblLuzMil.Name = "lblLuzMil";
             lblLuzMil.Size = new Size(48, 15);
             lblLuzMil.TabIndex = 9;
@@ -371,7 +410,7 @@
             // 
             lblrLuzMil.AutoSize = true;
             lblrLuzMil.Font = new Font("Segoe UI", 9F);
-            lblrLuzMil.Location = new Point(148, 105);
+            lblrLuzMil.Location = new Point(148, 160);
             lblrLuzMil.Name = "lblrLuzMil";
             lblrLuzMil.Size = new Size(59, 15);
             lblrLuzMil.TabIndex = 18;
@@ -383,7 +422,7 @@
             lblOdometroLuzMil.BackColor = Color.Transparent;
             lblOdometroLuzMil.Font = new Font("Segoe UI", 9F);
             lblOdometroLuzMil.ForeColor = Color.Black;
-            lblOdometroLuzMil.Location = new Point(3, 120);
+            lblOdometroLuzMil.Location = new Point(3, 180);
             lblOdometroLuzMil.Name = "lblOdometroLuzMil";
             lblOdometroLuzMil.Size = new Size(122, 15);
             lblOdometroLuzMil.TabIndex = 7;
@@ -393,7 +432,7 @@
             // 
             lblrOdometroLuzMil.AutoSize = true;
             lblrOdometroLuzMil.Font = new Font("Segoe UI", 9F);
-            lblrOdometroLuzMil.Location = new Point(148, 120);
+            lblrOdometroLuzMil.Location = new Point(148, 180);
             lblrOdometroLuzMil.Name = "lblrOdometroLuzMil";
             lblrOdometroLuzMil.Size = new Size(114, 15);
             lblrOdometroLuzMil.TabIndex = 20;
@@ -404,7 +443,7 @@
             lblRunTimeMil.AutoSize = true;
             lblRunTimeMil.Font = new Font("Segoe UI", 9F);
             lblRunTimeMil.ForeColor = Color.Black;
-            lblRunTimeMil.Location = new Point(3, 135);
+            lblRunTimeMil.Location = new Point(3, 200);
             lblRunTimeMil.Name = "lblRunTimeMil";
             lblRunTimeMil.Size = new Size(117, 15);
             lblRunTimeMil.TabIndex = 13;
@@ -414,7 +453,7 @@
             // 
             lblrRunTimeMil.AutoSize = true;
             lblrRunTimeMil.Font = new Font("Segoe UI", 9F);
-            lblrRunTimeMil.Location = new Point(148, 135);
+            lblrRunTimeMil.Location = new Point(148, 200);
             lblrRunTimeMil.Name = "lblrRunTimeMil";
             lblrRunTimeMil.Size = new Size(88, 15);
             lblrRunTimeMil.TabIndex = 24;
@@ -425,7 +464,7 @@
             lblDTCClear.AutoSize = true;
             lblDTCClear.Font = new Font("Segoe UI", 9F);
             lblDTCClear.ForeColor = Color.Black;
-            lblDTCClear.Location = new Point(3, 150);
+            lblDTCClear.Location = new Point(3, 220);
             lblDTCClear.Name = "lblDTCClear";
             lblDTCClear.Size = new Size(75, 15);
             lblDTCClear.TabIndex = 0;
@@ -436,7 +475,7 @@
             // 
             lblrDTCClear.AutoSize = true;
             lblrDTCClear.Font = new Font("Segoe UI", 9F);
-            lblrDTCClear.Location = new Point(148, 150);
+            lblrDTCClear.Location = new Point(148, 220);
             lblrDTCClear.Name = "lblrDTCClear";
             lblrDTCClear.Size = new Size(71, 15);
             lblrDTCClear.TabIndex = 27;
@@ -447,7 +486,7 @@
             lblOBDClear.AutoSize = true;
             lblOBDClear.Font = new Font("Segoe UI", 9F);
             lblOBDClear.ForeColor = Color.Black;
-            lblOBDClear.Location = new Point(3, 165);
+            lblOBDClear.Location = new Point(3, 240);
             lblOBDClear.Name = "lblOBDClear";
             lblOBDClear.Size = new Size(137, 15);
             lblOBDClear.TabIndex = 5;
@@ -458,18 +497,36 @@
             // 
             lblrOBDClear.AutoSize = true;
             lblrOBDClear.Font = new Font("Segoe UI", 9F);
-            lblrOBDClear.Location = new Point(148, 165);
+            lblrOBDClear.Location = new Point(148, 240);
             lblrOBDClear.Name = "lblrOBDClear";
             lblrOBDClear.Size = new Size(75, 15);
             lblrOBDClear.TabIndex = 22;
             lblrOBDClear.Text = "lblrOBDClear";
+            // 
+            // lblWarmsUp
+            // 
+            lblWarmsUp.AutoSize = true;
+            lblWarmsUp.Location = new Point(3, 260);
+            lblWarmsUp.Name = "lblWarmsUp";
+            lblWarmsUp.Size = new Size(131, 20);
+            lblWarmsUp.TabIndex = 44;
+            lblWarmsUp.Text = "Arranques / Warm-ups desde borrado";
+            // 
+            // lblrWarmsUp
+            // 
+            lblrWarmsUp.AutoSize = true;
+            lblrWarmsUp.Location = new Point(148, 260);
+            lblrWarmsUp.Name = "lblrWarmsUp";
+            lblrWarmsUp.Size = new Size(72, 15);
+            lblrWarmsUp.TabIndex = 45;
+            lblrWarmsUp.Text = "lblWarmsUp";
             // 
             // lblModo3Lista
             // 
             lblModo3Lista.AutoSize = true;
             lblModo3Lista.Font = new Font("Segoe UI", 9F);
             lblModo3Lista.ForeColor = Color.Black;
-            lblModo3Lista.Location = new Point(3, 180);
+            lblModo3Lista.Location = new Point(3, 280);
             lblModo3Lista.Name = "lblModo3Lista";
             lblModo3Lista.Size = new Size(126, 15);
             lblModo3Lista.TabIndex = 10;
@@ -480,7 +537,7 @@
             // 
             lblrModo3Lista.AutoSize = true;
             lblrModo3Lista.Font = new Font("Segoe UI", 9F);
-            lblrModo3Lista.Location = new Point(148, 180);
+            lblrModo3Lista.Location = new Point(148, 280);
             lblrModo3Lista.Name = "lblrModo3Lista";
             lblrModo3Lista.Size = new Size(86, 15);
             lblrModo3Lista.TabIndex = 28;
@@ -491,17 +548,18 @@
             lblModo7Lista.AutoSize = true;
             lblModo7Lista.Font = new Font("Segoe UI", 9F);
             lblModo7Lista.ForeColor = Color.Black;
-            lblModo7Lista.Location = new Point(3, 195);
+            lblModo7Lista.Location = new Point(3, 300);
             lblModo7Lista.Name = "lblModo7Lista";
             lblModo7Lista.Size = new Size(115, 15);
             lblModo7Lista.TabIndex = 12;
             lblModo7Lista.Text = "Códigos Pendientes:";
+            lblModo7Lista.Click += lblModo7Lista_Click;
             // 
             // lblrModo7Lista
             // 
             lblrModo7Lista.AutoSize = true;
             lblrModo7Lista.Font = new Font("Segoe UI", 9F);
-            lblrModo7Lista.Location = new Point(148, 195);
+            lblrModo7Lista.Location = new Point(148, 300);
             lblrModo7Lista.Name = "lblrModo7Lista";
             lblrModo7Lista.Size = new Size(86, 15);
             lblrModo7Lista.TabIndex = 0;
@@ -513,17 +571,18 @@
             lblModoALista.AutoSize = true;
             lblModoALista.Font = new Font("Segoe UI", 9F);
             lblModoALista.ForeColor = Color.Black;
-            lblModoALista.Location = new Point(3, 210);
+            lblModoALista.Location = new Point(3, 320);
             lblModoALista.Name = "lblModoALista";
             lblModoALista.Size = new Size(126, 15);
             lblModoALista.TabIndex = 0;
             lblModoALista.Text = "Códigos Permanentes:";
+            lblModoALista.Click += lblModoALista_Click;
             // 
             // lblrModoALista
             // 
             lblrModoALista.AutoSize = true;
             lblrModoALista.Font = new Font("Segoe UI", 9F);
-            lblrModoALista.Location = new Point(148, 210);
+            lblrModoALista.Location = new Point(148, 320);
             lblrModoALista.Name = "lblrModoALista";
             lblrModoALista.Size = new Size(88, 15);
             lblrModoALista.TabIndex = 39;
@@ -535,6 +594,7 @@
             tlpMonitores.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlpMonitores.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tlpMonitores.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpMonitores.Controls.Add(lblTempRefriegerante, 0, 17);
             tlpMonitores.Controls.Add(lblCompletoMisfire, 2, 10);
             tlpMonitores.Controls.Add(lblDisponibleMisfire, 1, 10);
             tlpMonitores.Controls.Add(lblMisfire, 0, 10);
@@ -586,10 +646,17 @@
             tlpMonitores.Controls.Add(lblNoxScrAftertreatment, 0, 16);
             tlpMonitores.Controls.Add(lblDisponibleNoxScrAftertreatment, 1, 16);
             tlpMonitores.Controls.Add(lblCompletoNoxScrAftertreatment, 2, 16);
+            tlpMonitores.Controls.Add(lblCargaCalculaMotor, 0, 18);
+            tlpMonitores.Controls.Add(lblrCargaCalculaMotor, 1, 18);
+            tlpMonitores.Controls.Add(lblrTempRefriegerante, 1, 17);
+            tlpMonitores.Controls.Add(lblSTFT, 0, 19);
+            tlpMonitores.Controls.Add(lblrSTFT, 1, 19);
+            tlpMonitores.Controls.Add(lblLTFT, 0, 20);
+            tlpMonitores.Controls.Add(lblrLTFT, 1, 20);
             tlpMonitores.Dock = DockStyle.Fill;
             tlpMonitores.Location = new Point(0, 0);
             tlpMonitores.Name = "tlpMonitores";
-            tlpMonitores.RowCount = 18;
+            tlpMonitores.RowCount = 26;
             tlpMonitores.RowStyles.Add(new RowStyle());
             tlpMonitores.RowStyles.Add(new RowStyle());
             tlpMonitores.RowStyles.Add(new RowStyle());
@@ -608,8 +675,25 @@
             tlpMonitores.RowStyles.Add(new RowStyle());
             tlpMonitores.RowStyles.Add(new RowStyle());
             tlpMonitores.RowStyles.Add(new RowStyle());
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpMonitores.Size = new Size(369, 432);
             tlpMonitores.TabIndex = 0;
+            // 
+            // lblTempRefriegerante
+            // 
+            lblTempRefriegerante.AutoSize = true;
+            lblTempRefriegerante.Location = new Point(3, 255);
+            lblTempRefriegerante.Name = "lblTempRefriegerante";
+            lblTempRefriegerante.Size = new Size(112, 15);
+            lblTempRefriegerante.TabIndex = 6;
+            lblTempRefriegerante.Text = "Temp. Refriegerante";
             // 
             // lblCompletoMisfire
             // 
@@ -1155,6 +1239,69 @@
             lblCompletoNoxScrAftertreatment.Text = "no";
             lblCompletoNoxScrAftertreatment.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // lblCargaCalculaMotor
+            // 
+            lblCargaCalculaMotor.AutoSize = true;
+            lblCargaCalculaMotor.Location = new Point(3, 285);
+            lblCargaCalculaMotor.Name = "lblCargaCalculaMotor";
+            lblCargaCalculaMotor.Size = new Size(110, 15);
+            lblCargaCalculaMotor.TabIndex = 3;
+            lblCargaCalculaMotor.Text = "CargaCalculaMotor";
+            // 
+            // lblrCargaCalculaMotor
+            // 
+            lblrCargaCalculaMotor.AutoSize = true;
+            lblrCargaCalculaMotor.Location = new Point(187, 285);
+            lblrCargaCalculaMotor.Name = "lblrCargaCalculaMotor";
+            lblrCargaCalculaMotor.Size = new Size(85, 20);
+            lblrCargaCalculaMotor.TabIndex = 4;
+            lblrCargaCalculaMotor.Text = "lblrCargaCalculaMotor";
+            // 
+            // lblrTempRefriegerante
+            // 
+            lblrTempRefriegerante.AutoSize = true;
+            lblrTempRefriegerante.Location = new Point(187, 255);
+            lblrTempRefriegerante.Name = "lblrTempRefriegerante";
+            lblrTempRefriegerante.Size = new Size(86, 30);
+            lblrTempRefriegerante.TabIndex = 5;
+            lblrTempRefriegerante.Text = "lblTempRefriegerante";
+            // 
+            // lblSTFT
+            // 
+            lblSTFT.AutoSize = true;
+            lblSTFT.Location = new Point(3, 305);
+            lblSTFT.Name = "lblSTFT";
+            lblSTFT.Size = new Size(31, 15);
+            lblSTFT.TabIndex = 7;
+            lblSTFT.Text = "STFT";
+            // 
+            // lblrSTFT
+            // 
+            lblrSTFT.AutoSize = true;
+            lblrSTFT.Location = new Point(187, 305);
+            lblrSTFT.Name = "lblrSTFT";
+            lblrSTFT.Size = new Size(48, 15);
+            lblrSTFT.TabIndex = 8;
+            lblrSTFT.Text = "lblrSTFT";
+            // 
+            // lblLTFT
+            // 
+            lblLTFT.AutoSize = true;
+            lblLTFT.Location = new Point(3, 325);
+            lblLTFT.Name = "lblLTFT";
+            lblLTFT.Size = new Size(30, 15);
+            lblLTFT.TabIndex = 9;
+            lblLTFT.Text = "LTFT";
+            // 
+            // lblrLTFT
+            // 
+            lblrLTFT.AutoSize = true;
+            lblrLTFT.Location = new Point(187, 325);
+            lblrLTFT.Name = "lblrLTFT";
+            lblrLTFT.Size = new Size(47, 15);
+            lblrLTFT.TabIndex = 10;
+            lblrLTFT.Text = "lblrLTFT";
+            // 
             // pnlFooterPrincipal
             // 
             pnlFooterPrincipal.BackColor = Color.White;
@@ -1337,5 +1484,17 @@
         private SplitContainer splitContainer1;
         private Label lblResultado;
         private Label lblTitulo2;
+        private Label lblrOperacionMotor;
+        private Label lblOperacionMotor;
+        private Label lblWarmsUp;
+        private Label lblrWarmsUp;
+        private Label lblTempRefriegerante;
+        private Label lblCargaCalculaMotor;
+        private Label lblrCargaCalculaMotor;
+        private Label lblrTempRefriegerante;
+        private Label lblSTFT;
+        private Label lblrSTFT;
+        private Label lblLTFT;
+        private Label lblrLTFT;
     }
 }

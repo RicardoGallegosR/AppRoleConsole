@@ -4,7 +4,7 @@
         #region Declaración de Variables
         private static string SafeStr(object? x, string empty = "—") => x == null ? empty : x.ToString() ?? empty;
 
-        private int? _rpm, _vel, _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03;
+        private int? _rpm, _vel, _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03, _OperacionMotor, _WarmUpsDesdeBorrado;
         private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A;
 
         private string _port = "COM4", _vin = string.Empty, _calJoined = string.Empty, 
@@ -261,6 +261,11 @@
                     );
                     _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);
 
+                    // Más valores instruidos por Toñin Cara de pan :D
+                    _OperacionMotor = TryQuery<int?>("TiempoTotalSegundosOperacionMotor", () => elm.TiempoTotalSegundosOperacionMotor(), null, errores);
+                    _WarmUpsDesdeBorrado = TryQuery<int?>("WarmUpsDesdeBorrado", () => elm.WarmUpsSinceCodesCleared(), null, errores);
+
+
 
                     var status = TryQuery<Elm327.MonitorStatus?>("STATUS", () => elm.ReadStatus(), null, errores);
                     if (status is { } st) { 
@@ -333,9 +338,13 @@
                         runTimeMilMin = _runTimeMilMin,
                         timeSinceClr = _timeSinceClr,
                         cvn = _cvn,
-                        cal = _cal
-                        
-                        
+                        cal = _cal,
+
+                        // Más valores instruidos por Toñin Cara de pan :D
+                        TiempoTotalSegundosOperacionMotor = _OperacionMotor,
+                        WarmUpsDesdeBorrado = _WarmUpsDesdeBorrado
+
+
 
                     };
                 }

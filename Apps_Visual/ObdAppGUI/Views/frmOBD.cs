@@ -87,6 +87,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             //LecturasIniciales a = randy.LecturasPrincipales();
             ResultadoOBD = randy.SpSetObd();
+            //TOÑO
+
+
 
             #region Asignacion de Monitores
             lblCompletoComponent.Text = GetCompletoText(ResultadoOBD.Sc);
@@ -163,6 +166,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //CVN:
             lblrCalibrationVerificationNumber.Text = ResultadoOBD.cvn;
             //*/
+
+            lblrOperacionMotor.Text = $"{ResultadoOBD.TiempoTotalSegundosOperacionMotor} seg";
+            lblWarmsUp.Text = $"{ResultadoOBD.WarmUpsDesdeBorrado} Veces";
+
+
+
+
+
 
 
             //obdMonitoresLuzMil = randy.Monitores();
@@ -644,6 +655,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void lblOBDClear_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblModo7Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblModoALista_Click(object sender, EventArgs e) {
 
         }
     }
