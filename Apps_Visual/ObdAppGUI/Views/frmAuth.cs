@@ -2,6 +2,7 @@
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config;
 using SQLSIVEV.Infrastructure.Security;
+using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Utils;
 using System;
@@ -12,18 +13,14 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 
 namespace Apps_Visual.ObdAppGUI.Views {
     public partial class frmAuth : Form {
         public event Action<Guid> AccesoObtenido;
-        public Guid estacionId = Guid.Empty, accesoId;
-
-        public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
-            appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty;
+        public VisualRegistroWindows _Visual;      
+        
         private Size _formSizeInicial;
         private float _fontSizeInicial;
 
@@ -74,20 +71,23 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
-                if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
-                       && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS) && estacionId != Guid.Empty) {
+                if (IsSet(_Visual.Server)       && IsSet(_Visual.Database)      && IsSet(_Visual.User)      && 
+                    IsSet(_Visual.Password)     && IsSet(_Visual.AppName)       && IsSet(_Visual.AppRole)   && 
+                    IsSet(_Visual.AppRolePassword.ToString())) {
+
                     var r = await CredencialExisteHuella(
-                                        SERVER: SERVER,
-                                        DB: DB,
-                                        SQL_USER: SQL_USER,
-                                        SQL_PASS: SQL_PASS,
-                                        appName: appName,
-                                        APPROLE: APPROLE,
-                                        APPROLE_PASS: APPROLE_PASS,
-                                        estacionId: estacionId,
-                                        opcionMenu: opcionMenu,
-                                        credencial: credencial
-                                    );
+                                        SERVER:         _Visual.Server,
+                                        DB:             _Visual.Database,
+                                        SQL_USER:       _Visual.User,
+                                        SQL_PASS:       _Visual.Password,
+                                        appName:        _Visual.AppName,
+                                        APPROLE:        _Visual.RollVisual,
+                                        APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
+                                        estacionId:     _Visual.EstacionId,
+                                        opcionMenu:     _Visual.OpcionMenuId,
+                                        credencial:     credencial
+                                        );
+                    
                     if (r.MensajeId == 0) {
                         lblCredencial.Enabled = false;
                         txbCredencial.Enabled = false;
@@ -109,9 +109,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     } else {
                         var repo = new SivevRepository();
                         try {
-                            using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
+                            using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
                                 await connApp.OpenAsync();
-                                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                                using (var scope = new AppRoleScope(connApp, _Visual.AppRole, _Visual.AppRolePassword.ToString().ToUpper())) {
                                     try {
                                         var rMensaje = await repo.PrintIfMsgAsync(connApp, $"Fallo en CredencialExisteHuella()", r.MensajeId);
                                         MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() con la credencial {credencial} Mensaje: {rMensaje.Mensaje}");
@@ -128,7 +128,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         txbCredencial.Text = string.Empty;
                     }
                 } else {
-                    //MostrarMensaje($"SERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {estacionId}");
+                    SivevLogger.Information(($"Apps_Visual.ObdAppGUI.Views.txbCredencial_PreviewKeyDown\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}"));
                 }
             }
         }
@@ -160,17 +160,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbCredencial.Focus();
 
             var r = await GetAccesoSQL(
-                                        SERVER: SERVER,
-                                        DB: DB,
-                                        SQL_USER: SQL_USER,
-                                        SQL_PASS: SQL_PASS,
-                                        appName: appName,
-                                        APPROLE: APPROLE,
-                                        APPROLE_PASS: APPROLE_PASS,
-                                        estacionId: estacionId,
-                                        opcionMenu: opcionMenu,
-                                        credencial: credencial
-            );
+                                        SERVER:         _Visual.Server,
+                                        DB:             _Visual.Database,
+                                        SQL_USER:       _Visual.User,
+                                        SQL_PASS:       _Visual.Password,
+                                        appName:        _Visual.AppName,
+                                        APPROLE:        _Visual.RollVisual,
+                                        APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
+                                        estacionId:     _Visual.EstacionId,
+                                        opcionMenu:     _Visual.OpcionMenuId,
+                                        credencial:     credencial
+                                      );
             Guid accesoNormalizado = Guid.Empty;
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
                 accesoNormalizado = r.AccesoId;

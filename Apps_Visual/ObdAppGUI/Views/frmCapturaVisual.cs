@@ -2,6 +2,7 @@
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
+using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Utils;
 using System;
@@ -14,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media;
 using System.Xml.Linq;
 //clbPrincipal
 
@@ -25,14 +27,16 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private Size _formSizeInicial;
         private float _fontSizeInicial;
         private TaskCompletionSource<bool>? _tcsResultado;
+        public VisualRegistroWindows _Visual;
 
 
-        //*
+        /*
         public Guid _estacionId = Guid.Empty, _accesoId = Guid.Empty;
         
         public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
             appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty, _placa = string.Empty;
         //*/
+        public string _placa = string.Empty;
 
         public event Action<bool> HabilitarPruebas;
         public event Action<bool> _checkOBD;
@@ -108,15 +112,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
             
             var r = await CapturaInspeccionVisual (
-                        SERVER: SERVER,
-                        DB: DB,
-                        SQL_USER: SQL_USER,
-                        SQL_PASS: SQL_PASS,
-                        appName: appName,
-                        APPROLE: APPROLE,
-                        APPROLE_PASS: APPROLE_PASS,
-                        estacionId: _estacionId,
-                        AccesoId: _accesoId,
+                        SERVER: _Visual.Server,
+                        DB: _Visual.Database,
+                        SQL_USER: _Visual.User,
+                        SQL_PASS: _Visual.Password,
+                        appName: _Visual.AppName,
+                        APPROLE: _Visual.RollVisual,
+                        APPROLE_PASS: _Visual.RollVisualAcceso.ToString().ToUpper(),
+                        estacionId: _Visual.EstacionId,
+                        AccesoId: _Visual.AccesoId,
                         verificacionId:_verificacionId,
                         tiTaponCombustible:tiTaponCombustible, 
                         tiTaponAceite: tiTaponAceite, 
@@ -272,21 +276,21 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblTitulo.Text = "Buscando Verificaciones disponibles";
             bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
-            if (IsSet(SERVER) && IsSet(DB) && IsSet(SQL_USER) && IsSet(SQL_PASS)
-                && IsSet(appName) && IsSet(APPROLE) && IsSet(APPROLE_PASS)
-                && _estacionId != Guid.Empty
-                && _accesoId != Guid.Empty) {
+            if (IsSet(_Visual.Server)        && IsSet(_Visual.Database)     && IsSet(_Visual.User) && 
+                IsSet(_Visual.Password)      && IsSet(_Visual.AppName)      && IsSet(_Visual.RollVisual) && 
+                _Visual.RollVisualAcceso != Guid.Empty                      && _Visual.EstacionId != Guid.Empty && 
+                _Visual.AccesoId != Guid.Empty) {
 
                 var r = await GetAccesoSQLVerificaciones(
-                    SERVER: SERVER,
-                    DB: DB,
-                    SQL_USER: SQL_USER,
-                    SQL_PASS: SQL_PASS,
-                    appName: appName,
-                    APPROLE: APPROLE,
-                    APPROLE_PASS: APPROLE_PASS,
-                    estacionId: _estacionId,
-                    AccesoId: _accesoId
+                    SERVER:         _Visual.Server,
+                    DB:             _Visual.Database,
+                    SQL_USER:       _Visual.User,
+                    SQL_PASS:       _Visual.Password,
+                    appName:        _Visual.AppName,
+                    APPROLE:        _Visual.RollVisual,
+                    APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
+                    estacionId:     _Visual.EstacionId,
+                    AccesoId:       _Visual.AccesoId
                 );
                 _MensajeSQL = r.MensajeId;
 
@@ -304,18 +308,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
                     
                     var r2 = await BanderasAEvaluar(
-                        SERVER: SERVER,
-                        DB: DB,
-                        SQL_USER: SQL_USER,
-                        SQL_PASS: SQL_PASS,
-                        appName: appName,
-                        APPROLE: APPROLE,
-                        APPROLE_PASS: APPROLE_PASS,
-                        estacionId: _estacionId,
-                        AccesoId: _accesoId,
-                        verificacionId: _verificacionId,
-                        elemento: "DESCONOCIDO",
-                        combustible: 0
+                            SERVER:         _Visual.Server,
+                            DB:             _Visual.Database,
+                            SQL_USER:       _Visual.User,
+                            SQL_PASS:       _Visual.Password,
+                            appName:        _Visual.AppName,
+                            APPROLE:        _Visual.RollVisual,
+                            APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
+                            estacionId:     _Visual.EstacionId,
+                            AccesoId:       _Visual.AccesoId,
+                            verificacionId: _verificacionId,
+                            elemento: "DESCONOCIDO",
+                            combustible: 0
                     );
 
                     if (r2.MensajeId == 0) {
@@ -325,12 +329,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 } else {
                     if (_MensajeSQL != 0) {
                         var repo = new SivevRepository();
-                        using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
+                        using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
                             await connApp.OpenAsync();
-                            using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                            using (var scope = new AppRoleScope(connApp, _Visual.AppRole, _Visual.AppRolePassword.ToString().ToUpper())) {
                                 var error = await repo.PrintIfMsgAsync(connApp, "Error en GetAccesoSQLVerificaciones", _MensajeSQL);
-                                var fin = await repo.SpAppAccesoFinAsync(connApp, _estacionId, _accesoId);
-                                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
+                                var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+                                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
+                                SivevLogger.Information($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
                             }
                         }
                         
@@ -339,7 +344,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     return false;
                 }
             } else {
-                MostrarMensaje($"No se pasaron los datos de la configuración...\nSERVER: {SERVER}\nDB: {DB}\nSQL_USER: {SQL_USER}\nSQL_PASS: {SQL_PASS}\nappName: {appName}\nAPPROLE_PASS: {APPROLE_PASS}\nestacionId: {_estacionId}");
+                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}");
+                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}");
                 foreach (Control c in pnlPrincipal.Controls)
                     c.Dispose();
                 pnlPrincipal.Controls.Clear();

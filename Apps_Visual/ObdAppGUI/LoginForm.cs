@@ -32,12 +32,6 @@ namespace Apps_Visual.ObdAppGUI {
 
     public partial class frmBASE : Form {
         #region Variables para funcionamiento
-        /*
-        private string SERVER, DB, SQL_USER, SQL_PASS, APPNAME, APPROLE, APPROLE_PASS,
-            RollAccesoVisual, RollAccesoVisualAcceso, estacionId, claveAccesoId;
-        private Guid _estacionId = Guid.Empty;
-        private short opcionMenu;
-        */
         
         private VisualRegistroWindows Visual;
         private readonly RegistroCrypto _reg = new();
@@ -91,7 +85,7 @@ namespace Apps_Visual.ObdAppGUI {
                 );
                 await conn.OpenAsync();
 
-                using (var scope = new AppRoleScope(conn, Visual.AppRole, Visual.AppRolePassword.ToString())) {
+                using (var scope = new AppRoleScope(conn, Visual.AppRole, Visual.AppRolePassword.ToString().ToUpper())) {
                     var repo = new SivevRepository();
                     var r = repo.SpAppRollClaveGet(conn);
                     var MensajesSQL = await  repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
@@ -104,9 +98,10 @@ namespace Apps_Visual.ObdAppGUI {
                         }
                         return false;
                     }
-                    Visual.RollAccesoVisualAcceso = new string((r.ClaveAcceso ?? "").Reverse().ToArray());
-                    Visual.RollAccesoVisual = r.FuncionAplicacion;
-                    SivevLogger.Information($"Valores regresados {Visual.RollAccesoVisualAcceso}");
+                    Visual.RollVisualAcceso = Guid.Parse((r.ClaveAcceso ?? "").Reverse().ToArray());
+                    Visual.RollVisual = r.FuncionAplicacion;
+
+                    SivevLogger.Information($"Valores regresados {Visual.RollVisual}");
                 }
 
 
@@ -123,7 +118,7 @@ namespace Apps_Visual.ObdAppGUI {
             }
         }
 
-
+        #region BloquearEstacionSqlTest
         private void BloquearEstacionSqlTest() {
             pnlLateralIzquierdoCentral.BackColor = AppColors.BloqueoPorSQLPanel;
             btnInspecionVisual.Enabled = false;
@@ -147,6 +142,8 @@ namespace Apps_Visual.ObdAppGUI {
         }
         #endregion
 
+        #endregion
+
         #region Regedit
         private bool LecturaRegedit() {
             bool vacio(string s) => string.IsNullOrWhiteSpace(s);
@@ -155,7 +152,6 @@ namespace Apps_Visual.ObdAppGUI {
             var conf = lector.GetConfig();
             CryptoHelper.Configurar(conf);
            
-
             Visual = new VisualRegistroWindows{
                 Server                    = Leer(nameof(VisualRegistroWindows.Server)),
                 Database                  = Leer(nameof(VisualRegistroWindows.Database)),
@@ -172,9 +168,8 @@ namespace Apps_Visual.ObdAppGUI {
                 ServidorVersionesControlador = Leer(nameof(VisualRegistroWindows.ServidorVersionesControlador)),
                 Url                       = Leer((nameof(VisualRegistroWindows.Url))),
                 EstacionId                = LeerGuid(nameof(VisualRegistroWindows.EstacionId))
-
-
             };
+
 
             SivevLogger.Information(
                 $"|| Lectura de REGEDIT " +
@@ -187,19 +182,6 @@ namespace Apps_Visual.ObdAppGUI {
                 $"|| opcionMenu: {Visual.OpcionMenuId}, " +
                 $"|| estacionId: {Visual.EstacionId}, " 
             );
-
-            MessageBox.Show(
-                $"|| Lectura de REGEDIT " +
-                $"|| SERVER: {Visual.Server}, " +
-                $"|| DB: {Visual.Database}, " +
-                $"|| SQL_USER: {Visual.User}, " +
-                $"|| APPNAME: {Visual.Password}, " +
-                $"|| APPROLE: {Visual.AppName}, " +
-                $"|| RollAcceso: {Visual.AppRole}, " +
-                $"|| opcionMenu: {Visual.OpcionMenuId}, " +
-                $"|| estacionId: {Visual.EstacionId}, "
-            );
-
 
             return vacio(Visual.Server)
                  || vacio(Visual.Database)
@@ -288,6 +270,12 @@ namespace Apps_Visual.ObdAppGUI {
                 SivevLogger.Information($"No pasa a prueba OBD: {pruebaVisual}");
                 return;
             }
+            Visual.PlacaId = _placa;
+            Visual.VerificacionId = _verificacionId;
+            MessageBox.Show($"placa: {Visual.PlacaId}");
+            MessageBox.Show($"verificacionId: {Visual.VerificacionId}");
+
+            await Task.Delay(500);
 
             bool PruebaOBD = await PruebaOBDPanel();
             if (!PruebaOBD) {
@@ -305,7 +293,7 @@ namespace Apps_Visual.ObdAppGUI {
                 c.Dispose();
                 
             pnlPanelCambios.Controls.Clear();
-            ///*
+
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
                 frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
@@ -314,24 +302,7 @@ namespace Apps_Visual.ObdAppGUI {
             frmcredenciales.panelY = pnlPanelCambios.Height;
             frmcredenciales.InicializarTamanoYFuente();
 
-
-            ///*
-            ///
-            /*
-            frmcredenciales.estacionId = _estacionId;
-
-
-            frmcredenciales.SERVER = SERVER;
-            frmcredenciales.DB = DB;
-            frmcredenciales.SQL_USER = SQL_USER;
-            frmcredenciales.SQL_PASS = SQL_PASS;
-            frmcredenciales.appName = APPNAME;
-            frmcredenciales.APPROLE = RollAccesoVisual;
-            frmcredenciales.APPROLE_PASS = RollAccesoVisualAcceso;
-            frmcredenciales.opcionMenu = opcionMenu;
-            */
-
-
+            frmcredenciales._Visual = Visual;
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
 
             bool ok = await _tcsAcceso.Task;
@@ -358,18 +329,8 @@ namespace Apps_Visual.ObdAppGUI {
             CapturaVisual.panelX = pnlPanelCambios.Width;
             CapturaVisual.panelY = pnlPanelCambios.Height;
             CapturaVisual.InicializarTamanoYFuente();
+            CapturaVisual._Visual = Visual;
 
-            /*
-            CapturaVisual.SERVER = SERVER;
-            CapturaVisual.DB = DB;
-            CapturaVisual.SQL_USER = SQL_USER;
-            CapturaVisual.SQL_PASS = SQL_PASS;
-            CapturaVisual.appName = APPNAME;
-            CapturaVisual.APPROLE = RollAccesoVisual;
-            CapturaVisual.APPROLE_PASS = RollAccesoVisualAcceso;
-            CapturaVisual._accesoId = _AccesoIdObtenido;
-            CapturaVisual._estacionId = _estacionId;
-            */
             pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
             bool VerificacionesDisponibles = await CapturaVisual.InicializarAsync();
             
@@ -405,13 +366,14 @@ namespace Apps_Visual.ObdAppGUI {
                 }
                 return false;
             }
-            //MostrarMensaje($"PLACA: {_placa}, VERIFICACION: {_verificacionId}, OBD: {_RealizarPruebaOBD}");
-
             return _RealizarPruebaOBD;
         }
         #endregion
 
         #region Prueba OBD
+
+
+
         private async Task<bool> PruebaOBDPanel() {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
@@ -420,26 +382,14 @@ namespace Apps_Visual.ObdAppGUI {
             if (PruebaOBD == null || PruebaOBD.IsDisposed) {
                 PruebaOBD = new frmOBD();
             }
-
-            /*
             PruebaOBD._panelX = pnlPanelCambios.Width;
             PruebaOBD._panelY = pnlPanelCambios.Height;
             PruebaOBD.InicializarTamanoYFuente();
-            PruebaOBD._SERVER = SERVER;
-            PruebaOBD._DB = DB;
-            PruebaOBD._SQL_USER = SQL_USER;
-            PruebaOBD._SQL_PASS = SQL_PASS;
-            PruebaOBD._appName = APPNAME;
-            PruebaOBD._APPROLE = RollAccesoVisual;
-            PruebaOBD._APPROLE_PASS = RollAccesoVisualAcceso;
-            PruebaOBD._placa = _placa;
-            PruebaOBD._verificacionId = _verificacionId;
-            PruebaOBD._accesoId = _AccesoIdObtenido;
-            PruebaOBD._estacionId = _estacionId;
-            */
-            
+            PruebaOBD._Visual = Visual;
             pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
-
+            
+            PruebaOBD._Visual = Visual;
+            
 
             bool ok = await PruebaOBD.EsperarResultadoAsync();
             if (ok) {
@@ -492,7 +442,8 @@ namespace Apps_Visual.ObdAppGUI {
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
             if (ok) {
-                _AccesoIdObtenido = accesoObtenido;
+                //_AccesoIdObtenido = accesoObtenido;
+                Visual.AccesoId = accesoObtenido;   
                 pnlPanelCambios.Controls.Clear();
                 frmcredenciales.Dispose();
                 frmcredenciales = null;

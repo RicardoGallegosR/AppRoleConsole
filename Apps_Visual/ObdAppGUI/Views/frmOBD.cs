@@ -3,6 +3,7 @@ using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Devices.Obd;
 using SQLSIVEV.Infrastructure.Security;
+using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Utils;
 using System;
@@ -23,8 +24,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Declaracion de las variables
         private Size _formSizeInicial;
         private float _fontSizeInicial;
-        //private string _placa;
-        public string _placa = "DESCONOCIDO";
+        public VisualRegistroWindows _Visual;
+
         private RBGR randy;
         private LecturasIniciales lecturasIniciales;
         private ObdMonitoresLuzMil obdMonitoresLuzMil;
@@ -32,22 +33,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private TaskCompletionSource<bool>? _tcsResultado;
 
         #region Credenciales de la bdd
-        //*
-        public string   _SERVER = string.Empty,
-                        _DB = string.Empty,
-                        _SQL_USER = string.Empty,
-                        _SQL_PASS = string.Empty,
-                        _appName = string.Empty,
-                        _APPROLE = string.Empty,
-                        _APPROLE_PASS = string.Empty;
 
-        public Guid     _accesoId = Guid.Empty,
-                        _verificacionId = Guid.Empty,
-                        _estacionId = Guid.Empty;
-
-        //*/
-
-        public int _credencial = 0, _panelX = 0, _panelY = 0;
+        public int _panelX = 0, _panelY = 0;
 
         #endregion
 
@@ -74,7 +61,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
             btnConectar.Text = "Conectando ...";
-            lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_placa}";
+            lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
 
@@ -179,7 +166,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //obdMonitoresLuzMil = randy.Monitores();
 
             btnConectar.Text = "Conectar";
-            lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_placa}";
+            lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = true;
             tlpPrincipal.Visible = true;
 
@@ -197,7 +184,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
-            lblLecturaOBD.Text = $"Diagnostico OBD {_placa}";
+            lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
             lblrModoALista.Text = "";
             //lblrModo0ALista.Text = "";
             lblrModo7Lista.Text = "";

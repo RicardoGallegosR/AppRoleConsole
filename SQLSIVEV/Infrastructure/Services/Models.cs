@@ -11,6 +11,7 @@ namespace SQLSIVEV.Infrastructure.Services {
         public int Iterations { get; set; } = 100_000;
         public int KeySizeBits { get; set; } = 256;
     }
+
     public sealed class VisualRegistroWindows {
         public string Server { get; init; } = "";
         public string Database { get; init; } = "";
@@ -27,8 +28,13 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string ServidorVersionesControlador { get; init; } = string.Empty;
         public string Url { get; init; } = string.Empty;
         public Guid EstacionId { get; init; } = Guid.Empty;
-        public string RollAccesoVisualAcceso { get; set; } = string.Empty;
-        public string RollAccesoVisual = string.Empty;
+        public Guid RollVisualAcceso { get; set; } = Guid.Empty;
+        public string RollVisual { get; set; } = string.Empty;
+        
+        
+        public string PlacaId { get; set; } = string.Empty;
+        public Guid AccesoId { get; set; } = Guid.Empty;
+        public Guid VerificacionId { get; set; } = Guid.Empty;
 
     }
 }
