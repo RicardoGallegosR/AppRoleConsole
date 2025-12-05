@@ -51,6 +51,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #endregion
+        public frmOBD() {
+            _fontSizeInicial = this.Font.Size;
+            InitializeComponent();
+
+            WindowState = FormWindowState.Maximized;
+            tlpPrincipal.Enabled = false;
+            tlpPrincipal.Visible = false;
+            btnFinalizarPruebaOBD.Enabled = false;
+            this.Resize += frmCapturaVisual_Resize;
+            ResetForm();
+        }
+        /*
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -63,11 +75,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
         }
+        */
         #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
             btnConectar.Text = "Conectando ...";
             //MessageBox.Show($"Placa: {_Visual.PlacaId}");
-            lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
+            //lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
 
@@ -172,7 +185,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //obdMonitoresLuzMil = randy.Monitores();
 
             btnConectar.Text = "Conectar";
-            lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_Visual.PlacaId}";
+            //lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = true;
             tlpPrincipal.Visible = true;
 
@@ -190,13 +203,16 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
+            /*
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");
                 return;
             }
-            //MessageBox.Show($"Placa: {_Visual.AppName}");
+            
             lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
+            */
+
             lblrModoALista.Text = "";
             //lblrModo0ALista.Text = "";
             lblrModo7Lista.Text = "";
