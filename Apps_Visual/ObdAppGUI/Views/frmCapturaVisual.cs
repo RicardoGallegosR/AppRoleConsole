@@ -135,7 +135,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             if (r.MensajeId == 0) {
                 await Task.Delay(500);
 
-                //MostrarMensaje($"DESDE EL HIJO Mensaje: {r.MensajeId}, CheckObd: {r.CheckObd}, Resultado: {r.Resultado}");
                 _verificacionId2?.Invoke(_verificacionId);
                 _placa2?.Invoke(_placa);
                 _checkOBD?.Invoke(r.CheckObd);
@@ -331,7 +330,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         var repo = new SivevRepository();
                         using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
                             await connApp.OpenAsync();
-                            using (var scope = new AppRoleScope(connApp, _Visual.AppRole, _Visual.AppRolePassword.ToString().ToUpper())) {
+                            using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
                                 var error = await repo.PrintIfMsgAsync(connApp, "Error en GetAccesoSQLVerificaciones", _MensajeSQL);
                                 var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
                                 MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");

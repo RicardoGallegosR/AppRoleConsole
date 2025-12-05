@@ -12,9 +12,12 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+//using System.Windows;
 using System.Windows.Forms;
+//using System.Windows.Media;
 
 
 
@@ -24,7 +27,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Declaracion de las variables
         private Size _formSizeInicial;
         private float _fontSizeInicial;
-        public VisualRegistroWindows _Visual;
+        
 
         private RBGR randy;
         private LecturasIniciales lecturasIniciales;
@@ -35,6 +38,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Credenciales de la bdd
 
         public int _panelX = 0, _panelY = 0;
+        private VisualRegistroWindows _Visual;
 
         #endregion
 
@@ -47,20 +51,22 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #endregion
-        public frmOBD() {
+        public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
-
             InitializeComponent();
+            _Visual = visual ?? throw new ArgumentNullException(nameof(visual));
+
             WindowState = FormWindowState.Maximized;
-            ResetForm();
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
             btnFinalizarPruebaOBD.Enabled = false;
             this.Resize += frmCapturaVisual_Resize;
+            ResetForm();
         }
         #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
             btnConectar.Text = "Conectando ...";
+            //MessageBox.Show($"Placa: {_Visual.PlacaId}");
             lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
@@ -184,6 +190,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
+            if (_Visual is null) {
+                MostrarMensaje("Visual no inicializado");
+                SivevLogger.Error("Visual no inicializado");
+                return;
+            }
+            //MessageBox.Show($"Placa: {_Visual.AppName}");
             lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
             lblrModoALista.Text = "";
             //lblrModo0ALista.Text = "";
@@ -617,8 +629,26 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                     o: ResultadoOBD);
             */
             _tcsResultado?.TrySetResult(true);
+            try {
+                using var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName);
+                await connApp.OpenAsync();
 
+                using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
+                    try {
+                        var repo = new SivevRepository();
+                        var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+                        MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmOBD.btnFinalizarPruebaOBD_Click, se finaliza el acceso");
+                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmOBD.btnFinalizarPruebaOBD_Click, se finaliza el acceso");
+                    } catch {
+
+                    }
+                }
+            } catch {
+
+            }
         }
+
+
         public Task<bool> EsperarResultadoAsync() {
             _tcsResultado = new TaskCompletionSource<bool>();
             return _tcsResultado.Task;
