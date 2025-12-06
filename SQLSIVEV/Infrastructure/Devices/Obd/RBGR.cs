@@ -178,7 +178,7 @@
                         LeeDtcPend = false,
                         LeeVin = vinFromObd,
                         DtcCount = _fallas03,
-                        mensaje = "ok"
+                        Mensaje = "ok"
 
                     };
                 }
@@ -188,7 +188,7 @@
             
 
             return new ObdMonitoresLuzMil {
-                mensaje = mensaje,
+                Mensaje = mensaje,
                 Intentos = 0,
                 ConexionOb = 0,
                 Mil = false,
@@ -330,17 +330,17 @@
                         RpmOn = 0,              //
                         RpmCheck = 0,           //
 
-                        mensaje = "",
+                        Mensaje = "",
 
                         // NUEVOS VALORES :D
-                        distMilKm = _distMilKm,
-                        distSinceClrKm = _distSinceClrKm,
-                        runTimeMilMin = _runTimeMilMin,
-                        timeSinceClr = _timeSinceClr,
-                        cvn = _cvn,
-                        cal = _cal,
+                        DistMilKm = _distMilKm,
+                        DistSinceClrKm = _distSinceClrKm,
+                        RunTimeMilMin = _runTimeMilMin,
+                        TimeSinceClr = _timeSinceClr,
+                        Cvn = _cvn,
+                        Cal = _cal,
 
-                        // Más valores instruidos por Toñin Cara de pan :D
+                        // Más valores instruidos por Toñin GALVAN 
                         TiempoTotalSegundosOperacionMotor = _OperacionMotor,
                         WarmUpsDesdeBorrado = _WarmUpsDesdeBorrado
 
@@ -381,11 +381,11 @@
                 LeeDtc = false,
                 LeeDtcPend = false,
                 LeeVin = false,
-                mensaje = mensaje,
-                distMilKm = _distMilKm,
-                distSinceClrKm = _distSinceClrKm,
-                runTimeMilMin = _runTimeMilMin,
-                timeSinceClr = _timeSinceClr
+                Mensaje = mensaje,
+                DistMilKm = _distMilKm,
+                DistSinceClrKm = _distSinceClrKm,
+                RunTimeMilMin = _runTimeMilMin,
+                TimeSinceClr = _timeSinceClr
 
             };
         }
