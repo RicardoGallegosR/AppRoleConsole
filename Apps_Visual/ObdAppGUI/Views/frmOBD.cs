@@ -51,6 +51,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #endregion
+        /*
         public frmOBD() {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -62,7 +63,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
         }
-        /*
+        */
+        
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -75,12 +77,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
         }
-        */
+        //*/
         #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
             btnConectar.Text = "Conectando ...";
             //MessageBox.Show($"Placa: {_Visual.PlacaId}");
-            //lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
+            lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
 
@@ -209,36 +211,42 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblrStftB1.Text = $"{ResultadoOBD.StftB1} Veces";
             lblrLTFT.Text = $"{ResultadoOBD.LtftB1} veces";
 
-            lblrIatC.Text = $"";
+            lblrIatC.Text = $"{ResultadoOBD.IatC} °C ";
+            lblrMafGs.Text = $"{ResultadoOBD.MafGs}";
+
+            lblrMafKgH.Text = $"{ResultadoOBD.MafKgH}";
+            lblrTps.Text = $"{ResultadoOBD.Tps}";
+            lblrTimingAdvance.Text = $"{ResultadoOBD.TimingAdvance} ss";
+
+            lblrO2S1_V.Text = $"{ResultadoOBD.O2S1_V}";
+            lblrO2S2_V.Text = $"{ResultadoOBD.O2S2_V}";
+
+            lblrFuelLevel.Text = $"{ResultadoOBD.FuelLevel}";
+            lblrBarometricPressure.Text = $"{ResultadoOBD.BarometricPressure}";
 
 
-            /*     
-            IatC
-            MafGs
-            MafKgH
-            Tps
-            TimingAdvance
-            O2S1_V
-            O2S2_V
-            FuelLevel
-            BarometricPressure
-            FuelType
-            IntFuelType
-            IntTipoCombustible0907
-            EcuAddress
-            EcuAddressInt
-            EmissionCode
-            Pids_01_20
-            Pids_21_40
-            Pids_41_60
-            */
 
 
+
+
+            lblrFuelLevel.Text = $"{ResultadoOBD.FuelType}";
+            lblrIntFuelType.Text = $"{ResultadoOBD.IntFuelType}";
+
+            lblIntTipoCombustible0907.Text = $"{ResultadoOBD.IntTipoCombustible0907}";
+            lblrEcuAddress.Text = $"{ResultadoOBD.EcuAddress}";
+            lblrEcuAddressInt.Text = $"{ResultadoOBD.EcuAddressInt}";
+
+
+            lblrlblEmissionCode.Text = $"{ResultadoOBD.EmissionCode}";
+
+            lblrPids_01_20.Text = $"{ResultadoOBD.Pids_01_20}";
+            lblrPids_21_40.Text = $"{ResultadoOBD.Pids_21_40}";
+            lblrPids_41_60.Text = $"{ResultadoOBD.Pids_41_60}";
 
             //obdMonitoresLuzMil = randy.Monitores();
 
             btnConectar.Text = "Conectar";
-            //lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_Visual.PlacaId}";
+            lblLecturaOBD.Text = $"Diagnótico OBD de la placa: {_Visual.PlacaId}";
             tlpPrincipal.Enabled = true;
             tlpPrincipal.Visible = true;
 
@@ -256,7 +264,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
-            /*
+            //*
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");
@@ -264,7 +272,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
             
             lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
-            */
+            //*/
 
             lblrModoALista.Text = "";
             //lblrModo0ALista.Text = "";
@@ -728,37 +736,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
-<<<<<<< HEAD
-=======
-/*
-        private void lblModo3Lista_Click(object sender, EventArgs e) {
 
-        }
-
-        private void lblrModo7Lista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblDTCClear_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblOBDClear_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblModo7Lista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblModoALista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e) {
-
-        }
-        */
->>>>>>> origin/master
     }
 }

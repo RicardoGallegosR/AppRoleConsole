@@ -378,7 +378,7 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Clear();
 
             if (PruebaOBD == null || PruebaOBD.IsDisposed) {
-                //PruebaOBD = new frmOBD(Visual);
+                PruebaOBD = new frmOBD(Visual);
             }
             PruebaOBD._panelX = pnlPanelCambios.Width;
             PruebaOBD._panelY = pnlPanelCambios.Height;
