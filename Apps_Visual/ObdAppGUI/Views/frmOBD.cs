@@ -728,5 +728,37 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
+<<<<<<< HEAD
+=======
+/*
+        private void lblModo3Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblrModo7Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblDTCClear_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblOBDClear_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblModo7Lista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void lblModoALista_Click(object sender, EventArgs e) {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e) {
+
+        }
+        */
+>>>>>>> origin/master
     }
 }
