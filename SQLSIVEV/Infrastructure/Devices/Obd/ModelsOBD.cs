@@ -107,7 +107,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         public string? NormativaObdVehiculo { get; init; }
         
         //0105
-        public int? CoolantTempC { get; init; }
+        public int? IatCCoolantTempC { get; init; }
 
         //0106
         public double? StftB1 { get; init; }

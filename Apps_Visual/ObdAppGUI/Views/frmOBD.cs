@@ -141,15 +141,42 @@ namespace Apps_Visual.ObdAppGUI.Views {
         public int? runTimeMilMin { get; set; }
         public int? timeSinceClr { get; set; }
              */
+            /*
+            ResultadoOBD.TiempoTotalSegundosOperacionMotor;
+            ResultadoOBD.WarmUpsDesdeBorrado;
+            ResultadoOBD.NormativaObdVehiculo;
+            ResultadoOBD.CoolantTempC;
+            ResultadoOBD.StftB1;
+            ResultadoOBD.LtftB1;
+            ResultadoOBD.IatC;
+            ResultadoOBD.MafGs;
+            ResultadoOBD.MafKgH;
+            ResultadoOBD.Tps;
+            ResultadoOBD.TimingAdvance;
+            ResultadoOBD.O2S1_V;
+            ResultadoOBD.O2S2_V;
+            ResultadoOBD.FuelLevel;
+            ResultadoOBD.BarometricPressure;
+            ResultadoOBD.FuelType;
+            ResultadoOBD.IntFuelType;
+            ResultadoOBD.IntTipoCombustible0907;
+            ResultadoOBD.EcuAddress;
+            ResultadoOBD.EcuAddressInt;
+            ResultadoOBD.EmissionCode;
+            ResultadoOBD.Pids_01_20;
+            ResultadoOBD.Pids_21_40;
+            ResultadoOBD.Pids_41_60;
+            */
 
-            #endregion
+
+        #endregion
 
 
 
 
-            ///*
-            // Valores Iniciales
-            lblrVIN.Text = ResultadoOBD.VehiculoId;
+        ///*
+        // Valores Iniciales
+        lblrVIN.Text = ResultadoOBD.VehiculoId;
             lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
             lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
             lblrCalId.Text = (ResultadoOBD.Cal != null && ResultadoOBD.Cal.Length > 0) ? string.Join(" || ", ResultadoOBD.Cal) : "";
