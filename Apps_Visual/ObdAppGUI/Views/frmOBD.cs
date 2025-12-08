@@ -204,8 +204,34 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblWarmsUp.Text = $"{ResultadoOBD.WarmUpsDesdeBorrado} Veces";
 
 
+            lblrNormativaObdVehiculo.Text = $"{ResultadoOBD.NormativaObdVehiculo}";
+            lblrIatCCoolantTempC.Text = $"{ResultadoOBD.IatCCoolantTempC} veces";
+            lblrStftB1.Text = $"{ResultadoOBD.StftB1} Veces";
+            lblrLTFT.Text = $"{ResultadoOBD.LtftB1} veces";
+
+            lblrIatC.Text = $"";
 
 
+            /*     
+            IatC
+            MafGs
+            MafKgH
+            Tps
+            TimingAdvance
+            O2S1_V
+            O2S2_V
+            FuelLevel
+            BarometricPressure
+            FuelType
+            IntFuelType
+            IntTipoCombustible0907
+            EcuAddress
+            EcuAddressInt
+            EmissionCode
+            Pids_01_20
+            Pids_21_40
+            Pids_41_60
+            */
 
 
 
@@ -702,34 +728,5 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
-/*
-        private void lblModo3Lista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblrModo7Lista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblDTCClear_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblOBDClear_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblModo7Lista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void lblModoALista_Click(object sender, EventArgs e) {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e) {
-
-        }
-        */
     }
 }
