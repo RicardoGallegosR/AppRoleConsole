@@ -133,8 +133,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
             // NUEVOS VALORES 
-            lblrOdometroLuzMil.Text = $"{ResultadoOBD.distSinceClrKm} km";
-            lblrRunTimeMil.Text = $"{ResultadoOBD.runTimeMilMin} min";
+            lblrOdometroLuzMil.Text = $"{ResultadoOBD.DistSinceClrKm} km";
+            lblrRunTimeMil.Text = $"{ResultadoOBD.RunTimeMilMin} min";
             /*
              public int? distMilKm { get; set; }
         public int? distSinceClrKm { get; set; }
@@ -152,7 +152,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblrVIN.Text = ResultadoOBD.VehiculoId;
             lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
             lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
-            lblrCalId.Text = (ResultadoOBD.cal != null && ResultadoOBD.cal.Length > 0) ? string.Join(" || ", ResultadoOBD.cal) : "";
+            lblrCalId.Text = (ResultadoOBD.Cal != null && ResultadoOBD.Cal.Length > 0) ? string.Join(" || ", ResultadoOBD.Cal) : "";
             lblrBateria.Text = ResultadoOBD.VoltsSwOff.ToString();
 
             // luz mil
@@ -166,11 +166,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
             // limpieza de dtc
-            lblrOBDClear.Text = ResultadoOBD.distSinceClrKm.ToString(); // distMilKm
+            lblrOBDClear.Text = ResultadoOBD.DistSinceClrKm.ToString(); // distMilKm
             //lblrRunTimeMil.Text = ResultadoOBD.runTimeMilMin.ToString();
 
             //CVN:
-            lblrCalibrationVerificationNumber.Text = ResultadoOBD.cvn;
+            lblrCalibrationVerificationNumber.Text = ResultadoOBD.Cvn;
             //*/
 
             lblrOperacionMotor.Text = $"{ResultadoOBD.TiempoTotalSegundosOperacionMotor} seg";

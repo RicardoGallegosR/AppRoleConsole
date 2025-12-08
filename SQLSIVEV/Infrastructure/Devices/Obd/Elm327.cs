@@ -356,6 +356,445 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
+        //LoadCalc.- Carga calculada del motor Load(%) = A*100/255
+        public double? LoadCalc() {
+            var ab = ReadPidAB("0104", 3000);
+            if (!ab.HasValue)
+                return null;
+            int A = ab.Value.A;  
+            double load = (A * 100.0) / 255.0;
+            return load;
+
+            // O si lo quieres entero:
+            // return Math.Round(load, 1);
+        }
+
+        // PID 011C - OBD requirements to which vehicle is designed
+        //public string? NormaObd { get; init; }
+
+        public string? NormativaObdVehiculo() {
+            var ab = ReadPidAB("011C", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            return A switch {
+                0x01 => "OBD-II según CARB",
+                0x02 => "OBD según EPA",
+                0x03 => "OBD y OBD-II",
+                0x04 => "OBD-I",
+                0x05 => "No diseñado para cumplir con una norma OBD",
+                0x06 => "EOBD (Europa)",
+                0x07 => "EOBD y OBD-II",
+                0x08 => "EOBD y OBD",
+                0x09 => "EOBD, OBD y OBD-II",
+                0x0A => "JOBD (Japón)",
+                0x0B => "JOBD y OBD-II",
+                0x0C => "JOBD y EOBD",
+                0x0D => "JOBD, EOBD y OBD-II",
+                _ => $"Norma OBD desconocida (A = 0x{A:X2})"
+            };
+        }
+
+        // PID 0105 - Temperatura del refrigerante (°C)
+        // public int? CoolantTempC { get; init; }
+        public int? TemperaturaRefrigeranteC() {
+            var ab = ReadPidAB("0105", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;   // A es int, no byte
+
+            int tempC = A - 40;
+            return tempC;
+        }
+
+        // PID 0106 - Short Term Fuel Trim Bank 1 (STFT B1)
+        // public double? StftB1 { get; init; }
+        public double? StftBank1() {
+            var ab = ReadPidAB("0106", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A; // A es int
+
+            double stft = (A - 128) * 100.0 / 128.0;
+
+            // Si quieres redondear a 1 decimal:
+            // stft = Math.Round(stft, 1);
+
+            return stft;
+        }
+
+
+
+        // PID 0107 - Long Term Fuel Trim Bank 1 (LTFT B1)
+        // public double? LtftB1 { get; init; }
+        public double? LtftBank1() {
+            var ab = ReadPidAB("0107", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;  // A es int
+
+            double ltft = (A - 128) * 100.0 / 128.0;
+
+            // Si quieres dejarlo bonito:
+            // ltft = Math.Round(ltft, 1);
+
+            return ltft;
+        }
+
+        // PID 010F - Temperatura del aire de admisión (°C)
+        // public int? IatC { get; init; }
+        public int? TemperaturaAireAdmisionC() {
+            var ab = ReadPidAB("010F", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;   // A es int
+
+            int tempC = A - 40;
+            return tempC;
+        }
+
+        // PID 0110 - MAF (Mass Air Flow) en g/s
+        //public double? MafGs  { get; init; }
+        // opcional:
+        //public double? MafKgH { get; init; }
+
+        public double? FlujoAireMaf() {
+            var ab = ReadPidAB("0110", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+            int B = ab.Value.B;
+
+            // Fórmula: ((256 * A) + B) / 100  → resultado en gramos/segundo
+            double maf = ((256 * A) + B) / 100.0;
+
+            // Si quieres, puedes redondear:
+            // maf = Math.Round(maf, 2);
+
+            return maf;
+        }
+        public double? FlujoAireMafKgPorHora() {
+            var mafGs = FlujoAireMaf();
+            if (!mafGs.HasValue)
+                return null;
+
+            // g/s → kg/h
+            return mafGs.Value * 3.6 / 1000.0;
+        }
+
+
+        // PID 0111 - Throttle Position (TPS) en %
+        // public double? Tps { get; init; }
+        public double? PosicionAcelerador() {
+            var ab = ReadPidAB("0111", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;   // A es int
+
+            double tps = (A * 100.0) / 255.0;
+
+            // Si quieres, lo puedes redondear:
+            // tps = Math.Round(tps, 1);
+
+            return tps;
+        }
+
+
+        // PID 010E - Timing Advance (avance de encendido) en grados BTDC
+        // public double? TimingAdvance { get; init; } Timing(° BTDC)=2/A​−64
+        public double? AvanceEncendido() {
+            var ab = ReadPidAB("010E", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;  // A es int
+
+            // Fórmula: (A / 2) - 64
+            double timing = (A / 2.0) - 64.0;
+
+            // Si quieres dejarlo más bonito:
+            // timing = Math.Round(timing, 1);
+
+            return timing;
+        }
+
+
+
+
+
+        // PID 0114 - O2 Sensor 1 Voltage (Voltaje sensor O2, Banco 1, Sensor 1)
+        /*
+            public double? O2S1_V { get; init; }  // Banco 1, Sensor 1 (V)
+            public double? O2S2_V { get; init; }  // Banco 1, Sensor 2 (V)
+         */
+        public double? O2Sensor1Voltage() {
+            var ab = ReadPidAB("0114", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            // Fórmula: Voltaje = A / 200  (resultado en Volts)
+            double voltage = A / 200.0;
+
+            // Si quieres redondear:
+            // voltage = Math.Round(voltage, 3);
+
+            return voltage;
+        }
+        public double? O2Sensor2Voltage() {
+            var ab = ReadPidAB("0115", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+            return A / 200.0;
+        }
+
+
+        // PID 012F - Nivel de combustible (%)
+        // public double? FuelLevel { get; init; }
+        public double? NivelCombustible() {
+            var ab = ReadPidAB("012F", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            // Nivel en porcentaje (0–100%)
+            double nivel = (A * 100.0) / 255.0;
+
+            // Opcional: redondear a 1 decimal
+            // nivel = Math.Round(nivel, 1);
+
+            return nivel;
+        }
+
+
+
+        // PID 0133 - Presión barométrica en kPa  Presioˊn(kPa)=A
+        //public int? BarometricPressure { get; init; }
+
+        public int? PresionBarometrica() {
+            var ab = ReadPidAB("0133", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            // A ya está en kPa
+            return A;
+        }
+
+
+        // PID 0151 - Tipo de combustible
+        //public string? FuelType { get; init; }
+
+        public string? TipoCombustible() {
+            var ab = ReadPidAB("0151", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            return A switch {
+                1 => "Gasolina",
+                2 => "Metanol",
+                3 => "Etanol",
+                4 => "Diésel",
+                5 => "Gas Natural Comprimido (CNG)",
+                6 => "Gas Natural Licuado (LNG)",
+                7 => "Gas LP (Propano)",
+                8 => "Híbrido Gasolina",
+                9 => "Híbrido Diésel",
+                10 => "Eléctrico",
+                11 => "Bifuel (Gasolina)",
+                12 => "Bifuel (Metanol)",
+                13 => "Bifuel (Etanol)",
+                14 => "Bifuel (GLP)",
+                15 => "Bifuel (CNG)",
+                16 => "Bifuel (LNG)",
+                17 => "Bifuel (Propano)",
+                18 => "Gasolina + Hidrógeno",
+                19 => "Diésel + Hidrógeno",
+                20 => "PHEV Gasolina",
+                21 => "PHEV Diésel",
+                22 => "PHEV Hidrógeno",
+                23 => "Híbrido No-Recargable",
+                24 => "Hidrógeno (H₂)",
+                _ => $"Tipo desconocido (A = {A})"
+            };
+        }
+
+        // public int? intFuelType { get; init; }
+
+        public int? intTipoCombustible0151() {
+            var ab = ReadPidAB("0151", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            return A ;
+        }
+        // public int? intTipoCombustible0907 { get; init; }
+        public int? intTipoCombustible0907() {
+            var ab = ReadPidAB("0907", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            return A;
+        }
+
+
+
+        public string? EcuAddress() {
+            var resp = ExecRaw("090A", 3000);
+            if (string.IsNullOrWhiteSpace(resp))
+                return null;
+
+            // Compactar respuesta
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").ToUpperInvariant();
+
+            // Buscar "490A"
+            int idx = compact.IndexOf("490A", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+                return null;
+
+            // Debe existir al menos: 49 0A 01 XX
+            if (compact.Length < idx + 8)
+                return null;
+
+            // Byte después del frame index
+            string hex = compact.Substring(idx + 6, 2);
+
+            return hex;
+        }
+
+        public int? EcuAddressInt() {
+            var hex = EcuAddress();
+            if (string.IsNullOrWhiteSpace(hex))
+                return null;
+
+            return Convert.ToInt32(hex, 16);
+        }
+
+
+        public string? EcuAddressDescripcion() {
+            var hex = EcuAddress();
+            if (hex == null) return null;
+
+            return hex.ToUpperInvariant() switch {
+                "7E0" or "7E" => "ECU de Motor",
+                "7E1" => "ECU de Transmisión",
+                "7E2" => "ECU de Emisiones",
+                "10" => "Dirección UDS/ISO14229",
+                _ => $"Dirección desconocida ({hex})"
+            };
+        }
+        /*
+            | CodigoHex | Descripcion             | EsEstandarObd |
+            | --------- | ----------------------- | ------------- |
+            | 7E0       | ECU Motor (solicitud)   | 1             |
+            | 7E8       | ECU Motor (respuesta)   | 1             |
+            | 7E1       | ECU Transmisión         | 1             |
+            | 7E9       | ECU Transmisión (resp.) | 1             |
+            | 7E2       | ECU Emisiones / Otros   | 1             |
+            | 10        | Dirección UDS genérica  | 0             |      
+         */
+
+
+        // PID 015F - Requisitos de emisiones del vehículo
+        // public byte? EmissionCode { get; init; }   // valor A crudo
+        public byte? RequisitosEmisionesVehiculo() {
+            var ab = ReadPidAB("015F", 3000);
+            if (!ab.HasValue)
+                return null;
+
+            int A = ab.Value.A;
+
+            return (byte)A;
+        }
+        /*
+         return A switch {
+                0x0E => "Vehículo pesado EURO IV (B1)",
+                0x0F => "Vehículo pesado EURO V (B2)",
+                0x10 => "Vehículo pesado EURO EEV (C)",
+                _ => $"Código de emisiones reservado/desconocido (0x{A:X2})"
+            };
+         */
+
+
+        public (int A, int B, int C, int D)? ReadPidABCD(string cmd, int timeoutMs = 3000) {
+            var resp = ExecRaw(cmd, timeoutMs);
+            if (string.IsNullOrWhiteSpace(resp))
+                return null;
+
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+            // cmd "0100" -> buscamos "41 00" => "4100"
+            var pid = "41" + cmd.Substring(2);
+            var idx = compact.IndexOf(pid, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0 || compact.Length < idx + 10)  // 41 00 A B C D -> 2 (4100) + 8 (AABBCCDD) = 10
+                return null;
+
+            try {
+                int A = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
+                int B = Convert.ToInt32(compact.Substring(idx + 6, 2), 16);
+                int C = Convert.ToInt32(compact.Substring(idx + 8, 2), 16);
+                int D = Convert.ToInt32(compact.Substring(idx + 10, 2), 16);
+                return (A, B, C, D);
+            } catch {
+                return null;
+            }
+        }
+
+
+        public List<int> PidsSoportadosBloque(string cmd, int startPid) {
+            var abcd = ReadPidABCD(cmd, 3000);
+            var list = new List<int>();
+
+            if (!abcd.HasValue)
+                return list;
+
+            int A = abcd.Value.A;
+            int B = abcd.Value.B;
+            int C = abcd.Value.C;
+            int D = abcd.Value.D;
+
+            uint map = (uint)((A << 24) | (B << 16) | (C << 8) | D);
+
+            for (int i = 0; i < 32; i++) {
+                int bitIndex = 31 - i;
+                bool soportado = ((map >> bitIndex) & 0x1) == 1;
+                if (soportado)
+                    list.Add(startPid + i);
+            }
+
+            return list;
+        }
+        /*
+        var pids_01_20 = PidsSoportadosBloque("0100", 0x01);
+        var pids_21_40 = PidsSoportadosBloque("0120", 0x21);
+        var pids_41_60 = PidsSoportadosBloque("0140", 0x41);
+        */
+
+
+
+
+
+
+
+
         /*
                 0   → se borraron códigos hace nada y casi no se ha usado el coche.
              3–10   → se borraron hace poco, pero el coche ya se ha usado algunos días/trayectos.
