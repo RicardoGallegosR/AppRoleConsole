@@ -27,7 +27,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Declaracion de las variables
         private Size _formSizeInicial;
         private float _fontSizeInicial;
-        
+
 
         private RBGR randy;
         private LecturasIniciales lecturasIniciales;
@@ -169,14 +169,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
             */
 
 
-        #endregion
+            #endregion
 
 
 
 
-        ///*
-        // Valores Iniciales
-        lblrVIN.Text = ResultadoOBD.VehiculoId;
+            ///*
+            // Valores Iniciales
+            lblrVIN.Text = ResultadoOBD.VehiculoId;
             lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
             lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
             lblrCalId.Text = (ResultadoOBD.Cal != null && ResultadoOBD.Cal.Length > 0) ? string.Join(" || ", ResultadoOBD.Cal) : "";
@@ -387,13 +387,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region Tamaño de letra variable
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
+            /*
             float factor = (float)this.Width / _formSizeInicial.Width;
-            ///*
+            
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 40f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 24f));
             float Titulo4 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
-            //*/
+            
 
             lblLecturaOBD.Font = new Font(
                 lblLecturaOBD.Font.FontFamily,
@@ -620,7 +621,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 lblrRunTimeMil.Font.Style
             );
 
-
+            */
 
         }
 
@@ -697,11 +698,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             return _tcsResultado.Task;
         }
         #endregion
-
+        
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
-
+/*
         private void lblModo3Lista_Click(object sender, EventArgs e) {
 
         }
@@ -725,5 +726,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void lblModoALista_Click(object sender, EventArgs e) {
 
         }
+
+        private void label2_Click(object sender, EventArgs e) {
+
+        }
+        */
     }
 }
