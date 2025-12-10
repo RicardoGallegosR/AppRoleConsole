@@ -263,10 +263,8 @@ namespace Apps_Visual.ObdAppGUI {
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Alt | Keys.F4)) {
-                // Bloqueas esa combinación
                 return true; 
             }
-
             return base.ProcessCmdKey(ref msg, keyData);
         }
         #endregion

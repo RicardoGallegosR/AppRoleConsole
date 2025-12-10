@@ -73,7 +73,7 @@
             txbMensaje.BackColor = Color.White;
             txbMensaje.CausesValidation = false;
             txbMensaje.Dock = DockStyle.Right;
-            txbMensaje.Font = new Font("Segoe UI", 14F);
+            txbMensaje.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txbMensaje.Location = new Point(135, 0);
             txbMensaje.Multiline = true;
             txbMensaje.Name = "txbMensaje";
