@@ -1647,9 +1647,9 @@
             lblrTempRefriegerante.AutoSize = true;
             lblrTempRefriegerante.Location = new Point(266, 255);
             lblrTempRefriegerante.Name = "lblrTempRefriegerante";
-            lblrTempRefriegerante.Size = new Size(119, 15);
+            lblrTempRefriegerante.Size = new Size(123, 15);
             lblrTempRefriegerante.TabIndex = 5;
-            lblrTempRefriegerante.Text = "lblTempRefriegerante";
+            lblrTempRefriegerante.Text = "lblrTempRefriegerante";
             // 
             // lblSTFT
             // 

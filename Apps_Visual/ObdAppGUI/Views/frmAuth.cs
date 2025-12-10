@@ -113,17 +113,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                 await connApp.OpenAsync();
                                 using (var scope = new AppRoleScope(connApp, _Visual.AppRole, _Visual.AppRolePassword.ToString().ToUpper())) {
                                     try {
-                                        var rMensaje = await repo.PrintIfMsgAsync(connApp, $"Fallo en CredencialExisteHuella()", r.MensajeId);
+                                        var rMensaje = await repo.PrintIfMsgAsync(connApp, $"CredencialExisteHuella()", r.MensajeId);
                                         MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() con la credencial {credencial} Mensaje: {rMensaje.Mensaje}");
 
                                     } catch (Exception ex) {
-                                        MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial {credencial}: {ex.Message}");
+                                        MostrarMensaje($"SpAppCredencialExisteHuella con la credencial {credencial}: {ex.Message}");
                                     }
                                 }
 
                             }
                         } catch (Exception ex2) {
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial {credencial}: {ex2.Message}");
+                            MostrarMensaje($"SpAppCredencialExisteHuella con la credencial {credencial}: {ex2.Message}");
                         }
                         txbCredencial.Text = string.Empty;
                     }
@@ -209,16 +209,16 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
                         if (_mensaje != 0) {
-                            var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCredencialExisteHuella MensajeId {_mensaje}", _mensaje);
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella :( MensajeId = {_mensaje}: {error.Mensaje}");
+                            var error = await repo.PrintIfMsgAsync(connApp, $"SpAppCredencialExisteHuella", _mensaje);
+                            MostrarMensaje($"SpAppCredencialExisteHuella :( {error.Mensaje}");
                             ResetForm();
                         } 
                     } catch (Exception ex) {
-                        MostrarMensaje($"Error en SpAppCredencialExisteHuella {ex.Message}");
+                        MostrarMensaje($"SpAppCredencialExisteHuella {ex.Message}");
                     } 
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en SpAppCredencialExisteHuella {e.Message}");
+                MostrarMensaje($"SpAppCredencialExisteHuella {e.Message}");
             }
 
             return new AccesoIniciaResult {

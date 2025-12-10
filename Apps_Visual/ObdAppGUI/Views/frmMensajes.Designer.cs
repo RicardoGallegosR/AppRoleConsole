@@ -72,7 +72,6 @@
             // 
             txbMensaje.BackColor = Color.White;
             txbMensaje.CausesValidation = false;
-            txbMensaje.CharacterCasing = CharacterCasing.Upper;
             txbMensaje.Dock = DockStyle.Right;
             txbMensaje.Font = new Font("Segoe UI", 14F);
             txbMensaje.Location = new Point(135, 0);

@@ -56,6 +56,7 @@ namespace Apps_Visual.ObdAppGUI {
 
             InitializeComponent();
             btnInspecionVisual.Enabled = false;
+            btnApagar.Enabled = false;
 
             this.Load += async (_, __) => {
                 await Task.Delay(200);
@@ -122,6 +123,9 @@ namespace Apps_Visual.ObdAppGUI {
         private void BloquearEstacionSqlTest() {
             pnlLateralIzquierdoCentral.BackColor = AppColors.BloqueoPorSQLPanel;
             btnInspecionVisual.Enabled = false;
+            btnInspecionVisual.Visible = false;
+            btnApagar.Enabled = true;
+            btnApagar.Visible = true;
             btnInspecionVisual.ForeColor = AppColors.BloqueoPorSQLTexto;
             pnlLateralIzquierdoAbajo.BackColor = AppColors.BloqueoPorSQLPanel;
             btnApagar.ForeColor = AppColors.BloqueoPorSQLTexto;
@@ -197,6 +201,9 @@ namespace Apps_Visual.ObdAppGUI {
             SivevLogger.Error("Estación no configurada");
             pnlLateralIzquierdoCentral.BackColor = AppColors.BloqueoPorRegEditPanel;
             btnInspecionVisual.Enabled = false;
+            btnInspecionVisual.Visible = false;
+            btnApagar.Enabled = true;
+            btnApagar.Visible = true;
             pnlLateralIzquierdoAbajo.BackColor = AppColors.BloqueoPorRegEditPanel;
             btnApagar.ForeColor = AppColors.BloqueoPorRegEditTexto;
 
@@ -228,6 +235,9 @@ namespace Apps_Visual.ObdAppGUI {
         private void pnlHome() {
             SivevLogger.Information("pnlHome se accede para el inicio del panel de home");
             btnInspecionVisual.Enabled = true;
+            btnInspecionVisual.Visible = true;
+            btnApagar.Enabled = true;
+            btnApagar.Visible = true;
             SivevLogger.Information("Se habilita btnInspecionVisual");
 
             foreach (Control c in pnlPanelCambios.Controls)
@@ -251,11 +261,22 @@ namespace Apps_Visual.ObdAppGUI {
             //await InicioAsync();
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            if (keyData == (Keys.Alt | Keys.F4)) {
+                // Bloqueas esa combinación
+                return true; 
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
         #endregion
 
         private async void btnInspecionVisual_Click(object sender, EventArgs e){
             btnInspecionVisual.Enabled = false;
-             
+            btnInspecionVisual.Visible = false;
+            btnApagar.Enabled = false;
+            btnApagar.Visible = false;
+
             // Validamos Verificacion 
             bool accesoValido = await ValidaCredencial();
 
@@ -344,6 +365,9 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
+                    btnInspecionVisual.Visible = true;
+                    btnApagar.Enabled = true;
+                    btnApagar.Visible = true;
                 }
                 return false;
             }
@@ -361,6 +385,9 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
+                    btnInspecionVisual.Visible = true;
+                    btnApagar.Enabled = true;
+                    btnApagar.Visible = true;
                 }
                 return false;
             }
@@ -400,6 +427,9 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
+                    btnInspecionVisual.Visible = true;
+                    btnApagar.Enabled = true;
+                    btnApagar.Visible = true;
                 }
                 return false;
             }
