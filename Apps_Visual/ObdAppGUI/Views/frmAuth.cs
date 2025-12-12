@@ -13,7 +13,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Reflection;
 
 
 namespace Apps_Visual.ObdAppGUI.Views {
@@ -26,8 +28,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         public int credencial = 0, panelX = 0, panelY = 0;
         public short opcionMenu = 0;
-
-        
 
         public bool ExisteHuella;
         public byte[] Huella;
@@ -66,7 +66,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private async void txbCredencial_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
                 e.IsInputKey = true;
-
                 credencial = validaCredencialNumerico(txbCredencial.Text);
 
                 bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
@@ -75,19 +74,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     IsSet(_Visual.Password)     && IsSet(_Visual.AppName)       && IsSet(_Visual.AppRole)   && 
                     IsSet(_Visual.AppRolePassword.ToString())) {
 
-                    var r = await CredencialExisteHuella(
-                                        SERVER:         _Visual.Server,
-                                        DB:             _Visual.Database,
-                                        SQL_USER:       _Visual.User,
-                                        SQL_PASS:       _Visual.Password,
-                                        appName:        _Visual.AppName,
-                                        APPROLE:        _Visual.RollVisual,
-                                        APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
-                                        estacionId:     _Visual.EstacionId,
-                                        opcionMenu:     _Visual.OpcionMenuId,
-                                        credencial:     credencial
-                                        );
-                    
+                    var r = await CredencialExisteHuella(V:_Visual, credencial:credencial);
+
                     if (r.MensajeId == 0) {
                         lblCredencial.Enabled = false;
                         txbCredencial.Enabled = false;
@@ -107,25 +95,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             MostrarMensaje($"Se debe crear la libreria de huella");
                         }
                     } else {
-                        var repo = new SivevRepository();
-                        try {
-                            using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
-                                await connApp.OpenAsync();
-                                using (var scope = new AppRoleScope(connApp, _Visual.AppRole, _Visual.AppRolePassword.ToString().ToUpper())) {
-                                    try {
-                                        var rMensaje = await repo.PrintIfMsgAsync(connApp, $"CredencialExisteHuella()", r.MensajeId);
-                                        MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.CredencialExisteHuella() con la credencial {credencial} Mensaje: {rMensaje.Mensaje}");
-
-                                    } catch (Exception ex) {
-                                        MostrarMensaje($"SpAppCredencialExisteHuella con la credencial {credencial}: {ex.Message}");
-                                    }
-                                }
-
-                            }
-                        } catch (Exception ex2) {
-                            MostrarMensaje($"SpAppCredencialExisteHuella con la credencial {credencial}: {ex2.Message}");
-                        }
                         txbCredencial.Text = string.Empty;
+                        txbCredencial.Focus();
                     }
                 } else {
                     SivevLogger.Information(($"Apps_Visual.ObdAppGUI.Views.txbCredencial_PreviewKeyDown\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}"));
@@ -159,25 +130,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblPassword.Enabled = false;
             txbCredencial.Focus();
 
-            var r = await GetAccesoSQL(
-                                        SERVER:         _Visual.Server,
-                                        DB:             _Visual.Database,
-                                        SQL_USER:       _Visual.User,
-                                        SQL_PASS:       _Visual.Password,
-                                        appName:        _Visual.AppName,
-                                        APPROLE:        _Visual.RollVisual,
-                                        APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
-                                        estacionId:     _Visual.EstacionId,
-                                        opcionMenu:     _Visual.OpcionMenuId,
-                                        credencial:     credencial
-                                      );
+            var r = await GetAccesoSQL(V:_Visual, credencial:credencial);
             Guid accesoNormalizado = Guid.Empty;
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
                 accesoNormalizado = r.AccesoId;
+                await Task.Delay(500);
+                AccesoObtenido?.Invoke(accesoNormalizado);
             }
-            await Task.Delay(500);
-            AccesoObtenido?.Invoke(accesoNormalizado);
-
             if (accesoNormalizado == Guid.Empty) {
                 btnAcceder.Enabled = true;
                 txbPassword.Text = "";
@@ -187,40 +146,40 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
-        private async Task<AccesoIniciaResult>  GetAccesoSQL (string SERVER, string DB, string SQL_USER, string SQL_PASS, 
-            string appName, string APPROLE, string APPROLE_PASS, Guid estacionId, short opcionMenu, int credencial) {
-            int _mensaje = 0;
+        private async Task<AccesoIniciaResult>  GetAccesoSQL (VisualRegistroWindows V, int credencial, CancellationToken ct = default) {
+            int _mensaje = 100;
             short _resultado = 0;
             Guid _AccesoSql = Guid.Empty;
 
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
-
-                        var rinicial = await repo.SpAppAccesoIniciaAsync( conn:connApp,estacionId: estacionId, opcionMenuId:opcionMenu,
+                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId: V.EstacionId, opcionMenuId:V.OpcionMenuId,
                                                                     credencial:credencial,password:txbPassword.Text, huella:Huella);
-                        _resultado = rinicial.ReturnCode;
-                        _mensaje = rinicial.MensajeId;
-                        _AccesoSql = rinicial.AccesoId;
+                    _resultado = rinicial.ReturnCode;
+                    _mensaje = rinicial.MensajeId;
+                    _AccesoSql = rinicial.AccesoId;
 
-
-                        if (_mensaje != 0) {
-                            var error = await repo.PrintIfMsgAsync(connApp, $"SpAppCredencialExisteHuella", _mensaje);
-                            MostrarMensaje($"SpAppCredencialExisteHuella :( {error.Mensaje}");
-                            ResetForm();
-                        } 
-                    } catch (Exception ex) {
-                        MostrarMensaje($"SpAppCredencialExisteHuella {ex.Message}");
-                    } 
-                }
+                    if (_mensaje != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"SpAppCredencialExisteHuella", _mensaje);
+                        var bitacora = NuevaBitacora( V, descripcion: error.Mensaje, codigoSql: _mensaje, codigo: 0);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                        MostrarMensaje($"SpAppCredencialExisteHuella {error.Mensaje}");
+                        ResetForm();
+                    }
+                 }
             } catch (Exception e) {
-                MostrarMensaje($"SpAppCredencialExisteHuella {e.Message}");
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en catch de credencial {credencial}, GetAccesoSQL: {logEx.Message}");
+                }
+                MostrarMensaje($"Error en GetAccesoSQL con la credencial {credencial}: {e.Message}");
             }
-
             return new AccesoIniciaResult {
                 MensajeId = _mensaje,
                 ReturnCode = _resultado,
@@ -229,45 +188,57 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
 
-        private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(string SERVER, string DB, string SQL_USER, string SQL_PASS, string appName, string APPROLE, string APPROLE_PASS, Guid estacionId
-            , short opcionMenu, int credencial) {
-            int _mensaje = 0;
-            short _resultado =  0;
-            bool _existeHuella = false;
-            byte[] _huella = Array.Empty<byte>();
+        private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(VisualRegistroWindows V, int credencial, CancellationToken ct = default) {
+            int mensaje = 100;
+            short resultado = 0;
+            bool existeHuella = false;
+            byte[] huella = Array.Empty<byte>();
+
             var repo = new SivevRepository();
 
             try {
-                using (var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName)) {
-                    await connApp.OpenAsync();
-                    using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                        try {
-                            var rinicial = repo.SpAppCredencialExisteHuella(cnn:connApp,uiEstacionId: estacionId, siOpcionMenuId:opcionMenu,iCredencial:credencial);
-                            _resultado = rinicial.Resultado;
-                            _mensaje = rinicial.MensajeId;
-                            _existeHuella = rinicial.ExisteHuella;
-                            _huella = rinicial.Huella;
+                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                await connApp.OpenAsync(ct);
+                using var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper());
 
-                            if (_mensaje != 0) {
-                                var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", _mensaje);
-                                MostrarMensaje($"Error en SpAppCredencialExisteHuella {error.Mensaje}");
-                            }
-                        } catch (Exception ex) {
-                            MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} : {ex.Message}");
-                        }
+                var r = repo.SpAppCredencialExisteHuella(cnn: connApp, uiEstacionId: V.EstacionId, siOpcionMenuId: V.OpcionMenuId, iCredencial: credencial);
+
+                resultado = r.Resultado;
+                mensaje = r.MensajeId;
+                existeHuella = r.ExisteHuella;
+                huella = r.Huella;
+
+
+                if (mensaje != 0) {
+                    string _msm;
+                    try {
+                        var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", mensaje);
+                        _msm = error.Mensaje;
+                        var bitacora = NuevaBitacora(V, descripcion: error.Mensaje, codigoSql: mensaje);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                    } catch (Exception logEx) {
+                        SivevLogger.Error($"Falló la bitácora en CredencialExisteHuella: {logEx.Message}");
                     }
+                    MostrarMensaje($"Error con la credencial: {credencial} ");
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial  {credencial} :  {e.Message}");
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en catch de CredencialExisteHuella: {logEx}");
+                }
+                MostrarMensaje($"Error en SpAppCredencialExisteHuella con la credencial {credencial}: {e.Message}");
             }
 
             return new CredencialExisteHuellaResult {
-                MensajeId = _mensaje,
-                Resultado = _resultado,
-                ExisteHuella = _existeHuella,
-                Huella = _huella
+                MensajeId = mensaje,
+                Resultado = resultado,
+                ExisteHuella = existeHuella,
+                Huella = huella
             };
         }
+
 
         private void frmAuth_Load(object sender, EventArgs e) {
 
@@ -296,7 +267,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             this.Resize += frmAuth_Resize;
             lblCredencial.Enabled = true;
             txbCredencial.Enabled = true;
-            
             btnAcceder.Enabled = false;
             btnAcceder.Visible = false;
             txbPassword.Enabled = false;
@@ -390,6 +360,25 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
             _formSizeInicial = this.Size;
             _fontSizeInicial = lblTituloLogin.Font.Size;
+        }
+
+        private SpAppBitacoraErroresSet NuevaBitacora( VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
+            return new SpAppBitacoraErroresSet {
+                EstacionId = V.EstacionId,
+                Centro = V.Centro,
+                NombreCpu = Environment.MachineName,
+                OpcionMenuId = V.OpcionMenuId,
+                FechaError = DateTime.Now,
+                Libreria = Path.GetFileName(callerFile),
+                Clase = Path.GetFileNameWithoutExtension(callerFile),
+                Metodo = callerMember,
+                CodigoErrorSql = codigoSql,
+                CodigoError = codigo,
+                DescripcionError = descripcion,
+                LineaCodigo = callerLine,
+                LastDllError = 0,
+                SourceError = "DESCONOCIDO"
+            };
         }
         #endregion
 

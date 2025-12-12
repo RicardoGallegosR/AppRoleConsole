@@ -259,6 +259,11 @@ namespace Apps_Visual.ObdAppGUI {
             //Application.Exit();
             //Close();
             //await InicioAsync();
+            bool matarExplorer = false; 
+            if (matarExplorer) {
+                foreach (var proc in Process.GetProcessesByName("explorer"))
+                    proc.Kill();
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {

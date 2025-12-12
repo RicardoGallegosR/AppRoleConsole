@@ -16,17 +16,15 @@ public static async Task<AppTextoMensajeResult?> PrintIfMsgAsync( this SivevRepo
                                                                         string appRolePass = "",  CancellationToken ct = default) {
         if (soloSiHayError && mensajeId == 0)
             return null;
-
         if (!string.IsNullOrWhiteSpace(appRole)) {
-
             using var _scope = new AppRoleScope(conn, appRole, appRolePass);
             var msgScoped = await repo.SpAppTextoMensajeGetAsync(conn: conn, mensajeId: mensajeId, ct);
-            Console.WriteLine($"\n{contexto}, code {mensajeId}_: {msgScoped.Mensaje}");
+            SivevLogger.Error($"\n{contexto}, code {mensajeId}_: {msgScoped.Mensaje}");
             return msgScoped;
         }
 
         var msg = await repo.SpAppTextoMensajeGetAsync(conn: conn, mensajeId: mensajeId, ct);
-        Console.WriteLine($"\n{contexto}, code {mensajeId}: {msg.Mensaje}");
+        SivevLogger.Error($"\n{contexto}, code {mensajeId}: {msg.Mensaje}");
         return msg;
     }
 }

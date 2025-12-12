@@ -1,6 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Data;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Config.Estaciones;
+using SQLSIVEV.Infrastructure.Security;
+using SQLSIVEV.Infrastructure.Services;
+using SQLSIVEV.Infrastructure.Utils;
+using System.Data;
 
 
 namespace SQLSIVEV.Infrastructure.Sql {
@@ -248,7 +253,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
         }
 
-        public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(SqlConnection conn, Guid estacionId,Guid accesoId, CancellationToken ct = default) {
+        public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(SqlConnection conn, Guid estacionId, Guid accesoId, CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
@@ -334,7 +339,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
         }
 
-        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync(SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible, 
+        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync(SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible,
                         CancellationToken ct = default) {
 
             if (conn is null) throw new ArgumentNullException(nameof(conn));
@@ -383,7 +388,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
 
 
-        public async Task<AppTextoMensajeResult> SpAppTextoMensajeGetAsync( SqlConnection conn, int mensajeId,  CancellationToken ct = default) {
+        public async Task<AppTextoMensajeResult> SpAppTextoMensajeGetAsync(SqlConnection conn, int mensajeId, CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
@@ -436,31 +441,34 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.CommandType = CommandType.StoredProcedure;
 
             // Entradas (alineadas a los tipos del SP)
-            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier)    { Value = verificacionId });
-            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier)        { Value = estacionId });
-            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier)          { Value = accesoId });
+            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = verificacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = accesoId });
 
-            cmd.Parameters.Add(new SqlParameter("@tiTaponCombustible", SqlDbType.TinyInt)           { Value = tiTaponCombustible });
-            cmd.Parameters.Add(new SqlParameter("@tiTaponAceite", SqlDbType.TinyInt)                { Value = tiTaponAceite });
-            cmd.Parameters.Add(new SqlParameter("@tiBayonetaAceite", SqlDbType.TinyInt)             { Value = tiBayonetaAceite });
-            cmd.Parameters.Add(new SqlParameter("@tiPortafiltroAire", SqlDbType.TinyInt)            { Value = tiPortafiltroAire });
-            cmd.Parameters.Add(new SqlParameter("@tiTuboEscape", SqlDbType.TinyInt)                 { Value = tiTuboEscape });
-            cmd.Parameters.Add(new SqlParameter("@tiFugasMotorTrans", SqlDbType.TinyInt)            { Value = tiFugasMotorTrans });
-            cmd.Parameters.Add(new SqlParameter("@tiNeumaticos", SqlDbType.TinyInt)                 { Value = tiNeumaticos });
-            cmd.Parameters.Add(new SqlParameter("@tiComponentesEmisiones", SqlDbType.TinyInt)       { Value = tiComponentesEmisiones });
-            cmd.Parameters.Add(new SqlParameter("@tiMotorGobernado", SqlDbType.TinyInt)             { Value = tiMotorGobernado });
+            cmd.Parameters.Add(new SqlParameter("@tiTaponCombustible", SqlDbType.TinyInt) { Value = tiTaponCombustible });
+            cmd.Parameters.Add(new SqlParameter("@tiTaponAceite", SqlDbType.TinyInt) { Value = tiTaponAceite });
+            cmd.Parameters.Add(new SqlParameter("@tiBayonetaAceite", SqlDbType.TinyInt) { Value = tiBayonetaAceite });
+            cmd.Parameters.Add(new SqlParameter("@tiPortafiltroAire", SqlDbType.TinyInt) { Value = tiPortafiltroAire });
+            cmd.Parameters.Add(new SqlParameter("@tiTuboEscape", SqlDbType.TinyInt) { Value = tiTuboEscape });
+            cmd.Parameters.Add(new SqlParameter("@tiFugasMotorTrans", SqlDbType.TinyInt) { Value = tiFugasMotorTrans });
+            cmd.Parameters.Add(new SqlParameter("@tiNeumaticos", SqlDbType.TinyInt) { Value = tiNeumaticos });
+            cmd.Parameters.Add(new SqlParameter("@tiComponentesEmisiones", SqlDbType.TinyInt) { Value = tiComponentesEmisiones });
+            cmd.Parameters.Add(new SqlParameter("@tiMotorGobernado", SqlDbType.TinyInt) { Value = tiMotorGobernado });
 
             cmd.Parameters.Add(new SqlParameter("@iOdometro", SqlDbType.Int) { Value = odometro });
 
             // Salidas
-            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { 
-                Direction = ParameterDirection.Output, Value = 0
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) {
+                Direction = ParameterDirection.Output,
+                Value = 0
             };
-            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { 
-                Direction = ParameterDirection.Output, Value = 0 
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.Output,
+                Value = 0
             };
             var pCheckObd = new SqlParameter("@bCheckObd", SqlDbType.Bit) {
-                Direction = ParameterDirection.Output, Value = false 
+                Direction = ParameterDirection.Output,
+                Value = false
             };
 
             cmd.Parameters.Add(pMensajeId);
@@ -483,41 +491,37 @@ namespace SQLSIVEV.Infrastructure.Sql {
             return res;
         }
 
-
-
-
-
         public async Task<CapturaInspeccionObdSetResult> SpAppCapturaInspeccionObdSetAsync(
                                                                                             SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId,
                                                                                             string vehiculoId,            // @vcVehiculoId (VIN leído por OBD o 'DESCONOCIDO')
-                                                                                            byte ? tiConexionObd,           // @tiConexionObd
+                                                                                            byte? tiConexionObd,           // @tiConexionObd
                                                                                             string protocoloObd,          // @vcProtocoloObd (p.ej. 'ISO 15765-4 CAN 11/500')
-                                                                                            byte ? tiIntentos,              // @tiIntentos
-                                                                                            byte ? tiMil,                   // @tiMil (bits: usr/obd)
-                                                                                            byte ? siFallas,                // @siFallas  (tinyint en SP, sí: usa byte)
+                                                                                            byte? tiIntentos,              // @tiIntentos
+                                                                                            byte? tiMil,                   // @tiMil (bits: usr/obd)
+                                                                                            byte? siFallas,                // @siFallas  (tinyint en SP, sí: usa byte)
                                                                                             string codError,              // @vcCodigoError
                                                                                             string codErrorPend,          // @vcCodigoErrorPendiente
-                                                                                            byte ? tiSdciic, 
-                                                                                            byte ? tiSecc, 
-                                                                                            byte ? tiSc, 
-                                                                                            byte ? tiSso,
-                                                                                            byte ? tiSci, 
-                                                                                            byte ? tiSccc,
-                                                                                            byte ? tiSe,
-                                                                                            byte ? tiSsa,
-                                                                                            byte ? tiSfaa,
-                                                                                            byte ? tiScso,
-                                                                                            byte ? tiSrge,
-                                                                                            decimal ? voltsSwOff,           // @dVoltsSwOff  decimal(4,1)
-                                                                                            decimal ? voltsSwOn,            // @dVoltsSwOn   decimal(4,1)
-                                                                                            short ? rpmOff,                 // @siRpmOff     smallint
-                                                                                            short ? rpmOn,                  // @siRpmOn      smallint
-                                                                                            short ? rpmCheck,               // @siRpmCheck   smallint
-                                                                                            bool ? leeMonitores,            // @bLeeMonitores
-                                                                                            bool ? leeDtc,                  // @bLeeDtc
-                                                                                            bool ? leeDtcPend,              // @bLeeDtcPend
-                                                                                            bool ? leeVin,                  // @bLeeVin
-                                                                                            short ? codigoProtocolo,        // @siCodigoProtocolo (smallint)
+                                                                                            byte? tiSdciic,
+                                                                                            byte? tiSecc,
+                                                                                            byte? tiSc,
+                                                                                            byte? tiSso,
+                                                                                            byte? tiSci,
+                                                                                            byte? tiSccc,
+                                                                                            byte? tiSe,
+                                                                                            byte? tiSsa,
+                                                                                            byte? tiSfaa,
+                                                                                            byte? tiScso,
+                                                                                            byte? tiSrge,
+                                                                                            decimal? voltsSwOff,           // @dVoltsSwOff  decimal(4,1)
+                                                                                            decimal? voltsSwOn,            // @dVoltsSwOn   decimal(4,1)
+                                                                                            short? rpmOff,                 // @siRpmOff     smallint
+                                                                                            short? rpmOn,                  // @siRpmOn      smallint
+                                                                                            short? rpmCheck,               // @siRpmCheck   smallint
+                                                                                            bool? leeMonitores,            // @bLeeMonitores
+                                                                                            bool? leeDtc,                  // @bLeeDtc
+                                                                                            bool? leeDtcPend,              // @bLeeDtcPend
+                                                                                            bool? leeVin,                  // @bLeeVin
+                                                                                            short? codigoProtocolo,        // @siCodigoProtocolo (smallint)
                                                                                             CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
@@ -527,33 +531,33 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.CommandType = CommandType.StoredProcedure;
 
             // Entradas GUID
-            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier)        { Value = estacionId });
-            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier)          { Value = accesoId });
-            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier)    { Value = verificacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = accesoId });
+            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = verificacionId });
 
             // Cadenas
-            cmd.Parameters.Add(new SqlParameter("@vcVehiculoId", SqlDbType.VarChar, 17)             { Value = string.IsNullOrWhiteSpace(vehiculoId) ? "DESCONOCIDO" : vehiculoId.Trim() });
-            cmd.Parameters.Add(new SqlParameter("@vcProtocoloObd", SqlDbType.VarChar, 100)          { Value = string.IsNullOrWhiteSpace(protocoloObd) ? "DESCONOCIDO" : protocoloObd.Trim() });
-            cmd.Parameters.Add(new SqlParameter("@vcCodigoError", SqlDbType.VarChar, 300)           { Value = codError ?? "DESCONOCIDO" });
-            cmd.Parameters.Add(new SqlParameter("@vcCodigoErrorPendiente", SqlDbType.VarChar, 300)  { Value = codErrorPend ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@vcVehiculoId", SqlDbType.VarChar, 17) { Value = string.IsNullOrWhiteSpace(vehiculoId) ? "DESCONOCIDO" : vehiculoId.Trim() });
+            cmd.Parameters.Add(new SqlParameter("@vcProtocoloObd", SqlDbType.VarChar, 100) { Value = string.IsNullOrWhiteSpace(protocoloObd) ? "DESCONOCIDO" : protocoloObd.Trim() });
+            cmd.Parameters.Add(new SqlParameter("@vcCodigoError", SqlDbType.VarChar, 300) { Value = codError ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@vcCodigoErrorPendiente", SqlDbType.VarChar, 300) { Value = codErrorPend ?? "DESCONOCIDO" });
 
             // TinyInt (byte)
-            cmd.Parameters.Add(new SqlParameter("@tiConexionObd", SqlDbType.TinyInt)                { Value = tiConexionObd });
-            cmd.Parameters.Add(new SqlParameter("@tiIntentos", SqlDbType.TinyInt)                   { Value = tiIntentos });
-            cmd.Parameters.Add(new SqlParameter("@tiMil", SqlDbType.TinyInt)                        { Value = tiMil });
-            cmd.Parameters.Add(new SqlParameter("@siFallas", SqlDbType.TinyInt)                     { Value = siFallas }); // SP lo define tinyint
+            cmd.Parameters.Add(new SqlParameter("@tiConexionObd", SqlDbType.TinyInt) { Value = tiConexionObd });
+            cmd.Parameters.Add(new SqlParameter("@tiIntentos", SqlDbType.TinyInt) { Value = tiIntentos });
+            cmd.Parameters.Add(new SqlParameter("@tiMil", SqlDbType.TinyInt) { Value = tiMil });
+            cmd.Parameters.Add(new SqlParameter("@siFallas", SqlDbType.TinyInt) { Value = siFallas }); // SP lo define tinyint
 
-            cmd.Parameters.Add(new SqlParameter("@tiSdciic", SqlDbType.TinyInt)                     { Value = tiSdciic });
-            cmd.Parameters.Add(new SqlParameter("@tiSecc", SqlDbType.TinyInt)                       { Value = tiSecc });
-            cmd.Parameters.Add(new SqlParameter("@tiSc", SqlDbType.TinyInt)                         { Value = tiSc });
-            cmd.Parameters.Add(new SqlParameter("@tiSso", SqlDbType.TinyInt)                        { Value = tiSso });
-            cmd.Parameters.Add(new SqlParameter("@tiSci", SqlDbType.TinyInt)                        { Value = tiSci });
-            cmd.Parameters.Add(new SqlParameter("@tiSccc", SqlDbType.TinyInt)                       { Value = tiSccc });
-            cmd.Parameters.Add(new SqlParameter("@tiSe", SqlDbType.TinyInt)                         { Value = tiSe });
-            cmd.Parameters.Add(new SqlParameter("@tiSsa", SqlDbType.TinyInt)                        { Value = tiSsa });
-            cmd.Parameters.Add(new SqlParameter("@tiSfaa", SqlDbType.TinyInt)                       { Value = tiSfaa });
-            cmd.Parameters.Add(new SqlParameter("@tiScso", SqlDbType.TinyInt)                       { Value = tiScso });
-            cmd.Parameters.Add(new SqlParameter("@tiSrge", SqlDbType.TinyInt)                       { Value = tiSrge });
+            cmd.Parameters.Add(new SqlParameter("@tiSdciic", SqlDbType.TinyInt) { Value = tiSdciic });
+            cmd.Parameters.Add(new SqlParameter("@tiSecc", SqlDbType.TinyInt) { Value = tiSecc });
+            cmd.Parameters.Add(new SqlParameter("@tiSc", SqlDbType.TinyInt) { Value = tiSc });
+            cmd.Parameters.Add(new SqlParameter("@tiSso", SqlDbType.TinyInt) { Value = tiSso });
+            cmd.Parameters.Add(new SqlParameter("@tiSci", SqlDbType.TinyInt) { Value = tiSci });
+            cmd.Parameters.Add(new SqlParameter("@tiSccc", SqlDbType.TinyInt) { Value = tiSccc });
+            cmd.Parameters.Add(new SqlParameter("@tiSe", SqlDbType.TinyInt) { Value = tiSe });
+            cmd.Parameters.Add(new SqlParameter("@tiSsa", SqlDbType.TinyInt) { Value = tiSsa });
+            cmd.Parameters.Add(new SqlParameter("@tiSfaa", SqlDbType.TinyInt) { Value = tiSfaa });
+            cmd.Parameters.Add(new SqlParameter("@tiScso", SqlDbType.TinyInt) { Value = tiScso });
+            cmd.Parameters.Add(new SqlParameter("@tiSrge", SqlDbType.TinyInt) { Value = tiSrge });
 
             // Decimales
             var pOff = new SqlParameter("@dVoltsSwOff", SqlDbType.Decimal)                          { Precision = 4, Scale = 1, Value = voltsSwOff };
@@ -562,18 +566,18 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(pOn);
 
             // Smallint
-            cmd.Parameters.Add(new SqlParameter("@siRpmOff", SqlDbType.SmallInt)                    { Value = rpmOff });
-            cmd.Parameters.Add(new SqlParameter("@siRpmOn", SqlDbType.SmallInt)                     { Value = rpmOn });
-            cmd.Parameters.Add(new SqlParameter("@siRpmCheck", SqlDbType.SmallInt)                  { Value = rpmCheck });
+            cmd.Parameters.Add(new SqlParameter("@siRpmOff", SqlDbType.SmallInt) { Value = rpmOff });
+            cmd.Parameters.Add(new SqlParameter("@siRpmOn", SqlDbType.SmallInt) { Value = rpmOn });
+            cmd.Parameters.Add(new SqlParameter("@siRpmCheck", SqlDbType.SmallInt) { Value = rpmCheck });
 
             // Bits
-            cmd.Parameters.Add(new SqlParameter("@bLeeMonitores", SqlDbType.Bit)                    { Value = leeMonitores });
-            cmd.Parameters.Add(new SqlParameter("@bLeeDtc", SqlDbType.Bit)                          { Value = leeDtc });
-            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPend", SqlDbType.Bit)                      { Value = leeDtcPend });
-            cmd.Parameters.Add(new SqlParameter("@bLeeVin", SqlDbType.Bit)                          { Value = leeVin });
+            cmd.Parameters.Add(new SqlParameter("@bLeeMonitores", SqlDbType.Bit) { Value = leeMonitores });
+            cmd.Parameters.Add(new SqlParameter("@bLeeDtc", SqlDbType.Bit) { Value = leeDtc });
+            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPend", SqlDbType.Bit) { Value = leeDtcPend });
+            cmd.Parameters.Add(new SqlParameter("@bLeeVin", SqlDbType.Bit) { Value = leeVin });
 
             // Smallint
-            cmd.Parameters.Add(new SqlParameter("@siCodigoProtocolo", SqlDbType.SmallInt)           { Value = codigoProtocolo });
+            cmd.Parameters.Add(new SqlParameter("@siCodigoProtocolo", SqlDbType.SmallInt) { Value = codigoProtocolo });
 
             // Outputs
             var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int)                         { Direction = ParameterDirection.Output, Value = 0 };
@@ -596,25 +600,58 @@ namespace SQLSIVEV.Infrastructure.Sql {
 
 
 
+        public async Task<SpAppBitacoraErroresSet> SpSpAppBitacoraErroresSetAsync(VisualRegistroWindows V, SpAppBitacoraErroresSet A, CancellationToken ct = default) {
+            short _Resultado = 0;
+            int   _MensajeId = 0;
+            try {
+                using (var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName)) {
+                    if (connApp.State != ConnectionState.Open) await connApp.OpenAsync(ct);
+                    using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+
+                        using var cmd = connApp.CreateCommand();
+                        cmd.CommandText = "SivAppComun.SpAppBitacoraErroresSet";
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Entradas
+                        cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = A.EstacionId });
+                        cmd.Parameters.Add(new SqlParameter("@siCentro", SqlDbType.SmallInt) { Value = A.Centro });
+                        cmd.Parameters.Add(new SqlParameter("@vcNombreCpu", SqlDbType.VarChar, 25) { Value = A.NombreCpu });
+                        cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.SmallInt) { Value = A.OpcionMenuId });
+                        cmd.Parameters.Add(new SqlParameter("@dtFechaError", SqlDbType.DateTime) { Value = A.FechaError });
+                        cmd.Parameters.Add(new SqlParameter("@vcLibreria", SqlDbType.VarChar, 50) { Value = A.Libreria });
+                        cmd.Parameters.Add(new SqlParameter("@vcClase", SqlDbType.VarChar, 50) { Value = A.Clase });
+                        cmd.Parameters.Add(new SqlParameter("@vcMetodo", SqlDbType.VarChar, 50) { Value = A.Metodo });
+                        cmd.Parameters.Add(new SqlParameter("@iCodigoErrorSql", SqlDbType.Int) { Value = A.CodigoErrorSql });
+                        cmd.Parameters.Add(new SqlParameter("@iCodigoError", SqlDbType.Int) { Value = A.CodigoError });
+                        cmd.Parameters.Add(new SqlParameter("@vcDescripcionError", SqlDbType.VarChar, 1000) { Value = A.DescripcionError });
+                        cmd.Parameters.Add(new SqlParameter("@iLineaCodigo", SqlDbType.Int) { Value = A.LineaCodigo });
+                        cmd.Parameters.Add(new SqlParameter("@iLastDllError", SqlDbType.Int) { Value = A.LastDllError });
+                        cmd.Parameters.Add(new SqlParameter("@vcSourceError", SqlDbType.VarChar, 50) { Value = A.SourceError });
+
+                        var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                        var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+
+                        cmd.Parameters.Add(pMensajeId);
+                        cmd.Parameters.Add(pResultado);
+
+                        // Valor de retorno (RETURN @@ERROR)
+                        var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+                        cmd.Parameters.Add(pReturn);
 
 
+                        await cmd.ExecuteNonQueryAsync(ct);
+                        _Resultado = (pResultado.Value == DBNull.Value) ? (short)0 : Convert.ToInt16(pResultado.Value);
+                        _MensajeId = (pMensajeId.Value == DBNull.Value) ? 0 : Convert.ToInt32(pMensajeId.Value);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    }
+                }
+            } catch (Exception e) {
+                SivevLogger.Error($"SivSpComun.SpAppBitacoraErroresSet {e}");
+            }
+            return new SpAppBitacoraErroresSet {
+                Resultado = _Resultado,
+                MensajeId = _MensajeId,
+            };
+        }
     }
 }

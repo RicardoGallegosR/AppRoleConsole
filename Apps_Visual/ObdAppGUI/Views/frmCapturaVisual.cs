@@ -142,6 +142,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 _tcsResultado?.TrySetResult(true);
             } else {
                 _tcsResultado?.TrySetResult(false);
+
+
+
+
+
+
+
+
             }
 
         }

@@ -64,6 +64,38 @@
         public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
 
+    public sealed class VerificacionPruebaObdFinaliza {
+        public Guid VerificacionId { get; set; }
+        public short ResultadoId { get; set; }
+        public short CausaRechazoId { get; set; }
+    }
+
+
+    public sealed class SpAppBitacoraErroresSet {
+        private const string ValorDesconocido = "DESCONOCIDO";
+        
+        // SALIDAS
+        public int      MensajeId       { get; set; }
+        public short    Resultado       { get; set; }
+
+        // ENTRADAS
+        public Guid     EstacionId      { get; set; } = Guid.Empty;
+        public short    Centro          { get; set; }
+        public string   NombreCpu       { get; set; } = ValorDesconocido;
+        public short    OpcionMenuId    { get; set; } = 0;
+        public DateTime FechaError      { get; set; } = new DateTime(1900, 1, 1);
+        public string   Libreria        { get; set; } = ValorDesconocido;
+        public string   Clase           { get; set; } = ValorDesconocido;
+        public string   Metodo          { get; set; } = ValorDesconocido;
+        public int      CodigoErrorSql  { get; set; } = 0;
+        public int      CodigoError     { get; set; } = 0;
+		public string   DescripcionError{ get; set; } = ValorDesconocido;
+		public int      LineaCodigo     { get; set; } = 0;
+        public int      LastDllError    { get; set; } = 0;
+        public string   SourceError     { get; set; } = ValorDesconocido;
+    }
+
+
     public sealed class CapturaVisualItem {
         public short CapturaVisualId { get; set; }
         public string Elemento { get; set; } = "";
