@@ -6,12 +6,6 @@ using SQLSIVEV.Infrastructure.Security;
 namespace SQLSIVEV.Infrastructure.Utils;
 
 public static class MessageUtils {
-    /// Imprime el catálogo si MensajeId != 0. 
-    /// Si pasas appRole/appRolePass, abre AppRoleScope (sin await) solo para esta llamada.
-    /// 
-//    using var scope = new AppRoleScope(connApp, RollAcceso, ClaveAcceso);
-
-
 public static async Task<AppTextoMensajeResult?> PrintIfMsgAsync( this SivevRepository repo, SqlConnection conn, string contexto, int mensajeId, bool soloSiHayError = true, string? appRole = null,
                                                                         string appRolePass = "",  CancellationToken ct = default) {
         if (soloSiHayError && mensajeId == 0)
@@ -24,7 +18,7 @@ public static async Task<AppTextoMensajeResult?> PrintIfMsgAsync( this SivevRepo
         }
 
         var msg = await repo.SpAppTextoMensajeGetAsync(conn: conn, mensajeId: mensajeId, ct);
-        SivevLogger.Error($"\n{contexto}, code {mensajeId}: {msg.Mensaje}");
+        SivevLogger.Warning($"\n{contexto}, code {mensajeId}: {msg.Mensaje}");
         return msg;
     }
 }
