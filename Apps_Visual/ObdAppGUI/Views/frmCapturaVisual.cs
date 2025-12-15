@@ -1,4 +1,6 @@
 ﻿using Apps_Visual.UI.Theme;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using Sprache;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
@@ -11,6 +13,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -30,20 +33,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
         public VisualRegistroWindows _Visual;
 
 
-        /*
-        public Guid _estacionId = Guid.Empty, _accesoId = Guid.Empty;
-        
-        public string SERVER = string.Empty, DB = string.Empty, SQL_USER = string.Empty, SQL_PASS = string.Empty,
-            appName = string.Empty, APPROLE = string.Empty, APPROLE_PASS = string.Empty, _placa = string.Empty;
-        //*/
         public string _placa = string.Empty;
 
         public event Action<bool> HabilitarPruebas;
         public event Action<bool> _checkOBD;
         public event Action<string> _placa2;
         public event Action<Guid> _verificacionId2;
-        
-        
+
+
         private Guid _verificacionId = Guid.Empty;
         public byte _protocoloVerificacíon;
 
@@ -64,7 +61,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbOdometro.TextChanged += TxbOdometro_TextChanged;
             txbOdometro.TextChanged += (s, ev) => SanitizeByRegex(txbOdometro, @"[^0-9]");
             txbOdometro.MaxLength = 7;
-            
+
             //_formSizeInicial = this.Size;
             _fontSizeInicial = this.Font.Size;
 
@@ -80,11 +77,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             InicializarMapaCapturaVisual();
             txbOdometro.KeyDown += txbOdometro_KeyDown;
             ResetForm();
-           
+
         }
 
 
-        
+
         #endregion
 
 
@@ -93,15 +90,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private async void QuizVisual() {
-            tiTaponCombustible       = ValorCheckboxNegado(cbTaponCombustible       );
-            tiTaponAceite            = ValorCheckboxNegado(cbTaponAceite            );
-            tiBayonetaAceite         = ValorCheckboxNegado(cbBayonetaAceite         );
-            tiPortafiltroAire        = ValorCheckboxNegado(cbPortaFiltroAire        );
-            tiTuboEscape             = ValorCheckboxNegado(cbTuboEscape             );
-            tiFugasMotorTrans        = ValorCheckboxNegado(cbFugasMotorTrans        );
-            tiNeumaticos             = ValorCheckboxNegado(cbNeumaticos             );
-            tiComponentesEmisiones   = ValorCheckboxNegado(cbComponentesEmisiones   );
-            tiMotorGobernado         = ValorCheckboxNegado(cbMotorGobernado         );
+            tiTaponCombustible = ValorCheckboxNegado(cbTaponCombustible);
+            tiTaponAceite = ValorCheckboxNegado(cbTaponAceite);
+            tiBayonetaAceite = ValorCheckboxNegado(cbBayonetaAceite);
+            tiPortafiltroAire = ValorCheckboxNegado(cbPortaFiltroAire);
+            tiTuboEscape = ValorCheckboxNegado(cbTuboEscape);
+            tiFugasMotorTrans = ValorCheckboxNegado(cbFugasMotorTrans);
+            tiNeumaticos = ValorCheckboxNegado(cbNeumaticos);
+            tiComponentesEmisiones = ValorCheckboxNegado(cbComponentesEmisiones);
+            tiMotorGobernado = ValorCheckboxNegado(cbMotorGobernado);
 
 
 
@@ -110,26 +107,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
                    && lblPlaca.Text != "PlacaID") {
                 odometro = _odometro;
             }
-            
+
             var r = await CapturaInspeccionVisual (
-                        SERVER: _Visual.Server,
-                        DB: _Visual.Database,
-                        SQL_USER: _Visual.User,
-                        SQL_PASS: _Visual.Password,
-                        appName: _Visual.AppName,
-                        APPROLE: _Visual.RollVisual,
-                        APPROLE_PASS: _Visual.RollVisualAcceso.ToString().ToUpper(),
-                        estacionId: _Visual.EstacionId,
-                        AccesoId: _Visual.AccesoId,
-                        verificacionId:_verificacionId,
-                        tiTaponCombustible:tiTaponCombustible, 
-                        tiTaponAceite: tiTaponAceite, 
-                        tiBayonetaAceite: tiBayonetaAceite, 
+                        V:_Visual,
+                        tiTaponCombustible:tiTaponCombustible,
+                        tiTaponAceite: tiTaponAceite,
+                        tiBayonetaAceite: tiBayonetaAceite,
                         tiPortafiltroAire: tiPortafiltroAire,
                         tiTuboEscape: tiTuboEscape,
-                        tiFugasMotorTrans: tiFugasMotorTrans, 
-                        tiNeumaticos: tiNeumaticos, 
-                        tiComponentesEmisiones: tiComponentesEmisiones, 
+                        tiFugasMotorTrans: tiFugasMotorTrans,
+                        tiNeumaticos: tiNeumaticos,
+                        tiComponentesEmisiones: tiComponentesEmisiones,
                         tiMotorGobernado:tiMotorGobernado,
                         odometro:odometro);
             if (r.MensajeId == 0) {
@@ -142,35 +130,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 _tcsResultado?.TrySetResult(true);
             } else {
                 _tcsResultado?.TrySetResult(false);
-
-
-
-
-
-
-
-
             }
-
         }
-
-
-
-
-        public void SetCallbacks(Action<string> placaCallback,
-                                 Action<Guid> verificacionCallback,
-                                 Action<bool> checkOBDCall) {
-            _placa2 = placaCallback;
-            _verificacionId2 = verificacionCallback;
-            _checkOBD = checkOBDCall;
-        }
-
-        // El padre va a esperar esta Task
-        public Task<bool> EsperarResultadoAsync() {
-            _tcsResultado = new TaskCompletionSource<bool>();
-            return _tcsResultado.Task;
-        }
-
 
 
         #region Configuración Inicial :D
@@ -247,7 +208,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             cbPortaFiltroAire.Checked = false;
 
             cbTaponAceite.Enabled = false;
-            cbTaponAceite.Visible = false;   
+            cbTaponAceite.Visible = false;
             cbTaponAceite.Checked = false;
 
             cbTaponCombustible.Enabled = false;
@@ -255,7 +216,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             cbTaponCombustible.Checked = false;
 
             cbTuboEscape.Enabled = false;
-            cbTuboEscape.Visible = false;    
+            cbTuboEscape.Visible = false;
             cbTuboEscape.Checked = false;
 
             btnSiguente.Enabled = false;
@@ -276,76 +237,55 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
         #endregion
-        
-        
+
+
         public async Task<bool> InicializarAsync() {
             lblTitulo.Visible = true;
             lblTitulo.Text = "Buscando Verificaciones disponibles";
             bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
-            if (IsSet(_Visual.Server)        && IsSet(_Visual.Database)     && IsSet(_Visual.User) && 
-                IsSet(_Visual.Password)      && IsSet(_Visual.AppName)      && IsSet(_Visual.RollVisual) && 
-                _Visual.RollVisualAcceso != Guid.Empty                      && _Visual.EstacionId != Guid.Empty && 
+            if (IsSet(_Visual.Server) && IsSet(_Visual.Database) && IsSet(_Visual.User) &&
+                IsSet(_Visual.Password) && IsSet(_Visual.AppName) && IsSet(_Visual.RollVisual) &&
+                _Visual.RollVisualAcceso != Guid.Empty && _Visual.EstacionId != Guid.Empty &&
                 _Visual.AccesoId != Guid.Empty) {
 
-                var r = await GetAccesoSQLVerificaciones(
-                    SERVER:         _Visual.Server,
-                    DB:             _Visual.Database,
-                    SQL_USER:       _Visual.User,
-                    SQL_PASS:       _Visual.Password,
-                    appName:        _Visual.AppName,
-                    APPROLE:        _Visual.RollVisual,
-                    APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
-                    estacionId:     _Visual.EstacionId,
-                    AccesoId:       _Visual.AccesoId
-                );
+                var r = await GetAccesoSQLVerificaciones(V:_Visual);
                 _MensajeSQL = r.MensajeId;
 
                 if (_MensajeSQL == 0) {
                     await Task.Delay(500);
                     lblTitulo.Text = "Inspección Visual";
                     lblPlaca.Visible = true;
-                    lblOdometro.Visible = true;    
+                    lblOdometro.Visible = true;
                     txbOdometro.Visible = true;
                     txbOdometro.Enabled = true;
 
                     lblPlaca.Text = r.PlacaId;
                     _placa = r.PlacaId;
                     _verificacionId = r.VerificacionId;
+                    _Visual.VerificacionId = _verificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
-                    
-                    var r2 = await BanderasAEvaluar(
-                            SERVER:         _Visual.Server,
-                            DB:             _Visual.Database,
-                            SQL_USER:       _Visual.User,
-                            SQL_PASS:       _Visual.Password,
-                            appName:        _Visual.AppName,
-                            APPROLE:        _Visual.RollVisual,
-                            APPROLE_PASS:   _Visual.RollVisualAcceso.ToString().ToUpper(),
-                            estacionId:     _Visual.EstacionId,
-                            AccesoId:       _Visual.AccesoId,
-                            verificacionId: _verificacionId,
-                            elemento: "DESCONOCIDO",
-                            combustible: 0
-                    );
 
+                    var r2 = await BanderasAEvaluar(V:_Visual,elemento: "DESCONOCIDO", combustible: 0 );
                     if (r2.MensajeId == 0) {
                         AplicarCapturaVisual(r2.Items);
                     }
-                    return true; 
+                    return true;
                 } else {
                     if (_MensajeSQL != 0) {
                         var repo = new SivevRepository();
+                        CancellationToken ct = default;
                         using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
-                            await connApp.OpenAsync();
+                            await connApp.OpenAsync(ct);
                             using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
-                                var error = await repo.PrintIfMsgAsync(connApp, "Error en GetAccesoSQLVerificaciones", _MensajeSQL);
+                                var error = await repo.PrintIfMsgAsync(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL);
                                 var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
-                                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
-                                SivevLogger.Information($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, se finaliza el acceso");
+                                var bitacora = NuevaBitacora(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
+                                await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
+                                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
                             }
                         }
-                        
+
                     }
                     HabilitarPruebas?.Invoke(false);
                     return false;
@@ -361,17 +301,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
-        
+
 
 
         #endregion
 
         #region SQL
         #region primer store 
-        private async Task<VerificacionVisualIniResult> GetAccesoSQLVerificaciones(string SERVER, string DB, string SQL_USER, string SQL_PASS,
-            string appName, string APPROLE, string APPROLE_PASS, Guid estacionId, Guid AccesoId) {
-            
-            int _mensaje = 0;
+        private async Task<VerificacionVisualIniResult> GetAccesoSQLVerificaciones(VisualRegistroWindows V, CancellationToken ct = default) {
+            int _mensaje = 100;
             short _resultado = 0;
             Guid _verificacion = Guid.Empty;
             byte _protocoloVerificacionId = (byte)0;
@@ -379,41 +317,40 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
+                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.EstacionId, accesoId:V.AccesoId);
 
-                        var rinicial = await repo.SpAppVerificacionVisualIniAsync( 
-                            conn:connApp,
-                            estacionId:estacionId, 
-                            accesoId:AccesoId
-                            );
-
-                        _resultado = rinicial.Resultado;
-                        _mensaje = rinicial.MensajeId;
-                        _verificacion = rinicial.VerificacionId;
-                        _protocoloVerificacionId = rinicial.ProtocoloVerificacionId;
-                        _placa = rinicial.PlacaId;
+                    _resultado = rinicial.Resultado;
+                    _mensaje = rinicial.MensajeId;
+                    _verificacion = rinicial.VerificacionId;
+                    _protocoloVerificacionId = rinicial.ProtocoloVerificacionId;
+                    _placa = rinicial.PlacaId;
 
 
-                        if (_mensaje != 0) {
-                            var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId {_mensaje}", _mensaje);
-                            MostrarMensaje($"Error en SpAppVerificacion_Visual_Ini_Async MensajeId = {_mensaje}: {error.Mensaje}");
-                            return new VerificacionVisualIniResult {
-                                MensajeId = _mensaje,
-                                Resultado = _resultado,
-                                VerificacionId = Guid.Empty,
-                                ProtocoloVerificacionId = 0,
-                                PlacaId = "DESCONOCIDO"
-                            };
-                        }
-                    } catch (Exception ex) {
-                        MostrarMensaje($"Error en Get_Acceso_SQL_Verificaciones {ex.Message}");
+                    if (_mensaje != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId: {_mensaje}", _mensaje);
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        return new VerificacionVisualIniResult {
+                            MensajeId = _mensaje,
+                            Resultado = _resultado,
+                            VerificacionId = Guid.Empty,
+                            ProtocoloVerificacionId = 0,
+                            PlacaId = "DESCONOCIDO"
+                        };
                     }
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en Get_Acceso_SQL_Verificaciones {e.Message}");
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Warning($"Falló la búsqueda de verificaciones en catch, GetAccesoSQLVerificaciones: {logEx.Message}");
+                }
+                MostrarMensaje($"{e.Message}");
+                SivevLogger.Error($"Error en Get_Acceso_SQL_Verificaciones {e.Message}");
             }
 
             return new VerificacionVisualIniResult {
@@ -428,58 +365,41 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #region Segundo store
-        private async Task<CapturaVisualGetResult> BanderasAEvaluar(
-                                                                        string SERVER,
-                                                                        string DB,
-                                                                        string SQL_USER,
-                                                                        string SQL_PASS,
-                                                                        string appName,
-                                                                        string APPROLE,
-                                                                        string APPROLE_PASS,
-                                                                        Guid estacionId,
-                                                                        Guid AccesoId,
-                                                                        Guid verificacionId,
-                                                                        string? elemento,
-                                                                        byte combustible
-                                                                    ) {
+        private async Task<CapturaVisualGetResult> BanderasAEvaluar(VisualRegistroWindows V, string? elemento, byte combustible, CancellationToken ct = default) {
             var repo = new SivevRepository();
-            var result = new CapturaVisualGetResult();   
-
+            var result = new CapturaVisualGetResult();
             try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
+                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.EstacionId, accesoId: V.AccesoId, verificacionId: V.VerificacionId, elemento: elemento, tiCombustible: combustible);
 
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
-                        var rbanderas = await repo.SpAppCapturaVisualGetAsync(
-                                                                                conn: connApp,
-                                                                                estacionId: estacionId,
-                                                                                accesoId: AccesoId,
-                                                                                verificacionId: verificacionId,
-                                                                                elemento: elemento,
-                                                                                tiCombustible: combustible
-                                                                            );
+                    //MostrarMensaje($"estacionId: {V.EstacionId}, accesoId: {V.AccesoId}, verificacionId: {V.VerificacionId}, elemento: {elemento}, tiCombustible: {combustible}");
 
-                        // Copiamos valores al objeto result
-                        result.Resultado = rbanderas.Resultado;
-                        result.MensajeId = rbanderas.MensajeId;
-                        result.ReturnCode = rbanderas.ReturnCode;
-                        result.Items.AddRange(rbanderas.Items);
+                    result.Resultado = rbanderas.Resultado;
+                    result.MensajeId = rbanderas.MensajeId;
+                    result.ReturnCode = rbanderas.ReturnCode;
+                    result.Items.AddRange(rbanderas.Items);
 
-                        if (result.MensajeId != 0) {
-                            var error = await repo.PrintIfMsgAsync( connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}",result.MensajeId);
-                            var msg = error?.Mensaje ?? "Mensaje no disponible";
-                            MostrarMensaje($"Error en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
-                        }
-                    } catch (Exception ex) {
-                        MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.SpAppCapturaVisualGetAsync: {ex.Message}");
-                        result.MensajeId = -1;
-                        result.Resultado = -1;
-                        result.ReturnCode = -1;
+                    if (result.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync( connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}",result.MensajeId);
+                        var msg = error?.Mensaje ?? "Mensaje no disponible";
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        MostrarMensaje($"Error SQL en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
                     }
+
                 }
             } catch (Exception e) {
-                MostrarMensaje($"Error en Apps_Visual.ObdAppGUI.Views.Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.BanderasAEvaluar: {e.Message}");
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Warning($"Falló la búsqueda de banderas en catch, BanderasAEvaluar: {logEx.Message}");
+                }
+                MostrarMensaje($"{e.Message}");
+                SivevLogger.Error($"Error en Apps_Visual.ObdAppGUI.Views.Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.BanderasAEvaluar: {e.Message}");
+
                 result.MensajeId = -2;
                 result.Resultado = -2;
                 result.ReturnCode = -2;
@@ -490,94 +410,66 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #region Tercer store
-        private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(
-                                                                        string SERVER,
-                                                                        string DB,
-                                                                        string SQL_USER,
-                                                                        string SQL_PASS,
-                                                                        string appName,
-                                                                        string APPROLE,
-                                                                        string APPROLE_PASS,
-                                                                        Guid estacionId,
-                                                                        Guid AccesoId,
-                                                                        Guid verificacionId,
-                                                                        byte tiTaponCombustible, 
-                                                                        byte tiTaponAceite, 
-                                                                        byte tiBayonetaAceite, 
-                                                                        byte tiPortafiltroAire,
-                                                                        byte tiTuboEscape, 
-                                                                        byte tiFugasMotorTrans, 
-                                                                        byte tiNeumaticos, 
-                                                                        byte tiComponentesEmisiones,
-                                                                        byte tiMotorGobernado, 
-                                                                        int odometro ) {
+        private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(VisualRegistroWindows V, byte tiTaponCombustible, byte tiTaponAceite, byte tiBayonetaAceite, byte tiPortafiltroAire, byte tiTuboEscape, byte tiFugasMotorTrans, byte tiNeumaticos, byte tiComponentesEmisiones, byte tiMotorGobernado, int odometro, CancellationToken ct = default) {
             var repo = new SivevRepository();
             var result = new CapturaInspeccionVisualNewSetResult();
 
             try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
+                using var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                await connApp.OpenAsync(ct);
 
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
-                        /*
-                        MostrarMensaje($@"Banderas: tiTaponCombustible:{tiTaponCombustible},
-                            tiTaponAceite: {tiTaponAceite},
-                            tiBayonetaAceite: {tiBayonetaAceite}, 
-                            PortafiltroAire: {tiPortafiltroAire},
-                            tiTuboEscape: {tiTuboEscape},
-                            tiFugasMotorTrans: {tiFugasMotorTrans},
-                            tiNeumaticos: {tiNeumaticos},
-                            tiComponentesEmisiones: {tiComponentesEmisiones},
-                            tiMotorGobernado: {tiMotorGobernado},
-                            odometro: {odometro}");
-                        */
-                        var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
+                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
                                                                                 conn: connApp,
-                                                                                verificacionId: verificacionId,
-                                                                                estacionId: estacionId,
-                                                                                accesoId: AccesoId,
-                                                                                
-                                                                                tiTaponCombustible:tiTaponCombustible, 
-                                                                                tiTaponAceite: tiTaponAceite, 
+                                                                                verificacionId: V.VerificacionId,
+                                                                                estacionId: V.EstacionId,
+                                                                                accesoId: V.AccesoId,
 
-                                                                                tiBayonetaAceite: tiBayonetaAceite, 
+                                                                                tiTaponCombustible:tiTaponCombustible,
+                                                                                tiTaponAceite: tiTaponAceite,
+
+                                                                                tiBayonetaAceite: tiBayonetaAceite,
                                                                                 tiPortafiltroAire: tiPortafiltroAire,
-                                                                                
-                                                                                tiTuboEscape: tiTuboEscape,
-                                                                                tiFugasMotorTrans: tiFugasMotorTrans, 
-                                                                                
-                                                                                tiNeumaticos: tiNeumaticos, 
-                                                                                tiComponentesEmisiones: tiComponentesEmisiones,
-                                                                                
-                                                                                tiMotorGobernado:tiMotorGobernado,
-                                                                                odometro:odometro
-                                                                            );
-                        result.Resultado = r.Resultado;
-                        result.MensajeId = r.MensajeId;
-                        result.ReturnCode = r.ReturnCode;
-                        result.CheckObd = r.CheckObd;
 
-                        if (result.MensajeId != 0) {
-                            var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
-                            var msg = error?.Mensaje ?? "Mensaje no disponible";
-                            MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
-                        }
-                    } catch (Exception ex) {
-                        MostrarMensaje($"Error de la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {ex.Message}");
+                                                                                tiTuboEscape: tiTuboEscape,
+                                                                                tiFugasMotorTrans: tiFugasMotorTrans,
+
+                                                                                tiNeumaticos: tiNeumaticos,
+                                                                                tiComponentesEmisiones: tiComponentesEmisiones,
+
+                                                                                tiMotorGobernado:tiMotorGobernado,
+                                                                                odometro:odometro );
+                    result.Resultado = r.Resultado;
+                    result.MensajeId = r.MensajeId;
+                    result.ReturnCode = r.ReturnCode;
+                    result.CheckObd = r.CheckObd;
+
+                    if (result.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
+                        var msg = error?.Mensaje ?? "Mensaje no disponible";
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
                     }
                 }
             } catch (Exception e) {
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Warning($"Falló la búsqueda de banderas en catch, BanderasAEvaluar: {logEx.Message}");
+                }
                 MostrarMensaje($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
+                SivevLogger.Error($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
             }
 
             return result;
         }
         #endregion
         #endregion
-        
+
         #region utils
-       
+
         #region Tamaño de la letra en AUTOMATICO
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
@@ -683,7 +575,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _fontSizeInicial = lblTitulo.Font.Size;
         }
 
-        
+
 
         private void txbOdometro_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
@@ -699,7 +591,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 }
             }
         }
-        
+
 
         private void SanitizeByRegex(TextBox tb, string invalidPattern) {
             string original = tb.Text;
@@ -716,6 +608,24 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
         #endregion
+        private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
+            return new SpAppBitacoraErroresSet {
+                EstacionId = V.EstacionId,
+                Centro = V.Centro,
+                NombreCpu = Environment.MachineName,
+                OpcionMenuId = V.OpcionMenuId,
+                FechaError = DateTime.Now,
+                Libreria = Path.GetFileName(callerFile),
+                Clase = Path.GetFileNameWithoutExtension(callerFile),
+                Metodo = callerMember,
+                CodigoErrorSql = codigoSql,
+                CodigoError = codigo,
+                DescripcionError = descripcion,
+                LineaCodigo = callerLine,
+                LastDllError = 0,
+                SourceError = "DESCONOCIDO"
+            };
+        }
         private void AplicarCapturaVisual(IReadOnlyList<CapturaVisualItem> items) {
 
             var allChecks = new[] {
@@ -750,7 +660,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             // Checked = false → 1
             return chk.Checked ? (byte)0 : (byte)1;
         }
-        
+
         private void CheckBox_CheckedChanged(object sender, EventArgs e) {
             var chk = (CheckBox)sender;
             var textoBase = chk.Tag.ToString();
@@ -764,6 +674,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
 
+        public void SetCallbacks(Action<string> placaCallback, Action<Guid> verificacionCallback, Action<bool> checkOBDCall) {
+            _placa2 = placaCallback;
+            _verificacionId2 = verificacionCallback;
+            _checkOBD = checkOBDCall;
+        }
+
+        // El padre va a esperar esta Task
+        public Task<bool> EsperarResultadoAsync() {
+            _tcsResultado = new TaskCompletionSource<bool>();
+            return _tcsResultado.Task;
+        }
 
 
         private void CheckBox_KeyDown(object sender, KeyEventArgs e) {

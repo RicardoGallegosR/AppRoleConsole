@@ -8,7 +8,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public sealed class LecturasIniciales {
         public int? rpm { get; init; }
         public int? vel { get; init; }
-        public string []cal { get; init; }
+        public string[] cal { get; init; }
         public string protocolo { get; init; } = "";
         public string vin { get; init; } = "";
         public string Mensaje { get; init; } = "";
@@ -51,6 +51,15 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
     }
 
+    public sealed class TryHandshakeGet {
+        public string? ProtocoloObd { get; set; }
+        public byte? Intentos { get; init; }
+        public byte? ConexionOb { get; init; }
+        public decimal? VoltsSwOff { get; init; }
+        public short? RpmOff { get; init; }
+        public string? Mensaje { get; set; }
+    }
+
 
     public sealed class ObdResultado {
         public string Mensaje { get; set; } = "";
@@ -59,6 +68,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         public string? ProtocoloObd { get; init; }
         public string? CodError { get; init; }
         public string? CodErrorPend { get; init; }
+        public string? CodErrorPerm { get; init; }
 
         public byte? Intentos { get; init; }
         public byte? ConexionOb { get; init; }
@@ -98,14 +108,14 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         public string[] Cal { get; init; } = Array.Empty<string>();
 
         //011F
-        public int? TiempoTotalSegundosOperacionMotor { get; init;}
-       
+        public int? TiempoTotalSegundosOperacionMotor { get; init; }
+
         //0104
         public int? WarmUpsDesdeBorrado { get; init; }
 
         //101C
         public string? NormativaObdVehiculo { get; init; }
-        
+
         //0105
         public int? IatCCoolantTempC { get; init; }
 
@@ -128,7 +138,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         //010E
         public double? TimingAdvance { get; init; }
 
-        
+
         //0114 y 0115
         public double? O2S1_V { get; init; }  // Banco 1, Sensor 1 (V)
         public double? O2S2_V { get; init; }  // Banco 1, Sensor 2 (V)

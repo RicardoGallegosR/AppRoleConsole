@@ -13,6 +13,8 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 //using System.Windows;
@@ -33,7 +35,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private RBGR randy;
         private LecturasIniciales lecturasIniciales;
         private ObdMonitoresLuzMil obdMonitoresLuzMil;
-        private ObdResultado ResultadoOBD;
+        private InspeccionObd2Set ResultadoOBD;
+        private TryHandshakeGet ResultadoTryHandshake;
         private TaskCompletionSource<bool>? _tcsResultado;
         private bool _leyendoObd = false;
 
@@ -45,16 +48,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #endregion
 
-        #region Variables del store
-
-
-
-
-        private ObdResultado o;
-        #endregion
 
         #endregion
-       
+
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -63,20 +59,20 @@ namespace Apps_Visual.ObdAppGUI.Views {
             WindowState = FormWindowState.Maximized;
             tlpPrincipal.Enabled = false;
             tlpPrincipal.Visible = false;
-            btnFinalizarPruebaOBD.Enabled = false;
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
         }
         //*/
         #region BOTON CONECTAR
         private async void btnConectar_Click(object sender, EventArgs e) {
-            if (_leyendoObd)
-                return;
-            _leyendoObd = true;
-            btnFinalizarPruebaOBD.Enabled = false;
+            btnConectar.Visible = false;
+            if (_leyendoObd) {
 
+                return;
+            }
+            _leyendoObd = true;
             try {
-                btnConectar.Text = "Leyendo ...";
+
                 lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
                 tlpPrincipal.Enabled = false;
                 tlpPrincipal.Visible = false;
@@ -86,121 +82,145 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 await Task.Delay(500);
                 randy = new RBGR();
 
-                //LecturasIniciales a = randy.LecturasPrincipales();
-                ResultadoOBD = randy.SpSetObd();
-                
-                //TOÑO
-
-                #region Asignacion de Monitores
-                lblCompletoComponent.Text = GetCompletoText(ResultadoOBD.Sc);
-                lblDisponibleComponent.Text = GetDisponibleText(ResultadoOBD.Sc);
-
-                lblCompletoMisfire.Text = GetCompletoText(ResultadoOBD.Sdciic);
-                lblDisponibleMisfire.Text = GetDisponibleText(ResultadoOBD.Sdciic);
-
-                lblCompletoFuelSystem.Text = GetCompletoText(ResultadoOBD.Secc);
-                lblDisponibleFuelSystem.Text = GetDisponibleText(ResultadoOBD.Secc);
-
-                lblCompletoCatalyst.Text = GetCompletoText(ResultadoOBD.Sso);
-                lblDisponibleCatalyst.Text = GetDisponibleText(ResultadoOBD.Sso);
-
-                lblCompletoHeatedCatalyst.Text = GetCompletoText(ResultadoOBD.Sci);
-                lblDisponibleHeatedCatalyst.Text = GetDisponibleText(ResultadoOBD.Sci);
-
-                lblCompletoEvaporativeSystem.Text = GetCompletoText(ResultadoOBD.Sccc);
-                lblDisponibleEvaporativeSystem.Text = GetDisponibleText(ResultadoOBD.Sccc);
-
-                lblCompletoSecondaryAirSystem.Text = GetCompletoText(ResultadoOBD.Se);
-                lblDisponibleSecondaryAirSystem.Text = GetDisponibleText(ResultadoOBD.Se);
-
-                lblCompletoAcRefrigerant.Text = GetCompletoText(ResultadoOBD.Ssa);
-                lblDisponibleAcRefrigerant.Text = GetDisponibleText(ResultadoOBD.Ssa);
-
-                lblCompletoEgerVvtSystem.Text = GetCompletoText(ResultadoOBD.Sfaa);
-                lblDisponibleEgerVvtSystem.Text = GetDisponibleText(ResultadoOBD.Sfaa);
-
-                lblCompletoOxygenSensor.Text = GetCompletoText(ResultadoOBD.Scso);
-                lblDisponibleOxygenSensor.Text = GetDisponibleText(ResultadoOBD.Scso);
-
-                lblCompletoOxygenSensorHeater.Text = GetCompletoText(ResultadoOBD.Srge);
-                lblDisponibleOxygenSensorHeater.Text = GetDisponibleText(ResultadoOBD.Srge);
-
-                #endregion
-
-                // NUEVOS VALORES 
-                lblrOdometroLuzMil.Text = $"{ResultadoOBD.DistSinceClrKm} km";
-                lblrRunTimeMil.Text = $"{ResultadoOBD.RunTimeMilMin} min";
-
-                ///*
-                // Valores Iniciales
-                lblrVIN.Text = ResultadoOBD.VehiculoId;
-                lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
-                lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
-                lblrCalId.Text = (ResultadoOBD.Cal != null && ResultadoOBD.Cal.Length > 0) ? string.Join(" || ", ResultadoOBD.Cal) : "";
-                lblrBateria.Text = ResultadoOBD.VoltsSwOff.ToString();
-
-                // luz mil
-                lblrLuzMil.Text = ResultadoOBD.Mil.ToString();
-                //lblrOdometroLuzMil.Text = "Prueba 2";
-
-                //dtc
-                lblrModo3Lista.Text = ResultadoOBD.CodError;
-                lblrModo7Lista.Text = ResultadoOBD.CodErrorPend;
-                //lblrModoALista.Text = a.dtcList0A;
 
 
-                // limpieza de dtc
-                lblrOBDClear.Text = ResultadoOBD.DistSinceClrKm.ToString(); // distMilKm
-                                                                            //lblrRunTimeMil.Text = ResultadoOBD.runTimeMilMin.ToString();
+                ResultadoTryHandshake = randy.TryHandshake();
 
-                //CVN:
-                lblrCalibrationVerificationNumber.Text = ResultadoOBD.Cvn;
-                //*/
+                if (ResultadoTryHandshake.Intentos < 4 /* && ResultadoTryHandshake.ConexionOb == 0 && ResultadoTryHandshake.VoltsSwOff != 0*/) {
+                    ResultadoOBD = randy.SpSetObd();
 
-                lblrOperacionMotor.Text = $"{ResultadoOBD.TiempoTotalSegundosOperacionMotor} seg";
-                lblrWarmsUp.Text = $"{ResultadoOBD.WarmUpsDesdeBorrado} Veces";
+                    //TOÑO
+
+                    #region Asignacion de Monitores
+                    lblCompletoComponent.Text = GetCompletoText(ResultadoOBD.Sci);
+                    lblDisponibleComponent.Text = GetDisponibleText(ResultadoOBD.Sci);
+
+                    lblCompletoMisfire.Text = GetCompletoText(ResultadoOBD.Sdciic);
+                    lblDisponibleMisfire.Text = GetDisponibleText(ResultadoOBD.Sdciic);
+
+                    lblCompletoFuelSystem.Text = GetCompletoText(ResultadoOBD.Sc);
+                    lblDisponibleFuelSystem.Text = GetDisponibleText(ResultadoOBD.Sc);
+
+                    lblCompletoCatalyst.Text = GetCompletoText(ResultadoOBD.Secc);
+                    lblDisponibleCatalyst.Text = GetDisponibleText(ResultadoOBD.Secc);
+
+                    lblCompletoHeatedCatalyst.Text = GetCompletoText(ResultadoOBD.Sccc);
+                    lblDisponibleHeatedCatalyst.Text = GetDisponibleText(ResultadoOBD.Sccc);
+
+                    lblCompletoEvaporativeSystem.Text = GetCompletoText(ResultadoOBD.Se);
+                    lblDisponibleEvaporativeSystem.Text = GetDisponibleText(ResultadoOBD.Se);
+
+                    lblCompletoSecondaryAirSystem.Text = GetCompletoText(ResultadoOBD.Ssa);
+                    lblDisponibleSecondaryAirSystem.Text = GetDisponibleText(ResultadoOBD.Ssa);
+
+                    lblCompletoAcRefrigerant.Text = GetCompletoText(ResultadoOBD.Sfaa);
+                    lblDisponibleAcRefrigerant.Text = GetDisponibleText(ResultadoOBD.Sfaa);
+
+                    lblCompletoEgerVvtSystem.Text = GetCompletoText(ResultadoOBD.Srge);
+                    lblDisponibleEgerVvtSystem.Text = GetDisponibleText(ResultadoOBD.Srge);
+
+                    lblCompletoOxygenSensor.Text = GetCompletoText(ResultadoOBD.Sso);
+                    lblDisponibleOxygenSensor.Text = GetDisponibleText(ResultadoOBD.Sso);
+
+                    lblCompletoOxygenSensorHeater.Text = GetCompletoText(ResultadoOBD.Scso);
+                    lblDisponibleOxygenSensorHeater.Text = GetDisponibleText(ResultadoOBD.Scso);
+
+                    #endregion
+
+                    #region labels
+                    // NUEVOS VALORES 
+                    lblrOdometroLuzMil.Text = $"{ResultadoOBD.Dist_MIL_On} km";
+                    lblrRunTimeMil.Text = $"{ResultadoOBD.Tpo_Borrado_DTC} min";
+
+                    ///*
+                    // Valores Iniciales
+                    lblrVIN.Text = ResultadoOBD.VehiculoId;
+                    lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
+                    lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
+                    lblrCalId.Text = ResultadoOBD.IDs_Adic;
+                    lblrBateria.Text = ResultadoOBD.VoltsSwOff.ToString();
+
+                    // luz mil
+                    lblrLuzMil.Text = ResultadoOBD.Mil.ToString();
+                    //lblrOdometroLuzMil.Text = "Prueba 2";
+
+                    //dtc
+                    lblrModo3Lista.Text = ResultadoOBD.CodigoError;
+                    lblrModo7Lista.Text = ResultadoOBD.CodigoErrorPendiente;
+                    lblrModoALista.Text = ResultadoOBD.CodigoErrorPermanente;
+                    //lblrModoALista.Text = a.dtcList0A;
 
 
-                lblrNormativaObdVehiculo.Text = $"{ResultadoOBD.NormativaObdVehiculo}";
-                lblrIatCCoolantTempC.Text = $"{ResultadoOBD.IatCCoolantTempC} veces";
-                lblrStftB1.Text = $"{ResultadoOBD.StftB1} Veces";
-                lblrLTFT.Text = $"{ResultadoOBD.LtftB1} veces";
+                    // limpieza de dtc
+                    lblrOBDClear.Text = ResultadoOBD.Tpo_Borrado_DTC.ToString(); // distMilKm
+                                                                                 //lblrRunTimeMil.Text = ResultadoOBD.runTimeMilMin.ToString();
 
-                lblrIatC.Text = $"{ResultadoOBD.IatC} °C ";
-                lblrMafGs.Text = $"{ResultadoOBD.MafGs}";
+                    //CVN:
+                    lblrCalibrationVerificationNumber.Text = ResultadoOBD.Lista_CVN;
+                    //*/
 
-                lblrMafKgH.Text = $"{ResultadoOBD.MafKgH}";
-                lblrTps.Text = $"{ResultadoOBD.Tps}";
-                lblrTimingAdvance.Text = $"{ResultadoOBD.TimingAdvance} ss";
-
-                lblrO2S1_V.Text = $"{ResultadoOBD.O2S1_V}";
-                lblrO2S2_V.Text = $"{ResultadoOBD.O2S2_V}";
-
-                lblrFuelLevel.Text = $"{ResultadoOBD.FuelLevel}";
-                lblrBarometricPressure.Text = $"{ResultadoOBD.BarometricPressure}";
+                    lblrOperacionMotor.Text = $"{ResultadoOBD.Tpo_Arranque} seg";
+                    //lblrWarmsUp.Text = $"{ResultadoOBD.WarmUpsDesdeBorrado} Veces";
 
 
+                    lblrNormativaObdVehiculo.Text = $"{ResultadoOBD.NEV}";
+                    lblrIatCCoolantTempC.Text = $"{ResultadoOBD.TR} veces";
+                    lblrStftB1.Text = $"{ResultadoOBD.STFT_B1} Veces";
+                    lblrLTFT.Text = $"{ResultadoOBD.LTFT_B1} veces";
+
+                    lblrIatC.Text = $"{ResultadoOBD.IAT} °C ";
+                    lblrMafGs.Text = $"{ResultadoOBD.MAF}";
+
+                    //lblrMafKgH.Text = $"{ResultadoOBD.MafKgH}";
+                    lblrTps.Text = $"{ResultadoOBD.TPS}";
+                    lblrTimingAdvance.Text = $"{ResultadoOBD.AvanceEnc} ss";
+
+                    lblrO2S1_V.Text = $"{ResultadoOBD.Volt_O2}";
+                    //lblrO2S2_V.Text = $"{ResultadoOBD.O2S2_V}";
+
+                    lblrFuelLevel.Text = $"{ResultadoOBD.NivelComb}";
+                    lblrBarometricPressure.Text = $"{ResultadoOBD.Pres_Baro}";
+
+                    //lblrFuelLevel.Text = $"{ResultadoOBD.FuelType}";
+                    lblrIntFuelType.Text = $"{ResultadoOBD.Combustible0151Id}";
+
+                    lblrIntTipoCombustible0907.Text = $"{ResultadoOBD.Combustible0907Id}";
+                    lblrEcuAddress.Text = $"{ResultadoOBD.Dir_ECU}";
+                    //lblrEcuAddressInt.Text = $"{ResultadoOBD.EcuAddressInt}";
 
 
+                    lblrlblEmissionCode.Text = $"{ResultadoOBD.Req_Emisiones}";
+
+                    lblrPids_01_20.Text = ResultadoOBD.PIDS_Sup_01_20;
+                    lblrPids_21_40.Text = ResultadoOBD.PIDS_Sup_21_40;
+                    lblrPids_41_60.Text = ResultadoOBD.PIDS_Sup_41_60;
+                    #endregion
 
 
-                lblrFuelLevel.Text = $"{ResultadoOBD.FuelType}";
-                lblrIntFuelType.Text = $"{ResultadoOBD.IntFuelType}";
+                    ResultadoOBD.Intentos = ResultadoTryHandshake.Intentos;
+                    ResultadoOBD.ProtocoloObd = ResultadoTryHandshake.ProtocoloObd;
+                    ResultadoOBD.ConexionObd = ResultadoTryHandshake.ConexionOb;
+                    ResultadoOBD.VoltsSwOff = ResultadoTryHandshake.VoltsSwOff;
+                    ResultadoOBD.RpmOff = ResultadoTryHandshake.RpmOff;
 
-                lblrIntTipoCombustible0907.Text = $"{ResultadoOBD.IntTipoCombustible0907}";
-                lblrEcuAddress.Text = $"{ResultadoOBD.EcuAddress}";
-                lblrEcuAddressInt.Text = $"{ResultadoOBD.EcuAddressInt}";
+                    await AccesoSqlObd2Set(OBD2: ResultadoOBD, _Visual_: _Visual);
 
 
-                lblrlblEmissionCode.Text = $"{ResultadoOBD.EmissionCode}";
+                } else {
+                    var repo = new SivevRepository();
+                    try {
+                        var bitacora = NuevaBitacora( V:_Visual, descripcion: e.ToString(), codigoSql: 0, codigo: 0);
+                        await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
+                    } catch (Exception logEx) {
+                        SivevLogger.Warning($"Falló la búsqueda de verificaciones en catch, GetAccesoSQLVerificaciones: {logEx.Message}");
+                    }
+                    MostrarMensaje($"No existe Conexion con OBD");
+                    SivevLogger.Error($"Error No existe Conexion con OBD");
+                }
 
-                lblrPids_01_20.Text = string.Join(" || ", ResultadoOBD.Pids_01_20);
-                lblrPids_21_40.Text = string.Join(" || ", ResultadoOBD.Pids_21_40);
-                lblrPids_41_60.Text = string.Join(" || ", ResultadoOBD.Pids_41_60);
-
-                //obdMonitoresLuzMil = randy.Monitores();
             } finally {
                 btnConectar.Enabled = true;
+                btnConectar.Visible = true;
                 _leyendoObd = false;
 
                 btnConectar.Text = "Conectar";
@@ -210,12 +230,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 tlpMonitores.Enabled = true;
                 tlpMonitores.Visible = true;
-                btnFinalizarPruebaOBD.Enabled = true;
             }
-
-            
-
-            
         }
         #endregion
 
@@ -233,7 +248,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 SivevLogger.Error("Visual no inicializado");
                 return;
             }
-            
+
             lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
             //*/
 
@@ -293,87 +308,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblCompletoNoxScrAftertreatment.Visible = false;
             lblCompletoNoxScrAftertreatment.Enabled = false;
 
-        }
-        #endregion
-
-        #region Primer store
-        private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(
-                                                                        string SERVER,
-                                                                        string DB,
-                                                                        string SQL_USER,
-                                                                        string SQL_PASS,
-                                                                        string appName,
-                                                                        string APPROLE,
-                                                                        string APPROLE_PASS,
-                                                                        Guid estacionId,
-                                                                        Guid AccesoId,
-                                                                        Guid verificacionId,
-                                                                        ObdResultado o
-                                                                        ) {
-            var repo = new SivevRepository();
-            var result = new CapturaInspeccionVisualNewSetResult();
-
-            try {
-                using var connApp = SqlConnectionFactory.Create(SERVER, DB, SQL_USER, SQL_PASS, appName);
-                await connApp.OpenAsync();
-
-                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
-                    try {
-                        var rObd = await repo.SpAppCapturaInspeccionObdSetAsync(
-                        conn: connApp,
-                        estacionId: estacionId,
-                        accesoId: AccesoId,
-                        verificacionId: verificacionId,
-
-                        vehiculoId: o.VehiculoId,
-                        tiConexionObd: o.ConexionOb,
-                        protocoloObd: o.ProtocoloObd,
-                        tiIntentos: o.Intentos,
-                        tiMil: o.Mil,
-                        siFallas: o.Fallas,
-                        codError: o.CodError,
-                        codErrorPend: o.CodErrorPend,
-                        tiSdciic: o.Sdciic,
-                        tiSecc: o.Secc,
-                        tiSc: o.Sc,
-                        tiSso: o.Sso,
-                        tiSci: o.Sci,
-                        tiSccc: o.Sccc,
-                        tiSe: o.Se,
-                        tiSsa: o.Ssa,
-                        tiSfaa: o.Sfaa,
-                        tiScso: o.Scso,
-                        tiSrge: o.Srge,
-                        voltsSwOff: o.VoltsSwOff,
-                        voltsSwOn: o.VoltsSwOn,
-                        rpmOff: o.RpmOff,
-                        rpmOn: o.RpmOn,
-                        rpmCheck: o.RpmCheck,
-                        leeMonitores: o.LeeMonitores,
-                        leeDtc: o.LeeDtc,
-                        leeDtcPend: o.LeeDtcPend,
-                        leeVin: o.LeeVin,
-                        codigoProtocolo: 0
-                        );
-
-                        result.Resultado = rObd.Resultado;
-                        result.MensajeId = rObd.MensajeId;
-
-
-                        if (result.MensajeId != 0) {
-                            var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
-                            var msg = error?.Mensaje ?? "Mensaje no disponible";
-                            MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
-                        }
-                    } catch (Exception ex) {
-                        MostrarMensaje($"Error de la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {ex.Message}");
-                    }
-                }
-            } catch (Exception e) {
-                MostrarMensaje($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
-            }
-
-            return result;
         }
         #endregion
 
@@ -655,55 +589,78 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var (_, comp) = UnmapMonitorCode(code);
             return comp ? "Sí" : "No";
         }
-
-        #endregion
-
-        #region INSERTAR EN LA BDD
-        private async void btnFinalizarPruebaOBD_Click(object sender, EventArgs e) {
-            /*
-            await CapturaInspeccionVisual(  SERVER: _Visual.Server,
-                                            DB: _Visual.Database, 
-                                            SQL_USER:_Visual.User, 
-                                            SQL_PASS: _Visual.Password,
-                                            appName: _Visual.AppName, 
-                                            APPROLE: _Visual.RollVisual, 
-                                            APPROLE_PASS: _Visual.RollVisualAcceso.ToString().ToUpper(),
-                                            estacionId: _Visual.EstacionId, 
-                                            AccesoId: _Visual.AccesoId, 
-                                            verificacionId: _Visual.VerificacionId,
-                                            o: ResultadoOBD
-                                            );
-            //*/
-            _tcsResultado?.TrySetResult(true);
-            try {
-                using var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName);
-                await connApp.OpenAsync();
-
-                using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
-                    try {
-                        var repo = new SivevRepository();
-                        var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
-                        MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmOBD.btnFinalizarPruebaOBD_Click, se finaliza el acceso");
-                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmOBD.btnFinalizarPruebaOBD_Click, se finaliza el acceso");
-                    } catch {
-
-                    }
-                }
-            } catch {
-
-            }
+        private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
+            return new SpAppBitacoraErroresSet {
+                EstacionId = V.EstacionId,
+                Centro = V.Centro,
+                NombreCpu = Environment.MachineName,
+                OpcionMenuId = V.OpcionMenuId,
+                FechaError = DateTime.Now,
+                Libreria = Path.GetFileName(callerFile),
+                Clase = Path.GetFileNameWithoutExtension(callerFile),
+                Metodo = callerMember,
+                CodigoErrorSql = codigoSql,
+                CodigoError = codigo,
+                DescripcionError = descripcion,
+                LineaCodigo = callerLine,
+                LastDllError = 0,
+                SourceError = "DESCONOCIDO"
+            };
         }
-
-
         public Task<bool> EsperarResultadoAsync() {
             _tcsResultado = new TaskCompletionSource<bool>();
             return _tcsResultado.Task;
         }
         #endregion
-        
+
+        #region INSERTAR EN LA BDD
+        private async Task<InspeccionObdGet> AccesoSqlObd2Set(InspeccionObd2Set OBD2, VisualRegistroWindows _Visual_, CancellationToken ct = default) {
+            int _mensaje = 100;
+            short _resultado = 0;
+
+            var repo = new SivevRepository();
+
+            try {
+                using var connApp = SqlConnectionFactory.Create( server: _Visual_.Server, db: _Visual_.Database, user: _Visual_.User, pass: _Visual_.Password, appName: _Visual_.AppName);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: _Visual_.RollVisual, password: _Visual_.RollVisualAcceso.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppCapturaInspeccionObd2SetAsync(conn:connApp, V:_Visual_, obd:OBD2);
+
+                    _resultado = rinicial.Resultado;
+                    _mensaje = rinicial.MensajeId;
+
+
+                    if (_mensaje != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId: {_mensaje}", _mensaje);
+                        var bitacora = NuevaBitacora(_Visual_, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual_, A: bitacora, ct: ct);
+                        return new InspeccionObdGet {
+                            MensajeId = _mensaje,
+                            Resultado = _resultado
+                        };
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    var bitacora = NuevaBitacora( _Visual_, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(_Visual_, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Warning($"Falló la búsqueda de verificaciones en catch, GetAccesoSQLVerificaciones: {logEx.Message}");
+                }
+                MostrarMensaje($"{e.Message}");
+                SivevLogger.Error($"Error en Get_Acceso_SQL_Verificaciones {e.Message}");
+            }
+
+            return new InspeccionObdGet {
+                MensajeId = 0,
+                Resultado = 0
+            };
+        }
+
+
+        #endregion
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
-
     }
 }

@@ -164,8 +164,6 @@
             lblrPids_21_40 = new Label();
             lblPids_41_60 = new Label();
             lblrPids_41_60 = new Label();
-            pnlFooterPrincipal = new Panel();
-            btnFinalizarPruebaOBD = new Button();
             pnlTopPrincipal = new Panel();
             btnConectar = new Button();
             lblLecturaOBD = new Label();
@@ -176,7 +174,6 @@
             splitContainer1.SuspendLayout();
             tlpPrincipal.SuspendLayout();
             tlpMonitores.SuspendLayout();
-            pnlFooterPrincipal.SuspendLayout();
             pnlTopPrincipal.SuspendLayout();
             SuspendLayout();
             // 
@@ -184,7 +181,6 @@
             // 
             pnlPrincipal.BackColor = Color.White;
             pnlPrincipal.Controls.Add(splitContainer1);
-            pnlPrincipal.Controls.Add(pnlFooterPrincipal);
             pnlPrincipal.Controls.Add(pnlTopPrincipal);
             pnlPrincipal.Dock = DockStyle.Fill;
             pnlPrincipal.Location = new Point(0, 0);
@@ -205,7 +201,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(tlpMonitores);
-            splitContainer1.Size = new Size(1128, 574);
+            splitContainer1.Size = new Size(1128, 647);
             splitContainer1.SplitterDistance = 598;
             splitContainer1.TabIndex = 0;
             // 
@@ -303,7 +299,7 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpPrincipal.Size = new Size(598, 574);
+            tlpPrincipal.Size = new Size(598, 647);
             tlpPrincipal.TabIndex = 2;
             // 
             // lblrIntTipoCombustible0907
@@ -1024,7 +1020,7 @@
             tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpMonitores.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpMonitores.Size = new Size(526, 574);
+            tlpMonitores.Size = new Size(526, 647);
             tlpMonitores.TabIndex = 0;
             // 
             // lblrEcuAddress
@@ -1849,31 +1845,6 @@
             lblrPids_41_60.TabIndex = 28;
             lblrPids_41_60.Text = "lblrlblPids_41_60";
             // 
-            // pnlFooterPrincipal
-            // 
-            pnlFooterPrincipal.BackColor = Color.White;
-            pnlFooterPrincipal.Controls.Add(btnFinalizarPruebaOBD);
-            pnlFooterPrincipal.Dock = DockStyle.Bottom;
-            pnlFooterPrincipal.Location = new Point(0, 700);
-            pnlFooterPrincipal.Name = "pnlFooterPrincipal";
-            pnlFooterPrincipal.Size = new Size(1128, 73);
-            pnlFooterPrincipal.TabIndex = 1;
-            // 
-            // btnFinalizarPruebaOBD
-            // 
-            btnFinalizarPruebaOBD.Dock = DockStyle.Right;
-            btnFinalizarPruebaOBD.FlatAppearance.BorderSize = 2;
-            btnFinalizarPruebaOBD.FlatStyle = FlatStyle.Flat;
-            btnFinalizarPruebaOBD.Font = new Font("Segoe UI", 24F);
-            btnFinalizarPruebaOBD.ForeColor = Color.FromArgb(159, 34, 65);
-            btnFinalizarPruebaOBD.Location = new Point(850, 0);
-            btnFinalizarPruebaOBD.Name = "btnFinalizarPruebaOBD";
-            btnFinalizarPruebaOBD.Size = new Size(278, 73);
-            btnFinalizarPruebaOBD.TabIndex = 0;
-            btnFinalizarPruebaOBD.Text = "Finalizar";
-            btnFinalizarPruebaOBD.UseVisualStyleBackColor = true;
-            btnFinalizarPruebaOBD.Click += btnFinalizarPruebaOBD_Click;
-            // 
             // pnlTopPrincipal
             // 
             pnlTopPrincipal.BackColor = Color.White;
@@ -1932,7 +1903,6 @@
             tlpPrincipal.PerformLayout();
             tlpMonitores.ResumeLayout(false);
             tlpMonitores.PerformLayout();
-            pnlFooterPrincipal.ResumeLayout(false);
             pnlTopPrincipal.ResumeLayout(false);
             pnlTopPrincipal.PerformLayout();
             ResumeLayout(false);
@@ -1943,8 +1913,6 @@
         private Panel pnlPrincipal;
         private Panel pnlTopPrincipal;
         private Label lblLecturaOBD;
-        private Panel pnlFooterPrincipal;
-        private Button btnFinalizarPruebaOBD;
         private Button btnConectar;
         private TableLayoutPanel tlpPrincipal;
         private Label lblVin;

@@ -140,14 +140,14 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
 
 
-        public int? ReadSpeedKmh() {
+        public short? ReadSpeedKmh() {
             var resp = ExecRaw("010D", 4000);
             var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "");
             var idx = compact.IndexOf("410D", StringComparison.OrdinalIgnoreCase);
             if (idx < 0 || compact.Length < idx + 6) return null;
             try {
                 int v = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
-                return v; // km/h
+                return (short)v; // km/h
             } catch { return null; }
         }
 
@@ -361,7 +361,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             var ab = ReadPidAB("0104", 3000);
             if (!ab.HasValue)
                 return null;
-            int A = ab.Value.A;  
+            int A = ab.Value.A;
             double load = (A * 100.0) / 255.0;
             return load;
 
@@ -399,7 +399,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // PID 0105 - Temperatura del refrigerante (°C)
         // public int? CoolantTempC { get; init; }
-        public int? TemperaturaRefrigeranteC() {
+        public short? TemperaturaRefrigeranteC() {
             var ab = ReadPidAB("0105", 3000);
             if (!ab.HasValue)
                 return null;
@@ -407,7 +407,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             int A = ab.Value.A;   // A es int, no byte
 
             int tempC = A - 40;
-            return tempC;
+            return (short)tempC;
         }
 
         // PID 0106 - Short Term Fuel Trim Bank 1 (STFT B1)
@@ -448,7 +448,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // PID 010F - Temperatura del aire de admisión (°C)
         // public int? IatC { get; init; }
-        public int? TemperaturaAireAdmisionC() {
+        public short? TemperaturaAireAdmisionC() {
             var ab = ReadPidAB("010F", 3000);
             if (!ab.HasValue)
                 return null;
@@ -456,7 +456,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             int A = ab.Value.A;   // A es int
 
             int tempC = A - 40;
-            return tempC;
+            return (short)tempC;
         }
 
         // PID 0110 - MAF (Mass Air Flow) en g/s
@@ -636,24 +636,24 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // public int? intFuelType { get; init; }
 
-        public int? intTipoCombustible0151() {
+        public byte? byteTipoCombustible0151() {
             var ab = ReadPidAB("0151", 3000);
             if (!ab.HasValue)
                 return null;
 
             int A = ab.Value.A;
 
-            return A ;
+            return (byte)A;
         }
         // public int? intTipoCombustible0907 { get; init; }
-        public int? intTipoCombustible0907() {
+        public byte? intTipoCombustible0907() {
             var ab = ReadPidAB("0907", 3000);
             if (!ab.HasValue)
                 return null;
 
             int A = ab.Value.A;
 
-            return A;
+            return (byte)A;
         }
 
 

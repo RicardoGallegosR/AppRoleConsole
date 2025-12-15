@@ -11,11 +11,12 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace Apps_Visual.ObdAppGUI.Views {
@@ -134,7 +135,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             Guid accesoNormalizado = Guid.Empty;
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
                 accesoNormalizado = r.AccesoId;
-                await Task.Delay(500);
+                await Task.Delay(200);
                 AccesoObtenido?.Invoke(accesoNormalizado);
             }
             if (accesoNormalizado == Guid.Empty) {
@@ -150,7 +151,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             int _mensaje = 100;
             short _resultado = 0;
             Guid _AccesoSql = Guid.Empty;
-
             var repo = new SivevRepository();
 
             try {
@@ -165,9 +165,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                     if (_mensaje != 0) {
                         var error = await repo.PrintIfMsgAsync(connApp, $"SpAppCredencialExisteHuella", _mensaje);
-                        var bitacora = NuevaBitacora( V, descripcion: error.Mensaje, codigoSql: _mensaje, codigo: 0);
+                        var bitacora = NuevaBitacora( V, descripcion: $"Credencial: {credencial}, {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
                         await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
-                        MostrarMensaje($"SpAppCredencialExisteHuella {error.Mensaje}");
+                        MostrarMensaje($"Credencial: {credencial} {error.Mensaje}");
                         ResetForm();
                     }
                  }
@@ -190,6 +190,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(VisualRegistroWindows V, int credencial, CancellationToken ct = default) {
             int mensaje = 100;
+            string _msm = string.Empty;
             short resultado = 0;
             bool existeHuella = false;
             byte[] huella = Array.Empty<byte>();
@@ -210,16 +211,18 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
                 if (mensaje != 0) {
-                    string _msm;
                     try {
                         var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppCredencialExisteHuella", mensaje);
                         _msm = error.Mensaje;
-                        var bitacora = NuevaBitacora(V, descripcion: error.Mensaje, codigoSql: mensaje);
+                        var bitacora = NuevaBitacora(V, descripcion: $"Credencial: {credencial}, {error.Mensaje}", codigoSql: mensaje);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
                     } catch (Exception logEx) {
+                        _msm = logEx.Message;
                         SivevLogger.Error($"Falló la bitácora en CredencialExisteHuella: {logEx.Message}");
+                    } finally {
+                        MostrarMensaje($"Credencial: {credencial}, {_msm}");
                     }
-                    MostrarMensaje($"Error con la credencial: {credencial} ");
+                    
                 }
             } catch (Exception e) {
                 try {
