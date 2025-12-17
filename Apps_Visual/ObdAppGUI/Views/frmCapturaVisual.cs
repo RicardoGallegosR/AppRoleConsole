@@ -265,7 +265,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     _verificacionId = r.VerificacionId;
                     _Visual.VerificacionId = _verificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
+<<<<<<< HEAD
 
+=======
+                    
+>>>>>>> origin/master
                     var r2 = await BanderasAEvaluar(V:_Visual,elemento: "DESCONOCIDO", combustible: 0 );
                     if (r2.MensajeId == 0) {
                         AplicarCapturaVisual(r2.Items);
@@ -280,8 +284,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
                                 var error = await repo.PrintIfMsgAsync(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL);
                                 var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+<<<<<<< HEAD
                                 var bitacora = NuevaBitacora(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
                                 await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
+=======
+>>>>>>> origin/master
                                 SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
                             }
                         }
@@ -319,7 +326,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             try {
                 using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
                 await connApp.OpenAsync(ct);
+<<<<<<< HEAD
                 using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+=======
+                using (var scope = new AppRoleScope(connApp, role:V.RollVisual, password:V.RollVisualAcceso.ToString().ToUpper())) {
+>>>>>>> origin/master
                     var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.EstacionId, accesoId:V.AccesoId);
 
                     _resultado = rinicial.Resultado;
@@ -333,6 +344,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId: {_mensaje}", _mensaje);
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+<<<<<<< HEAD
+=======
+                        MostrarMensaje($"{error.Mensaje}");
+>>>>>>> origin/master
                         return new VerificacionVisualIniResult {
                             MensajeId = _mensaje,
                             Resultado = _resultado,
@@ -365,16 +380,28 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #region Segundo store
+<<<<<<< HEAD
         private async Task<CapturaVisualGetResult> BanderasAEvaluar(VisualRegistroWindows V, string? elemento, byte combustible, CancellationToken ct = default) {
             var repo = new SivevRepository();
             var result = new CapturaVisualGetResult();
+=======
+        private async Task<CapturaVisualGetResult> BanderasAEvaluar(VisualRegistroWindows V, string? elemento, byte combustible, CancellationToken ct = default ) {
+            var repo = new SivevRepository();
+            var result = new CapturaVisualGetResult();   
+>>>>>>> origin/master
             try {
                 using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
                 await connApp.OpenAsync(ct);
                 using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+<<<<<<< HEAD
                     var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.EstacionId, accesoId: V.AccesoId, verificacionId: V.VerificacionId, elemento: elemento, tiCombustible: combustible);
 
                     //MostrarMensaje($"estacionId: {V.EstacionId}, accesoId: {V.AccesoId}, verificacionId: {V.VerificacionId}, elemento: {elemento}, tiCombustible: {combustible}");
+=======
+                    var rbanderas = await repo.SpAppCapturaVisualGetAsync( conn: connApp, estacionId: V.EstacionId, accesoId: V.AccesoId, verificacionId: V.VerificacionId, elemento: elemento, tiCombustible: combustible );
+
+                    MostrarMensaje($"estacionId: {V.EstacionId}, accesoId: {V.AccesoId}, verificacionId: {V.VerificacionId}, elemento: {elemento}, tiCombustible: {combustible}");
+>>>>>>> origin/master
 
                     result.Resultado = rbanderas.Resultado;
                     result.MensajeId = rbanderas.MensajeId;
@@ -384,8 +411,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     if (result.MensajeId != 0) {
                         var error = await repo.PrintIfMsgAsync( connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}",result.MensajeId);
                         var msg = error?.Mensaje ?? "Mensaje no disponible";
+<<<<<<< HEAD
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+=======
+
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+
+>>>>>>> origin/master
                         MostrarMensaje($"Error SQL en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
                     }
 
@@ -418,8 +452,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 using var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
                 await connApp.OpenAsync(ct);
 
+<<<<<<< HEAD
                 using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
                     var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
+=======
+                using (var scope = new AppRoleScope(connApp, APPROLE, APPROLE_PASS)) {
+                    try {
+                        var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
+>>>>>>> origin/master
                                                                                 conn: connApp,
                                                                                 verificacionId: V.VerificacionId,
                                                                                 estacionId: V.EstacionId,
