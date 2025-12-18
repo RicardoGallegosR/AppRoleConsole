@@ -583,7 +583,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // PID 0133 - Presión barométrica en kPa  Presioˊn(kPa)=A
         //public int? BarometricPressure { get; init; }
 
-        public int? PresionBarometrica() {
+        public short? PresionBarometrica() {
             var ab = ReadPidAB("0133", 3000);
             if (!ab.HasValue)
                 return null;
@@ -591,7 +591,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             int A = ab.Value.A;
 
             // A ya está en kPa
-            return A;
+            return (short)A;
         }
 
 

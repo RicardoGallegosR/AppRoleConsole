@@ -334,7 +334,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             ClientSize = new Size(819, 466);
-            ControlBox = false;
             Controls.Add(pnlPrincipal);
             MdiChildrenMinimizedAnchorBottom = false;
             MinimizeBox = false;

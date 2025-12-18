@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Devices.Obd;
@@ -33,6 +34,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         private RBGR randy;
+        private RBGR randy2;
         private LecturasIniciales lecturasIniciales;
         private ObdMonitoresLuzMil obdMonitoresLuzMil;
         private InspeccionObd2Set ResultadoOBD;
@@ -44,13 +46,39 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Credenciales de la bdd
 
         public int _panelX = 0, _panelY = 0;
-        private VisualRegistroWindows _Visual;
+        private VisualRegistroWindows _Visual ;
 
         #endregion
 
 
         #endregion
+        public frmOBD() {
+            _fontSizeInicial = this.Font.Size;
+            InitializeComponent();
+            WindowState = FormWindowState.Maximized;
+            tlpPrincipal.Enabled = false;
+            tlpPrincipal.Visible = false;
+            this.Resize += frmCapturaVisual_Resize;
+            ResetForm();
 
+            _Visual = new VisualRegistroWindows{
+                PlacaId = "L71AAP",
+                EstacionId = Guid.Parse("BFFF8EA5-76A4-F011-811C-D09466400DBA"),
+                Server = "SIVSRV9915",
+                Database = "Sivev",
+                User = "SivevCentros",
+                Password = "CentrosSivev",
+                AppName = "SivAppVfcVisual",
+                RollVisual = "RollVfcVisual",
+                RollVisualAcceso = Guid.Parse("95801B7A-4577-A5D0-952E-BD3D89757EA5"),
+                VerificacionId = Guid.Parse("25996E89-CAC4-F011-80F0-D094661AE320"),
+                AccesoId = Guid.Parse("2EEEE5A7-29DC-F011-811D-D09466400DBA")
+
+            };
+        }
+
+
+        /*
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -73,25 +101,30 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _leyendoObd = true;
             try {
 
-                lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
+                lblLecturaOBD.Text = $"Iniciando placa: {_Visual.PlacaId}";
                 tlpPrincipal.Enabled = false;
                 tlpPrincipal.Visible = false;
                 tlpMonitores.Enabled = false;
                 tlpMonitores.Visible = false;
 
+                //await Task.Delay(500);
+                //randy = new RBGR();
+
+
+                lblLecturaOBD.Text = $"TryHandshake Monitores de la placa: {_Visual.PlacaId}";
+                //ResultadoTryHandshake = randy.TryHandshake();
+
                 await Task.Delay(500);
-                randy = new RBGR();
-
-
-
-                ResultadoTryHandshake = randy.TryHandshake();
-
-                if (ResultadoTryHandshake.Intentos < 4 /* && ResultadoTryHandshake.ConexionOb == 0 && ResultadoTryHandshake.VoltsSwOff != 0*/) {
+                //if (ResultadoTryHandshake.ConexionOb == 1/*ResultadoTryHandshake.Intentos < 4*/ /* && ResultadoTryHandshake.ConexionOb == 0 && ResultadoTryHandshake.VoltsSwOff != 0*/) {
+                    lblLecturaOBD.Text = $"Leyendo OBD Monitores de la placa: {_Visual.PlacaId}";
+                    await Task.Delay(500);
+                    randy = new RBGR();
                     ResultadoOBD = randy.SpSetObd();
+                //TOÑO
 
-                    //TOÑO
+                #region Asignacion de Monitores
+                //*
 
-                    #region Asignacion de Monitores
                     lblCompletoComponent.Text = GetCompletoText(ResultadoOBD.Sci);
                     lblDisponibleComponent.Text = GetDisponibleText(ResultadoOBD.Sci);
 
@@ -124,7 +157,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                     lblCompletoOxygenSensorHeater.Text = GetCompletoText(ResultadoOBD.Scso);
                     lblDisponibleOxygenSensorHeater.Text = GetDisponibleText(ResultadoOBD.Scso);
-
+                
                     #endregion
 
                     #region labels
@@ -132,14 +165,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     lblrOdometroLuzMil.Text = $"{ResultadoOBD.Dist_MIL_On} km";
                     lblrRunTimeMil.Text = $"{ResultadoOBD.Tpo_Borrado_DTC} min";
 
-                    ///*
+                    
                     // Valores Iniciales
                     lblrVIN.Text = ResultadoOBD.VehiculoId;
                     lblrProtocoloOBD.Text = ResultadoOBD.ProtocoloObd;
                     lblrRPM.Text = ResultadoOBD.RpmOff.ToString();
                     lblrCalId.Text = ResultadoOBD.IDs_Adic;
                     lblrBateria.Text = ResultadoOBD.VoltsSwOff.ToString();
-
+                    
                     // luz mil
                     lblrLuzMil.Text = ResultadoOBD.Mil.ToString();
                     //lblrOdometroLuzMil.Text = "Prueba 2";
@@ -157,11 +190,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                     //CVN:
                     lblrCalibrationVerificationNumber.Text = ResultadoOBD.Lista_CVN;
-                    //*/
-
+                    
+                    
                     lblrOperacionMotor.Text = $"{ResultadoOBD.Tpo_Arranque} seg";
                     //lblrWarmsUp.Text = $"{ResultadoOBD.WarmUpsDesdeBorrado} Veces";
-
+                    lblrDTCClear.Text = $"{ResultadoOBD.Dist_Borrado_DTC}";
 
                     lblrNormativaObdVehiculo.Text = $"{ResultadoOBD.NEV}";
                     lblrIatCCoolantTempC.Text = $"{ResultadoOBD.TR} veces";
@@ -171,7 +204,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     lblrIatC.Text = $"{ResultadoOBD.IAT} °C ";
                     lblrMafGs.Text = $"{ResultadoOBD.MAF}";
 
-                    //lblrMafKgH.Text = $"{ResultadoOBD.MafKgH}";
+                   ///lblrMafKgH.Text = $"{ResultadoOBD.MafKgH}";
                     lblrTps.Text = $"{ResultadoOBD.TPS}";
                     lblrTimingAdvance.Text = $"{ResultadoOBD.AvanceEnc} ss";
 
@@ -194,19 +227,60 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     lblrPids_01_20.Text = ResultadoOBD.PIDS_Sup_01_20;
                     lblrPids_21_40.Text = ResultadoOBD.PIDS_Sup_21_40;
                     lblrPids_41_60.Text = ResultadoOBD.PIDS_Sup_41_60;
-                    #endregion
+
+                #endregion
+
+                /*
+                ResultadoOBD.Intentos = ResultadoTryHandshake.Intentos;
+                ResultadoOBD.ProtocoloObd = ResultadoTryHandshake.ProtocoloObd;
+                ResultadoOBD.ConexionObd = ResultadoTryHandshake.ConexionOb;
+                ResultadoOBD.VoltsSwOff = ResultadoTryHandshake.VoltsSwOff;
+                ResultadoOBD.RpmOff = ResultadoTryHandshake.RpmOff;
+                */
 
 
-                    ResultadoOBD.Intentos = ResultadoTryHandshake.Intentos;
-                    ResultadoOBD.ProtocoloObd = ResultadoTryHandshake.ProtocoloObd;
-                    ResultadoOBD.ConexionObd = ResultadoTryHandshake.ConexionOb;
-                    ResultadoOBD.VoltsSwOff = ResultadoTryHandshake.VoltsSwOff;
-                    ResultadoOBD.RpmOff = ResultadoTryHandshake.RpmOff;
-
-                    await AccesoSqlObd2Set(OBD2: ResultadoOBD, _Visual_: _Visual);
+                ResultadoOBD.Intentos = 1;
+                ResultadoOBD.ConexionObd = 1;
+                #endregion
+                //MostrarMensaje($" ResultadoOBD.Intentos = {ResultadoTryHandshake.Intentos} ResultadoOBD.ProtocoloObd = {ResultadoTryHandshake.ProtocoloObd};  ResultadoOBD.ConexionObd = {ResultadoTryHandshake.ConexionOb};               ResultadoOBD.VoltsSwOff = {ResultadoTryHandshake.VoltsSwOff}, {ResultadoOBD.RpmOff}");
 
 
-                } else {
+                //MostrarMensaje($" ResultadoOBD.RpmOff = {ResultadoOBD.RpmOff} ResultadoOBD.PIDS_Sup_01_20 = {ResultadoOBD.PIDS_Sup_01_20};");
+
+
+
+
+                lblLecturaOBD.Text = $"Registrando valores de la placa: {_Visual.PlacaId}";
+                    /*
+                var Resultado = await AccesoSqlObd2Set(OBD2: ResultadoOBD, _Visual_: _Visual);
+
+                    int _mensaje = Resultado.MensajeId;
+
+                    if (_mensaje != 0) {
+                        var repo = new SivevRepository();
+                        try {
+                            using var connApp = SqlConnectionFactory.Create( server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName);
+                            await connApp.OpenAsync();
+                            using (var scope = new AppRoleScope(connApp, role: _Visual.RollVisual, password: _Visual.RollVisualAcceso.ToString().ToUpper())) {
+                                var error = await repo.PrintIfMsgAsync(connApp, $"btnConectar_Click", _mensaje);
+                                var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de OBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
+                                await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
+                                MostrarMensaje($"Resultado de OBD: {error.Mensaje}");
+                            }
+                        } catch (Exception ex) {
+                            try {
+                                var bitacora = NuevaBitacora( _Visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
+                                await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
+                            } catch (Exception logEx) {
+                                SivevLogger.Error($"Falló en OBD en catch de placa {_Visual.PlacaId}, GetAccesoSQL: {logEx.Message}");
+                            }
+                            MostrarMensaje($"Falló en OBD en catch de placa {_Visual.PlacaId}: {ex.Message}");
+                        }
+
+                    }
+                    */
+                /*} 
+                 else {
                     var repo = new SivevRepository();
                     try {
                         var bitacora = NuevaBitacora( V:_Visual, descripcion: e.ToString(), codigoSql: 0, codigo: 0);
@@ -216,7 +290,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     }
                     MostrarMensaje($"No existe Conexion con OBD");
                     SivevLogger.Error($"Error No existe Conexion con OBD");
-                }
+                }//*/
 
             } finally {
                 btnConectar.Enabled = true;
@@ -232,7 +306,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 tlpMonitores.Visible = true;
             }
         }
-        #endregion
 
 
         #region ResetPanel
@@ -242,7 +315,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
-            //*
+            /*
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");

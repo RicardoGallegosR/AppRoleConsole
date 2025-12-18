@@ -139,21 +139,21 @@
     }
 
     public sealed class InspeccionObd2Set {
-        public Guid EstacionId { get; set; }
-        public Guid AccesoId { get; set; }
-        public Guid VerificacionId { get; set; }
-        public string? VehiculoId { get; set; }
-        public decimal? CCM { get; set; }
-        public byte? NEV { get; set; }
-        public short? TR { get; set; }
-        public byte? ConexionObd { get; set; }
-        public string? ProtocoloObd { get; set; }
-        public byte? Intentos { get; set; }
-        public byte? Mil { get; set; }
-        public byte? Fallas { get; set; }
-        public string? CodigoError { get; set; }
-        public string? CodigoErrorPendiente { get; set; }
-        public string? CodigoErrorPermanente { get; set; }
+        public Guid EstacionId { get; set; } = Guid.Empty;
+        public Guid AccesoId { get; set; } = Guid.Empty;
+        public Guid VerificacionId { get; set; } = Guid.Empty;
+        public string? VehiculoId { get; set; } = "DESCONOCIDO";
+        public decimal? CCM { get; set; } = 0;
+        public byte? NEV { get; set; } = 0;
+        public short? TR { get; set; } = 0;
+        public byte? ConexionObd { get; set; } = 0;
+        public string? ProtocoloObd { get; set; } = "DESCONOCIDO";
+        public byte? Intentos { get; set; } = 0;
+        public byte? Mil { get; set; } = 0;
+        public byte? Fallas { get; set; } = 0;
+        public string? CodigoError { get; set; } = "DESCONOCIDO";
+        public string? CodigoErrorPendiente { get; set; } = "DESCONOCIDO";
+        public string? CodigoErrorPermanente { get; set; } = "DESCONOCIDO";
         public byte? Sdciic { get; set; }
         public byte? Secc { get; set; }
         public byte? Sc { get; set; }
@@ -164,54 +164,54 @@
         public byte? Ssa { get; set; }
         public byte? Sfaa { get; set; }
         public byte? Scso { get; set; }
-        public byte? Srge { get; set; }
-        public byte? Spsa { get; set; }
-        public byte? Sge { get; set; }
+        public byte? Srge { get; set; } 
+        public byte? Spsa { get; set; } 
+        public byte? Sge { get; set; } 
         public byte? Schnm { get; set; }
-        public byte? Sfp { get; set; }
-        public byte? Sscrron { get; set; }
-        public decimal? STFT_B1 { get; set; }
-        public decimal? LTFT_B1 { get; set; }
-        public short? IAT { get; set; }
-        public decimal? MAF { get; set; }
-        public decimal? TPS { get; set; }
-        public decimal? VoltsSwOff { get; set; }
-        public decimal? VoltsSwOn { get; set; }
-        public short? RpmOff { get; set; }
-        public short? RpmOn { get; set; }
-        public short? RpmCheck { get; set; }
-        public bool? LeeMonitores { get; set; }
-        public bool? LeeDtc { get; set; }
-        public bool? LeeDtcPend { get; set; }
-        public bool? LeeDtcPerm { get; set; }
-        public bool? LeeVin { get; set; }
+        public byte? Sfp { get; set; } 
+        public byte? Sscrron { get; set; } 
+        public decimal? STFT_B1 { get; set; } = 0;
+        public decimal? LTFT_B1 { get; set; } = 0;
+        public short? IAT { get; set; } = 0;
+        public decimal? MAF { get; set; } = 0;
+        public decimal? TPS { get; set; } = 0;
+        public decimal? VoltsSwOff { get; set; } = 0;
+        public decimal? VoltsSwOn { get; set; } = 0;
+        public short? RpmOff { get; set; } = 0;
+        public short? RpmOn { get; set; } = 0;
+        public short? RpmCheck { get; set; } = 0;
+        public bool? LeeMonitores { get; set; } = false;
+        public bool? LeeDtc { get; set; } = false;
+        public bool? LeeDtcPend { get; set; } = false;
+        public bool? LeeDtcPerm { get; set; } = false;
+        public bool? LeeVin { get; set; } = false;
         public short? CodigoProtocolo { get; set; }
-        public short? VelVeh { get; set; }
-        public decimal? AvanceEnc { get; set; }
-        public decimal? Volt_O2 { get; set; }
-        public int? Tpo_Arranque { get; set; }
-        public decimal? NivelComb { get; set; }
-        public short? Pres_Baro { get; set; }
-        public byte? Combustible0151Id { get; set; }
-        public int? Dist_MIL_On { get; set; }
-        public int? Dist_Borrado_DTC { get; set; }
-        public int? Tpo_MIL_On { get; set; }
-        public int? Tpo_Borrado_DTC { get; set; }
-        public byte? Combustible0907Id { get; set; }
-        public string? Dir_ECU { get; set; }
-        public string? ID_Calib { get; set; }
-        public string? IDs_Adic { get; set; }
-        public string? NumVerifCalib { get; set; }
-        public string? Lista_CVN { get; set; }
-        public string? Est_Mon_DTC_Borrado { get; set; }
-        public int? MotorTipoId { get; set; }
-        public byte? Req_Emisiones { get; set; }
-        public string? PIDS_Sup_01_20 { get; set; }
-        public string? PIDS_Sup_21_40 { get; set; }
-        public string? PIDS_Sup_41_60 { get; set; }
+        public short? VelVeh { get; set; } = 0;
+        public decimal? AvanceEnc { get; set; } = 0;
+        public decimal? Volt_O2 { get; set; } = 0;
+        public int? Tpo_Arranque { get; set; } = 0;
+        public decimal? NivelComb { get; set; } = 0;
+        public short? Pres_Baro { get; set; } = 0;
+        public byte? Combustible0151Id { get; set; } = 0;
+        public int? Dist_MIL_On { get; set; } = 0;
+        public int? Dist_Borrado_DTC { get; set; } = 0;
+        public int? Tpo_MIL_On { get; set; } = 0;
+        public int? Tpo_Borrado_DTC { get; set; } = 0;
+        public byte? Combustible0907Id { get; set; } = 0;
+        public string? Dir_ECU { get; set; } = "DESCONOCIDO";
+        public string? ID_Calib { get; set; } = "DESCONOCIDO";
+        public string? IDs_Adic { get; set; } = "DESCONOCIDO";
+        public string? NumVerifCalib { get; set; } = "DESCONOCIDO";
+        public string? Lista_CVN { get; set; } = "DESCONOCIDO";
+        public string? Est_Mon_DTC_Borrado { get; set; } = "DESCONOCIDO";
+        public int? MotorTipoId { get; set; } = 0;
+        public byte? Req_Emisiones { get; set; } = 0;
+        public string? PIDS_Sup_01_20 { get; set; } = "DESCONOCIDO";
+        public string? PIDS_Sup_21_40 { get; set; } = "DESCONOCIDO";
+        public string? PIDS_Sup_41_60 { get; set; } = "DESCONOCIDO";
 
-        public string? Mensaje { get; set; }
-        public int? MensajeId { get; set; }
+        public string? Mensaje { get; set; } = "DESCONOCIDO";
+        public int? MensajeId { get; set; } = 0;
     }
 
 
