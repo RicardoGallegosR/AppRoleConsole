@@ -648,6 +648,8 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@tiSfaa", SqlDbType.TinyInt) { Value = obd.Sfaa });
             cmd.Parameters.Add(new SqlParameter("@tiScso", SqlDbType.TinyInt) { Value = obd.Scso });
             cmd.Parameters.Add(new SqlParameter("@tiSrge", SqlDbType.TinyInt) { Value = obd.Srge });
+            cmd.Parameters.Add(new SqlParameter("@tiSpsa", SqlDbType.TinyInt) { Value = obd.Spsa });
+            cmd.Parameters.Add(new SqlParameter("@tiSge", SqlDbType.TinyInt) { Value = obd.Sge });
             cmd.Parameters.Add(new SqlParameter("@tiSchnm", SqlDbType.TinyInt) { Value = obd.Schnm });
             cmd.Parameters.Add(new SqlParameter("@tiSfp", SqlDbType.TinyInt) { Value = obd.Sfp });
             cmd.Parameters.Add(new SqlParameter("@tiSscrron", SqlDbType.TinyInt) { Value = obd.Sscrron });

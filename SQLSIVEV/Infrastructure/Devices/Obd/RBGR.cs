@@ -342,7 +342,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         CodigoErrorPermanente = _dtcList0A ?? "No se realizo lectura",
                         
                         Mil = _MilOn.HasValue ? (_MilOn.Value ? (byte)1 : (byte)0) : (byte)0,
-                        Fallas = (byte)cnt03,
+                        Fallas = (byte)Math.Min(cnt03, byte.MaxValue),
                         Sdciic = monitorCodes["MISFIRE_MONITORING"] ?? 0,           // Misfire
                         Sc = monitorCodes["FUEL_SYSTEM_MONITORING"] ?? 0,           // Fuel System
                         Sci = monitorCodes["COMPONENT_MONITORING"] ?? 0,            // Components
@@ -377,21 +377,21 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
 
                         // Más valores instruidos por Toñin GALVAN 
-                        CCM = _CCM.HasValue ? (decimal?)_CCM.Value : (decimal?)(-1m),
+                        CCM = _CCM.HasValue ? (decimal?)_CCM.Value : (decimal?)(0m),
                         //WarmUpsDesdeBorrado = _WarmUpsDesdeBorrado,
                         //NEV = _NormativaObdVehiculo,
                         TR = _IatCCoolantTempC ?? 0,
-                        STFT_B1 = _StftB1.HasValue ? (decimal?)_StftB1.Value : (decimal?)(-1m),
-                        LTFT_B1 = _LtftB1.HasValue ? (decimal?)_LtftB1.Value : (decimal?)(-1m),
-                        IAT = _IatC,
-                        MAF = _MafGs.HasValue ? (decimal?)_MafGs.Value : (decimal?)(-1m),
+                        STFT_B1 = _StftB1.HasValue ? (decimal?)_StftB1.Value : (decimal?)(0m),
+                        LTFT_B1 = _LtftB1.HasValue ? (decimal?)_LtftB1.Value : (decimal?)(0m),
+                        IAT = _IatC.HasValue ? (short?)_IatC.Value : (short?)(-1),
+                        MAF = _MafGs.HasValue ? (decimal?)_MafGs.Value : (decimal?)(0m),
                         //MafKgH = _MafKgH,
-                        TPS = _Tps.HasValue ? (decimal?)_Tps.Value : (decimal?)(-1m),
-                        AvanceEnc = _TimingAdvance.HasValue ? (decimal?)_TimingAdvance.Value : (decimal?)(-1m),
+                        TPS = _Tps.HasValue ? (decimal?)_Tps.Value : (decimal?)(0m),
+                        AvanceEnc = _TimingAdvance.HasValue ? (decimal?)_TimingAdvance.Value : (decimal?)(0m),
                         VelVeh = _vel ?? -1,
-                        Volt_O2 = _O2S1_V.HasValue ? (decimal?)_O2S1_V.Value : (decimal?)(-1m),
+                        Volt_O2 = _O2S1_V.HasValue ? (decimal?)_O2S1_V.Value : (decimal?)(0m),
                         //O2S2_V = _O2S2_V,
-                        NivelComb = _FuelLevel.HasValue ? (decimal?)_FuelLevel.Value : (decimal?)(-1m),
+                        NivelComb = _FuelLevel.HasValue ? (decimal?)_FuelLevel.Value : (decimal?)(0m),
                         Pres_Baro = _BarometricPressure ?? -1,
                         //FuelType = _FuelType,
                         Combustible0151Id = _IntFuelType ?? 0,

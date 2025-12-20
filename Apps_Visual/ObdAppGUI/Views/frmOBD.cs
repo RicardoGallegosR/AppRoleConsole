@@ -251,7 +251,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
                 lblLecturaOBD.Text = $"Registrando valores de la placa: {_Visual.PlacaId}";
-                    /*
+                    //*
                 var Resultado = await AccesoSqlObd2Set(OBD2: ResultadoOBD, _Visual_: _Visual);
 
                     int _mensaje = Resultado.MensajeId;
@@ -278,7 +278,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         }
 
                     }
-                    */
+                    //*/
                 /*} 
                  else {
                     var repo = new SivevRepository();
