@@ -46,12 +46,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #region Credenciales de la bdd
 
         public int _panelX = 0, _panelY = 0;
-        private VisualRegistroWindows _Visual ;
+        public VisualRegistroWindows _Visual;
 
         #endregion
 
 
         #endregion
+        /*                      PRUEBAS 
         public frmOBD() {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -76,9 +77,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             };
         }
+         //*/
 
-
-        /*
+        //*                      PRODUCCION
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
             InitializeComponent();
@@ -267,6 +268,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                 await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                                 MostrarMensaje($"Resultado de OBD: {error.Mensaje}");
                             }
+                            _tcsResultado?.TrySetResult(false);
                         } catch (Exception ex) {
                             try {
                                 var bitacora = NuevaBitacora( _Visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
@@ -278,7 +280,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         }
 
                     }
-                    //*/
+                _tcsResultado?.TrySetResult(true);
+                //*/
                 /*} 
                  else {
                     var repo = new SivevRepository();
@@ -315,7 +318,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
-            /*
+            //*
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");

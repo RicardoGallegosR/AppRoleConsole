@@ -291,7 +291,7 @@ namespace Apps_Visual.ObdAppGUI {
                 
             bool pruebaVisual = await ListadoVisual();
             if (!pruebaVisual) {
-                SivevLogger.Information($"No pasa a prueba OBD: {pruebaVisual}");
+                SivevLogger.Information($"No pasa a prueba OBD la placa {_placa}: {pruebaVisual}");
                 return;
             }
             Visual.PlacaId = _placa;
@@ -301,7 +301,7 @@ namespace Apps_Visual.ObdAppGUI {
 
             bool PruebaOBD = await PruebaOBDPanel();
             if (!PruebaOBD) {
-                SivevLogger.Information($"No pasa la prueba OBD: {PruebaOBD}");
+                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual.PlacaId}: {PruebaOBD}");
                 return;
             }
         }
@@ -408,35 +408,60 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Clear();
 
             if (PruebaOBD == null || PruebaOBD.IsDisposed) {
-                //PruebaOBD = new frmOBD(Visual);
+                PruebaOBD = new frmOBD(Visual);
             }
-            //PruebaOBD._panelX = pnlPanelCambios.Width;
-            //PruebaOBD._panelY = pnlPanelCambios.Height;
+            PruebaOBD._panelX = pnlPanelCambios.Width;
+            PruebaOBD._panelY = pnlPanelCambios.Height;
             PruebaOBD.InicializarTamanoYFuente();
-            //PruebaOBD._Visual = Visual;
+            PruebaOBD._Visual = Visual;
 
             pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
             
             bool ok = await PruebaOBD.EsperarResultadoAsync();
+
+            pnlPanelCambios.Controls.Clear();
+            CapturaVisual.Dispose();
+            CapturaVisual = null;
+            if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                home = new HomeView();
+                home.panelX = pnlPanelCambios.Width;
+                home.panelY = pnlPanelCambios.Height;
+                home.InicializarTamanoYFuente();
+                pnlPanelCambios.Controls.Add(home.GetPanel());
+                pnlPanelCambios.Dock = DockStyle.Fill;
+                btnInspecionVisual.Enabled = true;
+                btnInspecionVisual.Visible = true;
+                btnApagar.Enabled = true;
+                btnApagar.Visible = true;
+            }
+
             if (ok) {
-                pnlPanelCambios.Controls.Clear();
-                CapturaVisual.Dispose();
-                CapturaVisual = null;
-                if (CapturaVisual == null || CapturaVisual.IsDisposed) {
-                    home = new HomeView();
-                    home.panelX = pnlPanelCambios.Width;
-                    home.panelY = pnlPanelCambios.Height;
-                    home.InicializarTamanoYFuente();
-                    pnlPanelCambios.Controls.Add(home.GetPanel());
-                    pnlPanelCambios.Dock = DockStyle.Fill;
-                    btnInspecionVisual.Enabled = true;
-                    btnInspecionVisual.Visible = true;
-                    btnApagar.Enabled = true;
-                    btnApagar.Visible = true;
-                }
+                
+                return true;
+            }else {
                 return false;
             }
-            return false;
+                /*
+                if (ok) {
+                    pnlPanelCambios.Controls.Clear();
+                    CapturaVisual.Dispose();
+                    CapturaVisual = null;
+                    if (CapturaVisual == null || CapturaVisual.IsDisposed) {
+                        home = new HomeView();
+                        home.panelX = pnlPanelCambios.Width;
+                        home.panelY = pnlPanelCambios.Height;
+                        home.InicializarTamanoYFuente();
+                        pnlPanelCambios.Controls.Add(home.GetPanel());
+                        pnlPanelCambios.Dock = DockStyle.Fill;
+                        btnInspecionVisual.Enabled = true;
+                        btnInspecionVisual.Visible = true;
+                        btnApagar.Enabled = true;
+                        btnApagar.Visible = true;
+                    }
+                    return true;
+                }
+                */
+                return false;
         }
         #endregion
 
