@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>disable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <FileVersion>6.0.0.5</FileVersion>
+    <AssemblyVersion>6.0.0.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,11 +20,13 @@
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
     <PackageReference Include="Serilog.Sinks.EventLog" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SQLSIVEV\SQLSIVEV.csproj" />
+    <ProjectReference Include="H:\Apps C#\Biometria\DPFP_SMA\DPFP_SMA.csproj" />
   </ItemGroup>
 
   <ItemGroup>

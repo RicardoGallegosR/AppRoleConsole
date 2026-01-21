@@ -26,6 +26,10 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+using DPFP_SMA.Forms.Comun;
+using System.Reflection;
+
+//using DPFP_SMA.Models;
 
 
 namespace Apps_Visual.ObdAppGUI {
@@ -33,7 +37,8 @@ namespace Apps_Visual.ObdAppGUI {
     public partial class frmBASE : Form {
         #region Variables para funcionamiento
         
-        private VisualRegistroWindows Visual;
+        private DPFP_SMA.Models.VisualRegistroWindows Visual_48;
+        private SQLSIVEV.Infrastructure.Services.VisualRegistroWindows Visual_Core;
         private readonly RegistroCrypto _reg = new();
 
 
@@ -47,6 +52,7 @@ namespace Apps_Visual.ObdAppGUI {
 
         private HomeView home;
         private frmAuth frmcredenciales;
+        private VerificationForm frmverification;
         private frmCapturaVisual CapturaVisual;
         private frmOBD PruebaOBD;
         #endregion
@@ -78,15 +84,15 @@ namespace Apps_Visual.ObdAppGUI {
         private async Task< bool> SpAppRollClaveGet() {
             try {
                 await using var conn = SqlConnectionFactory.Create( 
-                    server:     Visual.Server,
-                    db:         Visual.Database,
-                    user:       Visual.User, 
-                    pass:       Visual.Password,
-                    appName:    Visual.AppName
+                    server:     Visual_Core.Server,
+                    db:         Visual_Core.Database,
+                    user:       Visual_Core.User, 
+                    pass:       Visual_Core.Password,
+                    appName:    Visual_Core.AppName
                 );
                 await conn.OpenAsync();
 
-                using (var scope = new AppRoleScope(conn, Visual.AppRole, Visual.AppRolePassword.ToString().ToUpper())) {
+                using (var scope = new AppRoleScope(conn, Visual_Core.AppRole, Visual_Core.AppRolePassword.ToString().ToUpper())) {
                     var repo = new SivevRepository();
                     var r = repo.SpAppRollClaveGet(conn);
                     var MensajesSQL = await  repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
@@ -99,10 +105,10 @@ namespace Apps_Visual.ObdAppGUI {
                         }
                         return false;
                     }
-                    Visual.RollVisualAcceso = Guid.Parse((r.ClaveAcceso ?? "").Reverse().ToArray());
-                    Visual.RollVisual = r.FuncionAplicacion;
+                    Visual_Core.RollVisualAcceso = Guid.Parse((r.ClaveAcceso ?? "").Reverse().ToArray());
+                    Visual_Core.RollVisual = r.FuncionAplicacion;
 
-                    SivevLogger.Information($"Valores regresados {Visual.RollVisual}");
+                    SivevLogger.Information($"Valores regresados {Visual_Core.RollVisual}");
                 }
 
 
@@ -156,7 +162,7 @@ namespace Apps_Visual.ObdAppGUI {
             var conf = lector.GetConfig();
             CryptoHelper.Configurar(conf);
            
-            Visual = new VisualRegistroWindows{
+            Visual_Core = new VisualRegistroWindows{
                 Server                    = Leer(nameof(VisualRegistroWindows.Server)),
                 Database                  = Leer(nameof(VisualRegistroWindows.Database)),
                 User                      = Leer(nameof(VisualRegistroWindows.User)),
@@ -173,28 +179,28 @@ namespace Apps_Visual.ObdAppGUI {
                 Url                       = Leer((nameof(VisualRegistroWindows.Url))),
                 EstacionId                = LeerGuid(nameof(VisualRegistroWindows.EstacionId))
             };
-
+            
 
             SivevLogger.Information(
                 $"|| Lectura de REGEDIT " +
-                $"|| SERVER: {Visual.Server}, " +
-                $"|| DB: {Visual.Database}, " +
-                $"|| SQL_USER: {Visual.User}, " +
-                $"|| APPNAME: {Visual.Password}, " +
-                $"|| APPROLE: {Visual.AppName}, " +
-                $"|| RollAcceso: {Visual.AppRole}, " +
-                $"|| opcionMenu: {Visual.OpcionMenuId}, " +
-                $"|| estacionId: {Visual.EstacionId}, " 
+                $"|| SERVER: {Visual_Core.Server}, " +
+                $"|| DB: {Visual_Core.Database}, " +
+                $"|| SQL_USER: {Visual_Core.User}, " +
+                $"|| APPNAME: {Visual_Core.Password}, " +
+                $"|| APPROLE: {Visual_Core.AppName}, " +
+                $"|| RollAcceso: {Visual_Core.AppRole}, " +
+                $"|| opcionMenu: {Visual_Core.OpcionMenuId}, " +
+                $"|| estacionId: {Visual_Core.EstacionId}, " 
             );
 
-            return vacio(Visual.Server)
-                 || vacio(Visual.Database)
-                 || vacio(Visual.User)
-                 || vacio(Visual.Password)
-                 || vacio(Visual.AppName)
-                 || vacio(Visual.AppRole)
-                 || vacio(Visual.EstacionId.ToString())
-                 || Visual.OpcionMenuId <= 0;
+            return vacio(Visual_Core.Server)
+                 || vacio(Visual_Core.Database)
+                 || vacio(Visual_Core.User)
+                 || vacio(Visual_Core.Password)
+                 || vacio(Visual_Core.AppName)
+                 || vacio(Visual_Core.AppRole)
+                 || vacio(Visual_Core.EstacionId.ToString())
+                 || Visual_Core.OpcionMenuId <= 0;
         }
 
         private void BloquearEstacionRegEdit() {
@@ -249,8 +255,13 @@ namespace Apps_Visual.ObdAppGUI {
             home.panelX = pnlPanelCambios.Width;
             home.panelY = pnlPanelCambios.Height;
             home.InicializarTamanoYFuente();
-            pnlPanelCambios.Controls.Add(home.GetPanel());
-            pnlPanelCambios.Dock = DockStyle.Fill;
+
+            var p = home.GetPanel();
+            p.Dock = DockStyle.Fill;
+            pnlPanelCambios.Controls.Add(p);
+
+            //pnlPanelCambios.Controls.Add(home.GetPanel());
+            //pnlPanelCambios.Dock = DockStyle.Fill;
         }
         #endregion
 
@@ -264,12 +275,17 @@ namespace Apps_Visual.ObdAppGUI {
                 foreach (var proc in Process.GetProcessesByName("explorer"))
                     proc.Kill();
             }
+
+            var v = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "dev";
+
+            lblVerificaciónVehicularFoother.Text = $"Versión {v}";
         }
 
+        /* Control de teclas */
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
-            if (keyData == (Keys.Alt | Keys.F4)) {
-                return true; 
-            }
+            if (keyData == (Keys.Alt | Keys.F4) || keyData == Keys.Escape)
+                return true; // consumimos la tecla
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
         #endregion
@@ -283,8 +299,11 @@ namespace Apps_Visual.ObdAppGUI {
             // Validamos Verificacion 
             bool accesoValido = await ValidaCredencial();
 
+
             if (!accesoValido) {
                 SivevLogger.Information($"Acceso no valido: {accesoValido}");
+                MostrarMensaje($"Acceso no valido: {accesoValido} o Acceso Cancelado");
+                pnlHome();
                 return;
             }
             SivevLogger.Information($"Se guarda con el accesoId: {_AccesoIdObtenido}");
@@ -294,41 +313,59 @@ namespace Apps_Visual.ObdAppGUI {
                 SivevLogger.Information($"No pasa a prueba OBD la placa {_placa}: {pruebaVisual}");
                 return;
             }
-            Visual.PlacaId = _placa;
-            Visual.VerificacionId = _verificacionId;
+            Visual_Core.PlacaId = _placa;
+            Visual_Core.VerificacionId = _verificacionId;
 
             await Task.Delay(200);
 
             bool PruebaOBD = await PruebaOBDPanel();
             if (!PruebaOBD) {
-                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual.PlacaId}: {PruebaOBD}");
+                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual_Core.PlacaId}: {PruebaOBD}");
                 return;
             }
         }
         
 
         #region Credenciales :D
+        
         private async Task<bool> ValidaCredencial() {
             _tcsAcceso = new TaskCompletionSource<bool>();
+            bool ok = false;
 
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
                 
             pnlPanelCambios.Controls.Clear();
 
-            if (frmcredenciales == null || frmcredenciales.IsDisposed) {
-                frmcredenciales = new frmAuth();
-                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+            if (frmverification == null || frmverification.IsDisposed) {
+                Visual_48 = new DPFP_SMA.Models.VisualRegistroWindows {
+                    Server = Visual_Core.Server,
+                    Database = Visual_Core.Database,
+                    User = Visual_Core.User,
+                    Password = Visual_Core.Password,
+                    AppName = Visual_Core.AppName,
+                    AppRole = Visual_Core.AppRole,
+                    AppRolePassword = Visual_Core.AppRolePassword,
+                    OpcionMenuId = Visual_Core.OpcionMenuId,
+                    Relleno = Visual_Core.Relleno,
+                    UsuarioLinea = Visual_Core.UsuarioLinea,
+                    Ip = Visual_Core.Ip,
+                    Centro = Visual_Core.Centro,
+                    ServidorVersionesControlador = Visual_Core.ServidorVersionesControlador,
+                    Url = Visual_Core.Url,
+                    EstacionId = Visual_Core.EstacionId,
+                    RollVisualAcceso = Visual_Core.RollVisualAcceso,
+                    RollVisual = Visual_Core.RollVisual,
+                };
+                frmverification?.Dispose();
+                frmverification = new VerificationForm(visual: Visual_48);
+                frmverification.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                frmverification.ShowDialog(this);
             }
-            frmcredenciales.panelX = pnlPanelCambios.Width;
-            frmcredenciales.panelY = pnlPanelCambios.Height;
-            frmcredenciales.InicializarTamanoYFuente();
+            ok = await _tcsAcceso.Task;
 
-            frmcredenciales._Visual = Visual;
-            pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
-
-            bool ok = await _tcsAcceso.Task;
             return ok;
+            
         }
         #endregion
 
@@ -351,7 +388,7 @@ namespace Apps_Visual.ObdAppGUI {
             CapturaVisual.panelX = pnlPanelCambios.Width;
             CapturaVisual.panelY = pnlPanelCambios.Height;
             CapturaVisual.InicializarTamanoYFuente();
-            CapturaVisual._Visual = Visual;
+            CapturaVisual._Visual = Visual_Core;
 
             pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
             bool VerificacionesDisponibles = await CapturaVisual.InicializarAsync();
@@ -408,12 +445,12 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Clear();
 
             if (PruebaOBD == null || PruebaOBD.IsDisposed) {
-                PruebaOBD = new frmOBD(Visual);
+                PruebaOBD = new frmOBD(Visual_Core);
             }
             PruebaOBD._panelX = pnlPanelCambios.Width;
             PruebaOBD._panelY = pnlPanelCambios.Height;
             PruebaOBD.InicializarTamanoYFuente();
-            PruebaOBD._Visual = Visual;
+            PruebaOBD._Visual = Visual_Core;
 
             pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
             
@@ -441,27 +478,6 @@ namespace Apps_Visual.ObdAppGUI {
             }else {
                 return false;
             }
-                /*
-                if (ok) {
-                    pnlPanelCambios.Controls.Clear();
-                    CapturaVisual.Dispose();
-                    CapturaVisual = null;
-                    if (CapturaVisual == null || CapturaVisual.IsDisposed) {
-                        home = new HomeView();
-                        home.panelX = pnlPanelCambios.Width;
-                        home.panelY = pnlPanelCambios.Height;
-                        home.InicializarTamanoYFuente();
-                        pnlPanelCambios.Controls.Add(home.GetPanel());
-                        pnlPanelCambios.Dock = DockStyle.Fill;
-                        btnInspecionVisual.Enabled = true;
-                        btnInspecionVisual.Visible = true;
-                        btnApagar.Enabled = true;
-                        btnApagar.Visible = true;
-                    }
-                    return true;
-                }
-                */
-                return false;
         }
         #endregion
 
@@ -495,15 +511,44 @@ namespace Apps_Visual.ObdAppGUI {
 
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
-            if (ok) {
-                //_AccesoIdObtenido = accesoObtenido;
-                Visual.AccesoId = accesoObtenido;   
-                pnlPanelCambios.Controls.Clear();
-                frmcredenciales.Dispose();
-                frmcredenciales = null;
-            }
+
+            // 1) Completar el TCS SIEMPRE (ok o cancelado)
             _tcsAcceso?.TrySetResult(ok);
+
+            // 2) Guardar acceso solo si es válido
+            if (ok)
+                Visual_Core.AccesoId = accesoObtenido;
+
+            // 3) Todo lo de UI: limpiar SIEMPRE (ok o no ok)
+            if (!this.IsHandleCreated) return;
+
+            this.BeginInvoke(new Action(() =>
+            {
+                // Limpia el panel siempre
+                foreach (Control c in pnlPanelCambios.Controls)
+                    c.Dispose();
+                pnlPanelCambios.Controls.Clear();
+
+                // Cierra/limpia el dialog siempre
+                if (frmverification != null) {
+                    try { frmverification.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
+                    frmverification.Dispose();
+                    frmverification = null;
+                }
+
+                // Si estás usando frmcredenciales en algún flujo alterno, igual límpialo
+                if (frmcredenciales != null) {
+                    try { frmcredenciales.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
+                    frmcredenciales.Dispose();
+                    frmcredenciales = null;
+                }
+
+                // Si fue cancelado/incorrecto, regresa a Home aquí mismo (más confiable)
+                if (!ok)
+                    pnlHome();
+            }));
         }
+
         private string Leer(string nombrePropiedad) {
             string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
             if (string.IsNullOrWhiteSpace(cifrado))

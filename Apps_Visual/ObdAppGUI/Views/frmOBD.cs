@@ -267,6 +267,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                                 var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de OBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
                                 await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                                 MostrarMensaje($"Resultado de OBD: {error.Mensaje}");
+                                await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId:_Visual.EstacionId, _AccesoId:_Visual.AccesoId);
                             }
                             _tcsResultado?.TrySetResult(false);
                         } catch (Exception ex) {
@@ -302,11 +303,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 btnConectar.Text = "Conectar";
                 lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId}";
-                tlpPrincipal.Enabled = true;
-                tlpPrincipal.Visible = true;
+                tlpPrincipal.Enabled = false;
+                tlpPrincipal.Visible = false;
 
-                tlpMonitores.Enabled = true;
-                tlpMonitores.Visible = true;
+                tlpMonitores.Enabled = false;
+                tlpMonitores.Visible = false;
+
             }
         }
 

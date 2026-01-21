@@ -307,6 +307,7 @@
             // 
             // pnlLateralIzquierdoCentral
             // 
+            pnlLateralIzquierdoCentral.BackColor = Color.FromArgb(159, 34, 65);
             pnlLateralIzquierdoCentral.Controls.Add(btnInspecionVisual);
             pnlLateralIzquierdoCentral.Dock = DockStyle.Fill;
             pnlLateralIzquierdoCentral.Location = new Point(0, 0);
@@ -334,6 +335,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             ClientSize = new Size(819, 466);
+            ControlBox = false;
             Controls.Add(pnlPrincipal);
             MdiChildrenMinimizedAnchorBottom = false;
             MinimizeBox = false;

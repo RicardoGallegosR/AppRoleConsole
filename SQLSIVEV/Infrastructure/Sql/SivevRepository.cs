@@ -737,13 +737,19 @@ namespace SQLSIVEV.Infrastructure.Sql {
                         cmd.Parameters.Add(new SqlParameter("@siCentro", SqlDbType.SmallInt) { Value = A.Centro });
                         cmd.Parameters.Add(new SqlParameter("@vcNombreCpu", SqlDbType.VarChar, 25) { Value = A.NombreCpu });
                         cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.SmallInt) { Value = A.OpcionMenuId });
-                        //cmd.Parameters.Add(new SqlParameter("@dtFechaError", SqlDbType.DateTime) { Value = A.FechaError });
+                        cmd.Parameters.Add(new SqlParameter("@dtFechaError", SqlDbType.DateTime) { Value = A.FechaError });
                         cmd.Parameters.Add(new SqlParameter("@vcLibreria", SqlDbType.VarChar, 50) { Value = A.Libreria });
                         cmd.Parameters.Add(new SqlParameter("@vcClase", SqlDbType.VarChar, 50) { Value = A.Clase });
                         cmd.Parameters.Add(new SqlParameter("@vcMetodo", SqlDbType.VarChar, 50) { Value = A.Metodo });
                         cmd.Parameters.Add(new SqlParameter("@iCodigoErrorSql", SqlDbType.Int) { Value = A.CodigoErrorSql });
                         cmd.Parameters.Add(new SqlParameter("@iCodigoError", SqlDbType.Int) { Value = A.CodigoError });
-                        cmd.Parameters.Add(new SqlParameter("@vcDescripcionError", SqlDbType.VarChar, 1000) { Value = A.DescripcionError });
+                        cmd.Parameters.Add(
+                            new SqlParameter("@vcDescripcionError", SqlDbType.VarChar, 500) {
+                                Value = A.DescripcionError?.Length > 500
+                                    ? A.DescripcionError.Substring(0, 500)
+                                    : (object?)A.DescripcionError ?? DBNull.Value
+                            }
+                        );
                         cmd.Parameters.Add(new SqlParameter("@iLineaCodigo", SqlDbType.Int) { Value = A.LineaCodigo });
                         cmd.Parameters.Add(new SqlParameter("@iLastDllError", SqlDbType.Int) { Value = A.LastDllError });
                         cmd.Parameters.Add(new SqlParameter("@vcSourceError", SqlDbType.VarChar, 50) { Value = A.SourceError });
