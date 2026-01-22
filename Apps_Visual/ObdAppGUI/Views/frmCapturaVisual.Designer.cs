@@ -59,7 +59,7 @@
             // 
             // pnlPrincipal
             // 
-            pnlPrincipal.BackColor = Color.White;
+            pnlPrincipal.BackColor = Color.IndianRed;
             pnlPrincipal.Controls.Add(pnlCentral);
             pnlPrincipal.Controls.Add(pnlTopListadoVisual);
             pnlPrincipal.Dock = DockStyle.Fill;

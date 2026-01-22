@@ -44,7 +44,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private Guid _verificacionId = Guid.Empty;
         public byte _protocoloVerificacíon;
 
-        public int panelX = 0, panelY = 0;
+        public int panelX = 450, panelY = 450;
 
         private byte tiTaponCombustible = 0, tiTaponAceite = 0, tiBayonetaAceite = 0, tiPortafiltroAire = 0,
              tiTuboEscape = 0, tiFugasMotorTrans = 0, tiNeumaticos = 0, tiComponentesEmisiones = 0,
@@ -240,6 +240,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         public async Task<bool> InicializarAsync() {
+            SivevLogger.Information("Entra a InicializarAsync()");
             lblTitulo.Visible = true;
             lblTitulo.Text = "Buscando Verificaciones disponibles";
             bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
@@ -291,8 +292,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     return false;
                 }
             } else {
-                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}");
-                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}");
+                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}, Acceso: {_Visual.AccesoId.ToString().ToUpper()}");
+                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}, Acceso: {_Visual.AccesoId.ToString().ToUpper()}");
                 foreach (Control c in pnlPrincipal.Controls)
                     c.Dispose();
                 pnlPrincipal.Controls.Clear();
@@ -712,7 +713,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private async void frmCapturaVisual_Load(object sender, EventArgs e) {
-
+            //Close();
         }
         #endregion
 

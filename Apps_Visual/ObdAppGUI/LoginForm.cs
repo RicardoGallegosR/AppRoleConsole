@@ -1,5 +1,6 @@
 ﻿using Apps_Visual.ObdAppGUI.Views;
 using Apps_Visual.UI.Theme;
+using DPFP_SMA.Forms.Comun;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic.Devices;
@@ -19,6 +20,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,8 +28,6 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-using DPFP_SMA.Forms.Comun;
-using System.Reflection;
 
 //using DPFP_SMA.Models;
 
@@ -276,9 +276,9 @@ namespace Apps_Visual.ObdAppGUI {
                     proc.Kill();
             }
 
-            var v = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "dev";
+            //var v = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "dev";
 
-            lblVerificaciónVehicularFoother.Text = $"Versión {v}";
+            //lblVerificaciónVehicularFoother.Text = $"Versión {v}";
         }
 
         /* Control de teclas */
@@ -306,7 +306,9 @@ namespace Apps_Visual.ObdAppGUI {
                 pnlHome();
                 return;
             }
-            SivevLogger.Information($"Se guarda con el accesoId: {_AccesoIdObtenido}");
+            //Visual_Core.AccesoId = accesoValido;
+            SivevLogger.Information($"Se guarda con el accesoId: {Visual_Core.AccesoId}");
+            
                 
             bool pruebaVisual = await ListadoVisual();
             if (!pruebaVisual) {
@@ -324,10 +326,10 @@ namespace Apps_Visual.ObdAppGUI {
                 return;
             }
         }
-        
+
 
         #region Credenciales :D
-        
+        /*
         private async Task<bool> ValidaCredencial() {
             _tcsAcceso = new TaskCompletionSource<bool>();
             bool ok = false;
@@ -367,18 +369,92 @@ namespace Apps_Visual.ObdAppGUI {
             return ok;
             
         }
+        */
+
+
+
+        /*
+        private async Task<bool> ValidaCredencial() {
+            _tcsAcceso = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Limpia panel actual
+            foreach (Control c in pnlPanelCambios.Controls) c.Dispose();
+            pnlPanelCambios.Controls.Clear();
+
+            // Siempre crea un dialog nuevo (es lo más estable en WinForms)
+            Visual_48 = new DPFP_SMA.Models.VisualRegistroWindows {
+                Server = Visual_Core.Server,
+                Database = Visual_Core.Database,
+                User = Visual_Core.User,
+                Password = Visual_Core.Password,
+                AppName = Visual_Core.AppName,
+                AppRole = Visual_Core.AppRole,
+                AppRolePassword = Visual_Core.AppRolePassword,
+                OpcionMenuId = Visual_Core.OpcionMenuId,
+                Relleno = Visual_Core.Relleno,
+                UsuarioLinea = Visual_Core.UsuarioLinea,
+                Ip = Visual_Core.Ip,
+                Centro = Visual_Core.Centro,
+                ServidorVersionesControlador = Visual_Core.ServidorVersionesControlador,
+                Url = Visual_Core.Url,
+                EstacionId = Visual_Core.EstacionId,
+                RollVisualAcceso = Visual_Core.RollVisualAcceso,
+                RollVisual = Visual_Core.RollVisual,
+            };
+
+            using (var dlg = new VerificationForm(visual: Visual_48)) {
+                dlg.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+
+                // Si el usuario cierra la ventana sin autenticarse, NO te quedes colgado
+                dlg.FormClosed += (_, __) => _tcsAcceso?.TrySetResult(false);
+
+                dlg.ShowDialog(this);
+
+                // Espera resultado (ya garantizado que termina)
+                return await _tcsAcceso.Task;
+            }
+        }
+        //*/
+        //*
+        private async Task<bool> ValidaCredencial() {
+            SivevLogger.Information("Inicializa ValidaCredencial()");
+            _tcsAcceso = new TaskCompletionSource<bool>();
+
+            foreach (Control c in pnlPanelCambios.Controls)
+                c.Dispose();
+
+            pnlPanelCambios.Controls.Clear();
+
+            if (frmcredenciales == null || frmcredenciales.IsDisposed) {
+                frmcredenciales = new frmAuth();
+                frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+            }
+            frmcredenciales.panelX = pnlPanelCambios.Width;
+            frmcredenciales.panelY = pnlPanelCambios.Height;
+            frmcredenciales.InicializarTamanoYFuente();
+
+            frmcredenciales._Visual = Visual_Core;
+            pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
+            
+
+            bool ok = await _tcsAcceso.Task;
+            return ok;
+        }
+        //*/
         #endregion
 
         #region Prueba Visual
+
         private async Task<bool> ListadoVisual() {
+            SivevLogger.Information($"Entra a listado Visual con el Acceso: {Visual_Core.AccesoId.ToString().ToUpper()}");
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
 
-            
+
             if (CapturaVisual == null || CapturaVisual.IsDisposed) {
                 CapturaVisual = new frmCapturaVisual();
-
+                SivevLogger.Information("Inicializa los SetCallbacks");
                 CapturaVisual.SetCallbacks(
                     placa => { _placa = placa; },
                     verId => { _verificacionId = verId; },
@@ -392,7 +468,7 @@ namespace Apps_Visual.ObdAppGUI {
 
             pnlPanelCambios.Controls.Add(CapturaVisual.GetPanel());
             bool VerificacionesDisponibles = await CapturaVisual.InicializarAsync();
-            
+
             if (!VerificacionesDisponibles) {
                 pnlPanelCambios.Controls.Clear();
                 CapturaVisual.Dispose();
@@ -405,9 +481,6 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
-                    btnInspecionVisual.Visible = true;
-                    btnApagar.Enabled = true;
-                    btnApagar.Visible = true;
                 }
                 return false;
             }
@@ -425,9 +498,6 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
-                    btnInspecionVisual.Visible = true;
-                    btnApagar.Enabled = true;
-                    btnApagar.Visible = true;
                 }
                 return false;
             }
@@ -484,7 +554,7 @@ namespace Apps_Visual.ObdAppGUI {
 
         #region Apagar
         private void btnApagar_Click(object sender, EventArgs e) {
-            var result = MessageBox.Show(
+            var result = System.Windows.Forms.MessageBox.Show(
                 "¿Desea apagar la aplicación?",
                 "Confirmar salida",
                 MessageBoxButtons.YesNo,
@@ -509,46 +579,69 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
 
+        /// <summary>
+        /// GENERA UN BUG REVISAR A DETALLE
+        /// </summary>
+        /// <param name="accesoObtenido"></param>
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
+            if (ok) {
+                //_AccesoIdObtenido = accesoObtenido;
+                Visual_Core.AccesoId = accesoObtenido;
+                pnlPanelCambios.Controls.Clear();
+                frmcredenciales.Dispose();
+                frmcredenciales = null;
+                //frmverification.Close();
+                //frmverification=null;
+            }
+            _tcsAcceso?.TrySetResult(ok);
+        }
 
-            // 1) Completar el TCS SIEMPRE (ok o cancelado)
+        /*
+        private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
+            bool ok = accesoObtenido != Guid.Empty;
+            //Visual_Core.AccesoId = accesoObtenido;
             _tcsAcceso?.TrySetResult(ok);
 
-            // 2) Guardar acceso solo si es válido
-            if (ok)
+            if (ok) {
                 Visual_Core.AccesoId = accesoObtenido;
+                SivevLogger.Information($"Guardar acceso solo si es válido Visual_Core.AccesoId: {Visual_Core.AccesoId}, accesoObtenido {accesoObtenido}");
+            }
+            
+            SivevLogger.Information($"Acceso para Visual_Core = {Visual_Core.AccesoId}");
 
-            // 3) Todo lo de UI: limpiar SIEMPRE (ok o no ok)
             if (!this.IsHandleCreated) return;
 
-            this.BeginInvoke(new Action(() =>
-            {
-                // Limpia el panel siempre
+            this.BeginInvoke(new Action(() => {
                 foreach (Control c in pnlPanelCambios.Controls)
                     c.Dispose();
                 pnlPanelCambios.Controls.Clear();
 
+                //*
                 // Cierra/limpia el dialog siempre
                 if (frmverification != null) {
                     try { frmverification.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
                     frmverification.Dispose();
                     frmverification = null;
                 }
-
+                //
                 // Si estás usando frmcredenciales en algún flujo alterno, igual límpialo
                 if (frmcredenciales != null) {
                     try { frmcredenciales.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
+                    SivevLogger.Information("Cierra frmcredenciales");
                     frmcredenciales.Dispose();
                     frmcredenciales = null;
                 }
 
                 // Si fue cancelado/incorrecto, regresa a Home aquí mismo (más confiable)
-                if (!ok)
+                if (!ok) {
+                    SivevLogger.Information("Fue cancelado en Frmcredenciales_AccesoObtenido  o salio algo mal asi que regresamos a home");
                     pnlHome();
+                }
+                   
             }));
         }
-
+        */
         private string Leer(string nombrePropiedad) {
             string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
             if (string.IsNullOrWhiteSpace(cifrado))
