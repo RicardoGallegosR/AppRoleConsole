@@ -379,7 +379,6 @@
 
         private Panel pnlPrincipal;
         private Panel pnlTopListadoVisual;
-        private Label lblTitulo;
         private Panel pnlCentral;
         private Panel pnlCentralFooter;
         private SplitContainer spcPrincipal;
@@ -399,5 +398,6 @@
         private Label lblOdometro;
         private TextBox txbOdometro;
         private Panel pnlRellenoOdometro;
+        public Label lblTitulo;
     }
 }

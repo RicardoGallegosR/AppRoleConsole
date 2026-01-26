@@ -113,7 +113,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         //0104
         public int? WarmUpsDesdeBorrado { get; set; }
 
-        //101C
+        //011C
         public string? NormativaObdVehiculo { get; set; }
 
         //0105

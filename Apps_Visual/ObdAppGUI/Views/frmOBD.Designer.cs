@@ -1873,17 +1873,17 @@
             // 
             // lblLecturaOBD
             // 
-            lblLecturaOBD.AutoSize = true;
             lblLecturaOBD.Dock = DockStyle.Fill;
             lblLecturaOBD.FlatStyle = FlatStyle.Flat;
-            lblLecturaOBD.Font = new Font("Segoe UI Semibold", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblLecturaOBD.Font = new Font("Segoe UI Semibold", 24F, FontStyle.Bold);
             lblLecturaOBD.ForeColor = Color.Black;
+            lblLecturaOBD.ImageAlign = ContentAlignment.BottomLeft;
             lblLecturaOBD.Location = new Point(0, 0);
             lblLecturaOBD.Name = "lblLecturaOBD";
-            lblLecturaOBD.Size = new Size(401, 65);
+            lblLecturaOBD.Size = new Size(1128, 126);
             lblLecturaOBD.TabIndex = 0;
             lblLecturaOBD.Text = "Diagnóstico OBD";
-            lblLecturaOBD.TextAlign = ContentAlignment.MiddleCenter;
+            lblLecturaOBD.TextAlign = ContentAlignment.BottomLeft;
             // 
             // frmOBD
             // 
@@ -1904,7 +1904,6 @@
             tlpMonitores.ResumeLayout(false);
             tlpMonitores.PerformLayout();
             pnlTopPrincipal.ResumeLayout(false);
-            pnlTopPrincipal.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1913,7 +1912,6 @@
         private Panel pnlPrincipal;
         private Panel pnlTopPrincipal;
         private Label lblLecturaOBD;
-        private Button btnConectar;
         private TableLayoutPanel tlpPrincipal;
         private Label lblVin;
         private Label lblProtocoloOBD;
@@ -2057,5 +2055,6 @@
         private Label IntFuelType;
         private Label lblPids_41_60;
         private Label lblrPids_41_60;
+        public Button btnConectar;
     }
 }

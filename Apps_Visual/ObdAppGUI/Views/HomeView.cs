@@ -41,8 +41,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmAuth_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
             ///*
-            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 70f));
-            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 60f));
+            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
+            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 30f));
             //*/
 

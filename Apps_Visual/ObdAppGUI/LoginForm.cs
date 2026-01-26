@@ -73,6 +73,7 @@ namespace Apps_Visual.ObdAppGUI {
                         BloquearEstacionSqlTest();
                     } else {
                         SivevLogger.Information("Se ha revisado el registro de windows y las configuraciones son correctas, problemas por aqui no son :)");
+                        btnInspecionVisual.Focus();
                         pnlHome();
                     }
                 }
@@ -132,6 +133,7 @@ namespace Apps_Visual.ObdAppGUI {
             btnInspecionVisual.Visible = false;
             btnApagar.Enabled = true;
             btnApagar.Visible = true;
+            btnApagar.Focus();
             btnInspecionVisual.ForeColor = AppColors.BloqueoPorSQLTexto;
             pnlLateralIzquierdoAbajo.BackColor = AppColors.BloqueoPorSQLPanel;
             btnApagar.ForeColor = AppColors.BloqueoPorSQLTexto;
@@ -242,6 +244,9 @@ namespace Apps_Visual.ObdAppGUI {
             SivevLogger.Information("pnlHome se accede para el inicio del panel de home");
             btnInspecionVisual.Enabled = true;
             btnInspecionVisual.Visible = true;
+            btnInspecionVisual?.Select();
+            btnInspecionVisual.Focus();
+
             btnApagar.Enabled = true;
             btnApagar.Visible = true;
             SivevLogger.Information("Se habilita btnInspecionVisual");
@@ -435,7 +440,17 @@ namespace Apps_Visual.ObdAppGUI {
 
             frmcredenciales._Visual = Visual_Core;
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
-            
+            pnlPanelCambios.Select();
+
+            pnlPanelCambios.BeginInvoke(new Action(() =>  {
+                try {
+                    frmcredenciales.txbCredencial?.Select();
+                    frmcredenciales.txbCredencial?.Focus();
+                    SivevLogger.Information("Focus aplicado a txbCredencial");
+                } catch (Exception ex) {
+                    SivevLogger.Error($"No se pudo aplicar focus a txbCredencial {ex}");
+                }
+            }));
 
             bool ok = await _tcsAcceso.Task;
             return ok;
@@ -454,6 +469,7 @@ namespace Apps_Visual.ObdAppGUI {
 
             if (CapturaVisual == null || CapturaVisual.IsDisposed) {
                 CapturaVisual = new frmCapturaVisual();
+                CapturaVisual.lblTitulo.Focus();
                 SivevLogger.Information("Inicializa los SetCallbacks");
                 CapturaVisual.SetCallbacks(
                     placa => { _placa = placa; },
@@ -481,9 +497,21 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
+                    btnInspecionVisual.Visible = true;
+                    btnInspecionVisual?.Select();
+                    btnInspecionVisual.Focus();
                 }
                 return false;
             }
+            pnlPanelCambios.BeginInvoke(new Action(() => {
+                try {
+                    CapturaVisual.lblTitulo?.Select();
+                    CapturaVisual.lblTitulo?.Focus();
+                    SivevLogger.Information("Focus aplicado a txbCredencial");
+                } catch (Exception ex) {
+                    SivevLogger.Error($"No se pudo aplicar focus a txbCredencial {ex}");
+                }
+            }));
             bool ok = await CapturaVisual.EsperarResultadoAsync();
 
             if (!_RealizarPruebaOBD) {
@@ -498,6 +526,9 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Controls.Add(home.GetPanel());
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
+                    btnInspecionVisual.Visible = true;
+                    btnInspecionVisual?.Select();
+                    btnInspecionVisual.Focus();
                 }
                 return false;
             }
@@ -521,9 +552,20 @@ namespace Apps_Visual.ObdAppGUI {
             PruebaOBD._panelY = pnlPanelCambios.Height;
             PruebaOBD.InicializarTamanoYFuente();
             PruebaOBD._Visual = Visual_Core;
-
+           
             pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
-            
+
+            pnlPanelCambios.BeginInvoke(new Action(() => {
+                this.Activate();
+                PruebaOBD.btnConectar.Visible = true;
+                PruebaOBD.btnConectar.Enabled = true;
+                if (!PruebaOBD.btnConectar.Focus())
+                    SivevLogger.Warning("Focus() devolvió false en PruebaOBD.btnConectar");
+
+                SivevLogger.Information($"CanFocus={PruebaOBD.btnConectar.CanFocus}");
+            }));
+
+
             bool ok = await PruebaOBD.EsperarResultadoAsync();
 
             pnlPanelCambios.Controls.Clear();
@@ -536,12 +578,19 @@ namespace Apps_Visual.ObdAppGUI {
                 home.InicializarTamanoYFuente();
                 pnlPanelCambios.Controls.Add(home.GetPanel());
                 pnlPanelCambios.Dock = DockStyle.Fill;
+                
                 btnInspecionVisual.Enabled = true;
                 btnInspecionVisual.Visible = true;
+                btnInspecionVisual?.Select();
+                btnInspecionVisual.Focus();
+
                 btnApagar.Enabled = true;
                 btnApagar.Visible = true;
-            }
 
+            }
+            PruebaOBD.Controls.Clear();
+            PruebaOBD.Dispose();
+            PruebaOBD = null;
             if (ok) {
                 
                 return true;
@@ -562,8 +611,8 @@ namespace Apps_Visual.ObdAppGUI {
                 MessageBoxDefaultButton.Button2  // ← "No" por defecto
             );
             if (result == DialogResult.Yes) {
-                Application.Exit();
-                //Process.Start("shutdown", "/s /t 0");
+                //Application.Exit();
+                Process.Start("shutdown", "/s /t 0");
             }
         }
         #endregion
@@ -596,6 +645,71 @@ namespace Apps_Visual.ObdAppGUI {
             }
             _tcsAcceso?.TrySetResult(ok);
         }
+        /// <summary>
+        /// Posible correccion pero aun no la ingreso
+        /// </summary>
+        /// <param name="nombrePropiedad"></param>
+        /// <returns></returns>
+
+        /*
+         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido){
+            // 1) Si el evento viene de otro hilo, brinca al hilo UI
+            if (this.InvokeRequired)   {
+                this.BeginInvoke(new Action(() => Frmcredenciales_AccesoObtenido(accesoObtenido)));
+                return;
+            }
+
+            bool ok = accesoObtenido != Guid.Empty;
+
+            if (ok)    {
+                // 2) Primero guarda el acceso
+                Visual_Core.AccesoId = accesoObtenido;
+
+                // 3) Completa el TCS ANTES de destruir UI (para no quedar colgado si algo falla al limpiar)
+                _tcsAcceso?.TrySetResult(true);
+
+                // 4) Limpieza UI: hazla "después" del ciclo actual de mensajes (evita re-entrancy)
+                this.BeginInvoke(new Action(() =>        {
+                    try            {
+                        // Mejor liberar controles (evitas fugas)
+                        foreach (Control c in pnlPanelCambios.Controls)
+                            c.Dispose();
+
+                        pnlPanelCambios.Controls.Clear();
+
+                        if (frmcredenciales != null && !frmcredenciales.IsDisposed)                {
+                            frmcredenciales.AccesoObtenido -= Frmcredenciales_AccesoObtenido;
+                            frmcredenciales.Dispose();
+                        }
+
+                        frmcredenciales = null;
+                    } catch (Exception ex) {
+                        SivevLogger.Error(ex, "Error limpiando UI tras AccesoObtenido");
+                        // No regresamos false porque el acceso ya fue válido y el flujo debe seguir.
+                    }
+                }));
+
+                return;
+            }
+
+            // Acceso inválido / cancelado
+            Visual_Core.AccesoId = Guid.Empty;
+            _tcsAcceso?.TrySetResult(false);
+        }
+
+         */
+
+
+
+
+
+
+
+
+
+
+
+
 
         /*
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {

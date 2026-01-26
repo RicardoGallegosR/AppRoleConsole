@@ -192,8 +192,8 @@
         private Label lblTituloLogin;
         private Label lblCredencial;
         private Label lblPassword;
-        private TextBox txbCredencial;
         private TextBox txbPassword;
         private Panel panel1;
+        public TextBox txbCredencial;
     }
 }

@@ -148,6 +148,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _mapCvToCheckBox[24] = cbComponentesEmisiones;
             _mapCvToCheckBox[32] = cbComponentesEmisiones;
 
+
+            // REVISAR EL 6
+            _mapCvToCheckBox[6] = cbFugasMotorTrans;
             _mapCvToCheckBox[15] = cbFugasMotorTrans;
             _mapCvToCheckBox[22] = cbFugasMotorTrans;
             _mapCvToCheckBox[30] = cbFugasMotorTrans;
@@ -171,6 +174,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _mapCvToCheckBox[27] = cbTaponAceite;
 
             _mapCvToCheckBox[10] = cbMotorGobernado;
+            
+            
+            _mapCvToCheckBox[7] = cbNeumaticos;
+            _mapCvToCheckBox[31] = cbNeumaticos;
+
+
+
+
         }
         #endregion
 
@@ -478,7 +489,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             ///*
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 50f));
-            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 30f));
+            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
             //*/
 
 
@@ -558,7 +569,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblOdometro.Font = new Font(
                 lblOdometro.Font.FontFamily,
-                Titulo2,
+                Titulo3,
                 lblOdometro.Font.Style
             );
 

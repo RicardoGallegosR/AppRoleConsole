@@ -282,19 +282,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                     }
                 _tcsResultado?.TrySetResult(true);
-                //*/
-                /*} 
-                 else {
-                    var repo = new SivevRepository();
-                    try {
-                        var bitacora = NuevaBitacora( V:_Visual, descripcion: e.ToString(), codigoSql: 0, codigo: 0);
-                        await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
-                    } catch (Exception logEx) {
-                        SivevLogger.Warning($"Falló la búsqueda de verificaciones en catch, GetAccesoSQLVerificaciones: {logEx.Message}");
-                    }
-                    MostrarMensaje($"No existe Conexion con OBD");
-                    SivevLogger.Error($"Error No existe Conexion con OBD");
-                }//*/
 
             } finally {
                 btnConectar.Enabled = true;
@@ -321,6 +308,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private void ResetForm() {
             //*
+            btnConectar?.Select();
+            btnConectar?.Focus();
+
+
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");
@@ -393,22 +384,22 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region Tamaño de letra variable
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
-            /*
+            
             float factor = (float)this.Width / _formSizeInicial.Width;
             
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 40f));
-            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 24f));
+            float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 30f));
             float Titulo4 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
             
 
             lblLecturaOBD.Font = new Font(
                 lblLecturaOBD.Font.FontFamily,
-                Titulo1,
+                Titulo3,
                 lblLecturaOBD.Font.Style
             );
 
-
+            /*
             pnlTopPrincipal.Font = new Font(
                 pnlTopPrincipal.Font.FontFamily,
                 Titulo1,
