@@ -220,6 +220,48 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             } catch { return null; }
         }
 
+        public uint? ReadOdometer01A6(int timeoutMs = 5000) {
+            var resp = ExecRaw("01A6", timeoutMs);
+
+            // Limpieza mínima de basura típica de ELM
+            var compact = resp
+                                .Replace(" ", "")
+                                .Replace("\n", "")
+                                .Replace("\r", "")
+                                .Replace(">", "")
+                                .Replace("SEARCHING...", "", StringComparison.OrdinalIgnoreCase);
+
+            // Si no hay data
+            if (compact.IndexOf("NODATA", StringComparison.OrdinalIgnoreCase) >= 0)
+                return null;
+
+            // Buscamos "41A6" (respuesta de modo 01)
+            var idx = compact.IndexOf("41A6", StringComparison.OrdinalIgnoreCase);
+
+            // Necesitamos 4 bytes después de 41A6 => 8 hex chars
+            // Total requerido desde idx: "41A6" (4 chars) + "AABBCCDD" (8 chars) = 12 chars
+            if (idx < 0 || compact.Length < idx + 12)
+                return null;
+
+            try {
+                // Extrae A B C D (cada uno 1 byte en hex)
+                byte A = Convert.ToByte(compact.Substring(idx + 4, 2), 16);
+                byte B = Convert.ToByte(compact.Substring(idx + 6, 2), 16);
+                byte C = Convert.ToByte(compact.Substring(idx + 8, 2), 16);
+                byte D = Convert.ToByte(compact.Substring(idx + 10, 2), 16);
+
+                // Ensamble big-endian: A es el MSB
+                uint odoKm = ((uint)A << 24) | ((uint)B << 16) | ((uint)C << 8) | D;
+
+                SivevLogger.Information($"PID 01A6 odómetro: {odoKm} km (bytes: {A:X2} {B:X2} {C:X2} {D:X2})");
+                return odoKm;
+            } catch (Exception ex) {
+                SivevLogger.Warning($"Error leyendo PID 01A6. Resp: {resp}.- {ex}");
+                return null;
+            }
+        }
+
+
 
         public short? ReadSpeedKmh() {
             var resp = ExecRaw("010D", 3_000);
@@ -322,18 +364,23 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         public List<string> ReadCvns() {
             // Configuración similar a ReadVin (modo 09 “limpio”)
             ExecRaw("ATCAF1", 600);  // auto-format
-            ExecRaw("ATH0", 600);  // sin headers
+            ExecRaw("ATH1", 600);  // con headers
             ExecRaw("ATS0", 600);  // sin espacios
             ExecRaw("ATAT1", 600);  // adaptive timing
+            ExecRaw("ATE0", 600);  // eco off
             ExecRaw("ATST96", 600);  // un poco más de espera
             //////////////////////////////////////////////////////////////////////////////////////////
             var resp = ExecRaw("0906", 10_000); // Modo 09, PID 06 (CVN)
 
             if (string.IsNullOrWhiteSpace(resp))
                 return new List<string>();
+            if (resp.IndexOf("NO DATA", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                resp.IndexOf("STOPPED", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                resp.IndexOf("UNABLE", StringComparison.OrdinalIgnoreCase) >= 0)
+                return new List<string>();
 
             // Tokeniza en bytes hex de 2 dígitos
-            var hex = Regex.Matches(resp, "[0-9A-Fa-f]{2]")
+            var hex = Regex.Matches(resp,"(?i)[0-9a-f]{2}")
                    .Cast<Match>()
                    .Select(m => m.Value.ToUpperInvariant())
                    .ToList();
@@ -343,7 +390,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             for (int i = 0; i + 3 < hex.Count; i++) {
                 // Buscamos bloques tipo: 49 06 01 / 02 / 03...
                 if (hex[i] == "49" && hex[i + 1] == "06" &&
-                    Regex.IsMatch(hex[i + 2], "^0[0-9A-F]$")) // "01","02","03"...
+                    Regex.IsMatch(hex[i + 2], "^[0-9A-F]{2}$")) // "01","02","03"...
                 {
                     int j = i + 3; // aquí empiezan los bytes de CVN
                     var bytesCvn = new List<string>();
@@ -352,14 +399,18 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     while (j < hex.Count &&
                           !(j + 2 < hex.Count &&
                             hex[j] == "49" && hex[j + 1] == "06" &&
-                            Regex.IsMatch(hex[j + 2], "^0[0-9A-F]$"))) {
+                            Regex.IsMatch(hex[j + 2], "^[0-9A-F]{2}$"))) {
                         bytesCvn.Add(hex[j]);
                         j++;
                     }
 
-                    if (bytesCvn.Count > 0) {
+
+                    // CVN típico: 4 bytes (8 hex). Toma solo los primeros 4 bytes.
+                    //if (bytesCvn.Count > 0) {
+                    if (bytesCvn.Count >= 4) {
                         // CVN como string hex continuo, ej: "1791BC82"
-                        var cvn = string.Concat(bytesCvn);
+                        //var cvn = string.Concat(bytesCvn);
+                        var cvn = string.Concat(bytesCvn.Take(4)); // ej: "1791BC82"
                         cvnList.Add(cvn);
                     }
 
@@ -386,7 +437,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
 
         // -- Helper genérico para PIDs 01xx que devuelven A y B (2 bytes) --
-        private (int A, int B)? ReadPidAB(string cmd, int timeoutMs = 3000) {
+        private (int A, int B)? 
+            ReadPidAB(string cmd, int timeoutMs = 3000) {
             var resp = ExecRaw(cmd, timeoutMs);
             var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "");
             // cmd "0131" -> buscamos "41 31"
@@ -397,6 +449,19 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 int A = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
                 int B = Convert.ToInt32(compact.Substring(idx + 6, 2), 16);
                 return (A, B);
+            } catch { return null; }
+        }
+        private int? ReadPidA(string cmd, int timeoutMs = 3000) {
+            var resp = ExecRaw(cmd, timeoutMs);
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace(">", "");
+            if (compact.IndexOf("NODATA", StringComparison.OrdinalIgnoreCase) >= 0) return null;
+
+            var pid = "41" + cmd.Substring(2);
+            var idx = compact.IndexOf(pid, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0 || compact.Length < idx + 6) return null; // "41PPAA" => 6 chars desde idx
+
+            try {
+                return Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
             } catch { return null; }
         }
 
@@ -439,7 +504,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // Solicitados por Toñin Cara de pan :D
         public int? TiempoTotalSegundosOperacionMotor() {
-            var ab = ReadPidAB("011F", 3000);
+            var ab = ReadPidAB("011F", 5_000);
             SivevLogger.Information($"PID 011F Valor ab.HasValue: {ab.HasValue} segundos");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
@@ -461,14 +526,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // PID 011C - OBD requirements to which vehicle is designed
         //public string? NormaObd { get; init; }
 
-        public string? NormativaObdVehiculo() {
-            var ab = ReadPidAB("011C", 9_000);
-            if (!ab.HasValue)
-                return null;
-
-            int A = ab.Value.A;
-            SivevLogger.Information($"PID 011C NormativaObdVehiculo: {A}");
-
+        public string? NormativaObdVehiculo(int? A) {
             return A switch {
                 0x01 => "OBD-II según CARB",
                 0x02 => "OBD según EPA",
@@ -487,10 +545,18 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             };
         }
 
+        public int? intNormativaObdVehiculo() {
+            var ab = ReadPidAB("011C", 9_000);
+            if (!ab.HasValue)
+                return null;
+            int A = ab.Value.A;
+            return A;
+        }
+
         // PID 0105 - Temperatura del refrigerante (°C)
         // public int? CoolantTempC { get; init; }
         public short? TemperaturaRefrigeranteC() {
-            var ab = ReadPidAB("0105", 3000);
+            var ab = ReadPidAB("0105", 5_000);
             if (!ab.HasValue)
                 return null;
 
@@ -538,6 +604,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         // PID 010F - Temperatura del aire de admisión (°C)
         // public int? IatC { get; init; }
+        /*
         public short? TemperaturaAireAdmisionC() {
             var ab = ReadPidAB("010F", 3000);
             if (!ab.HasValue)
@@ -547,7 +614,20 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             int tempC = A - 40;
             return (short)tempC;
+        }*/
+        public short? TemperaturaAireAdmisionC() {
+            var A = ReadPidA("010F", 3000);
+            if (!A.HasValue) return null;
+
+            int tempC = A.Value - 40;
+
+            // Validación rápida por si viene basura
+            if (tempC < -40 || tempC > 215) return null;
+
+            return (short)tempC;
         }
+
+
 
         // PID 0110 - MAF (Mass Air Flow) en g/s
         //public double? MafGs  { get; init; }
@@ -674,14 +754,9 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         //public int? BarometricPressure { get; init; }
 
         public short? PresionBarometrica() {
-            var ab = ReadPidAB("0133", 4000);
-            if (!ab.HasValue)
-                return null;
-
-            int A = ab.Value.A;
-
-            // A ya está en kPa
-            return (short)A;
+            var A = ReadPidA("0133", 4000);
+            if (!A.HasValue) return null;
+            return (short)A.Value; // kPa
         }
 
 
@@ -771,6 +846,24 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return hex;
         }
 
+
+        public int? CalibIdMessageCount() {
+            var resp = ExecRaw("0903", 3000);
+            if (string.IsNullOrWhiteSpace(resp))
+                return null;
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").ToUpperInvariant();
+            int idx = compact.IndexOf("4903", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+                return null;
+            if (compact.Length < idx + 6)
+                return null;
+
+            string hex = compact.Substring(idx + 4, 2);
+            return Convert.ToInt32(hex, 16);
+        }
+
+
+
         public int? EcuAddressInt() {
             var hex = EcuAddress();
             if (string.IsNullOrWhiteSpace(hex))
@@ -804,6 +897,15 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
          */
 
 
+        // PID 017F - Tiempo que el motor ha estado en marcha
+        public int? TiempoMotorEnMarchaSeg() {
+            var ab = ReadPidAB("017F", 3000);
+            if (!ab.HasValue) return null;
+
+            int A = ab.Value.A;
+            int B = ab.Value.B;
+            return (A << 8) | B; // 256*A + B
+        }
         // PID 015F - Requisitos de emisiones del vehículo
         // public byte? EmissionCode { get; init; }   // valor A crudo
         public byte? RequisitosEmisionesVehiculo() {
@@ -898,10 +1000,9 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 -> 0 "Uso normal desde hace tiempo".
         */
         public int? WarmUpsSinceCodesCleared() {
-            var ab = ReadPidAB("0130", 3000);
-            return ab.HasValue ? (int?)ab.Value.A : null;
+            var a = ReadPidA("0130", 4000);
+            return a.HasValue ? (int?)a.Value : null;
         }
-
 
         // Calibration ID(s) (modo 09 PID 04) — puede devolver 1..N IDs
         public string[] ReadCalibrationIds() {
@@ -1024,6 +1125,100 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             public Dictionary<string, (bool available, bool complete)> Monitors { get; init; } =
                 new(StringComparer.OrdinalIgnoreCase);
         }
+
+        /// <summary>
+        /// PID 0905 (Service 09 InfoType 05):
+        /// MessageCount de CVN. Indica cuántos mensajes/entradas de CVN vendrán al consultar 0906.
+        /// Devuelve null si no hay dato.
+        /// </summary>
+        public int? ReadCvnMessageCount(int timeoutMs = 4000) {
+            var a = ReadPidA("0905", timeoutMs); // 49 05 XX
+            return a.HasValue ? (int?)a.Value : null;
+        }
+
+        /// <summary>
+        /// PID 0906 (Service 09 InfoType 06):
+        /// Lee CVN(s). Usa 0905 como guía si está disponible.
+        /// Retorna lista de CVN en hex de 8 caracteres (4 bytes).
+        /// </summary>
+        public string ReadCvnsRobusto(int? expected, int timeoutMs0906 = 10000) {
+
+            ExecRaw("ATCAF1", 600);
+            ExecRaw("ATH1", 600);
+            ExecRaw("ATS0", 600);
+            ExecRaw("ATAT1", 600);
+            ExecRaw("ATE0", 600);
+            ExecRaw("ATST96", 600);
+
+            var resp = ExecRaw("0906", timeoutMs0906);
+            if (string.IsNullOrWhiteSpace(resp))
+                return string.Empty;
+
+            var bytes = ExtractHexBytes(resp);
+
+            // Para poder leer: 49 06 idx A B C D => 7 bytes
+            if (bytes.Count < 7)
+                return string.Empty;
+
+            var byIndex = new Dictionary<int, string>();
+
+            for (int i = 0; i <= bytes.Count - 7; i++) {
+                if (bytes[i] != 0x49 || bytes[i + 1] != 0x06)
+                    continue;
+
+                int idx = bytes[i + 2];
+                byte A = bytes[i + 3];
+                byte B = bytes[i + 4];
+                byte C = bytes[i + 5];
+                byte D = bytes[i + 6];
+
+                if (!byIndex.ContainsKey(idx))
+                    byIndex[idx] = ToHex8(A, B, C, D);
+
+                if (expected.HasValue && expected.Value > 0 && byIndex.Count >= expected.Value)
+                    break;
+            }
+
+            if (byIndex.Count == 0)
+                return string.Empty;
+
+            var result = byIndex.OrderBy(kv => kv.Key).Select(kv => kv.Value);
+            return string.Join(" || ", result);
+        }
+
+        // ----------------- Helpers -----------------
+
+        /// <summary>
+        /// Extrae bytes hex (00-FF) desde un texto (con o sin espacios/headers/ruido).
+        /// </summary>
+        private static List<byte> ExtractHexBytes(string text) {
+            var list = new List<byte>(256);
+
+            // Filtra únicamente pares hex
+            for (int i = 0; i < text.Length - 1; i++) {
+                char c1 = text[i];
+                char c2 = text[i + 1];
+
+                if (!IsHex(c1) || !IsHex(c2))
+                    continue;
+
+                string pair = new string(new[] { c1, c2 });
+                if (byte.TryParse(pair, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b))
+                    list.Add(b);
+
+                i++; // saltar el segundo char del par
+            }
+
+            return list;
+        }
+
+        private static bool IsHex(char c) {
+            c = char.ToUpperInvariant(c);
+            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
+        }
+
+        private static string ToHex8(byte a, byte b, byte c, byte d)
+            => a.ToString("X2") + b.ToString("X2") + c.ToString("X2") + d.ToString("X2");
 
         public MonitorStatus? ReadStatus() {
             try {

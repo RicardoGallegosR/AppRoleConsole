@@ -133,9 +133,9 @@
         public int ReturnCode { get; set; }       
         public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
     }
-    public sealed class InspeccionObdGet {
-        public int MensajeId { get; set; }
+    public sealed class ResultadoSql {
         public short Resultado { get; set; }
+        public int MensajeId { get; set; }
     }
 
     public sealed class InspeccionObd2Set {
@@ -144,11 +144,13 @@
         public Guid VerificacionId { get; set; } = Guid.Empty;
         public string? VehiculoId { get; set; } = "DESCONOCIDO";
         public decimal? CCM { get; set; } = 0;
-        public byte? NEV { get; set; } = 0;
+        public decimal? WarmUpsDesdeBorrado { get; set; } = 0;
+        public int? NEV { get; set; } = 0;
+        public string? NEV_string { get; set; } = "DESCONOCIDO";
         public short? TR { get; set; } = 0;
         public byte? ConexionObd { get; set; } = 0;
         public string? ProtocoloObd { get; set; } = "DESCONOCIDO";
-        public byte? Intentos { get; set; } = 0;
+        public int Intentos { get; set; } = 0;
         public byte? Mil { get; set; } = 0;
         public byte? Fallas { get; set; } = 0;
         public string? CodigoError { get; set; } = "DESCONOCIDO";
@@ -174,6 +176,7 @@
         public decimal? LTFT_B1 { get; set; } = 0;
         public short? IAT { get; set; } = 0;
         public decimal? MAF { get; set; } = 0;
+        public decimal? MafKgH { get; set; } = 0;
         public decimal? TPS { get; set; } = 0;
         public decimal? VoltsSwOff { get; set; } = 0;
         public decimal? VoltsSwOn { get; set; } = 0;
@@ -189,9 +192,11 @@
         public short? VelVeh { get; set; } = 0;
         public decimal? AvanceEnc { get; set; } = 0;
         public decimal? Volt_O2 { get; set; } = 0;
-        public int? Tpo_Arranque { get; set; } = 0;
+        public decimal? Volt_O2_S2 { get; set; } = 0;
+        public int? TiemppoDeArranque { get; set; } = 0;
         public decimal? NivelComb { get; set; } = 0;
         public short? Pres_Baro { get; set; } = 0;
+        public string? FuelType { get; set; } = "DESCONOCIDO";
         public byte? Combustible0151Id { get; set; } = 0;
         public int? Dist_MIL_On { get; set; } = 0;
         public int? Dist_Borrado_DTC { get; set; } = 0;
@@ -199,7 +204,8 @@
         public int? Tpo_Borrado_DTC { get; set; } = 0;
         public byte? Combustible0907Id { get; set; } = 0;
         public string? Dir_ECU { get; set; } = "DESCONOCIDO";
-        public string? ID_Calib { get; set; } = "DESCONOCIDO";
+        public int? EcuAddressInt { get; set; } = 0;
+        public int? ID_Calib { get; set; } = 0;
         public string? IDs_Adic { get; set; } = "DESCONOCIDO";
         public string? NumVerifCalib { get; set; } = "DESCONOCIDO";
         public string? Lista_CVN { get; set; } = "DESCONOCIDO";
@@ -209,6 +215,12 @@
         public string? PIDS_Sup_01_20 { get; set; } = "DESCONOCIDO";
         public string? PIDS_Sup_21_40 { get; set; } = "DESCONOCIDO";
         public string? PIDS_Sup_41_60 { get; set; } = "DESCONOCIDO";
+
+        public uint? Odometro { get; set; } = 0;
+        public int? TiempoMotorEnMarchaSeg { get; set; } = 0;
+        public int? ReadCvnMessageCount { get; set; } = 0;
+        public string ReadCvnsRobusto { get; set; } = "DESCONOCIDO";
+        public string TramaPid0101 { get; set; } = "DESCONOCIDO";
 
         public string? Mensaje { get; set; } = "DESCONOCIDO";
         public int? MensajeId { get; set; } = 0;

@@ -31,7 +31,7 @@ namespace SQLSIVEV.Infrastructure.Services {
         public Guid RollVisualAcceso { get; set; } = Guid.Empty;
         public string RollVisual { get; set; } = string.Empty;
         
-        
+        public string Credencial { get; set; } = string.Empty;
         public string PlacaId { get; set; } = string.Empty;
         public Guid AccesoId { get; set; } = Guid.Empty;
         public Guid VerificacionId { get; set; } = Guid.Empty;

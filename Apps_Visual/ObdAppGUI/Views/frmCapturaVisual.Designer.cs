@@ -299,7 +299,7 @@
             pnlRellenoOdometro.Location = new Point(3, 127);
             pnlRellenoOdometro.Name = "pnlRellenoOdometro";
             pnlRellenoOdometro.Size = new Size(242, 12);
-            pnlRellenoOdometro.TabIndex = 11;
+            pnlRellenoOdometro.TabIndex = 0;
             // 
             // pnlCentralFooter
             // 
@@ -309,7 +309,7 @@
             pnlCentralFooter.Location = new Point(0, 325);
             pnlCentralFooter.Name = "pnlCentralFooter";
             pnlCentralFooter.Size = new Size(800, 101);
-            pnlCentralFooter.TabIndex = 1;
+            pnlCentralFooter.TabIndex = 0;
             // 
             // btnSiguente
             // 

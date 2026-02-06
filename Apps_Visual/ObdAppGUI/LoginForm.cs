@@ -264,9 +264,6 @@ namespace Apps_Visual.ObdAppGUI {
             var p = home.GetPanel();
             p.Dock = DockStyle.Fill;
             pnlPanelCambios.Controls.Add(p);
-
-            //pnlPanelCambios.Controls.Add(home.GetPanel());
-            //pnlPanelCambios.Dock = DockStyle.Fill;
         }
         #endregion
 
@@ -288,11 +285,58 @@ namespace Apps_Visual.ObdAppGUI {
 
         /* Control de teclas */
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
-            if (keyData == (Keys.Alt | Keys.F4) || keyData == Keys.Escape)
-                return true; // consumimos la tecla
+            if (keyData == (Keys.Alt | Keys.F4))
+                return true;
+
+            if (keyData == Keys.Escape && Visual_Core.AccesoId != Guid.Empty) {
+                BeginInvoke(new Action(async () => {
+                    var frmEscape = new frmEscape(visual: Visual_Core);
+                    // Si quieres modal, usa ShowDialog y NO necesitas EsperarResultadoAsync.
+                    // Si tu diseño es async, entonces Show (no modal) sí tiene sentido:
+                    frmEscape.Show();
+                    bool ok = await frmEscape.EsperarResultadoAsync();
+                    if (!frmEscape.IsDisposed)
+                        frmEscape.Close();
+                    if (ok) {
+                        pnlPanelCambios.Controls.Clear();
+                        home = new HomeView();
+                        home.panelX = pnlPanelCambios.Width;
+                        home.panelY = pnlPanelCambios.Height;
+                        home.InicializarTamanoYFuente();
+                        pnlPanelCambios.Controls.Add(home.GetPanel());
+                        pnlPanelCambios.Dock = DockStyle.Fill;
+
+                        btnInspecionVisual.Enabled = true;
+                        btnInspecionVisual.Visible = true;
+                        btnInspecionVisual?.Select();
+                        btnInspecionVisual.Focus();
+
+                        btnApagar.Enabled = true;
+                        btnApagar.Visible = true;
+
+                        if (PruebaOBD != null && !PruebaOBD.IsDisposed) {
+                            PruebaOBD.Parent?.Controls.Remove(PruebaOBD); // opcional pero recomendable si estaba embebido
+                            PruebaOBD.Controls.Clear();
+                            PruebaOBD.Dispose();
+                        }
+                        PruebaOBD = null;
+
+                        // Cerrar CapturaVisual si aplica
+                        if (CapturaVisual != null && !CapturaVisual.IsDisposed) {
+                            CapturaVisual.Parent?.Controls.Remove(CapturaVisual);
+                            CapturaVisual.Controls.Clear();
+                            CapturaVisual.Dispose();
+                        }
+                        CapturaVisual = null;
+                    }
+                }));
+
+                return true; // consumimos Escape
+            }
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
         #endregion
 
         private async void btnInspecionVisual_Click(object sender, EventArgs e){

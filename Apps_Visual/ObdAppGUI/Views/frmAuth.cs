@@ -130,7 +130,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbPassword.Enabled = false;
             lblPassword.Enabled = false;
             txbCredencial.Focus();
-
+            _Visual.Credencial = credencial.ToString();
             var r = await GetAccesoSQL(V:_Visual, credencial:credencial);
             Guid accesoNormalizado = Guid.Empty;
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {

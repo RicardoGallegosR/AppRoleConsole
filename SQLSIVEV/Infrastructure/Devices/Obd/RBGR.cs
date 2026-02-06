@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Utils;
+using System.Collections.Generic;
+using System.Runtime.Intrinsics.X86;
 
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public class RBGR {
@@ -8,14 +10,18 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         #region Declaración de Variables
 
         private int? _rpm,  _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03, _OperacionMotor, _WarmUpsDesdeBorrado,
-            _EcuAddressInt;
+            _EcuAddressInt, _ID_Calib, _ReadCvnMessageCount, _TiempoMotorEnMarchaSeg, _intNormativaObdVehiculo;
+
+        private uint ? _odometro;
+
         private short? _vel, _BarometricPressure, _IatC, _IatCCoolantTempC;
 
         private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A, _rpmOff, _rpmOn, cnt03, cnt07, cnt0A;
         private static string SafeStr(object? x, string empty = "—") => x == null ? empty : x.ToString() ?? empty;
         private string _port = "COM4", _vin = string.Empty, _calJoined = string.Empty;
             
-        private string? _FuelType = string.Empty, _EcuAddress = string.Empty, _NormativaObdVehiculo = string.Empty, _dtcList03 = string.Empty, _dtcList07 = string.Empty, _dtcList0A = string.Empty, _protocolo = string.Empty, _cvn = string.Empty;
+        private string? _FuelType = string.Empty, _EcuAddress = string.Empty, _NormativaObdVehiculo = string.Empty, _dtcList03 = string.Empty, _dtcList07 = string.Empty, _dtcList0A = string.Empty, 
+            _protocolo = string.Empty, _cvn = string.Empty, _ReadCvnsRobusto = string.Empty, _Trama = string.Empty;
 
         private string[] _cal= Array.Empty<string>();
         private string[] expected = {
@@ -39,11 +45,11 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
 
         private const byte SIN_COMUNICACION = 4;
-        private byte? _EmissionCode,_IntFuelType,_IntTipoCombustible0907;
+        private byte? _EmissionCode,_IntFuelType,_IntTipoCombustible0907, _fallas;
 
 
         private bool? _MilOn = false, _LeeDtcConfirmados = false, _LeeDtcPendientes = false, _LeeDtcPermanentes = false;
-        private bool _vinFromObd = false;
+        private bool _vinFromObd = false, _leeMonitores;
 
         private ObdResultado? _obd;
         private ObdMonitoresLuzMil? _monitores;
@@ -159,6 +165,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     }
                     _MilOn = status?.MIL;
                     _fallas03 = status?.DtcCount;
+                    _fallas = ContarPxxxxUnicos(texto: _dtcList03);
 
                     var monitorCodes = new Dictionary<string, byte?>(StringComparer.OrdinalIgnoreCase);
                     foreach (var name in expected) {
@@ -172,7 +179,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         Intentos = 0,
                         ConexionOb = 1,
                         Mil = _MilOn,
-                        Fallas = 0,
+                        Fallas = _fallas,
                         Sdciic = monitorCodes["MISFIRE_MONITORING"],
                         Secc = monitorCodes["FUEL_SYSTEM_MONITORING"],
                         Sc = monitorCodes["COMPONENT_MONITORING"],
@@ -233,7 +240,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
                     elm.Open();
                     elm.Initialize(showHeaders: false);
-                    _protocolo = elm.WaitAndGetProtocolText();
+                    _protocolo = elm.WaitAndGetProtocolText(); //0100
 
                     _rpm = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
                     _vel = TryQuery<short?>("Velocidad", () => elm.ReadSpeedKmh(), null, errores); //010D
@@ -268,20 +275,25 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         errores
                     );//0906
 
-                    _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
+                    //_cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
 
-                    // Más valores instruidos por Toñin Cara de pan :D
+                    // Más valores instruidos por Toñin :D
                     _OperacionMotor = TryQuery<int?>("TiempoTotalSegundosOperacionMotor", () => elm.TiempoTotalSegundosOperacionMotor(), null, errores);//011F
-                                                                                                                                                        //_WarmUpsDesdeBorrado = TryQuery<int?>("WarmUpsDesdeBorrado", () => elm.WarmUpsSinceCodesCleared(), null, errores);
+                    _WarmUpsDesdeBorrado = TryQuery<int?>("WarmUpsDesdeBorrado", () => elm.WarmUpsSinceCodesCleared(), null, errores);//0130
 
 
 
-                    var status = TryQuery<Elm327.MonitorStatus?>("STATUS", () => elm.ReadStatus(), null, errores);
+                    var status = TryQuery<Elm327.MonitorStatus?>("STATUS PID 0101", () => elm.ReadStatus(), null, errores);
                     if (status is { } st) {
                         foreach (var name in expected) {
                             if (!st.Monitors.ContainsKey(name))
                                 st.Monitors[name] = (false, false);
                         }
+
+                        var sb = new System.Text.StringBuilder(256);
+                        sb.Append("PID_0101|");
+                        sb.Append("MIL=").Append(st.MIL ? "1" : "0").Append("|");
+                        sb.Append("DTC=").Append(st.DtcCount).Append("|");
 
                         // 2) Procesar monitores (si lo necesitas) --Agregar un Log en el futuro
                         if (st.Monitors.Count > 0) {
@@ -291,6 +303,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                                 string sComp  = comp  ? "COMPLETO"   : "NO COMPLETO";
                             }
                         }
+                        _Trama = sb.ToString();
                         _MilOn = st.MIL;
                         _fallas03 = st.DtcCount;
                     } else {
@@ -306,12 +319,19 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                             monitorCodes[name] = 0;
                         }
                     }
+
+
+                    _leeMonitores = (status != null);
+
+
                     /////////////////////////////////////////////////////////////////////////////////////////////////
-                    _NormativaObdVehiculo = TryQuery<string?>("NORMATIVA_OBD_VEHICULO", () => elm.NormativaObdVehiculo(), null, errores);//011C
+                    
+                    _intNormativaObdVehiculo = TryQuery<int?>("NORMATIVA_OBD_VEHICULO_int", () => elm.intNormativaObdVehiculo(), null, errores);//011C
+                    _NormativaObdVehiculo = TryQuery<string?>("NORMATIVA_OBD_VEHICULO_string", () => elm.NormativaObdVehiculo(_intNormativaObdVehiculo), null, errores);//011C
                     _IatCCoolantTempC = TryQuery<short?>("COOLANTTEMPC", () => elm.TemperaturaRefrigeranteC(), null, errores);//0105
-                    _StftB1 = TryQuery<double?>("STFTB1", () => elm.StftBank1(), null, errores);
-                    _LtftB1 = TryQuery<double?>("LTFTB1", () => elm.LtftBank1(), null, errores);
-                    _IatC = TryQuery<short?>("IATC", () => elm.TemperaturaAireAdmisionC(), null, errores);
+                    _StftB1 = TryQuery<double?>("STFTB1", () => elm.StftBank1(), null, errores);//0106
+                    _LtftB1 = TryQuery<double?>("LTFTB1", () => elm.LtftBank1(), null, errores);//0107
+                    _IatC = TryQuery<short?>("IATC", () => elm.TemperaturaAireAdmisionC(), null, errores);//010F
                     _MafGs = TryQuery<double?>("MAFGS", () => elm.FlujoAireMaf(), null, errores);//0110
                     _MafKgH = TryQuery<double?>("MAFKGH", () => elm.FlujoAireMafKgPorHora(), null, errores);
                     _Tps = TryQuery<double?>("TPS", () => elm.PosicionAcelerador(), null, errores);
@@ -323,26 +343,30 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     _FuelType = TryQuery<string?>("FUEL_TYPE", () => elm.TipoCombustible(), null, errores);//0151
                     _IntFuelType = TryQuery<byte?>("INT_FUEL_TYPE", () => elm.byteTipoCombustible0151(), null, errores);//0151
                     _IntTipoCombustible0907 = TryQuery<byte?>("INT_TIPO_COMBUSTIBLE_0907", () => elm.intTipoCombustible0907(), null, errores);
-                    _EcuAddress = TryQuery<string?>("ECU_ADDRESS", () => elm.EcuAddress(), null, errores);
-                    //_EcuAddressInt = TryQuery<int?>("ECU_ADDRESS_INT", () => elm.EcuAddressInt(), null, errores);
+                    _EcuAddress = TryQuery<string?>("ECU_ADDRESS", () => elm.EcuAddress(), null, errores); //090A
+                    _EcuAddressInt = TryQuery<int?>("ECU_ADDRESS_INT", () => elm.EcuAddressInt(), null, errores);//090A int
                     _CCM = TryQuery<double?>("CCM", () => elm.LoadCalc(), null, errores); //0104
                     _EmissionCode = TryQuery<byte?>("EMISSION_CODE", () => elm.RequisitosEmisionesVehiculo(), null, errores);//015F
                     _Pids_01_20 = TryQuery<IReadOnlyList<int>>("PIDS_01_20", () => elm.PidsSoportadosBloque("0100", 0x01), Array.Empty<int>(), errores);
                     _Pids_21_40 = TryQuery<IReadOnlyList<int>>("PIDS_21_40", () => elm.PidsSoportadosBloque("0120", 0x21), Array.Empty<int>(), errores);
                     _Pids_41_60 = TryQuery<IReadOnlyList<int>>("PIDS_41_60", () => elm.PidsSoportadosBloque("0140", 0x41), Array.Empty<int>(), errores);
-
-
+                    _odometro = TryQuery<uint?>("Odometro", () => elm.ReadOdometer01A6(), null, errores);
+                    _fallas = ContarPxxxxUnicos(_dtcList03);
+                    _ID_Calib = TryQuery<int?>("_ID_Calib", () => elm.CalibIdMessageCount(), null, errores);// 0903
+                    _ReadCvnMessageCount = TryQuery<int?>("_ReadCvnMessageCount", () => elm.ReadCvnMessageCount(), null, errores);// 0905
+                    _ReadCvnsRobusto = TryQuery<string?>("ReadCvnsRobusto", () => elm.ReadCvnsRobusto(_ReadCvnMessageCount), null, errores); //0906
+                    _TiempoMotorEnMarchaSeg = TryQuery<int?>("TiempoMotorEnMarchaSeg", () => elm.TiempoMotorEnMarchaSeg(), null, errores); //017F
 
                     return new InspeccionObd2Set {
                         VehiculoId = _vin ?? "No se realizo lectura",
                         ProtocoloObd = _protocolo ?? "No se realizo lectura",
-                        
+
                         CodigoError = _dtcList03 ?? "No se realizo lectura",
                         CodigoErrorPendiente = _dtcList07 ?? "No se realizo lectura",
                         CodigoErrorPermanente = _dtcList0A ?? "No se realizo lectura",
-                        
+
                         Mil = _MilOn.HasValue ? (_MilOn.Value ? (byte)1 : (byte)0) : (byte)0,
-                        Fallas = (byte)Math.Min(cnt03, byte.MaxValue),
+                        Fallas = _fallas,
                         Sdciic = monitorCodes["MISFIRE_MONITORING"] ?? 0,           // Misfire
                         Sc = monitorCodes["FUEL_SYSTEM_MONITORING"] ?? 0,           // Fuel System
                         Sci = monitorCodes["COMPONENT_MONITORING"] ?? 0,            // Components
@@ -354,23 +378,25 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         // aquí es donde estaba el desajuste:
                         Sfaa = monitorCodes["AC_REFRIGERANT_MONITORING"] ?? 0,       // A/C Refrigerant
                         Srge = monitorCodes["EGR_VVT_SYSTEM_MONITORING"] ?? 0,       // EGR System
-                        Sso = monitorCodes["OXYGEN_SENSOR_MONITORING"],         // Oxygen Sensor
+                        Sso = monitorCodes["OXYGEN_SENSOR_MONITORING"] ?? 0,         // Oxygen Sensor
                         Scso = monitorCodes["OXYGEN_SENSOR_HEATER_MONITORING"] ?? 0, // Oxygen Sensor Heater
-                        
+
                         //*
-                        LeeMonitores = false,
+                        LeeMonitores = _leeMonitores,
                         LeeDtc = _LeeDtcConfirmados,
                         LeeDtcPend = _LeeDtcPendientes,
+                        LeeDtcPerm = _LeeDtcPermanentes,
                         LeeVin = _vinFromObd,
-                        VoltsSwOn = _vOn.HasValue ? (decimal?)_vOn.Value : (decimal?)(-1m),          //
-                        RpmOn = _rpm.HasValue ? (short?)_rpm.Value : (short?)(-1),              //
+                        VoltsSwOn = _vOn.HasValue ? (decimal?)_vOn.Value : (decimal?)(-1m),
+                        RpmOn = _rpm.HasValue ? (short?)_rpm.Value : (short?)(-1),
                         //*/
 
                         // NUEVOS VALORES :D
                         Dist_MIL_On = _distMilKm ?? -1,
                         Dist_Borrado_DTC = _distSinceClrKm ?? -1,
-                        Tpo_Arranque = _OperacionMotor ?? -1,
+                        TiemppoDeArranque = _OperacionMotor ?? -1,
                         Tpo_Borrado_DTC = _timeSinceClr ?? -1,
+
                         //NumVerifCalib = "",
                         IDs_Adic = string.Join(" || ", _cal) ?? "No se realizo lectura",
                         Lista_CVN = _cvn ?? "No se realizo lectura",
@@ -378,32 +404,38 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
                         // Más valores instruidos por Toñin GALVAN 
                         CCM = _CCM.HasValue ? (decimal?)_CCM.Value : (decimal?)(0m),
-                        //WarmUpsDesdeBorrado = _WarmUpsDesdeBorrado,
-                        //NEV = _NormativaObdVehiculo,
+                        WarmUpsDesdeBorrado = _WarmUpsDesdeBorrado.HasValue ? (decimal?)_WarmUpsDesdeBorrado.Value : (decimal?)(0m),
+                        NEV_string = _NormativaObdVehiculo ?? "No se realizo lectura",
+                        NEV = _intNormativaObdVehiculo ?? 0,
                         TR = _IatCCoolantTempC ?? 0,
                         STFT_B1 = _StftB1.HasValue ? (decimal?)_StftB1.Value : (decimal?)(0m),
                         LTFT_B1 = _LtftB1.HasValue ? (decimal?)_LtftB1.Value : (decimal?)(0m),
                         IAT = _IatC.HasValue ? (short?)_IatC.Value : (short?)(-1),
                         MAF = _MafGs.HasValue ? (decimal?)_MafGs.Value : (decimal?)(0m),
-                        //MafKgH = _MafKgH,
+                        MafKgH = _MafKgH.HasValue ? (decimal?)_MafKgH.Value : (decimal?)(0m),
                         TPS = _Tps.HasValue ? (decimal?)_Tps.Value : (decimal?)(0m),
                         AvanceEnc = _TimingAdvance.HasValue ? (decimal?)_TimingAdvance.Value : (decimal?)(0m),
                         VelVeh = _vel ?? -1,
                         Volt_O2 = _O2S1_V.HasValue ? (decimal?)_O2S1_V.Value : (decimal?)(0m),
-                        //O2S2_V = _O2S2_V,
+                        Volt_O2_S2 = _O2S2_V.HasValue ? (decimal?)_O2S2_V.Value : (decimal?)(0m),
                         NivelComb = _FuelLevel.HasValue ? (decimal?)_FuelLevel.Value : (decimal?)(0m),
                         Pres_Baro = _BarometricPressure ?? -1,
-                        //FuelType = _FuelType,
+                        FuelType = _FuelType ?? "No se realizo lectura",
                         Combustible0151Id = _IntFuelType ?? 0,
                         Combustible0907Id = _IntTipoCombustible0907 ?? 0,
                         Dir_ECU = _EcuAddress ?? "No se realizo lectura",
-                        //EcuAddressInt = _EcuAddressInt,
+                        EcuAddressInt = _EcuAddressInt,
                         Req_Emisiones = _EmissionCode ?? 0,
 
                         PIDS_Sup_01_20 = string.Join(" || ", _Pids_01_20),
                         PIDS_Sup_21_40 = string.Join(" || ", _Pids_21_40),
-                        PIDS_Sup_41_60 = string.Join(" || ", _Pids_41_60)
-
+                        PIDS_Sup_41_60 = string.Join(" || ", _Pids_41_60),
+                        Odometro = _odometro,
+                        ID_Calib = _ID_Calib ?? 0,
+                        ReadCvnMessageCount = _ReadCvnMessageCount ?? 0,
+                        ReadCvnsRobusto = _ReadCvnsRobusto  ?? "No se realizo lectura",
+                        TramaPid0101 = _Trama ?? "No se realizo lectura",
+                        TiempoMotorEnMarchaSeg = _TiempoMotorEnMarchaSeg ?? 0,
                         //*/
                     };
                 }
@@ -486,6 +518,9 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return val == null ? fallback : val;
             } catch (Exception e) {
                 errores[key] = e.Message;
+                try {
+                    SivevLogger.Error($"ERROR DETECTADO en {key}.- {e.Message}");
+                } catch { }
                 return fallback;
             }
         }
@@ -496,6 +531,46 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return 0;
         }
 
+        #endregion
+
+
+
+        #region Contar codigos de Falla
+        public static byte ContarPxxxxUnicos(string? texto) {
+            if (string.IsNullOrWhiteSpace(texto))
+                return 0;
+
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ReadOnlySpan<char> s = texto.AsSpan();
+
+            for (int i = 0; i <= s.Length - 5; i++) {
+                if (char.ToUpperInvariant(s[i]) != 'P')
+                    continue;
+
+                char c1 = s[i + 1], c2 = s[i + 2], c3 = s[i + 3], c4 = s[i + 4];
+                if (!IsHex(c1) || !IsHex(c2) || !IsHex(c3) || !IsHex(c4))
+                    continue;
+
+                // sin tuplas con Span, sin string.Create
+                string code = new string(new[] {
+                    'P',
+                    char.ToUpperInvariant(c1),
+                    char.ToUpperInvariant(c2),
+                    char.ToUpperInvariant(c3),
+                    char.ToUpperInvariant(c4)
+                });
+
+                set.Add(code);
+                i += 4;
+            }
+
+            return (byte)set.Count;
+        }
+
+        private static bool IsHex(char c) {
+            c = char.ToUpperInvariant(c);
+            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
+        }
         #endregion
 
     }
