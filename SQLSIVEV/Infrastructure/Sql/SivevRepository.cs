@@ -623,7 +623,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@vcDir_ECU", SqlDbType.VarChar, 32) { Value = obd.Dir_ECU ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcIDs_Adic", SqlDbType.VarChar, 64) { Value = obd.IDs_Adic ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcNumVerifCalib", SqlDbType.VarChar, 16) { Value = obd.NumVerifCalib });
-            cmd.Parameters.Add(new SqlParameter("@vcLista_CVN", SqlDbType.VarChar, 200) { Value = obd.Lista_CVN });
+            cmd.Parameters.Add(new SqlParameter("@vcLista_CVN", SqlDbType.VarChar, 200) { Value = obd.ReadCvnsRobusto });
             cmd.Parameters.Add(new SqlParameter("@vcEst_Mon_DTC_Borrado", SqlDbType.VarChar, 100) { Value = obd.Est_Mon_DTC_Borrado ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_01_20", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_01_20 });
             cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_21_40", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_21_40 });

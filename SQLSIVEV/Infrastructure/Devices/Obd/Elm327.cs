@@ -437,8 +437,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
 
         // -- Helper genérico para PIDs 01xx que devuelven A y B (2 bytes) --
-        private (int A, int B)? 
-            ReadPidAB(string cmd, int timeoutMs = 3000) {
+        private (int A, int B)? ReadPidAB(string cmd, int timeoutMs = 3000) {
             var resp = ExecRaw(cmd, timeoutMs);
             var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "");
             // cmd "0131" -> buscamos "41 31"
@@ -569,7 +568,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // PID 0106 - Short Term Fuel Trim Bank 1 (STFT B1)
         // public double? StftB1 { get; init; }
         public double? StftBank1() {
-            var ab = ReadPidAB("0106", 3000);
+            var ab = ReadPidAB("0106", 4000);
             if (!ab.HasValue)
                 return null;
 
@@ -588,7 +587,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // PID 0107 - Long Term Fuel Trim Bank 1 (LTFT B1)
         // public double? LtftB1 { get; init; }
         public double? LtftBank1() {
-            var ab = ReadPidAB("0107", 3000);
+            var ab = ReadPidAB("0107", 4000);
             if (!ab.HasValue)
                 return null;
 
@@ -1141,7 +1140,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         /// Lee CVN(s). Usa 0905 como guía si está disponible.
         /// Retorna lista de CVN en hex de 8 caracteres (4 bytes).
         /// </summary>
-        public string ReadCvnsRobusto(int? expected, int timeoutMs0906 = 10000) {
+        public string ReadCvnsRobusto(int? expected, int timeoutMs0906 = 10_000) {
 
             ExecRaw("ATCAF1", 600);
             ExecRaw("ATH1", 600);

@@ -51,9 +51,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         private bool? _MilOn = false, _LeeDtcConfirmados = false, _LeeDtcPendientes = false, _LeeDtcPermanentes = false;
         private bool _vinFromObd = false, _leeMonitores;
 
-        private ObdResultado? _obd;
-        private ObdMonitoresLuzMil? _monitores;
-
 
         private double? _StftB1,_LtftB1,_MafGs,_MafKgH,_Tps,_TimingAdvance,_O2S1_V,_O2S2_V, _FuelLevel,_vOff, _CCM,_vOn;
 
@@ -62,175 +59,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
 
         #endregion
-
-        #region PRIMER INTENTO
-        // Lecturas de los valores del diagnóstico de OBD
-        public LecturasIniciales LecturasPrincipales() {
-            string mensaje = "";
-            try {
-                using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
-                    elm.Open();
-                    elm.Initialize(showHeaders: false);
-
-                    _protocolo = elm.WaitAndGetProtocolText();
-
-                    var errores = new Dictionary<string, string>();
-
-                    // Lecturas principales
-                    _rpm = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
-                    _vel = TryQuery<short?>("Velocidad", () => elm.ReadSpeedKmh(), null, errores);
-                    _vin = TryQuery<string>("VIN", () => elm.ReadVin() ?? "DESCONOCIDO", "DESCONOCIDO", errores);
-                    _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);
-                    _vOff = TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores);
-
-                    // DTC Confirmados, Pendientes, Permanentes :D
-
-
-                    // Distancias/tiempos relacionados a DTC/MIL (PID 01 xx)+
-                    // Generico para 3, 7 y 0A
-                    _distMilKm = TryQuery<int?>("DISTANCE_W_MIL", () => elm.ReadDistanceWithMilKm(), null, errores);
-                    _distSinceClrKm = TryQuery<int?>("DISTANCE_SINCE_DTC_CLEAR", () => elm.ReadDistanceSinceClearKm(), null, errores);
-                    _runTimeMilMin = TryQuery<int?>("RUN_TIME_MIL", () => elm.ReadRunTimeMilMinutes(), null, errores);
-                    _timeSinceClr = TryQuery<int?>("TIME_SINCE_DTC_CLEARED", () => elm.ReadTimeSinceDtcClearedMinutes(), null, errores);
-
-                    // DTC (modo 03 y 07) — sin condiciones por ahora (olvidamos J1939)
-                    _dtcList03 = LeerYUnirDtcs("GET_DTC", () => elm.ReadStoredDtcs(), errores, out cnt03);
-                    _dtcList07 = LeerYUnirDtcs("GET_CURRENT_DTC", () => elm.ReadCurrentDtcs(), errores, out cnt07);
-                    _dtcList0A = LeerYUnirDtcs("GET_PERMANENT_DTC", () => elm.ReadPermanentDtcs(), errores, out cnt0A);
-
-                }
-            } catch (Exception ex) {
-                mensaje = ex.Message;
-            }
-            return new LecturasIniciales {
-                rpm = _rpm,
-                vel = _vel,
-                cal = _cal,
-                protocolo = _protocolo ?? "",
-                vin = _vin ?? "",
-                vOff = _vOff,
-                distMilKm = _distMilKm,
-                distSinceClrKm = _distSinceClrKm,
-                runTimeMilMin = _runTimeMilMin,
-                timeSinceClr = _timeSinceClr,
-                dtcList03 = _dtcList03,
-                dtcList07 = _dtcList07,
-                dtcList0A = _dtcList0A,
-
-                Mensaje = mensaje
-            };
-
-        }
-        #endregion
-
-        #region MONITORES
-        public ObdMonitoresLuzMil Monitores() {
-            string mensaje = "";
-            var errores = new Dictionary<string, string>();
-
-            try {
-                using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
-                    elm.Open();
-                    elm.Initialize(showHeaders: false);
-                    _protocolo = elm.WaitAndGetProtocolText();
-
-                    string vin = TryQuery<string>("VIN", () => elm.ReadVin() ?? "desconocido", "desconocido", errores);
-                    bool vinFromObd = (!string.IsNullOrWhiteSpace(vin) && !string.Equals(vin, "desconocido", StringComparison.OrdinalIgnoreCase)) ? true : false;
-
-
-                    var status = TryQuery<Elm327.MonitorStatus?>("STATUS", () => elm.ReadStatus(), null, errores);
-                    if (status != null) {
-                        foreach (var name in expected) {
-                            if (!status.Monitors.ContainsKey(name))
-                                status.Monitors[name] = (false, false);
-                        }
-                    }
-
-                    if (status != null) {
-                        if (status.Monitors.Count > 0) {
-                            Console.WriteLine("Monitores:");
-                            foreach (var kv in status.Monitors.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase)) {
-                                var (avail, comp) = kv.Value;
-                                string sAvail = avail ? "disponible" : "no disponible";
-                                string sComp = comp ? "completo" : "no completo";
-                                Console.WriteLine($" - {kv.Key}: {sAvail}, {sComp}");
-                            }
-                        }
-                    }
-
-                    if (status != null) {
-                        foreach (var name in expected)
-                            if (!status.Monitors.ContainsKey(name))
-                                status.Monitors[name] = (false, false);
-                    }
-                    _MilOn = status?.MIL;
-                    _fallas03 = status?.DtcCount;
-                    _fallas = ContarPxxxxUnicos(texto: _dtcList03);
-
-                    var monitorCodes = new Dictionary<string, byte?>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var name in expected) {
-                        if (status != null && status.Monitors.TryGetValue(name, out var tuple)) {
-                            monitorCodes[name] = MapMonitorCode(tuple);
-                        } else {
-                            monitorCodes[name] = 0;
-                        }
-                    }
-                    return new ObdMonitoresLuzMil {
-                        Intentos = 0,
-                        ConexionOb = 1,
-                        Mil = _MilOn,
-                        Fallas = _fallas,
-                        Sdciic = monitorCodes["MISFIRE_MONITORING"],
-                        Secc = monitorCodes["FUEL_SYSTEM_MONITORING"],
-                        Sc = monitorCodes["COMPONENT_MONITORING"],
-                        Sso = monitorCodes["CATALYST_MONITORING"],
-                        Sci = monitorCodes["HEATED_CATALYST_MONITORING"],
-                        Sccc = monitorCodes["EVAPORATIVE_SYSTEM_MONITORING"],
-                        Se = monitorCodes["SECONDARY_AIR_SYSTEM_MONITORING"],
-                        Ssa = monitorCodes["OXYGEN_SENSOR_MONITORING"],
-                        Sfaa = monitorCodes["OXYGEN_SENSOR_HEATER_MONITORING"],
-                        Scso = monitorCodes["EGR_VVT_SYSTEM_MONITORING"],
-                        Srge = monitorCodes["BOOST_PRESSURE_MONITORING"],
-                        LeeMonitores = false,
-                        LeeDtc = false,
-                        LeeDtcPend = false,
-                        LeeVin = vinFromObd,
-                        DtcCount = _fallas03,
-                        Mensaje = "ok"
-
-                    };
-                }
-            } catch (Exception ex) {
-                mensaje = ex.Message;
-            }
-
-
-            return new ObdMonitoresLuzMil {
-                Mensaje = mensaje,
-                Intentos = 0,
-                ConexionOb = 0,
-                Mil = false,
-                Fallas = 0,
-                Sdciic = 0,
-                Secc = 0,
-                Sc = 0,
-                Sso = 0,
-                Sci = 0,
-                Sccc = 0,
-                Se = 0,
-                Ssa = 0,
-                Sfaa = 0,
-                Scso = 0,
-                Srge = 0,
-                LeeMonitores = false,
-                LeeDtc = false,
-                LeeDtcPend = false,
-                LeeVin = false,
-                DtcCount = 0
-            };
-        }
-        #endregion
-
 
         #region Clase produccion 
         public InspeccionObd2Set SpSetObd() {
@@ -265,6 +93,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     _distSinceClrKm = TryQuery<int?>("DISTANCE_SINCE_DTC_CLEAR", () => elm.ReadDistanceSinceClearKm(), null, errores);//0131
                     _runTimeMilMin = TryQuery<int?>("RUN_TIME_MIL", () => elm.ReadRunTimeMilMinutes(), null, errores);//014D
                     _timeSinceClr = TryQuery<int?>("TIME_SINCE_DTC_CLEARED", () => elm.ReadTimeSinceDtcClearedMinutes(), null, errores);//014E
+                    
+                    /*
                     _cvn = TryQuery<string>("CVN", () => {
                         var lista = elm.ReadCvns(); // List<string> o null
                         if (lista != null && lista.Count > 0)
@@ -274,7 +104,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         "DESCONOCIDO",
                         errores
                     );//0906
-
+                    */
                     //_cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
 
                     // Más valores instruidos por Toñin :D
@@ -358,6 +188,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     _TiempoMotorEnMarchaSeg = TryQuery<int?>("TiempoMotorEnMarchaSeg", () => elm.TiempoMotorEnMarchaSeg(), null, errores); //017F
 
                     return new InspeccionObd2Set {
+                        ConexionObd = true,
                         VehiculoId = _vin ?? "No se realizo lectura",
                         ProtocoloObd = _protocolo ?? "No se realizo lectura",
 
@@ -399,7 +230,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
                         //NumVerifCalib = "",
                         IDs_Adic = string.Join(" || ", _cal) ?? "No se realizo lectura",
-                        Lista_CVN = _cvn ?? "No se realizo lectura",
+                        //Lista_CVN = _cvn ?? "No se realizo lectura",
 
 
                         // Más valores instruidos por Toñin GALVAN 
@@ -446,58 +277,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return new InspeccionObd2Set();
         }
 
-
-
-        public TryHandshakeGet TryHandshake(int maxTries = 3, int settleMs = 150) {
-            string mensaje = "";
-            var errores = new Dictionary<string, string>();
-
-            for (int intento = 1; intento <= maxTries; intento++) {
-                try {
-                    using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
-                        elm.Open();
-                        elm.Initialize(showHeaders: false);
-
-                        var proto = elm.WaitAndGetProtocolText(maxTries: 3, settleMs: settleMs);
-
-                        var rpm = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
-                        var vOff = TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores);
-
-                        bool protoOk = !string.IsNullOrWhiteSpace(proto) &&
-                               !proto.Contains("(A0", StringComparison.OrdinalIgnoreCase);
-
-                        bool ecuOk = rpm.HasValue;
-
-                        byte conexion = (byte)((protoOk && ecuOk) ? 1 : 0);
-
-                        // Si falló, intenta de nuevo
-                        if (conexion == 0) {
-                            mensaje = $"Handshake fallido (intento {intento}/{maxTries}). Proto='{proto}'.";
-                            continue;
-                        }
-                        return new TryHandshakeGet {
-                            ProtocoloObd = proto,
-                            Intentos = (byte)intento,
-                            ConexionOb = conexion,
-                            VoltsSwOff = vOff.HasValue ? (decimal)vOff.Value : 0m,
-                            RpmOff = rpm.HasValue ? (short)rpm.Value : (short)0,
-                            Mensaje = ""
-                        };
-                    }
-                } catch (Exception ex) {
-                    mensaje = $"Handshake excepción (intento {intento}/{maxTries}): {ex.Message}";
-                }
-            }
-            return new TryHandshakeGet {
-                ProtocoloObd = "DESCONOCIDO",
-                Intentos = (byte)maxTries,
-                ConexionOb = 0,
-                VoltsSwOff = 0m,
-                RpmOff = 0,
-                Mensaje = mensaje
-            };
-        }
-
         #endregion
 
         #region utils
@@ -508,9 +287,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             return lista.Count > 0 ? string.Join(" || ", lista) : "";
         }
-
-
-
 
         private static T TryQuery<T>(string key, Func<T> func, T fallback, Dictionary<string, string> errores) {
             try {

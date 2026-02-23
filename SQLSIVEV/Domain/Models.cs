@@ -139,6 +139,7 @@
     }
 
     public sealed class InspeccionObd2Set {
+        public bool? ConexionObd { get; set; } = false;
         public Guid EstacionId { get; set; } = Guid.Empty;
         public Guid AccesoId { get; set; } = Guid.Empty;
         public Guid VerificacionId { get; set; } = Guid.Empty;
@@ -148,7 +149,7 @@
         public int? NEV { get; set; } = 0;
         public string? NEV_string { get; set; } = "DESCONOCIDO";
         public short? TR { get; set; } = 0;
-        public byte? ConexionObd { get; set; } = 0;
+        //public byte? ConexionObd { get; set; } = 0;
         public string? ProtocoloObd { get; set; } = "DESCONOCIDO";
         public int Intentos { get; set; } = 0;
         public byte? Mil { get; set; } = 0;

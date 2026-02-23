@@ -16,6 +16,10 @@
 
   <ItemGroup>
     <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
+    <PackageReference Include="Obfuscar" Version="2.2.50">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
     <PackageReference Include="Serilog.Sinks.EventLog" Version="4.0.0" />
@@ -49,5 +53,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; (&#xD;&#xA;  &quot;%25USERPROFILE%25\.dotnet\tools\obfuscar.console.exe&quot; &quot;C:\Users\rgallegos\source\repos\AppRoleConsole\Apps_Visual\obfuscar.xml&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;" />
+  </Target>
 
 </Project>

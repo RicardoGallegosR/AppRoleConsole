@@ -45,6 +45,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
         public int _panelX = 0, _panelY = 0;
         public VisualRegistroWindows _Visual;
         bool conexionObd = false;
+
+
+        private int _intentosConexion = 0;
+        private const int MAX_INTENTOS = 3;
         #endregion
 
 
@@ -64,15 +68,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
         //*/
         #region BOTON CONECTAR
+        /*
         private async void btnConectar_Click(object sender, EventArgs e) {
             //_Intentos++;
             //conexionObd = false;
             btnConectar.Visible = false;
             if (_leyendoObd) {
-
                 return;
             }
             _leyendoObd = true;
+
+
             try {
 
                 lblLecturaOBD.Text = $"Iniciando placa: {_Visual.PlacaId}";
@@ -102,7 +108,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 }
                 if (3-_Intentos <= 0 && !conexionObd) {
                     ResultadoObdSet(OBD2: defaultOBD, _Visual_: _Visual, intento: _Intentos, TrySetResult: true);
-                }//*/
+                }//
             } finally {
                 btnConectar.Enabled = true;
                 btnConectar.Visible = true;
@@ -117,14 +123,110 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 tlpMonitores.Visible = false;
                 btnConectar.Focus();
             }
+
+
+
+        }
+        */
+
+
+        private async void btnConectar_Click(object sender, EventArgs e) {
+            // Evita doble click / re-entradas
+            
+            if (_leyendoObd)
+                return;
+
+            // Si ya agotó intentos, no lo dejes seguir
+            if (_intentosConexion >= MAX_INTENTOS) {
+                btnConectar.Enabled = false;
+                btnConectar.Text = "Sin intentos";
+                lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión OBD.";
+                var respuestaDefaulObd = new InspeccionObd2Set{
+                    Intentos = _intentosConexion,
+                    ConexionObd = false
+                };
+                ResultadoObdSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
+                //_tcsResultado?.TrySetResult(true);
+                return;
+            }
+
+            _leyendoObd = true;
+            btnConectar.Enabled = false;
+            btnConectar.Visible = false;
+            conexionObd = false;
+
+            try {
+                // Cuenta el intento al iniciar el proceso (así aunque falle, cuenta)
+                _intentosConexion++;
+
+                lblLecturaOBD.Text = $"Credencial {_Visual.Credencial} ha conectando OBD (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
+
+                tlpPrincipal.Enabled = false;
+                tlpPrincipal.Visible = false;
+                tlpMonitores.Enabled = false;
+                tlpMonitores.Visible = false;
+
+                await Task.Delay(500);
+
+                // === Tu lógica de conexión/lectura ===
+                randy = new RBGR();
+                ResultadoOBD = randy.SpSetObd();
+
+                // Si aquí tienes alguna señal real de éxito, úsala para poner conexionObd=true.
+                // Por ejemplo: conexionObd = ResultadoOBD?.ConexionObd == 1; (depende de tu modelo)
+                conexionObd = true; // <-- ajusta esto a tu criterio real de éxito
+                if (ResultadoOBD.ConexionObd == true) {
+                    ResultadoOBD.Intentos = _intentosConexion;
+                    ResultadoOBD.ConexionObd = conexionObd ? true : false;
+
+                    ResultadoObdSet(OBD2_enviado: ResultadoOBD, _Visual_: _Visual);
+
+                    lblLecturaOBD.Text = conexionObd
+                        ? $"Conexión OBD exitosa - Placa: {_Visual.PlacaId}"
+                        : $"No se pudo conectar (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
+                }
+            } catch (Exception ex) {
+                // Si falla, deja el intento contado y muestra mensaje
+                lblLecturaOBD.Text = $"Error OBD (intento {_intentosConexion}/{MAX_INTENTOS}): {ex.Message}";
+                SivevLogger.Error($"Error OBD (intento {_intentosConexion}/{MAX_INTENTOS}): {ex.Message}");
+            } finally {
+                _leyendoObd = false;
+
+                // Si ya se agotaron intentos, bloquea definitivamente el botón
+                if (_intentosConexion >= MAX_INTENTOS && !conexionObd) {
+                    btnConectar.Enabled = false;
+                    btnConectar.Visible = true;
+                    btnConectar.Text = "Sin intentos";
+                    lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión OBD.";
+                    var respuestaDefaulObd = new InspeccionObd2Set{
+                        Intentos = _intentosConexion,
+                        ConexionObd = false
+                    };
+                    ResultadoObdSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
+                    //_tcsResultado?.TrySetResult(true);
+                } else {
+                    // Si aún hay intentos o si ya conectó, restablece UI normal
+                    btnConectar.Visible = true;
+                    btnConectar.Enabled = true;
+                    btnConectar.Text = "Conectar";
+
+                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId}";
+                }
+
+                tlpPrincipal.Enabled = false;
+                tlpPrincipal.Visible = false;
+
+                tlpMonitores.Enabled = false;
+                tlpMonitores.Visible = false;
+
+                btnConectar.Focus();
+            }
         }
 
-        private async void ResultadoObdSet(InspeccionObd2Set OBD2, VisualRegistroWindows _Visual_, int intento, bool TrySetResult) {
+        private async void ResultadoObdSet(InspeccionObd2Set OBD2_enviado, VisualRegistroWindows _Visual_) {
             lblLecturaOBD.Text = $"Registrando valores de la placa: {_Visual.PlacaId}";
             var repo = new SivevRepository();
-
-            var Resultado = await AccesoSqlObd2Set(OBD2: ResultadoOBD, _Visual_: _Visual);
-
+            var Resultado = await AccesoSqlObd2Set(OBD2: OBD2_enviado, _Visual_: _Visual);
             int _mensaje = Resultado.MensajeId;
 
             if (_mensaje != 0) {

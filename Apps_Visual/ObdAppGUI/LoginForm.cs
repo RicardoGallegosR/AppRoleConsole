@@ -283,7 +283,6 @@ namespace Apps_Visual.ObdAppGUI {
             //lblVerificaciónVehicularFoother.Text = $"Versión {v}";
         }
 
-        /* Control de teclas */
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Alt | Keys.F4))
                 return true;
@@ -608,10 +607,7 @@ namespace Apps_Visual.ObdAppGUI {
 
                 SivevLogger.Information($"CanFocus={PruebaOBD.btnConectar.CanFocus}");
             }));
-
-
             bool ok = await PruebaOBD.EsperarResultadoAsync();
-
             pnlPanelCambios.Controls.Clear();
             CapturaVisual.Dispose();
             CapturaVisual = null;
@@ -636,7 +632,6 @@ namespace Apps_Visual.ObdAppGUI {
             PruebaOBD.Dispose();
             PruebaOBD = null;
             if (ok) {
-                
                 return true;
             }else {
                 return false;
