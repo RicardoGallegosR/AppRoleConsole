@@ -54,8 +54,6 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if &quot;$(ConfigurationName)&quot;==&quot;Release&quot; (&#xD;&#xA;  &quot;%25USERPROFILE%25\.dotnet\tools\obfuscar.console.exe&quot; &quot;C:\Users\rgallegos\source\repos\AppRoleConsole\Apps_Visual\obfuscar.xml&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;" />
-  </Target>
+  
 
 </Project>

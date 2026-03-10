@@ -61,59 +61,69 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         #endregion
 
         #region Clase produccion 
-        public InspeccionObd2Set SpSetObd() {
+        public InspeccionObd2Set SpSetObd(IProgress<string>? progreso = null, IProgress<int>? porcentaje = null) {
             string mensaje = "";
             var errores = new Dictionary<string, string>();
             try {
                 using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
-                    elm.Open();
-                    elm.Initialize(showHeaders: false);
-                    _protocolo = elm.WaitAndGetProtocolText(); //0100
+                    SivevLogger.Information($"Iniciando lectura OBD en puerto {_port} a {_baud} baudios.");
+                    progreso?.Report($"Iniciando lectura OBD");
 
+                    elm.Open();
+                    progreso?.Report($"Abriendo puerto");
+                    elm.Initialize(showHeaders: false);
+                    progreso?.Report($"Identificando protocolo de comunicación");
+                    _protocolo = elm.WaitAndGetProtocolText(); //0100
+                    progreso?.Report($"Pensando");
+                    porcentaje?.Report(1);
                     _rpm = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
+                    porcentaje?.Report(2);
                     _vel = TryQuery<short?>("Velocidad", () => elm.ReadSpeedKmh(), null, errores); //010D
+                    porcentaje?.Report(3);
                     _vin = TryQuery<string>("VIN", () => elm.ReadVin() ?? "DESCONOCIDO", "DESCONOCIDO", errores);
+                    porcentaje?.Report(4);
                     _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
+                    porcentaje?.Report(5);
                     _vOn = TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores);
 
-
+                    porcentaje?.Report(6);
                     _dtcList03 = LeerYUnirDtcs("GET_DTC", () => elm.ReadStoredDtcs(), errores, out cnt03);
+                    porcentaje?.Report(7);
                     _dtcList07 = LeerYUnirDtcs("GET_CURRENT_DTC", () => elm.ReadCurrentDtcs(), errores, out cnt07);
+                    porcentaje?.Report(8);
                     _dtcList0A = LeerYUnirDtcs("GET_PERMANENT_DTC", () => elm.ReadPermanentDtcs(), errores, out cnt0A);
-
+                    porcentaje?.Report(9);
                     _LeeDtcConfirmados = cnt03 > 0;
+                    porcentaje?.Report(10);
                     _LeeDtcPendientes = cnt07 > 0;
+                    porcentaje?.Report(11);
                     _LeeDtcPermanentes = cnt0A > 0;
-
+                    porcentaje?.Report(12);
                     _vinFromObd = (!string.IsNullOrWhiteSpace(_vin) && !string.Equals(_vin, "DESCONOCIDO", StringComparison.OrdinalIgnoreCase)) ? true : false;
-
+                    //porcentaje?.Report(20);
                     // NUEVOS VALORES 
 
+                    porcentaje?.Report(13);
                     _distMilKm = TryQuery<int?>("DISTANCE_W_MIL", () => elm.ReadDistanceWithMilKm(), null, errores); //0121
+                    porcentaje?.Report(14);
                     _distSinceClrKm = TryQuery<int?>("DISTANCE_SINCE_DTC_CLEAR", () => elm.ReadDistanceSinceClearKm(), null, errores);//0131
+                    porcentaje?.Report(15);
                     _runTimeMilMin = TryQuery<int?>("RUN_TIME_MIL", () => elm.ReadRunTimeMilMinutes(), null, errores);//014D
+                    porcentaje?.Report(16); 
                     _timeSinceClr = TryQuery<int?>("TIME_SINCE_DTC_CLEARED", () => elm.ReadTimeSinceDtcClearedMinutes(), null, errores);//014E
-                    
-                    /*
-                    _cvn = TryQuery<string>("CVN", () => {
-                        var lista = elm.ReadCvns(); // List<string> o null
-                        if (lista != null && lista.Count > 0)
-                            return string.Join(" || ", lista);
-                        return "DESCONOCIDO";
-                    },
-                        "DESCONOCIDO",
-                        errores
-                    );//0906
-                    */
-                    //_cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
 
-                    // Más valores instruidos por Toñin :D
+
+                    porcentaje?.Report(17);
                     _OperacionMotor = TryQuery<int?>("TiempoTotalSegundosOperacionMotor", () => elm.TiempoTotalSegundosOperacionMotor(), null, errores);//011F
+
+                    porcentaje?.Report(18);
                     _WarmUpsDesdeBorrado = TryQuery<int?>("WarmUpsDesdeBorrado", () => elm.WarmUpsSinceCodesCleared(), null, errores);//0130
 
 
-
+                    porcentaje?.Report(19);
                     var status = TryQuery<Elm327.MonitorStatus?>("STATUS PID 0101", () => elm.ReadStatus(), null, errores);
+                    
+                    porcentaje?.Report(20);
                     if (status is { } st) {
                         foreach (var name in expected) {
                             if (!st.Monitors.ContainsKey(name))
@@ -136,6 +146,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         _Trama = sb.ToString();
                         _MilOn = st.MIL;
                         _fallas03 = st.DtcCount;
+                        //porcentaje?.Report(90);
                     } else {
                         _MilOn = null;
                         _fallas03 = null;
@@ -150,43 +161,73 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         }
                     }
 
-
+                    porcentaje?.Report(21);
                     _leeMonitores = (status != null);
 
 
                     /////////////////////////////////////////////////////////////////////////////////////////////////
-                    
+                    porcentaje?.Report(22);
                     _intNormativaObdVehiculo = TryQuery<int?>("NORMATIVA_OBD_VEHICULO_int", () => elm.intNormativaObdVehiculo(), null, errores);//011C
+                    porcentaje?.Report(23);
                     _NormativaObdVehiculo = TryQuery<string?>("NORMATIVA_OBD_VEHICULO_string", () => elm.NormativaObdVehiculo(_intNormativaObdVehiculo), null, errores);//011C
+                    porcentaje?.Report(24);
                     _IatCCoolantTempC = TryQuery<short?>("COOLANTTEMPC", () => elm.TemperaturaRefrigeranteC(), null, errores);//0105
+                    porcentaje?.Report(25);
                     _StftB1 = TryQuery<double?>("STFTB1", () => elm.StftBank1(), null, errores);//0106
+                    porcentaje?.Report(26);
                     _LtftB1 = TryQuery<double?>("LTFTB1", () => elm.LtftBank1(), null, errores);//0107
+                    porcentaje?.Report(27);
                     _IatC = TryQuery<short?>("IATC", () => elm.TemperaturaAireAdmisionC(), null, errores);//010F
+                    porcentaje?.Report(28);
                     _MafGs = TryQuery<double?>("MAFGS", () => elm.FlujoAireMaf(), null, errores);//0110
+                    porcentaje?.Report(29);
                     _MafKgH = TryQuery<double?>("MAFKGH", () => elm.FlujoAireMafKgPorHora(), null, errores);
+                    porcentaje?.Report(30);
                     _Tps = TryQuery<double?>("TPS", () => elm.PosicionAcelerador(), null, errores);
+                    porcentaje?.Report(31);
                     _TimingAdvance = TryQuery<double?>("TIMING_ADVANCE", () => elm.AvanceEncendido(), null, errores);//010E
+                    porcentaje?.Report(32);
                     _O2S1_V = TryQuery<double?>("O2S1_V", () => elm.O2Sensor1Voltage(), null, errores);//0114
+                    porcentaje?.Report(33);
                     _O2S2_V = TryQuery<double?>("O2S2_V", () => elm.O2Sensor2Voltage(), null, errores);//0115
+                    porcentaje?.Report(34);
                     _FuelLevel = TryQuery<double?>("FUEL_LEVEL", () => elm.NivelCombustible(), null, errores);//012F
+                    porcentaje?.Report(35);
                     _BarometricPressure = TryQuery<short?>("BAROMETRIC_PRESSURE", () => elm.PresionBarometrica(), null, errores);//0133
+                    porcentaje?.Report(36);
                     _FuelType = TryQuery<string?>("FUEL_TYPE", () => elm.TipoCombustible(), null, errores);//0151
+                    porcentaje?.Report(37);
                     _IntFuelType = TryQuery<byte?>("INT_FUEL_TYPE", () => elm.byteTipoCombustible0151(), null, errores);//0151
+                    porcentaje?.Report(38);
                     _IntTipoCombustible0907 = TryQuery<byte?>("INT_TIPO_COMBUSTIBLE_0907", () => elm.intTipoCombustible0907(), null, errores);
+                    porcentaje?.Report(39);
                     _EcuAddress = TryQuery<string?>("ECU_ADDRESS", () => elm.EcuAddress(), null, errores); //090A
+                    porcentaje?.Report(40);
                     _EcuAddressInt = TryQuery<int?>("ECU_ADDRESS_INT", () => elm.EcuAddressInt(), null, errores);//090A int
+                    porcentaje?.Report(41);
                     _CCM = TryQuery<double?>("CCM", () => elm.LoadCalc(), null, errores); //0104
+                    porcentaje?.Report(42);
                     _EmissionCode = TryQuery<byte?>("EMISSION_CODE", () => elm.RequisitosEmisionesVehiculo(), null, errores);//015F
+                    porcentaje?.Report(43);
                     _Pids_01_20 = TryQuery<IReadOnlyList<int>>("PIDS_01_20", () => elm.PidsSoportadosBloque("0100", 0x01), Array.Empty<int>(), errores);
+                    porcentaje?.Report(44);
                     _Pids_21_40 = TryQuery<IReadOnlyList<int>>("PIDS_21_40", () => elm.PidsSoportadosBloque("0120", 0x21), Array.Empty<int>(), errores);
+                    porcentaje?.Report(45);
                     _Pids_41_60 = TryQuery<IReadOnlyList<int>>("PIDS_41_60", () => elm.PidsSoportadosBloque("0140", 0x41), Array.Empty<int>(), errores);
+                    porcentaje?.Report(46);
                     _odometro = TryQuery<uint?>("Odometro", () => elm.ReadOdometer01A6(), null, errores);
+                    porcentaje?.Report(47);
                     _fallas = ContarPxxxxUnicos(_dtcList03);
+                    porcentaje?.Report(48);
                     _ID_Calib = TryQuery<int?>("_ID_Calib", () => elm.CalibIdMessageCount(), null, errores);// 0903
+                    porcentaje?.Report(49);
                     _ReadCvnMessageCount = TryQuery<int?>("_ReadCvnMessageCount", () => elm.ReadCvnMessageCount(), null, errores);// 0905
+                    porcentaje?.Report(100);
                     _ReadCvnsRobusto = TryQuery<string?>("ReadCvnsRobusto", () => elm.ReadCvnsRobusto(_ReadCvnMessageCount), null, errores); //0906
                     _TiempoMotorEnMarchaSeg = TryQuery<int?>("TiempoMotorEnMarchaSeg", () => elm.TiempoMotorEnMarchaSeg(), null, errores); //017F
-
+                    
+                    
+                    SivevLogger.Information($"Lectura OBD finalizada exitosamente. VIN: {_vin}, Protocolo: {_protocolo}, DTCs: {_dtcList03}");
                     return new InspeccionObd2Set {
                         ConexionObd = true,
                         VehiculoId = _vin ?? "No se realizo lectura",
@@ -268,6 +309,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         TramaPid0101 = _Trama ?? "No se realizo lectura",
                         TiempoMotorEnMarchaSeg = _TiempoMotorEnMarchaSeg ?? 0,
                         //*/
+
                     };
                 }
             } catch (Exception ex) {

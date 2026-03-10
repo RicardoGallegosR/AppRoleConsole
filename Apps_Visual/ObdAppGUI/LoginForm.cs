@@ -377,93 +377,7 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         #region Credenciales :D
-        /*
-        private async Task<bool> ValidaCredencial() {
-            _tcsAcceso = new TaskCompletionSource<bool>();
-            bool ok = false;
-
-            foreach (Control c in pnlPanelCambios.Controls)
-                c.Dispose();
-                
-            pnlPanelCambios.Controls.Clear();
-
-            if (frmverification == null || frmverification.IsDisposed) {
-                Visual_48 = new DPFP_SMA.Models.VisualRegistroWindows {
-                    Server = Visual_Core.Server,
-                    Database = Visual_Core.Database,
-                    User = Visual_Core.User,
-                    Password = Visual_Core.Password,
-                    AppName = Visual_Core.AppName,
-                    AppRole = Visual_Core.AppRole,
-                    AppRolePassword = Visual_Core.AppRolePassword,
-                    OpcionMenuId = Visual_Core.OpcionMenuId,
-                    Relleno = Visual_Core.Relleno,
-                    UsuarioLinea = Visual_Core.UsuarioLinea,
-                    Ip = Visual_Core.Ip,
-                    Centro = Visual_Core.Centro,
-                    ServidorVersionesControlador = Visual_Core.ServidorVersionesControlador,
-                    Url = Visual_Core.Url,
-                    EstacionId = Visual_Core.EstacionId,
-                    RollVisualAcceso = Visual_Core.RollVisualAcceso,
-                    RollVisual = Visual_Core.RollVisual,
-                };
-                frmverification?.Dispose();
-                frmverification = new VerificationForm(visual: Visual_48);
-                frmverification.AccesoObtenido += Frmcredenciales_AccesoObtenido;
-                frmverification.ShowDialog(this);
-            }
-            ok = await _tcsAcceso.Task;
-
-            return ok;
-            
-        }
-        */
-
-
-
-        /*
-        private async Task<bool> ValidaCredencial() {
-            _tcsAcceso = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-            // Limpia panel actual
-            foreach (Control c in pnlPanelCambios.Controls) c.Dispose();
-            pnlPanelCambios.Controls.Clear();
-
-            // Siempre crea un dialog nuevo (es lo más estable en WinForms)
-            Visual_48 = new DPFP_SMA.Models.VisualRegistroWindows {
-                Server = Visual_Core.Server,
-                Database = Visual_Core.Database,
-                User = Visual_Core.User,
-                Password = Visual_Core.Password,
-                AppName = Visual_Core.AppName,
-                AppRole = Visual_Core.AppRole,
-                AppRolePassword = Visual_Core.AppRolePassword,
-                OpcionMenuId = Visual_Core.OpcionMenuId,
-                Relleno = Visual_Core.Relleno,
-                UsuarioLinea = Visual_Core.UsuarioLinea,
-                Ip = Visual_Core.Ip,
-                Centro = Visual_Core.Centro,
-                ServidorVersionesControlador = Visual_Core.ServidorVersionesControlador,
-                Url = Visual_Core.Url,
-                EstacionId = Visual_Core.EstacionId,
-                RollVisualAcceso = Visual_Core.RollVisualAcceso,
-                RollVisual = Visual_Core.RollVisual,
-            };
-
-            using (var dlg = new VerificationForm(visual: Visual_48)) {
-                dlg.AccesoObtenido += Frmcredenciales_AccesoObtenido;
-
-                // Si el usuario cierra la ventana sin autenticarse, NO te quedes colgado
-                dlg.FormClosed += (_, __) => _tcsAcceso?.TrySetResult(false);
-
-                dlg.ShowDialog(this);
-
-                // Espera resultado (ya garantizado que termina)
-                return await _tcsAcceso.Task;
-            }
-        }
-        //*/
-        //*
+        
         private async Task<bool> ValidaCredencial() {
             SivevLogger.Information("Inicializa ValidaCredencial()");
             _tcsAcceso = new TaskCompletionSource<bool>();
@@ -666,11 +580,6 @@ namespace Apps_Visual.ObdAppGUI {
             }
         }
 
-
-        /// <summary>
-        /// GENERA UN BUG REVISAR A DETALLE
-        /// </summary>
-        /// <param name="accesoObtenido"></param>
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
             if (ok) {
@@ -684,117 +593,7 @@ namespace Apps_Visual.ObdAppGUI {
             }
             _tcsAcceso?.TrySetResult(ok);
         }
-        /// <summary>
-        /// Posible correccion pero aun no la ingreso
-        /// </summary>
-        /// <param name="nombrePropiedad"></param>
-        /// <returns></returns>
 
-        /*
-         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido){
-            // 1) Si el evento viene de otro hilo, brinca al hilo UI
-            if (this.InvokeRequired)   {
-                this.BeginInvoke(new Action(() => Frmcredenciales_AccesoObtenido(accesoObtenido)));
-                return;
-            }
-
-            bool ok = accesoObtenido != Guid.Empty;
-
-            if (ok)    {
-                // 2) Primero guarda el acceso
-                Visual_Core.AccesoId = accesoObtenido;
-
-                // 3) Completa el TCS ANTES de destruir UI (para no quedar colgado si algo falla al limpiar)
-                _tcsAcceso?.TrySetResult(true);
-
-                // 4) Limpieza UI: hazla "después" del ciclo actual de mensajes (evita re-entrancy)
-                this.BeginInvoke(new Action(() =>        {
-                    try            {
-                        // Mejor liberar controles (evitas fugas)
-                        foreach (Control c in pnlPanelCambios.Controls)
-                            c.Dispose();
-
-                        pnlPanelCambios.Controls.Clear();
-
-                        if (frmcredenciales != null && !frmcredenciales.IsDisposed)                {
-                            frmcredenciales.AccesoObtenido -= Frmcredenciales_AccesoObtenido;
-                            frmcredenciales.Dispose();
-                        }
-
-                        frmcredenciales = null;
-                    } catch (Exception ex) {
-                        SivevLogger.Error(ex, "Error limpiando UI tras AccesoObtenido");
-                        // No regresamos false porque el acceso ya fue válido y el flujo debe seguir.
-                    }
-                }));
-
-                return;
-            }
-
-            // Acceso inválido / cancelado
-            Visual_Core.AccesoId = Guid.Empty;
-            _tcsAcceso?.TrySetResult(false);
-        }
-
-         */
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-        private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
-            bool ok = accesoObtenido != Guid.Empty;
-            //Visual_Core.AccesoId = accesoObtenido;
-            _tcsAcceso?.TrySetResult(ok);
-
-            if (ok) {
-                Visual_Core.AccesoId = accesoObtenido;
-                SivevLogger.Information($"Guardar acceso solo si es válido Visual_Core.AccesoId: {Visual_Core.AccesoId}, accesoObtenido {accesoObtenido}");
-            }
-            
-            SivevLogger.Information($"Acceso para Visual_Core = {Visual_Core.AccesoId}");
-
-            if (!this.IsHandleCreated) return;
-
-            this.BeginInvoke(new Action(() => {
-                foreach (Control c in pnlPanelCambios.Controls)
-                    c.Dispose();
-                pnlPanelCambios.Controls.Clear();
-
-                //*
-                // Cierra/limpia el dialog siempre
-                if (frmverification != null) {
-                    try { frmverification.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
-                    frmverification.Dispose();
-                    frmverification = null;
-                }
-                //
-                // Si estás usando frmcredenciales en algún flujo alterno, igual límpialo
-                if (frmcredenciales != null) {
-                    try { frmcredenciales.AccesoObtenido -= Frmcredenciales_AccesoObtenido; } catch { }
-                    SivevLogger.Information("Cierra frmcredenciales");
-                    frmcredenciales.Dispose();
-                    frmcredenciales = null;
-                }
-
-                // Si fue cancelado/incorrecto, regresa a Home aquí mismo (más confiable)
-                if (!ok) {
-                    SivevLogger.Information("Fue cancelado en Frmcredenciales_AccesoObtenido  o salio algo mal asi que regresamos a home");
-                    pnlHome();
-                }
-                   
-            }));
-        }
-        */
         private string Leer(string nombrePropiedad) {
             string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
             if (string.IsNullOrWhiteSpace(cifrado))

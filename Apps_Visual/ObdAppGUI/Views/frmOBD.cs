@@ -61,92 +61,30 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _Visual = visual ?? throw new ArgumentNullException(nameof(visual));
 
             WindowState = FormWindowState.Maximized;
-            tlpPrincipal.Enabled = false;
-            tlpPrincipal.Visible = false;
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
+            
         }
         //*/
         #region BOTON CONECTAR
-        /*
-        private async void btnConectar_Click(object sender, EventArgs e) {
-            //_Intentos++;
-            //conexionObd = false;
-            btnConectar.Visible = false;
-            if (_leyendoObd) {
-                return;
-            }
-            _leyendoObd = true;
-
-
-            try {
-
-                lblLecturaOBD.Text = $"Iniciando placa: {_Visual.PlacaId}";
-                tlpPrincipal.Enabled = false;
-                tlpPrincipal.Visible = false;
-                tlpMonitores.Enabled = false;
-                tlpMonitores.Visible = false;
-
-                lblLecturaOBD.Text = $"Leyendo Monitores de la placa: {_Visual.PlacaId}";
-
-                await Task.Delay(500);
-                lblLecturaOBD.Text = $"Leyendo OBD Monitores de la placa: {_Visual.PlacaId}";
-                randy = new RBGR();
-                ResultadoOBD = randy.SpSetObd();
-                var defaultOBD = new InspeccionObd2Set();
-                //if (defaultOBD.Equals(ResultadoOBD) && _Intentos < 3 && _Intentos >= 0 && !conexionObd) {
-                    ResultadoOBD.Intentos = _Intentos;
-                    ResultadoOBD.ConexionObd = 1;
-                    ResultadoObdSet(OBD2: ResultadoOBD, _Visual_: _Visual, intento: 1, TrySetResult: true);
-                    //conexionObd = true;
-                //}
-                /*
-                if (3-_Intentos != 1 && !conexionObd) {
-                    MostrarMensaje($"Advertencia personalId {_Visual.Credencial}.- Asegurate que se encuentre conectado el OBD. Te quedan {3 - _Intentos} intento.");
-                } else {
-                    MostrarMensaje($"Advertencia personalId {_Visual.Credencial}.- Asegurate que se encuentre conectado el OBD. Te queda {3 - _Intentos} intentos.");
-                }
-                if (3-_Intentos <= 0 && !conexionObd) {
-                    ResultadoObdSet(OBD2: defaultOBD, _Visual_: _Visual, intento: _Intentos, TrySetResult: true);
-                }//
-            } finally {
-                btnConectar.Enabled = true;
-                btnConectar.Visible = true;
-                _leyendoObd = false;
-
-                btnConectar.Text = "Conectar";
-                lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId}";
-                tlpPrincipal.Enabled = false;
-                tlpPrincipal.Visible = false;
-
-                tlpMonitores.Enabled = false;
-                tlpMonitores.Visible = false;
-                btnConectar.Focus();
-            }
-
-
-
-        }
-        */
-
 
         private async void btnConectar_Click(object sender, EventArgs e) {
             // Evita doble click / re-entradas
-            
+            pbLecturaObd.Minimum = 0;
+            pbLecturaObd.Maximum = 100;
+            pbLecturaObd.Value = 0;
             if (_leyendoObd)
                 return;
 
-            // Si ya agotó intentos, no lo dejes seguir
             if (_intentosConexion >= MAX_INTENTOS) {
                 btnConectar.Enabled = false;
                 btnConectar.Text = "Sin intentos";
-                lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión OBD.";
+                lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión SBD.";
                 var respuestaDefaulObd = new InspeccionObd2Set{
                     Intentos = _intentosConexion,
                     ConexionObd = false
                 };
                 ResultadoObdSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
-                //_tcsResultado?.TrySetResult(true);
                 return;
             }
 
@@ -159,22 +97,19 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 // Cuenta el intento al iniciar el proceso (así aunque falle, cuenta)
                 _intentosConexion++;
 
-                lblLecturaOBD.Text = $"Credencial {_Visual.Credencial} ha conectando OBD (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
-
-                tlpPrincipal.Enabled = false;
-                tlpPrincipal.Visible = false;
-                tlpMonitores.Enabled = false;
-                tlpMonitores.Visible = false;
+                lblLecturaOBD.Text = $"Credencial {_Visual.Credencial} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
 
                 await Task.Delay(500);
 
                 // === Tu lógica de conexión/lectura ===
                 randy = new RBGR();
-                ResultadoOBD = randy.SpSetObd();
+                var progreso = new Progress<string>(msg => lblReporte.Text = msg);
 
-                // Si aquí tienes alguna señal real de éxito, úsala para poner conexionObd=true.
-                // Por ejemplo: conexionObd = ResultadoOBD?.ConexionObd == 1; (depende de tu modelo)
-                conexionObd = true; // <-- ajusta esto a tu criterio real de éxito
+                var porcentaje = new Progress<int>(p => {
+                    pbLecturaObd.Value = p;
+                });
+                ResultadoOBD = await Task.Run(() => randy.SpSetObd(progreso, porcentaje));
+
                 if (ResultadoOBD.ConexionObd == true) {
                     ResultadoOBD.Intentos = _intentosConexion;
                     ResultadoOBD.ConexionObd = conexionObd ? true : false;
@@ -197,7 +132,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     btnConectar.Enabled = false;
                     btnConectar.Visible = true;
                     btnConectar.Text = "Sin intentos";
-                    lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión OBD.";
+                    lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión SBD. Desconecte el dispositivo";
                     var respuestaDefaulObd = new InspeccionObd2Set{
                         Intentos = _intentosConexion,
                         ConexionObd = false
@@ -210,16 +145,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     btnConectar.Enabled = true;
                     btnConectar.Text = "Conectar";
 
-                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId}";
+                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId} intento {_intentosConexion}/{MAX_INTENTOS}";
                 }
 
-                tlpPrincipal.Enabled = false;
-                tlpPrincipal.Visible = false;
-
-                tlpMonitores.Enabled = false;
-                tlpMonitores.Visible = false;
-
                 btnConectar.Focus();
+                lblReporte.Text = "Conecte el escaner SBD en el vehículo.\r\nUna vez conectado presiona el botón conectar :D";
             }
         }
 
@@ -235,9 +165,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     await connApp.OpenAsync();
                     using (var scope = new AppRoleScope(connApp, role: _Visual.RollVisual, password: _Visual.RollVisualAcceso.ToString().ToUpper())) {
                         var error = await repo.PrintIfMsgAsync(connApp, $"btnConectar_Click", _mensaje);
-                        var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de OBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
+                        var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de SBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
                         await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
-                        MostrarMensaje($"Resultado de OBD: {error.Mensaje}");
+                        MostrarMensaje($"Resultado de SBD: {error.Mensaje}");
                         await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId: _Visual.EstacionId, _AccesoId: _Visual.AccesoId);
                     }
                     _tcsResultado?.TrySetResult(false);
@@ -275,65 +205,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 return;
             }
 
-            lblLecturaOBD.Text = $"Diagnostico OBD {_Visual.PlacaId}";
+            lblLecturaOBD.Text = $"Diagnostico SBD para la placa: {_Visual.PlacaId}";
+            lblReporte.Text = $"Credencial {_Visual.Credencial}.\nConecta el dispositivo SBD al vehículo encendido y presiona 'Conectar'.";
             //*/
-
-            lblrModoALista.Text = "";
-            lblrModo7Lista.Text = "";
-            lblrModo3Lista.Text = "";
-            lblrCalId.Text = "";
-            lblrRPM.Text = "";
-            lblrBateria.Text = "";
-            lblrOdometroLuzMil.Text = "";
-            lblrProtocoloOBD.Text = "";
-            lblrLuzMil.Text = "";
-            lblrVIN.Text = "";
-            lblrOBDClear.Text = "";
-            lblrCalibrationVerificationNumber.Text = "";
-            lblrRunTimeMil.Text = "";
-            lblrDTCClear.Text = "";
-            tlpMonitores.Visible = false;
-
-            lblBoostPressure.Visible = false;
-            lblBoostPressure.Enabled = false;
-            lblDisponibleBoostPressure.Visible = false;
-            lblDisponibleBoostPressure.Enabled = false;
-            lblCompletoBoostPressure.Visible = false;
-            lblCompletoBoostPressure.Enabled = false;
-
-
-            lblExhaustGasSensor.Visible = false;
-            lblExhaustGasSensor.Enabled = false;
-            lblDisponibleExhaustGasSensor.Visible = false;
-            lblDisponibleExhaustGasSensor.Enabled = false;
-            lblCompletoExhaustGasSensor.Visible = false;
-            lblCompletoExhaustGasSensor.Enabled = false;
-
-
-
-            lblNmhcCatalyst.Visible = false;
-            lblNmhcCatalyst.Enabled = false;
-            lblDisponibleNmhcCatalyst.Visible = false;
-            lblDisponibleNmhcCatalyst.Enabled = false;
-            lblCompletoNmhcCatalyst.Visible = false;
-            lblCompletoNmhcCatalyst.Enabled = false;
-
-
-            lblPmFilter.Visible = false;
-            lblPmFilter.Enabled = false;
-            lblDisponiblePmFilter.Visible = false;
-            lblDisponiblePmFilter.Enabled = false;
-            lblCompletoPmFilter.Visible = false;
-            lblCompletoPmFilter.Enabled = false;
-
-
-            lblNoxScrAftertreatment.Visible = false;
-            lblNoxScrAftertreatment.Enabled = false;
-            lblDisponibleNoxScrAftertreatment.Visible = false;
-            lblDisponibleNoxScrAftertreatment.Enabled = false;
-            lblCompletoNoxScrAftertreatment.Visible = false;
-            lblCompletoNoxScrAftertreatment.Enabled = false;
-
         }
         #endregion
 
@@ -363,7 +237,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 this.Size = new Size(_panelX, _panelY);
             }
             _formSizeInicial = this.Size;
-            _fontSizeInicial = lblMonitorTitulo.Font.Size;
         }
         #endregion
 

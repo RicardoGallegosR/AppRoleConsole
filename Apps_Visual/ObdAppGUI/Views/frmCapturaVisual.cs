@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Xml.Linq;
 //clbPrincipal
@@ -128,6 +129,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 _checkOBD?.Invoke(r.CheckObd);
 
                 _tcsResultado?.TrySetResult(true);
+            } else if (r.MensajeId is 50025) {
+                //MostrarMensaje("Intento 2 para arreglar el desmadrito de la visual");
+                _tcsResultado?.TrySetResult(false);
+
             } else {
                 _tcsResultado?.TrySetResult(false);
             }
@@ -457,13 +462,23 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     result.ReturnCode = r.ReturnCode;
                     result.CheckObd = r.CheckObd;
 
-                    if (result.MensajeId != 0) {
+                    if (result.MensajeId is not 0 and not 50025) {
                         var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
                         var msg = error?.Mensaje ?? "Mensaje no disponible";
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
                         MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
                     }
+                    if (result.MensajeId is 50025) {
+                        var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
+                        var msg = error?.Mensaje ?? "Mensaje no disponible";
+                        var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
+                        MostrarMensaje($"{msg}");
+                    }
+                
                 }
             } catch (Exception e) {
                 try {
