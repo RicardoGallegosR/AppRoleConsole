@@ -44,13 +44,13 @@ class Program {
             reg.BaseSql = ev.BaseDatos;
             reg.SQL_USER = ev.SQL_USER;
             reg.SQL_PASS = ev.SQL_PASS;
-            reg.APPNAME = ev.APPNAME;
+            reg.APPNAME = eV.dvar5;
             reg.APPROLE = ev.APPROLE;
             reg.APPROLE_PASS = ev.APPROLE_PASS;
             reg.APPROLE_VISUAL = ev.APPROLE_VISUAL;      // setter persistente
             reg.APPROLE_PASS_VISUAL = ev.APPROLE_PASS_VISUAL; // setter persistente
             reg.ClaveAccesoId = ev.ClaveAccesoId;
-            reg.EstacionId = ev.EstacionId;
+            reg.EstacionId = eV.dvar15;
             reg.OpcionMenuId = ev.opcionMenu;
         } else {
             Console.WriteLine("Ejecuta elevado o implementa fallback a HKCU.");

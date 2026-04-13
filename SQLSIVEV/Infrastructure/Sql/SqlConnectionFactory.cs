@@ -7,8 +7,9 @@ namespace SQLSIVEV.Infrastructure.Sql {
             var csb = new SqlConnectionStringBuilder {
                 DataSource = server,
                 InitialCatalog = db,
-                UserID = user,
-                Password = pass,
+                //UserID = user,
+                //Password = pass,
+                IntegratedSecurity = true,
                 Encrypt = false,
                 TrustServerCertificate = true,
                 ApplicationName = appName,

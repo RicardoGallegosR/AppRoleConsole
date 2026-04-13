@@ -85,15 +85,15 @@ namespace Apps_Visual.ObdAppGUI {
         private async Task< bool> SpAppRollClaveGet() {
             try {
                 await using var conn = SqlConnectionFactory.Create( 
-                    server:     Visual_Core.Server,
-                    db:         Visual_Core.Database,
-                    user:       Visual_Core.User, 
-                    pass:       Visual_Core.Password,
-                    appName:    Visual_Core.AppName
+                    server:     Visual_Core.dvar1,
+                    db:         Visual_Core.dvar2,
+                    user:       Visual_Core.dvar3, 
+                    pass:       Visual_Core.dvar4,
+                    appName:    Visual_Core.dvar5
                 );
                 await conn.OpenAsync();
 
-                using (var scope = new AppRoleScope(conn, Visual_Core.AppRole, Visual_Core.AppRolePassword.ToString().ToUpper())) {
+                using (var scope = new AppRoleScope(conn, Visual_Core.dvar6, Visual_Core.dvar7.ToString().ToUpper())) {
                     var repo = new SivevRepository();
                     var r = repo.SpAppRollClaveGet(conn);
                     var MensajesSQL = await  repo.PrintIfMsgAsync(conn, "Fallo en SpAppRollClaveGet", r.MensajeId);
@@ -106,10 +106,10 @@ namespace Apps_Visual.ObdAppGUI {
                         }
                         return false;
                     }
-                    Visual_Core.RollVisualAcceso = Guid.Parse((r.ClaveAcceso ?? "").Reverse().ToArray());
-                    Visual_Core.RollVisual = r.FuncionAplicacion;
+                    Visual_Core.dvar16 = Guid.Parse((r.ClaveAcceso ?? "").Reverse().ToArray());
+                    Visual_Core.dvar17 = r.FuncionAplicacion;
 
-                    SivevLogger.Information($"Valores regresados {Visual_Core.RollVisual}");
+                    SivevLogger.Information($"Valores regresados {Visual_Core.dvar17}");
                 }
 
 
@@ -165,44 +165,48 @@ namespace Apps_Visual.ObdAppGUI {
             CryptoHelper.Configurar(conf);
            
             Visual_Core = new VisualRegistroWindows{
-                Server                    = Leer(nameof(VisualRegistroWindows.Server)),
-                Database                  = Leer(nameof(VisualRegistroWindows.Database)),
-                User                      = Leer(nameof(VisualRegistroWindows.User)),
-                Password                  = Leer(nameof(VisualRegistroWindows.Password)),
-                AppName                   = Leer(nameof(VisualRegistroWindows.AppName)),
-                AppRole                   = Leer(nameof(VisualRegistroWindows.AppRole)),
-                AppRolePassword           = LeerGuid(nameof(VisualRegistroWindows.AppRolePassword)),
-                OpcionMenuId              = LeerShort(nameof(VisualRegistroWindows.OpcionMenuId), 0),
-                Relleno                   = LeerBool(nameof(VisualRegistroWindows.Relleno), false),
-                UsuarioLinea              = Leer(nameof(VisualRegistroWindows.UsuarioLinea)),
-                Ip                        = Leer(nameof(VisualRegistroWindows.Ip)),
-                Centro                    = LeerShort(nameof(VisualRegistroWindows.Centro), 0),
-                ServidorVersionesControlador = Leer(nameof(VisualRegistroWindows.ServidorVersionesControlador)),
-                Url                       = Leer((nameof(VisualRegistroWindows.Url))),
-                EstacionId                = LeerGuid(nameof(VisualRegistroWindows.EstacionId))
+                dvar1 = Leer("Server"),
+                dvar2 = Leer("Database"),
+                dvar3 = Leer("User"),
+                dvar4 = Leer("Password"),
+                dvar5 = Leer("AppName"),
+                dvar6 = Leer("AppRole"),
+                dvar7 = LeerGuid("AppRolePassword"),
+                dvar8 = LeerShort("OpcionMenuId", 0),
+                dvar9 = LeerBool("Relleno", false),
+                dvar10 = Leer("UsuarioLinea"),
+                dvar11 = Leer("Ip"),
+                dvar12 = LeerShort("Centro", 0),
+                dvar13 = Leer("ServidorVersionesControlador"),
+                dvar14 = Leer("url"),
+                dvar15 = LeerGuid("EstacionId"),
+                dvar25 = Leer("v25")
             };
-            
 
+            //*
             SivevLogger.Information(
                 $"|| Lectura de REGEDIT " +
-                $"|| SERVER: {Visual_Core.Server}, " +
-                $"|| DB: {Visual_Core.Database}, " +
-                $"|| SQL_USER: {Visual_Core.User}, " +
-                $"|| APPNAME: {Visual_Core.Password}, " +
-                $"|| APPROLE: {Visual_Core.AppName}, " +
-                $"|| RollAcceso: {Visual_Core.AppRole}, " +
-                $"|| opcionMenu: {Visual_Core.OpcionMenuId}, " +
-                $"|| estacionId: {Visual_Core.EstacionId}, " 
+                $"|| SERVER: {Visual_Core.dvar1}, " +
+                $"|| DB: {Visual_Core.dvar2}, " +
+                $"|| SQL_USER: {Visual_Core.dvar3}, " +
+                $"|| APPNAME: {Visual_Core.dvar5}, " +
+                $"|| APPROLE: {Visual_Core.dvar6}, " +
+                $"|| RollAcceso: {Visual_Core.dvar7}, " +
+                $"|| opcionMenu: {Visual_Core.dvar8}, " +
+                $"|| estacionId: {Visual_Core.dvar15}, " +
+                //$"|| v25: {Visual_Core.dvar25} " 
+                ""
             );
-
-            return vacio(Visual_Core.Server)
-                 || vacio(Visual_Core.Database)
-                 || vacio(Visual_Core.User)
-                 || vacio(Visual_Core.Password)
-                 || vacio(Visual_Core.AppName)
-                 || vacio(Visual_Core.AppRole)
-                 || vacio(Visual_Core.EstacionId.ToString())
-                 || Visual_Core.OpcionMenuId <= 0;
+            MostrarMensaje($"{Visual_Core.dvar1}");
+            //*/
+            return vacio(Visual_Core.dvar1)
+                 || vacio(Visual_Core.dvar2)
+                 || vacio(Visual_Core.dvar3)
+                 || vacio(Visual_Core.dvar4)
+                 || vacio(Visual_Core.dvar5)
+                 || vacio(Visual_Core.dvar6)
+                 || vacio(Visual_Core.dvar15.ToString())
+                 || Visual_Core.dvar8 <= 0;
         }
 
         private void BloquearEstacionRegEdit() {
@@ -269,29 +273,19 @@ namespace Apps_Visual.ObdAppGUI {
 
         #region Inicio de inspeccion visual
         private async void LoginForm_Load(object sender, EventArgs e) {
-            //Application.Exit();
-            //Close();
-            //await InicioAsync();
             bool matarExplorer = false; 
             if (matarExplorer) {
                 foreach (var proc in Process.GetProcessesByName("explorer"))
                     proc.Kill();
             }
-
-            //var v = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "dev";
-
-            //lblVerificaciónVehicularFoother.Text = $"Versión {v}";
         }
-
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Alt | Keys.F4))
                 return true;
 
-            if (keyData == Keys.Escape && Visual_Core.AccesoId != Guid.Empty) {
+            if (keyData == Keys.Escape && Visual_Core.dvar20 != Guid.Empty) {
                 BeginInvoke(new Action(async () => {
                     var frmEscape = new frmEscape(visual: Visual_Core);
-                    // Si quieres modal, usa ShowDialog y NO necesitas EsperarResultadoAsync.
-                    // Si tu diseño es async, entonces Show (no modal) sí tiene sentido:
                     frmEscape.Show();
                     bool ok = await frmEscape.EsperarResultadoAsync();
                     if (!frmEscape.IsDisposed)
@@ -319,8 +313,6 @@ namespace Apps_Visual.ObdAppGUI {
                             PruebaOBD.Dispose();
                         }
                         PruebaOBD = null;
-
-                        // Cerrar CapturaVisual si aplica
                         if (CapturaVisual != null && !CapturaVisual.IsDisposed) {
                             CapturaVisual.Parent?.Controls.Remove(CapturaVisual);
                             CapturaVisual.Controls.Clear();
@@ -354,23 +346,25 @@ namespace Apps_Visual.ObdAppGUI {
                 pnlHome();
                 return;
             }
-            //Visual_Core.AccesoId = accesoValido;
-            SivevLogger.Information($"Se guarda con el accesoId: {Visual_Core.AccesoId}");
+            //Visual_Core.dvar20 = accesoValido;
+            SivevLogger.Information($"Se guarda con el accesoId: {Visual_Core.dvar20}");
             
                 
             bool pruebaVisual = await ListadoVisual();
             if (!pruebaVisual) {
+                btnApagar.Enabled = true;
+                btnApagar.Visible = true;
                 SivevLogger.Information($"No pasa a prueba OBD la placa {_placa}: {pruebaVisual}");
                 return;
             }
-            Visual_Core.PlacaId = _placa;
-            Visual_Core.VerificacionId = _verificacionId;
+            Visual_Core.dvar19 = _placa;
+            Visual_Core.dvar21 = _verificacionId;
 
             await Task.Delay(200);
 
             bool PruebaOBD = await PruebaOBDPanel();
             if (!PruebaOBD) {
-                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual_Core.PlacaId}: {PruebaOBD}");
+                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual_Core.dvar19}: {PruebaOBD}");
                 return;
             }
         }
@@ -390,6 +384,15 @@ namespace Apps_Visual.ObdAppGUI {
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
                 frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
+                /*
+                frmcredenciales.SetCallbacks (credencial => {
+                    if (int.TryParse(credencial, out var c)) {
+                        frmcredenciales.credencial = c;
+                    } else {
+                        SivevLogger.Warning($"Credencial ingresada no es numérica: {credencial}");
+                    }
+                });
+                */
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
@@ -399,10 +402,12 @@ namespace Apps_Visual.ObdAppGUI {
             pnlPanelCambios.Controls.Add(frmcredenciales.GetPanel());
             pnlPanelCambios.Select();
 
+
             pnlPanelCambios.BeginInvoke(new Action(() =>  {
                 try {
                     frmcredenciales.txbCredencial?.Select();
                     frmcredenciales.txbCredencial?.Focus();
+                    //Visual_Core.dvar18 = frmcredenciales.txbCredencial.Text;
                     SivevLogger.Information("Focus aplicado a txbCredencial");
                 } catch (Exception ex) {
                     SivevLogger.Error($"No se pudo aplicar focus a txbCredencial {ex}");
@@ -418,7 +423,11 @@ namespace Apps_Visual.ObdAppGUI {
         #region Prueba Visual
 
         private async Task<bool> ListadoVisual() {
-            SivevLogger.Information($"Entra a listado Visual con el Acceso: {Visual_Core.AccesoId.ToString().ToUpper()}");
+            _placa = string.Empty;
+            _verificacionId = Guid.Empty;
+            _RealizarPruebaOBD = false;
+
+            SivevLogger.Information($"Entra a listado Visual con el Acceso: {Visual_Core.dvar20.ToString().ToUpper()}");
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
@@ -455,6 +464,8 @@ namespace Apps_Visual.ObdAppGUI {
                     pnlPanelCambios.Dock = DockStyle.Fill;
                     btnInspecionVisual.Enabled = true;
                     btnInspecionVisual.Visible = true;
+                    btnApagar.Enabled = true;
+                    btnApagar.Visible = true;
                     btnInspecionVisual?.Select();
                     btnInspecionVisual.Focus();
                 }
@@ -501,7 +512,6 @@ namespace Apps_Visual.ObdAppGUI {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
-
             if (PruebaOBD == null || PruebaOBD.IsDisposed) {
                 PruebaOBD = new frmOBD(Visual_Core);
             }
@@ -561,7 +571,7 @@ namespace Apps_Visual.ObdAppGUI {
                 "Confirmar salida",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2  // ← "No" por defecto
+                MessageBoxDefaultButton.Button2  
             );
             if (result == DialogResult.Yes) {
                 //Application.Exit();
@@ -584,7 +594,7 @@ namespace Apps_Visual.ObdAppGUI {
             bool ok = accesoObtenido != Guid.Empty;
             if (ok) {
                 //_AccesoIdObtenido = accesoObtenido;
-                Visual_Core.AccesoId = accesoObtenido;
+                Visual_Core.dvar20 = accesoObtenido;
                 pnlPanelCambios.Controls.Clear();
                 frmcredenciales.Dispose();
                 frmcredenciales = null;

@@ -32,6 +32,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         public bool ExisteHuella;
         public byte[] Huella;
+        public event Action<string> _credencial;
 
 
         public frmAuth() {
@@ -47,8 +48,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             _fontSizeInicial = this.Font.Size;
             ResetForm();
         }
-
-
+        /*
+        public void SetCallbacks(Action<string> CredencialCallback) {
+            _credencial = CredencialCallback;
+        }
+        */
         private void btnAcceder_Click(object sender, EventArgs e) {
             ActivacionBotonAcceder();
         }
@@ -71,16 +75,16 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
-                if (IsSet(_Visual.Server)       && IsSet(_Visual.Database)      && IsSet(_Visual.User)      && 
-                    IsSet(_Visual.Password)     && IsSet(_Visual.AppName)       && IsSet(_Visual.AppRole)   && 
-                    IsSet(_Visual.AppRolePassword.ToString())) {
+                if (IsSet(_Visual.dvar1)     && IsSet(_Visual.dvar2)  && IsSet(_Visual.dvar3)   && 
+                    IsSet(_Visual.dvar4)     && IsSet(_Visual.dvar5)  && IsSet(_Visual.dvar6)   && 
+                    IsSet(_Visual.dvar7.ToString())) {
 
                     var r = await CredencialExisteHuella(V:_Visual, credencial:credencial);
 
                     if (r.MensajeId == 0) {
                         lblCredencial.Enabled = false;
                         txbCredencial.Enabled = false;
-
+                        _Visual.dvar18 = txbCredencial.Text.ToString();
                         ExisteHuella = r.ExisteHuella;
                         Huella = r.Huella;
 
@@ -93,14 +97,38 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             lblPassword.Visible = true;
 
                         } else {
-                            MostrarMensaje($"Se debe crear la libreria de huella");
+                            var visual_48 = new DPFP_SMA.Models.VisualRegistroWindows {
+                                dvar18 = txbCredencial.Text,
+                                dvar1 = _Visual.dvar1,
+                                dvar2 = _Visual.dvar2,
+                                dvar3 = _Visual.dvar3,
+                                dvar4 = _Visual.dvar4,
+                                dvar5 = _Visual.dvar5,
+                                dvar15 = _Visual.dvar15,
+                                dvar8 = _Visual.dvar8,
+                                dvar17 = _Visual.dvar17,
+                                dvar16 = _Visual.dvar16,
+                                Huella = Huella
+                            };
+                            var analizaHuellaForm = new DPFP_SMA.Forms.Comun.VerificationForm(visual_48);
+                            Guid accesoIdRecibido = Guid.Empty;
+                            analizaHuellaForm.StartPosition = FormStartPosition.CenterParent;
+                            analizaHuellaForm.AccesoObtenido += (accesoId) => {
+                                accesoIdRecibido = accesoId;
+                            };
+                            analizaHuellaForm.ShowDialog();
+                            if (!accesoIdRecibido.Equals( Guid.Empty)) {
+                                analizaHuellaForm.Close();
+                                _Visual.dvar20 = accesoIdRecibido;
+                                AccesoObtenido?.Invoke(accesoIdRecibido);
+                            }
                         }
                     } else {
                         txbCredencial.Text = string.Empty;
                         txbCredencial.Focus();
                     }
                 } else {
-                    SivevLogger.Information(($"Apps_Visual.ObdAppGUI.Views.txbCredencial_PreviewKeyDown\n server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}"));
+                    SivevLogger.Information(($"Apps_Visual.ObdAppGUI.Views.txbCredencial_PreviewKeyDown\n server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}"));
                 }
             }
         }
@@ -130,7 +158,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
             txbPassword.Enabled = false;
             lblPassword.Enabled = false;
             txbCredencial.Focus();
-            _Visual.Credencial = credencial.ToString();
+            _Visual.dvar18 = txbCredencial.Text.ToString();
+            //MostrarMensaje($"Verificando credencial {_Visual.dvar18} y contraseña, por favor espere...");
             var r = await GetAccesoSQL(V:_Visual, credencial:credencial);
             Guid accesoNormalizado = Guid.Empty;
             if (r != null && r.MensajeId == 0 && r.AccesoId != Guid.Empty) {
@@ -154,10 +183,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
                 await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
-                    var rinicial = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId: V.EstacionId, opcionMenuId:V.OpcionMenuId,
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppAccesoIniciaAsync( conn:connApp, estacionId: V.dvar15, opcionMenuId:V.dvar8,
                                                                     credencial:credencial,password:txbPassword.Text, huella:Huella);
                     _resultado = rinicial.ReturnCode;
                     _mensaje = rinicial.MensajeId;
@@ -198,11 +227,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
                 await connApp.OpenAsync(ct);
-                using var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper());
+                using var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper());
 
-                var r = repo.SpAppCredencialExisteHuella(cnn: connApp, uiEstacionId: V.EstacionId, siOpcionMenuId: V.OpcionMenuId, iCredencial: credencial);
+                var r = repo.SpAppCredencialExisteHuella(cnn: connApp, uiEstacionId: V.dvar15, siOpcionMenuId: V.dvar8, iCredencial: credencial);
 
                 resultado = r.Resultado;
                 mensaje = r.MensajeId;
@@ -367,10 +396,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private SpAppBitacoraErroresSet NuevaBitacora( VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
             return new SpAppBitacoraErroresSet {
-                EstacionId = V.EstacionId,
-                Centro = V.Centro,
+                EstacionId = V.dvar15,
+                Centro = V.dvar12,
                 NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.OpcionMenuId,
+                OpcionMenuId = V.dvar8,
                 FechaError = DateTime.Now,
                 Libreria = Path.GetFileName(callerFile),
                 Clase = Path.GetFileNameWithoutExtension(callerFile),

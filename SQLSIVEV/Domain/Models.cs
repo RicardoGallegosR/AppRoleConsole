@@ -139,7 +139,7 @@
     }
 
     public sealed class InspeccionObd2Set {
-        public bool? ConexionObd { get; set; } = false;
+        public bool ConexionObd { get; set; } = false;
         public Guid EstacionId { get; set; } = Guid.Empty;
         public Guid AccesoId { get; set; } = Guid.Empty;
         public Guid VerificacionId { get; set; } = Guid.Empty;

@@ -314,9 +314,12 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 }
             } catch (Exception ex) {
                 mensaje = ex.Message;
-                SivevLogger.Error($"Falló en la lectura de OBD {ex.Message}");
+                SivevLogger.Error($"Falló en la lectura de SBD: {ex.Message}");
             }
-            return new InspeccionObd2Set();
+            return new InspeccionObd2Set { 
+                ConexionObd = false,
+                Mensaje = $"Error en lectura SBD: {mensaje}"
+            };
         }
 
         #endregion

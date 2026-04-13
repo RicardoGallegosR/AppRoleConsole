@@ -450,12 +450,37 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return (A, B);
             } catch { return null; }
         }
+        private (int A, int B)? ReadPidABMod09(string cmd, int timeoutMs = 3000) {
+            var resp = ExecRaw(cmd, timeoutMs);
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+            var pid = "49" + cmd.Substring(2);
+            var idx = compact.IndexOf(pid, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0 || compact.Length < idx + 8) return null;
+            try {
+                int A = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
+                int B = Convert.ToInt32(compact.Substring(idx + 6, 2), 16);
+                return (A, B);
+            } catch { return null; }
+        }
         private int? ReadPidA(string cmd, int timeoutMs = 3000) {
             var resp = ExecRaw(cmd, timeoutMs);
             var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace(">", "");
             if (compact.IndexOf("NODATA", StringComparison.OrdinalIgnoreCase) >= 0) return null;
 
             var pid = "41" + cmd.Substring(2);
+            var idx = compact.IndexOf(pid, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0 || compact.Length < idx + 6) return null; // "41PPAA" => 6 chars desde idx
+
+            try {
+                return Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
+            } catch { return null; }
+        }
+        private int? ReadPidAMod09(string cmd, int timeoutMs = 3000) {
+            var resp = ExecRaw(cmd, timeoutMs);
+            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace(">", "");
+            if (compact.IndexOf("NODATA", StringComparison.OrdinalIgnoreCase) >= 0) return null;
+
+            var pid = "49" + cmd.Substring(2);
             var idx = compact.IndexOf(pid, StringComparison.OrdinalIgnoreCase);
             if (idx < 0 || compact.Length < idx + 6) return null; // "41PPAA" => 6 chars desde idx
 
@@ -545,11 +570,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
 
         public int? intNormativaObdVehiculo() {
-            var ab = ReadPidAB("011C", 9_000);
-            if (!ab.HasValue)
-                return null;
-            int A = ab.Value.A;
-            return A;
+            var a = ReadPidA("011C", 9000);
+            return a;
         }
 
         // PID 0105 - Temperatura del refrigerante (°C)
@@ -811,7 +833,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
         // public int? intTipoCombustible0907 { get; init; }
         public byte? intTipoCombustible0907() {
-            var ab = ReadPidAB("0907", 9000);
+            var ab = ReadPidABMod09("0907", 9000);
             if (!ab.HasValue)
                 return null;
 
@@ -850,15 +872,26 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             var resp = ExecRaw("0903", 3000);
             if (string.IsNullOrWhiteSpace(resp))
                 return null;
-            var compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").ToUpperInvariant();
-            int idx = compact.IndexOf("4903", StringComparison.OrdinalIgnoreCase);
-            if (idx < 0)
-                return null;
-            if (compact.Length < idx + 6)
+
+            var compact = resp.Replace(" ", "")
+                      .Replace("\n", "")
+                      .Replace("\r", "")
+                      .Replace(">", "")
+                      .ToUpperInvariant();
+
+            if (compact.Contains("NODATA", StringComparison.OrdinalIgnoreCase))
                 return null;
 
-            string hex = compact.Substring(idx + 4, 2);
-            return Convert.ToInt32(hex, 16);
+            int idx = compact.IndexOf("4903", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0 || compact.Length < idx + 6) // 49 03 AA
+                return null;
+
+            try {
+                string hex = compact.Substring(idx + 4, 2);
+                return Convert.ToInt32(hex, 16);
+            } catch {
+                return null;
+            }
         }
 
 
@@ -1131,7 +1164,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         /// Devuelve null si no hay dato.
         /// </summary>
         public int? ReadCvnMessageCount(int timeoutMs = 4000) {
-            var a = ReadPidA("0905", timeoutMs); // 49 05 XX
+            var a = ReadPidAMod09("0905", timeoutMs); // 49 05 XX
             return a.HasValue ? (int?)a.Value : null;
         }
 

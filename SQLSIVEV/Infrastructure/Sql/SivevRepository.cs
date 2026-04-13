@@ -610,9 +610,9 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.CommandType = CommandType.StoredProcedure;
 
             // Entradas GUID
-            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.EstacionId });
-            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = V.AccesoId });
-            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.VerificacionId });
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar15 });
+            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value =V.dvar20 });
+            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar21 });
 
             // Cadenas
             cmd.Parameters.Add(new SqlParameter("@vcVehiculoId", SqlDbType.VarChar, 17) { Value = string.IsNullOrWhiteSpace(obd.VehiculoId) ? "DESCONOCIDO" : obd.VehiculoId.Trim() });
@@ -622,7 +622,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@vcCodigoErrorPermanente", SqlDbType.VarChar, 300) { Value = obd.CodigoErrorPermanente ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcDir_ECU", SqlDbType.VarChar, 32) { Value = obd.Dir_ECU ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcIDs_Adic", SqlDbType.VarChar, 64) { Value = obd.IDs_Adic ?? "DESCONOCIDO" });
-            cmd.Parameters.Add(new SqlParameter("@vcNumVerifCalib", SqlDbType.VarChar, 16) { Value = obd.NumVerifCalib });
+            cmd.Parameters.Add(new SqlParameter("@vcNumVerifCalib", SqlDbType.VarChar, 16) { Value = obd.ReadCvnsRobusto });
             cmd.Parameters.Add(new SqlParameter("@vcLista_CVN", SqlDbType.VarChar, 200) { Value = obd.ReadCvnsRobusto });
             cmd.Parameters.Add(new SqlParameter("@vcEst_Mon_DTC_Borrado", SqlDbType.VarChar, 100) { Value = obd.Est_Mon_DTC_Borrado ?? "DESCONOCIDO" });
             cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_01_20", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_01_20 });
@@ -733,18 +733,18 @@ namespace SQLSIVEV.Infrastructure.Sql {
             short _Resultado = 0;
             int   _MensajeId = 0;
             try {
-                using (var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName)) {
+                using (var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5)) {
                     if (connApp.State != ConnectionState.Open) await connApp.OpenAsync(ct);
-                    using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
 
                         using (var cmd = connApp.CreateCommand()) {
                             cmd.CommandText = "VfcVisual.SpAppCapturaAbandona";
                             cmd.CommandType = CommandType.StoredProcedure;
 
                             // Entradas
-                            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = V.AccesoId });
-                            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.EstacionId });
-                            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.VerificacionId });
+                            cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value =V.dvar20 });
+                            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar15 });
+                            cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar21 });
 
                             // Salidas
                             var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
@@ -774,9 +774,9 @@ namespace SQLSIVEV.Infrastructure.Sql {
             short _Resultado = 0;
             int   _MensajeId = 0;
             try {
-                using (var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName)) {
+                using (var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5)) {
                     if (connApp.State != ConnectionState.Open) await connApp.OpenAsync(ct);
-                    using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                    using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
 
                         using var cmd = connApp.CreateCommand();
                         cmd.CommandText = "SivAppComun.SpAppBitacoraErroresSet";

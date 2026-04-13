@@ -129,11 +129,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 _checkOBD?.Invoke(r.CheckObd);
 
                 _tcsResultado?.TrySetResult(true);
-            } else if (r.MensajeId is 50025) {
-                //MostrarMensaje("Intento 2 para arreglar el desmadrito de la visual");
-                _tcsResultado?.TrySetResult(false);
-
-            } else {
+            }else {
                 _tcsResultado?.TrySetResult(false);
             }
         }
@@ -261,10 +257,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
             lblTitulo.Text = "Buscando Verificaciones disponibles";
             bool IsSet(string s) => !string.IsNullOrWhiteSpace(s);
 
-            if (IsSet(_Visual.Server) && IsSet(_Visual.Database) && IsSet(_Visual.User) &&
-                IsSet(_Visual.Password) && IsSet(_Visual.AppName) && IsSet(_Visual.RollVisual) &&
-                _Visual.RollVisualAcceso != Guid.Empty && _Visual.EstacionId != Guid.Empty &&
-                _Visual.AccesoId != Guid.Empty) {
+            if (IsSet(_Visual.dvar1) && IsSet(_Visual.dvar2) && IsSet(_Visual.dvar3) &&
+                IsSet(_Visual.dvar4) && IsSet(_Visual.dvar5) && IsSet(_Visual.dvar17) &&
+                _Visual.dvar16 != Guid.Empty &&_Visual.dvar15 != Guid.Empty &&
+                _Visual.dvar20 != Guid.Empty) {
 
                 var r = await GetAccesoSQLVerificaciones(V:_Visual);
                 _MensajeSQL = r.MensajeId;
@@ -280,7 +276,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     lblPlaca.Text = r.PlacaId;
                     _placa = r.PlacaId;
                     _verificacionId = r.VerificacionId;
-                    _Visual.VerificacionId = _verificacionId;
+                    _Visual.dvar21 = _verificacionId;
                     _protocoloVerificacíon = r.ProtocoloVerificacionId;
 
                     var r2 = await BanderasAEvaluar(V:_Visual,elemento: "DESCONOCIDO", combustible: 0 );
@@ -292,11 +288,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     if (_MensajeSQL != 0) {
                         var repo = new SivevRepository();
                         CancellationToken ct = default;
-                        using (var connApp = SqlConnectionFactory.Create(server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName)) {
+                        using (var connApp = SqlConnectionFactory.Create(server: _Visual.dvar1, db: _Visual.dvar2, user: _Visual.dvar3, pass: _Visual.dvar4, appName: _Visual.dvar5)) {
                             await connApp.OpenAsync(ct);
-                            using (var scope = new AppRoleScope(connApp, _Visual.RollVisual, _Visual.RollVisualAcceso.ToString().ToUpper())) {
+                            using (var scope = new AppRoleScope(connApp, _Visual.dvar17, _Visual.dvar16.ToString().ToUpper())) {
                                 var error = await repo.PrintIfMsgAsync(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL);
-                                var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+                                var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
                                 var bitacora = NuevaBitacora(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
                                 await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
                                 SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
@@ -308,8 +304,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     return false;
                 }
             } else {
-                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}, Acceso: {_Visual.AccesoId.ToString().ToUpper()}");
-                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.Server}, db: {_Visual.Database}, user: {_Visual.User}, pass: {_Visual.Password}, appName: {_Visual.AppName}, Acceso: {_Visual.AccesoId.ToString().ToUpper()}");
+                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}, Acceso: {_Visual.dvar20.ToString().ToUpper()}");
+                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}, Acceso: {_Visual.dvar20.ToString().ToUpper()}");
                 foreach (Control c in pnlPrincipal.Controls)
                     c.Dispose();
                 pnlPrincipal.Controls.Clear();
@@ -334,10 +330,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
                 await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
-                    var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.EstacionId, accesoId:V.AccesoId);
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.dvar15, accesoId:V.dvar20);
 
                     _resultado = rinicial.Resultado;
                     _mensaje = rinicial.MensajeId;
@@ -387,12 +383,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var repo = new SivevRepository();
             var result = new CapturaVisualGetResult();
             try {
-                using var connApp = SqlConnectionFactory.Create( server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
                 await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
-                    var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.EstacionId, accesoId: V.AccesoId, verificacionId: V.VerificacionId, elemento: elemento, tiCombustible: combustible);
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                    var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.dvar15, accesoId:V.dvar20, verificacionId: V.dvar21, elemento: elemento, tiCombustible: combustible);
 
-                    //MostrarMensaje($"estacionId: {V.EstacionId}, accesoId: {V.AccesoId}, verificacionId: {V.VerificacionId}, elemento: {elemento}, tiCombustible: {combustible}");
+                    //MostrarMensaje($"estacionId: {V.dvar15}, accesoId: {V.AccesoId}, verificacionId: {V.dvar21}, elemento: {elemento}, tiCombustible: {combustible}");
 
                     result.Resultado = rbanderas.Resultado;
                     result.MensajeId = rbanderas.MensajeId;
@@ -433,15 +429,15 @@ namespace Apps_Visual.ObdAppGUI.Views {
             var result = new CapturaInspeccionVisualNewSetResult();
 
             try {
-                using var connApp = SqlConnectionFactory.Create(server: V.Server, db: V.Database, user: V.User, pass: V.Password, appName: V.AppName);
+                using var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
                 await connApp.OpenAsync(ct);
 
-                using (var scope = new AppRoleScope(connApp, role: V.RollVisual, password: V.RollVisualAcceso.ToString().ToUpper())) {
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
                     var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
                                                                                 conn: connApp,
-                                                                                verificacionId: V.VerificacionId,
-                                                                                estacionId: V.EstacionId,
-                                                                                accesoId: V.AccesoId,
+                                                                                verificacionId: V.dvar21,
+                                                                                estacionId: V.dvar15,
+                                                                                accesoId:V.dvar20,
 
                                                                                 tiTaponCombustible:tiTaponCombustible,
                                                                                 tiTaponAceite: tiTaponAceite,
@@ -472,7 +468,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     if (result.MensajeId is 50025) {
                         var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
                         var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var fin = await repo.SpAppAccesoFinAsync(connApp, _Visual.EstacionId,_Visual.AccesoId);
+                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
                         SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
@@ -638,10 +634,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
         private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
             return new SpAppBitacoraErroresSet {
-                EstacionId = V.EstacionId,
-                Centro = V.Centro,
+                EstacionId = V.dvar15,
+                Centro = V.dvar12,
                 NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.OpcionMenuId,
+                OpcionMenuId = V.dvar8,
                 FechaError = DateTime.Now,
                 Libreria = Path.GetFileName(callerFile),
                 Clase = Path.GetFileNameWithoutExtension(callerFile),

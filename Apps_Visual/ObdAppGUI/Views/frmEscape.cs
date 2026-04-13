@@ -51,14 +51,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 //MostrarMensaje($"Respuesta:{MensajeId}");
                 if (MensajeId != 0) {
                     try {
-                        using var connApp = SqlConnectionFactory.Create( server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName);
+                        using var connApp = SqlConnectionFactory.Create( server: _Visual.dvar1, db: _Visual.dvar2, user: _Visual.dvar3, pass: _Visual.dvar4, appName: _Visual.dvar5);
                         await connApp.OpenAsync();
-                        using (var scope = new AppRoleScope(connApp, role: _Visual.RollVisual, password: _Visual.RollVisualAcceso.ToString().ToUpper())) {
+                        using (var scope = new AppRoleScope(connApp, role: _Visual.dvar17, password: _Visual.dvar16.ToString().ToUpper())) {
                             var error = await repo.PrintIfMsgAsync(connApp, $"btnConectar_Click", MensajeId);
                             var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de OBD: {error.Mensaje}", codigoSql: MensajeId, codigo: 0);
                             await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                             MostrarMensaje($"Resultado de OBD: {error.Mensaje}");
-                            await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId: _Visual.EstacionId, _AccesoId: _Visual.AccesoId);
+                            await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId:_Visual.dvar15, _AccesoId: _Visual.dvar20);
                         }
                         _tcsResultado?.TrySetResult(true);
                     } catch (Exception ex) {
@@ -66,9 +66,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
                             var bitacora = NuevaBitacora( _Visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
                             await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                         } catch (Exception logEx) {
-                            SivevLogger.Error($"Falló en OBD en catch de placa {_Visual.PlacaId}, GetAccesoSQL: {logEx.Message}");
+                            SivevLogger.Error($"Falló en OBD en catch de placa {_Visual.dvar19}, GetAccesoSQL: {logEx.Message}");
                         }
-                        MostrarMensaje($"Falló en OBD en catch de placa {_Visual.PlacaId}: {ex.Message}");
+                        MostrarMensaje($"Falló en OBD en catch de placa {_Visual.dvar19}: {ex.Message}");
                     }
 
                 }
@@ -97,10 +97,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
             return new SpAppBitacoraErroresSet {
-                EstacionId = V.EstacionId,
-                Centro = V.Centro,
+                EstacionId = V.dvar15,
+                Centro = V.dvar12,
                 NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.OpcionMenuId,
+                OpcionMenuId = V.dvar8,
                 FechaError = DateTime.Now,
                 Libreria = Path.GetFileName(callerFile),
                 Clase = Path.GetFileNameWithoutExtension(callerFile),

@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using AutoUpdaterDotNET;
+using Microsoft.Data.SqlClient;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
@@ -35,7 +36,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
 
         private RBGR randy;
-        private InspeccionObd2Set ResultadoOBD;
+        private InspeccionObd2Set R;
         private TaskCompletionSource<bool>? _tcsResultado;
         private bool _leyendoObd = false;
         private int _Intentos = 0;
@@ -44,11 +45,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         public int _panelX = 0, _panelY = 0;
         public VisualRegistroWindows _Visual;
-        bool conexionObd = false;
 
 
         private int _intentosConexion = 0;
         private const int MAX_INTENTOS = 3;
+
+        private int coQ = 0, coA = 0, coP = 0;
+        private enum Modo { Mod0, Mod1, Mod2, Mod3 }
+        private static Random _r = new Random();
         #endregion
 
 
@@ -68,8 +72,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
         //*/
         #region BOTON CONECTAR
 
+
+
+
         private async void btnConectar_Click(object sender, EventArgs e) {
-            // Evita doble click / re-entradas
+            R = null;
+            pbLecturaObd.Visible = true;
+
             pbLecturaObd.Minimum = 0;
             pbLecturaObd.Maximum = 100;
             pbLecturaObd.Value = 0;
@@ -78,57 +87,49 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             if (_intentosConexion >= MAX_INTENTOS) {
                 btnConectar.Enabled = false;
-                btnConectar.Text = "Sin intentos";
+                btnConectar.Text = "Sin intentos de conexión";
                 lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión SBD.";
                 var respuestaDefaulObd = new InspeccionObd2Set{
                     Intentos = _intentosConexion,
                     ConexionObd = false
                 };
-                ResultadoObdSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
+                RSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
                 return;
             }
-
-            _leyendoObd = true;
             btnConectar.Enabled = false;
             btnConectar.Visible = false;
-            conexionObd = false;
 
             try {
                 // Cuenta el intento al iniciar el proceso (así aunque falle, cuenta)
                 _intentosConexion++;
 
-                lblLecturaOBD.Text = $"Credencial {_Visual.Credencial} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
+                lblLecturaOBD.Text = $"Credencial {_Visual.dvar18} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión - Placa: {_Visual.dvar19}";
 
                 await Task.Delay(500);
 
                 // === Tu lógica de conexión/lectura ===
                 randy = new RBGR();
+                lblReporte.TextAlign = ContentAlignment.MiddleCenter;
                 var progreso = new Progress<string>(msg => lblReporte.Text = msg);
+                var porcentaje = new Progress<int>(p => { pbLecturaObd.Value = p; });
 
-                var porcentaje = new Progress<int>(p => {
-                    pbLecturaObd.Value = p;
-                });
-                ResultadoOBD = await Task.Run(() => randy.SpSetObd(progreso, porcentaje));
+                R = await Task.Run(() => randy.SpSetObd(progreso, porcentaje));
+                R.Intentos = _intentosConexion;
 
-                if (ResultadoOBD.ConexionObd == true) {
-                    ResultadoOBD.Intentos = _intentosConexion;
-                    ResultadoOBD.ConexionObd = conexionObd ? true : false;
+                lblLecturaOBD.Text = R.ConexionObd
+                        ? $"Conexión OBD exitosa - Placa: {_Visual.dvar19}"
+                        : $"No se pudo conectar (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.dvar19}";
 
-                    ResultadoObdSet(OBD2_enviado: ResultadoOBD, _Visual_: _Visual);
 
-                    lblLecturaOBD.Text = conexionObd
-                        ? $"Conexión OBD exitosa - Placa: {_Visual.PlacaId}"
-                        : $"No se pudo conectar (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.PlacaId}";
-                }
+                    RSet(OBD2_enviado: R, _Visual_: _Visual);
+                
             } catch (Exception ex) {
                 // Si falla, deja el intento contado y muestra mensaje
-                lblLecturaOBD.Text = $"Error OBD (intento {_intentosConexion}/{MAX_INTENTOS}): {ex.Message}";
-                SivevLogger.Error($"Error OBD (intento {_intentosConexion}/{MAX_INTENTOS}): {ex.Message}");
+                lblLecturaOBD.Text = $"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}";
+                SivevLogger.Error($"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}");
             } finally {
-                _leyendoObd = false;
-
                 // Si ya se agotaron intentos, bloquea definitivamente el botón
-                if (_intentosConexion >= MAX_INTENTOS && !conexionObd) {
+                if (_intentosConexion >= MAX_INTENTOS && !R.ConexionObd) {
                     btnConectar.Enabled = false;
                     btnConectar.Visible = true;
                     btnConectar.Text = "Sin intentos";
@@ -137,38 +138,39 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         Intentos = _intentosConexion,
                         ConexionObd = false
                     };
-                    ResultadoObdSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
+                    RSet(OBD2_enviado: respuestaDefaulObd, _Visual_: _Visual);
                     //_tcsResultado?.TrySetResult(true);
                 } else {
                     // Si aún hay intentos o si ya conectó, restablece UI normal
                     btnConectar.Visible = true;
                     btnConectar.Enabled = true;
-                    btnConectar.Text = "Conectar";
+                    btnConectar.Text = "C O N E C T A R";
 
-                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.PlacaId} intento {_intentosConexion}/{MAX_INTENTOS}";
+                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.dvar19} intento {_intentosConexion}/{MAX_INTENTOS}";
                 }
 
                 btnConectar.Focus();
-                lblReporte.Text = "Conecte el escaner SBD en el vehículo.\r\nUna vez conectado presiona el botón conectar :D";
+                //lblReporte.Text = "Conecte el escaner SBD en el vehículo.\r\nUna vez conectado presiona el botón conectar :D";
             }
         }
 
-        private async void ResultadoObdSet(InspeccionObd2Set OBD2_enviado, VisualRegistroWindows _Visual_) {
-            lblLecturaOBD.Text = $"Registrando valores de la placa: {_Visual.PlacaId}";
+        private async void RSet(InspeccionObd2Set OBD2_enviado, VisualRegistroWindows _Visual_) {
+            lblLecturaOBD.Text = $"Registrando valores de la placa: {_Visual.dvar19}";
+            pbLecturaObd.Visible = false;
             var repo = new SivevRepository();
             var Resultado = await AccesoSqlObd2Set(OBD2: OBD2_enviado, _Visual_: _Visual);
             int _mensaje = Resultado.MensajeId;
 
             if (_mensaje != 0) {
                 try {
-                    using var connApp = SqlConnectionFactory.Create( server: _Visual.Server, db: _Visual.Database, user: _Visual.User, pass: _Visual.Password, appName: _Visual.AppName);
+                    using var connApp = SqlConnectionFactory.Create( server: _Visual.dvar1, db: _Visual.dvar2, user: _Visual.dvar3, pass: _Visual.dvar4, appName: _Visual.dvar5);
                     await connApp.OpenAsync();
-                    using (var scope = new AppRoleScope(connApp, role: _Visual.RollVisual, password: _Visual.RollVisualAcceso.ToString().ToUpper())) {
+                    using (var scope = new AppRoleScope(connApp, role: _Visual.dvar17, password: _Visual.dvar16.ToString().ToUpper())) {
                         var error = await repo.PrintIfMsgAsync(connApp, $"btnConectar_Click", _mensaje);
                         var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de SBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
                         await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                         MostrarMensaje($"Resultado de SBD: {error.Mensaje}");
-                        await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId: _Visual.EstacionId, _AccesoId: _Visual.AccesoId);
+                        await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId:_Visual.dvar15, _AccesoId: _Visual.dvar20);
                     }
                     _tcsResultado?.TrySetResult(false);
                 } catch (Exception ex) {
@@ -176,9 +178,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         var bitacora = NuevaBitacora( _Visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
                         await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                     } catch (Exception logEx) {
-                        SivevLogger.Error($"Falló en OBD en catch de placa {_Visual.PlacaId}, GetAccesoSQL: {logEx.Message}");
+                        SivevLogger.Error($"Falló en OBD en catch de placa {_Visual.dvar19}, GetAccesoSQL: {logEx.Message}");
                     }
-                    MostrarMensaje($"Falló en OBD en catch de placa {_Visual.PlacaId}: {ex.Message}");
+                    MostrarMensaje($"Falló en OBD en catch de placa {_Visual.dvar19}: {ex.Message}");
                 }
 
             }
@@ -194,20 +196,27 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
-            //*
-            btnConectar?.Select();
-            btnConectar?.Focus();
-
-
+            pbLecturaObd.Visible = false;
+            _Visual.dvar22 = false;
+            _Visual.dvar23 = false;
+            _Visual.dvar24 = false;
+            coQ = 0; coA = 0; coP = 0;
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");
                 return;
             }
 
-            lblLecturaOBD.Text = $"Diagnostico SBD para la placa: {_Visual.PlacaId}";
-            lblReporte.Text = $"Credencial {_Visual.Credencial}.\nConecta el dispositivo SBD al vehículo encendido y presiona 'Conectar'.";
-            //*/
+            lblLecturaOBD.Text = $"Diagnóstico SBD - Placa: {_Visual.dvar19} - Clave de Personal: {_Visual.dvar18}";
+            lblReporte.TextAlign = ContentAlignment.TopLeft;
+            lblReporte.Text =
+                "• Localiza el conector de diagnóstico (DLC) del vehículo.\r\n\n" +
+                "• Conecta el dispositivo SBD al DLC.\r\n\n" +
+                "• Enciende el vehículo.\r\n\n" +
+                "• Presiona \"CONECTAR\"";
+
+            this.ActiveControl = pnlPrincipal;
+            pnlPrincipal.Focus();
         }
         #endregion
 
@@ -250,10 +259,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
         private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
             return new SpAppBitacoraErroresSet {
-                EstacionId = V.EstacionId,
-                Centro = V.Centro,
+                EstacionId = V.dvar15,
+                Centro = V.dvar12,
                 NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.OpcionMenuId,
+                OpcionMenuId = V.dvar8,
                 FechaError = DateTime.Now,
                 Libreria = Path.GetFileName(callerFile),
                 Clase = Path.GetFileNameWithoutExtension(callerFile),
@@ -276,13 +285,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private async Task<ResultadoSql> AccesoSqlObd2Set(InspeccionObd2Set OBD2, VisualRegistroWindows _Visual_, CancellationToken ct = default) {
             int _mensaje = 100;
             short _resultado = 0;
-
+            btnConectar.Visible = false;
+            btnConectar.Enabled = false;
             var repo = new SivevRepository();
 
             try {
-                using var connApp = SqlConnectionFactory.Create( server: _Visual_.Server, db: _Visual_.Database, user: _Visual_.User, pass: _Visual_.Password, appName: _Visual_.AppName);
+                using var connApp = SqlConnectionFactory.Create( server: _Visual_.dvar1, db: _Visual_.dvar2, user: _Visual_.dvar3, pass: _Visual_.dvar4, appName: _Visual_.dvar5);
                 await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: _Visual_.RollVisual, password: _Visual_.RollVisualAcceso.ToString().ToUpper())) {
+                using (var scope = new AppRoleScope(connApp, role: _Visual_.dvar17, password: _Visual_.dvar16.ToString().ToUpper())) {
                     var rinicial = await repo.SpAppCapturaInspeccionObd2SetAsync(conn:connApp, V:_Visual_, obd:OBD2);
 
                     _resultado = rinicial.Resultado;
@@ -293,9 +303,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId: {_mensaje}", _mensaje);
                         var bitacora = NuevaBitacora(_Visual_, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual_, A: bitacora, ct: ct);
+                        btnConectar.Visible = true;
+                        btnConectar.Enabled = true;
                         return new ResultadoSql {
                             MensajeId = _mensaje,
                             Resultado = _resultado
+
                         };
                     }
                 }

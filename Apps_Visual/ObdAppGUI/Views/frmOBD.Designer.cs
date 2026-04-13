@@ -24,40 +24,26 @@
         /// </summary>
         private void InitializeComponent() {
             pnlTopPrincipal = new Panel();
-            btnConectar = new Button();
             lblLecturaOBD = new Label();
+            btnConectar = new Button();
             pnlPrincipal = new Panel();
+            pnlBoton = new Panel();
             lblReporte = new Label();
             pbLecturaObd = new ProgressBar();
             pnlTopPrincipal.SuspendLayout();
             pnlPrincipal.SuspendLayout();
+            pnlBoton.SuspendLayout();
             SuspendLayout();
             // 
             // pnlTopPrincipal
             // 
             pnlTopPrincipal.BackColor = Color.White;
-            pnlTopPrincipal.Controls.Add(btnConectar);
             pnlTopPrincipal.Controls.Add(lblLecturaOBD);
             pnlTopPrincipal.Dock = DockStyle.Top;
             pnlTopPrincipal.Location = new Point(0, 0);
             pnlTopPrincipal.Name = "pnlTopPrincipal";
             pnlTopPrincipal.Size = new Size(840, 126);
             pnlTopPrincipal.TabIndex = 0;
-            // 
-            // btnConectar
-            // 
-            btnConectar.Dock = DockStyle.Right;
-            btnConectar.FlatAppearance.BorderSize = 2;
-            btnConectar.FlatStyle = FlatStyle.Flat;
-            btnConectar.Font = new Font("Segoe UI", 24F);
-            btnConectar.ForeColor = Color.FromArgb(159, 34, 65);
-            btnConectar.Location = new Point(530, 0);
-            btnConectar.Name = "btnConectar";
-            btnConectar.Size = new Size(310, 126);
-            btnConectar.TabIndex = 1;
-            btnConectar.Text = "Conectar";
-            btnConectar.UseVisualStyleBackColor = true;
-            btnConectar.Click += btnConectar_Click;
             // 
             // lblLecturaOBD
             // 
@@ -73,9 +59,25 @@
             lblLecturaOBD.Text = "Diagnóstico OBD";
             lblLecturaOBD.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // btnConectar
+            // 
+            btnConectar.Dock = DockStyle.Right;
+            btnConectar.FlatAppearance.BorderSize = 2;
+            btnConectar.FlatStyle = FlatStyle.Flat;
+            btnConectar.Font = new Font("Segoe UI", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnConectar.ForeColor = Color.FromArgb(159, 34, 65);
+            btnConectar.Location = new Point(543, 0);
+            btnConectar.Name = "btnConectar";
+            btnConectar.Size = new Size(297, 100);
+            btnConectar.TabIndex = 1;
+            btnConectar.Text = "C O N E C T A R";
+            btnConectar.UseVisualStyleBackColor = true;
+            btnConectar.Click += btnConectar_Click;
+            // 
             // pnlPrincipal
             // 
             pnlPrincipal.BackColor = Color.White;
+            pnlPrincipal.Controls.Add(pnlBoton);
             pnlPrincipal.Controls.Add(lblReporte);
             pnlPrincipal.Controls.Add(pbLecturaObd);
             pnlPrincipal.Controls.Add(pnlTopPrincipal);
@@ -85,17 +87,26 @@
             pnlPrincipal.Size = new Size(840, 516);
             pnlPrincipal.TabIndex = 0;
             // 
+            // pnlBoton
+            // 
+            pnlBoton.Controls.Add(btnConectar);
+            pnlBoton.Dock = DockStyle.Bottom;
+            pnlBoton.Location = new Point(0, 393);
+            pnlBoton.Name = "pnlBoton";
+            pnlBoton.Size = new Size(840, 100);
+            pnlBoton.TabIndex = 2;
+            // 
             // lblReporte
             // 
             lblReporte.Dock = DockStyle.Fill;
-            lblReporte.Font = new Font("Segoe UI", 36F);
-            lblReporte.ImageAlign = ContentAlignment.BottomCenter;
+            lblReporte.Font = new Font("Segoe UI", 28F);
+            lblReporte.ImageAlign = ContentAlignment.MiddleLeft;
             lblReporte.Location = new Point(0, 126);
             lblReporte.Name = "lblReporte";
             lblReporte.Size = new Size(840, 367);
             lblReporte.TabIndex = 0;
             lblReporte.Text = "Conecte el escaner SBD en el vehículo.\r\nUna vez conectado presiona el botón conectar. :D";
-            lblReporte.TextAlign = ContentAlignment.MiddleCenter;
+            lblReporte.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pbLecturaObd
             // 
@@ -116,6 +127,7 @@
             Load += frmOBD_Load;
             pnlTopPrincipal.ResumeLayout(false);
             pnlPrincipal.ResumeLayout(false);
+            pnlBoton.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -127,5 +139,6 @@
         private Panel pnlPrincipal;
         private Label lblReporte;
         private ProgressBar pbLecturaObd;
+        private Panel pnlBoton;
     }
 }
