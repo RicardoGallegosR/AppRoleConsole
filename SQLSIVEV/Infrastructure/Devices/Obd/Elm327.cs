@@ -13,9 +13,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public sealed class Elm327 : IDisposable {
         private readonly SerialPort _port;
 
-
-        // VERSION ANTES DEL "Otro STOPPED  > (A0  >)"
-        // int readTimeoutMs = 3000
         public Elm327(string portName, int baud = 38400, int readTimeoutMs = 10_000, int writeTimeoutMs = 2_000) {
             // Acepta \\.\COMX o COMX
             //var p = portName.StartsWith(@"\\.\", StringComparison.OrdinalIgnoreCase) ? portName.Substring(4) : portName;
@@ -94,32 +91,27 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                    || resp.Contains(">");
         }
 
+        /* 17/04/2026 Se realiza el cambio para limpiar los buffer antes de cada lectura, 
+         * y así evitar que queden datos viejos que puedan confundir la lectura. 
+         * Además, se ajusta el método ExecRaw para que sea más robusto ante respuestas lentas o con basura.
         public string ExecRaw(string cmd, int timeoutMs = 1500) {
             _port.Write(cmd + "\r");
             var resp = ReadUntilPrompt(timeoutMs);
             return Clean(resp);
         }
-
-        /* ANTES DEL CAMBIO
-        public void Initialize(bool showHeaders = false) {
-            if (!Probe(1500)) { _port.Write("\r\r"); ReadUntilPrompt(500); }
-
-            _port.Write("ATZ\r");
-            ReadUntilPrompt(3000);
-            SafeDrain();
-
-            ExecRaw("ATE0", 800);
-            ExecRaw("ATL0", 800);
-            ExecRaw("ATS0", 800);                 // espacios off por defecto
-            ExecRaw(showHeaders ? "ATH1" : "ATH0", 800);
-            ExecRaw("ATCAF1", 800);               // asegúrate de auto-formateo ON
-            ExecRaw("ATAT1", 800);                // adaptive timing
-            // ESTABA EN 1500
-            ExecRaw("ATSP0", 4500);               // auto protocolo
-            ExecRaw("0100", 2000);                // “engancha” el protocolo negociado
-            SafeDrain();
-        }
         */
+
+        /*
+         Cambio generado tras la observación del MH01
+         */
+        public string ExecRaw(string cmd, int timeoutMs = 1500) {
+            SafeDrain();                 // limpia basura previa
+            _port.Write(cmd + "\r");
+            var resp = ReadUntilPrompt(timeoutMs);
+            var clean = Clean(resp);
+            SafeDrain();                 // opcional: deja limpio para el siguiente
+            return clean;
+        }
 
         public void Initialize(bool showHeaders = false) {
 
@@ -157,22 +149,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             SafeDrain();
         }
 
-
-
-        /*
-        public string WaitAndGetProtocolText(int maxTries = 4, int settleMs = 150) {
-            string proto = "";
-            for (int i = 0; i < maxTries; i++) {
-                var _ = ExecRaw("0100", 10000);       // provoca negociación
-                Thread.Sleep(settleMs);               // deja “asentar”
-                proto = ReadProtocolText();           // ATDP + (ATDPN)
-                if (!proto.Contains("(A0", StringComparison.OrdinalIgnoreCase))
-                    break;                            // ya negoció (A6, A7, etc.)
-            }
-            SivevLogger.Information($"Lectura PID 0100 valor {proto}");
-            return proto;
-        }
-        */
         public string WaitAndGetProtocolText(int maxTries = 4, int settleMs = 150) {
             string proto = "";
 
@@ -199,7 +175,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     break;
             }
 
-            SivevLogger.Information($"Lectura PID 0100 valor {proto}");
+            //SivevLogger.Information($"Lectura PID 0100 valor {proto}");
             return proto;
         }
 
@@ -215,7 +191,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             try {
                 int A = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
                 int B = Convert.ToInt32(compact.Substring(idx + 6, 2), 16);
-                SivevLogger.Information($"Lectura PID 010C valor A: {A}, B: {B}");
+                //SivevLogger.Information($"Lectura PID 010C valor A: {A}, B: {B}");
                 return ((A << 8) | B) / 4;
             } catch { return null; }
         }
@@ -253,7 +229,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 // Ensamble big-endian: A es el MSB
                 uint odoKm = ((uint)A << 24) | ((uint)B << 16) | ((uint)C << 8) | D;
 
-                SivevLogger.Information($"PID 01A6 odómetro: {odoKm} km (bytes: {A:X2} {B:X2} {C:X2} {D:X2})");
+                //SivevLogger.Information($"PID 01A6 odómetro: {odoKm} km (bytes: {A:X2} {B:X2} {C:X2} {D:X2})");
                 return odoKm;
             } catch (Exception ex) {
                 SivevLogger.Warning($"Error leyendo PID 01A6. Resp: {resp}.- {ex}");
@@ -270,7 +246,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             if (idx < 0 || compact.Length < idx + 6) return null;
             try {
                 int v = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
-                SivevLogger.Information($"Lectura PID 010D valor V: {v} km/h");
+                //SivevLogger.Information($"Lectura PID 010D valor V: {v} km/h");
                 return (short)v; // km/h
             } catch { return null; }
         }
@@ -355,7 +331,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     // (Si quieres, duplico el parse con resp2 como hicimos arriba.)
                 }
             }
-            SivevLogger.Information($"PID 0902 Valor {vin}");
+            //SivevLogger.Information($"PID 0902 Valor {vin}");
             return string.IsNullOrWhiteSpace(vin) ? null : vin;
         }
         #endregion
@@ -499,28 +475,28 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // Distancia con MIL encendido (PID 01 21) en km
         public int? ReadDistanceWithMilKm() {
             var ab = ReadPidAB("0121", 3000);
-            SivevLogger.Information($"PID 0121 Valor ab.HasValue: {ab.HasValue} km");
+            //SivevLogger.Information($"PID 0121 Valor ab.HasValue: {ab.HasValue} km");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
         // Distancia desde que se borraron DTC (PID 01 31) en km
         public int? ReadDistanceSinceClearKm() {
             var ab = ReadPidAB("0131", 3000);
-            SivevLogger.Information($"PID 0131 Valor ab.HasValue: {ab.HasValue} km");
+            //SivevLogger.Information($"PID 0131 Valor ab.HasValue: {ab.HasValue} km");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
         // Tiempo con MIL encendido (PID 01 4D) en minutos
         public int? ReadRunTimeMilMinutes() {
             var ab = ReadPidAB("014D", 3000);
-            SivevLogger.Information($"PID 014D Valor ab.HasValue: {ab.HasValue} minutos");
+            //SivevLogger.Information($"PID 014D Valor ab.HasValue: {ab.HasValue} minutos");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
         // Tiempo desde que se borraron DTC (PID 01 4E) en minutos
         public int? ReadTimeSinceDtcClearedMinutes() {
             var ab = ReadPidAB("014E", 3000);
-            SivevLogger.Information($"PID 014E Valor ab.HasValue: {ab.HasValue} minutos");
+            //SivevLogger.Information($"PID 014E Valor ab.HasValue: {ab.HasValue} minutos");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
@@ -529,7 +505,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // Solicitados por Toñin Cara de pan :D
         public int? TiempoTotalSegundosOperacionMotor() {
             var ab = ReadPidAB("011F", 5_000);
-            SivevLogger.Information($"PID 011F Valor ab.HasValue: {ab.HasValue} segundos");
+            //SivevLogger.Information($"PID 011F Valor ab.HasValue: {ab.HasValue} segundos");
             return ab.HasValue ? (int?)(ab.Value.A * 256 + ab.Value.B) : null;
         }
 
@@ -540,7 +516,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return null;
             int A = ab.Value.A;
             double load = (A * 100.0) / 255.0;
-            SivevLogger.Information($"PID 0104 Carga calculada del motor: {load} %");
+            //SivevLogger.Information($"PID 0104 Carga calculada del motor: {load} %");
             return load;
 
             // O si lo quieres entero:
@@ -623,19 +599,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return ltft;
         }
 
-        // PID 010F - Temperatura del aire de admisión (°C)
-        // public int? IatC { get; init; }
-        /*
-        public short? TemperaturaAireAdmisionC() {
-            var ab = ReadPidAB("010F", 3000);
-            if (!ab.HasValue)
-                return null;
-
-            int A = ab.Value.A;   // A es int
-
-            int tempC = A - 40;
-            return (short)tempC;
-        }*/
         public short? TemperaturaAireAdmisionC() {
             var A = ReadPidA("010F", 3000);
             if (!A.HasValue) return null;
@@ -647,13 +610,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             return (short)tempC;
         }
-
-
-
-        // PID 0110 - MAF (Mass Air Flow) en g/s
-        //public double? MafGs  { get; init; }
-        // opcional:
-        //public double? MafKgH { get; init; }
 
         public double? FlujoAireMaf() {
             var ab = ReadPidAB("0110", 3000);
@@ -717,15 +673,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return timing;
         }
 
-
-
-
-
-        // PID 0114 - O2 Sensor 1 Voltage (Voltaje sensor O2, Banco 1, Sensor 1)
-        /*
-            public double? O2S1_V { get; init; }  // Banco 1, Sensor 1 (V)
-            public double? O2S2_V { get; init; }  // Banco 1, Sensor 2 (V)
-         */
         public double? O2Sensor1Voltage() {
             var ab = ReadPidAB("0114", 3000);
             if (!ab.HasValue)
@@ -949,15 +896,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             return (byte)A;
         }
-        /*
-         return A switch {
-                0x0E => "Vehículo pesado EURO IV (B1)",
-                0x0F => "Vehículo pesado EURO V (B2)",
-                0x10 => "Vehículo pesado EURO EEV (C)",
-                _ => $"Código de emisiones reservado/desconocido (0x{A:X2})"
-            };
-         */
-
 
         public (int A, int B, int C, int D)? ReadPidABCD(string cmd, int timeoutMs = 3000) {
             var resp = ExecRaw(cmd, timeoutMs);
@@ -1137,7 +1075,12 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 int d4 = B & 0xF;
                 dtcs.Add($"{system}{d1:X}{d2:X}{d3:X}{d4:X}");
             }
-            return dtcs;
+            // 17/04/2026 cambio para eliminar duplicados (algunas ECUs envían cada DTC varias veces)
+            //return dtcs;
+            return dtcs
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
         public List<string> ReadStoredDtcs()
             => ReadDtcsInternal("03", "43");  // modo 03 → respuesta 43     

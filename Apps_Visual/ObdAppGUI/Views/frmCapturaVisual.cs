@@ -457,8 +457,12 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     result.MensajeId = r.MensajeId;
                     result.ReturnCode = r.ReturnCode;
                     result.CheckObd = r.CheckObd;
-
-                    if (result.MensajeId is not 0 and not 50025) {
+                    /*
+                        50025.-	Captura de datos finalizada. Avance el vehículo a la posición de prueba
+                        50263.-	No ha aprobado la verificación por inspección visual. Avance el vehículo a la zona de resultados
+                     */
+                    /*
+                    if (result.MensajeId is not 0 and not 50025 and not 50263) {
                         var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
                         var msg = error?.Mensaje ?? "Mensaje no disponible";
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
@@ -468,13 +472,40 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     if (result.MensajeId is 50025) {
                         var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
                         var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
                         var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
                         await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
                         SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
-                        MostrarMensaje($"{msg}");
+                        MostrarMensaje($"{msg} ♥");
                     }
-                
+
+                    if (result.MensajeId is 50263) {
+                        var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
+                        var msg = error?.Mensaje ?? "Mensaje no disponible";
+                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
+                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
+                        MostrarMensaje($"{msg} ♥");
+                    }
+                    */
+                    if (result.MensajeId != 0) {
+                        var requiereFinAcceso = result.MensajeId is 50025 or 50263;
+                        var error = await repo.PrintIfMsgAsync(connApp, requiereFinAcceso ? $"{result.MensajeId}"
+                                : $"Captura Inspección Visual MensajeId {result.MensajeId}", result.MensajeId );
+
+                        var msg = error?.Mensaje ?? "Mensaje no disponible";
+                        var bitacora = NuevaBitacora(V, descripcion: msg, codigoSql: result.MensajeId);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+
+                        if (requiereFinAcceso) {
+                            await repo.SpAppAccesoFinAsync(connApp, _Visual.dvar15, _Visual.dvar20);
+                            SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, Mensaje {result.MensajeId}, {msg} se finaliza el acceso.");
+                            MostrarMensaje($"{msg} ♥");
+                        } else {
+                            MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
+                        }
+                    }
                 }
             } catch (Exception e) {
                 try {
@@ -483,7 +514,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 } catch (Exception logEx) {
                     SivevLogger.Warning($"Falló la búsqueda de banderas en catch, BanderasAEvaluar: {logEx.Message}");
                 }
-                MostrarMensaje($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
+                MostrarMensaje($"Error en la conexión a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
                 SivevLogger.Error($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
             }
 
@@ -513,7 +544,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             lblPlaca.Font = new Font(
                 lblPlaca.Font.FontFamily,
-                Titulo1,
+                Titulo2,
                 lblPlaca.Font.Style
             );
 

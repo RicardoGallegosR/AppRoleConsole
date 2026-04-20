@@ -41,6 +41,10 @@
         public short Resultado { get; init; }
     }
 
+    public sealed class SpAppProgramOffResult {
+        public int MensajeId { get; init; }
+        public short Resultado { get; init; }
+    }
 
     public sealed class AccesoIniciaResult {
         public short ReturnCode { get; set; }
@@ -73,26 +77,26 @@
 
     public sealed class SpAppBitacoraErroresSet {
         private const string ValorDesconocido = "DESCONOCIDO";
-        
+
         // SALIDAS
-        public int      MensajeId       { get; set; }
-        public short    Resultado       { get; set; }
+        public int MensajeId { get; set; }
+        public short Resultado { get; set; }
 
         // ENTRADAS
-        public Guid     EstacionId      { get; set; } = Guid.Empty;
-        public short    Centro          { get; set; }
-        public string   NombreCpu       { get; set; } = ValorDesconocido;
-        public short    OpcionMenuId    { get; set; } = 0;
-        public DateTime FechaError      { get; set; } = new DateTime(1900, 1, 1);
-        public string   Libreria        { get; set; } = ValorDesconocido;
-        public string   Clase           { get; set; } = ValorDesconocido;
-        public string   Metodo          { get; set; } = ValorDesconocido;
-        public int      CodigoErrorSql  { get; set; } = 0;
-        public int      CodigoError     { get; set; } = 0;
-		public string   DescripcionError{ get; set; } = ValorDesconocido;
-		public int      LineaCodigo     { get; set; } = 0;
-        public int      LastDllError    { get; set; } = 0;
-        public string   SourceError     { get; set; } = ValorDesconocido;
+        public Guid EstacionId { get; set; } = Guid.Empty;
+        public short Centro { get; set; }
+        public string NombreCpu { get; set; } = ValorDesconocido;
+        public short OpcionMenuId { get; set; } = 0;
+        public DateTime FechaError { get; set; } = new DateTime(1900, 1, 1);
+        public string Libreria { get; set; } = ValorDesconocido;
+        public string Clase { get; set; } = ValorDesconocido;
+        public string Metodo { get; set; } = ValorDesconocido;
+        public int CodigoErrorSql { get; set; } = 0;
+        public int CodigoError { get; set; } = 0;
+        public string DescripcionError { get; set; } = ValorDesconocido;
+        public int LineaCodigo { get; set; } = 0;
+        public int LastDllError { get; set; } = 0;
+        public string SourceError { get; set; } = ValorDesconocido;
     }
 
 
@@ -128,9 +132,9 @@
 
 
     public sealed class CapturaInspeccionObdSetResult {
-        public int MensajeId { get; set; }        
-        public short Resultado { get; set; }      
-        public int ReturnCode { get; set; }       
+        public int MensajeId { get; set; }
+        public short Resultado { get; set; }
+        public int ReturnCode { get; set; }
         public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
     }
     public sealed class ResultadoSql {
@@ -145,7 +149,7 @@
         public Guid VerificacionId { get; set; } = Guid.Empty;
         public string? VehiculoId { get; set; } = "DESCONOCIDO";
         public decimal? CCM { get; set; } = 0;
-        public decimal? WarmUpsDesdeBorrado { get; set; } = 0;
+        public int? WarmUpsDesdeBorrado { get; set; } = 0;
         public int? NEV { get; set; } = 0;
         public string? NEV_string { get; set; } = "DESCONOCIDO";
         public short? TR { get; set; } = 0;
@@ -167,12 +171,12 @@
         public byte? Ssa { get; set; }
         public byte? Sfaa { get; set; }
         public byte? Scso { get; set; }
-        public byte? Srge { get; set; } 
-        public byte? Spsa { get; set; } 
-        public byte? Sge { get; set; } 
+        public byte? Srge { get; set; }
+        public byte? Spsa { get; set; }
+        public byte? Sge { get; set; }
         public byte? Schnm { get; set; }
-        public byte? Sfp { get; set; } 
-        public byte? Sscrron { get; set; } 
+        public byte? Sfp { get; set; }
+        public byte? Sscrron { get; set; }
         public decimal? STFT_B1 { get; set; } = 0;
         public decimal? LTFT_B1 { get; set; } = 0;
         public short? IAT { get; set; } = 0;

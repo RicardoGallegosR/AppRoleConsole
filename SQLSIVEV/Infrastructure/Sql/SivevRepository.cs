@@ -7,6 +7,7 @@ using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Utils;
 using System.Data;
 using System.Linq.Expressions;
+using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
 
 
 namespace SQLSIVEV.Infrastructure.Sql {
@@ -178,8 +179,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
 
 
-
-        public SpAppProgramOnResult SpAppProgramOn(SqlConnection conn, Guid estacionId) {
+        public async Task<SpAppProgramOnResult> SpAppProgramOn(SqlConnection conn, Guid estacionId) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");
@@ -213,6 +213,31 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
 
 
+        public async Task<SpAppProgramOffResult> SpAppProgramOff(SqlConnection conn, Guid estacionId) {
+            if (conn is null) throw new ArgumentNullException(nameof(conn));
+            if (conn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+            using var cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppProgramOff";
+            cmd.CommandTimeout = _timeout;
+            // outputs
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            // input
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = estacionId });
+
+            cmd.ExecuteNonQuery();
+
+            return new SpAppProgramOffResult {
+                MensajeId = (int)(pMsg.Value ?? 0),
+                Resultado = (short)(pRes.Value ?? (short)0),
+            };
+        }
 
 
         public async Task<AccesoIniciaResult> SpAppAccesoIniciaAsync(SqlConnection conn, Guid estacionId, short opcionMenuId, int credencial, string password, byte[] huella, CancellationToken ct = default) {
@@ -253,6 +278,10 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 AccesoId = pAccesoId.Value is Guid g ? g : Guid.Empty
             };
         }
+
+
+
+
 
         public async Task<VerificacionVisualIniResult> SpAppVerificacionVisualIniAsync(SqlConnection conn, Guid estacionId, Guid accesoId, CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));

@@ -105,9 +105,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 lblLecturaOBD.Text = $"Credencial {_Visual.dvar18} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión - Placa: {_Visual.dvar19}";
 
-                await Task.Delay(500);
+                await Task.Delay(300);
 
-                // === Tu lógica de conexión/lectura ===
+                //  Tu lógica de conexión/lectura 
                 randy = new RBGR();
                 lblReporte.TextAlign = ContentAlignment.MiddleCenter;
                 var progreso = new Progress<string>(msg => lblReporte.Text = msg);
@@ -120,9 +120,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         ? $"Conexión OBD exitosa - Placa: {_Visual.dvar19}"
                         : $"No se pudo conectar (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.dvar19}";
 
-
+                //*
+                if (R.ConexionObd && R.Intentos <= MAX_INTENTOS) {
                     RSet(OBD2_enviado: R, _Visual_: _Visual);
-                
+                }
+                //*/
             } catch (Exception ex) {
                 // Si falla, deja el intento contado y muestra mensaje
                 lblLecturaOBD.Text = $"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}";
@@ -146,11 +148,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     btnConectar.Enabled = true;
                     btnConectar.Text = "C O N E C T A R";
 
-                    lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.dvar19} intento {_intentosConexion}/{MAX_INTENTOS}";
+                    //lblLecturaOBD.Text = $"Diagnóstico OBD de la placa: {_Visual.dvar19} intento {_intentosConexion}/{MAX_INTENTOS}";
                 }
 
                 btnConectar.Focus();
-                //lblReporte.Text = "Conecte el escaner SBD en el vehículo.\r\nUna vez conectado presiona el botón conectar :D";
             }
         }
 

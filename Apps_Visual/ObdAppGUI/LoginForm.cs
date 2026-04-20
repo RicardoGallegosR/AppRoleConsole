@@ -21,11 +21,13 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
@@ -55,6 +57,8 @@ namespace Apps_Visual.ObdAppGUI {
         private VerificationForm frmverification;
         private frmCapturaVisual CapturaVisual;
         private frmOBD PruebaOBD;
+        private bool _cerrandoAplicacion = false;
+        private bool _bitacoraFinalizada = false;
         #endregion
 
         #region inicio
@@ -73,6 +77,11 @@ namespace Apps_Visual.ObdAppGUI {
                         BloquearEstacionSqlTest();
                     } else {
                         SivevLogger.Information("Se ha revisado el registro de windows y las configuraciones son correctas, problemas por aqui no son :)");
+                        // Inicia Bitacora de Aplicaciones 
+
+                        await IniciaBiatcoraAplicaciones(Visual_Core);
+
+
                         btnInspecionVisual.Focus();
                         pnlHome();
                     }
@@ -80,6 +89,84 @@ namespace Apps_Visual.ObdAppGUI {
             };
         }
         #endregion
+
+
+
+        private async Task<SpAppProgramOnResult> IniciaBiatcoraAplicaciones(VisualRegistroWindows V, CancellationToken ct = default) {
+            int _mensaje = 100;
+            short _resultado = 0;
+            Guid _AccesoSql = Guid.Empty;
+            var repo = new SivevRepository();
+
+            try {
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppProgramOn(conn:connApp, estacionId: V.dvar15);
+                    _resultado = rinicial.Resultado;
+                    _mensaje = rinicial.MensajeId;
+
+                    if (_mensaje != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"frmLogin.IniciaBiatcoraAplicaciones", _mensaje);
+                        var bitacora = NuevaBitacora( V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje, codigo: 0);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                        MostrarMensaje($"{error.Mensaje}");
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en IniciaBiatcoraAplicaciones: {logEx.Message}");
+                }
+                MostrarMensaje($"Error en IniciaBiatcoraAplicaciones: {e.Message}");
+            }
+            return new SpAppProgramOnResult {
+                MensajeId = _mensaje,
+                Resultado = _resultado,
+            };
+        }
+
+        private async Task<SpAppProgramOffResult> FinalizaBiatcoraAplicaciones(VisualRegistroWindows V, CancellationToken ct = default) {
+            int _mensaje = 100;
+            short _resultado = 0;
+            Guid _AccesoSql = Guid.Empty;
+            var repo = new SivevRepository();
+
+            try {
+                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
+                await connApp.OpenAsync(ct);
+                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                    var rinicial = await repo.SpAppProgramOff(conn:connApp, estacionId: V.dvar15);
+                    _resultado = rinicial.Resultado;
+                    _mensaje = rinicial.MensajeId;
+
+                    if (_mensaje != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"frmLogin.FinalizaBitacorasAplicaciones", _mensaje);
+                        var bitacora = NuevaBitacora( V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje, codigo: 0);
+                        await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                        MostrarMensaje($"{error.Mensaje}");
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
+                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en FinalizaBiatcoraAplicaciones: {logEx.Message}");
+                }
+                MostrarMensaje($"Error en FinalizaBiatcoraAplicaciones: {e.Message}");
+            }
+            return new SpAppProgramOffResult {
+                MensajeId = _mensaje,
+                Resultado = _resultado,
+            };
+        }
+
+
+
+
 
         #region SpAppRollClaveGet
         private async Task< bool> SpAppRollClaveGet() {
@@ -197,7 +284,7 @@ namespace Apps_Visual.ObdAppGUI {
                 //$"|| v25: {Visual_Core.dvar25} " 
                 ""
             );
-            MostrarMensaje($"{Visual_Core.dvar1}");
+            //MostrarMensaje($"{Visual_Core.dvar1}");
             //*/
             return vacio(Visual_Core.dvar1)
                  || vacio(Visual_Core.dvar2)
@@ -253,6 +340,12 @@ namespace Apps_Visual.ObdAppGUI {
 
             btnApagar.Enabled = true;
             btnApagar.Visible = true;
+
+
+
+
+
+
             SivevLogger.Information("Se habilita btnInspecionVisual");
 
             foreach (Control c in pnlPanelCambios.Controls)
@@ -351,20 +444,19 @@ namespace Apps_Visual.ObdAppGUI {
             
                 
             bool pruebaVisual = await ListadoVisual();
+            
             if (!pruebaVisual) {
                 btnApagar.Enabled = true;
                 btnApagar.Visible = true;
-                SivevLogger.Information($"No pasa a prueba OBD la placa {_placa}: {pruebaVisual}");
                 return;
             }
-            Visual_Core.dvar19 = _placa;
-            Visual_Core.dvar21 = _verificacionId;
+            
 
             await Task.Delay(200);
 
             bool PruebaOBD = await PruebaOBDPanel();
             if (!PruebaOBD) {
-                SivevLogger.Information($"No pasa la prueba OBD la placa {Visual_Core.dvar19}: {PruebaOBD}");
+                SivevLogger.Information($"Se realizo la lectura de SBD de {Visual_Core.dvar19}: {!PruebaOBD}");
                 return;
             }
         }
@@ -481,7 +573,8 @@ namespace Apps_Visual.ObdAppGUI {
                 }
             }));
             bool ok = await CapturaVisual.EsperarResultadoAsync();
-
+            
+           
             if (!_RealizarPruebaOBD) {
                 pnlPanelCambios.Controls.Clear();
                 CapturaVisual.Dispose();
@@ -497,6 +590,9 @@ namespace Apps_Visual.ObdAppGUI {
                     btnInspecionVisual.Visible = true;
                     btnInspecionVisual?.Select();
                     btnInspecionVisual.Focus();
+                    Visual_Core.dvar19 = _placa;
+                    Visual_Core.dvar21 = _verificacionId;
+                    SivevLogger.Information($"No pasa a prueba OBD la placa {Visual_Core.dvar19}: {_RealizarPruebaOBD}, verificación: {Visual_Core.dvar21}");
                 }
                 return false;
             }
@@ -565,18 +661,35 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         #region Apagar
-        private void btnApagar_Click(object sender, EventArgs e) {
-            var result = System.Windows.Forms.MessageBox.Show(
+        private async void btnApagar_Click(object sender, EventArgs e) {
+            var result = MessageBox.Show(
                 "¿Desea apagar la aplicación?",
                 "Confirmar salida",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2  
+                MessageBoxDefaultButton.Button2
             );
-            if (result == DialogResult.Yes) {
-                //Application.Exit();
-                Process.Start("shutdown", "/s /t 0");
+
+            if (result == DialogResult.Yes)
+                await CerrarAplicacionAsync(apagarEquipo: true);
+        }
+        private async Task CerrarAplicacionAsync(bool apagarEquipo = false) {
+            if (_cerrandoAplicacion) return;
+            _cerrandoAplicacion = true;
+
+            try {
+                if (!_bitacoraFinalizada) {
+                    await FinalizaBiatcoraAplicaciones(Visual_Core);
+                    _bitacoraFinalizada = true;
+                }
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al finalizar bitácora: {ex.Message}");
             }
+
+            if (apagarEquipo)
+                Process.Start("shutdown", "/s /t 0");
+            else
+                Application.Exit();
         }
         #endregion
 
@@ -638,6 +751,24 @@ namespace Apps_Visual.ObdAppGUI {
                 return defecto;
 
             return bool.TryParse(plano, out var valor) ? valor : defecto;
+        }
+        private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
+            return new SpAppBitacoraErroresSet {
+                EstacionId = V.dvar15,
+                Centro = V.dvar12,
+                NombreCpu = Environment.MachineName,
+                OpcionMenuId = V.dvar8,
+                FechaError = DateTime.Now,
+                Libreria = Path.GetFileName(callerFile),
+                Clase = Path.GetFileNameWithoutExtension(callerFile),
+                Metodo = callerMember,
+                CodigoErrorSql = codigoSql,
+                CodigoError = codigo,
+                DescripcionError = descripcion,
+                LineaCodigo = callerLine,
+                LastDllError = 0,
+                SourceError = "DESCONOCIDO"
+            };
         }
 
         #endregion
