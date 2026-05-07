@@ -72,7 +72,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
         //*/
         #region BOTON CONECTAR
 
-
+        #region Configuración del logger 
+        
+        #endregion
 
 
         private async void btnConectar_Click(object sender, EventArgs e) {
@@ -107,8 +109,17 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 await Task.Delay(300);
 
-                //  Tu lógica de conexión/lectura 
-                randy = new RBGR();
+                if (_Visual.dvar26) {
+                    ObdTxtLogger.LimpiarLogsAntiguos(@"C:\SIVEV\LogsOBD",7);
+                    var carpeta = $@"C:\SIVEV\LogsOBD\{DateTime.Now:yyyy-MM-dd}";
+                    var archivo = $@"{carpeta}\{_Visual.dvar21}_{_Visual.dvar19}_{DateTime.Now:HHmmss}.txt";
+                    var logger = new ObdTxtLogger(archivo, _Visual.dvar21.ToString().ToUpper());
+                    logger.EncabezadoSesion(  verificacionId: _Visual.dvar21.ToString(), placa: _Visual.dvar19.ToString());
+                    randy = new RBGR(logger);
+                } else {
+                    randy = new RBGR();
+                }
+                
                 lblReporte.TextAlign = ContentAlignment.MiddleCenter;
                 var progreso = new Progress<string>(msg => lblReporte.Text = msg);
                 var porcentaje = new Progress<int>(p => { pbLecturaObd.Value = p; });
@@ -131,7 +142,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 SivevLogger.Error($"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}");
             } finally {
                 // Si ya se agotaron intentos, bloquea definitivamente el botón
-                if (_intentosConexion >= MAX_INTENTOS && !R.ConexionObd) {
+                if (_intentosConexion >= MAX_INTENTOS && (R == null || !R.ConexionObd)) {
                     btnConectar.Enabled = false;
                     btnConectar.Visible = true;
                     btnConectar.Text = "Sin intentos";

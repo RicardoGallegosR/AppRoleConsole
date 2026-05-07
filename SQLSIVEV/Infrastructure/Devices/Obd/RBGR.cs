@@ -4,27 +4,26 @@ using SQLSIVEV.Infrastructure.Utils;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Runtime.Intrinsics.X86;
+using static SQLSIVEV.Infrastructure.Devices.Obd.Elm327;
 
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public class RBGR {
+        public RBGR(IObdLogger? logger = null) {
+            _logger = logger;
+        }
 
         #region Declaración de Variables
 
         private int? _rpm,  _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03, _OperacionMotor, _WarmUpsDesdeBorrado,
             _EcuAddressInt, _ID_Calib, _ReadCvnMessageCount, _TiempoMotorEnMarchaSeg, _intNormativaObdVehiculo;
-
         private uint ? _odometro;
-
         private short? _vel, _BarometricPressure, _IatC, _IatCCoolantTempC;
-
         private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A, _rpmOff, _rpmOn, cnt03, cnt07, cnt0A;
         private static string SafeStr(object? x, string empty = "—") => x == null ? empty : x.ToString() ?? empty;
         private string _port = ""//"COM4"
             , _vin = string.Empty, _calJoined = string.Empty;
-            
         private string? _FuelType = string.Empty, _EcuAddress = string.Empty, _NormativaObdVehiculo = string.Empty, _dtcList03 = string.Empty, _dtcList07 = string.Empty, _dtcList0A = string.Empty, 
             _protocolo = string.Empty, _cvn = string.Empty, _ReadCvnsRobusto = string.Empty, _Trama = string.Empty;
-
         private string[] _cal= Array.Empty<string>();
         private string[] expected = {
             "MISFIRE_MONITORING",
@@ -44,23 +43,16 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             "PM_FILTER_MONITORING",
             "AC_REFRIGERANT_MONITORING"
         };
-
-
-        private const byte SIN_COMUNICACION = 4;
         private byte? _EmissionCode,_IntFuelType,_IntTipoCombustible0907, _fallas;
-
-
         private bool? _MilOn = false, _LeeDtcConfirmados = false, _LeeDtcPendientes = false, _LeeDtcPermanentes = false;
         private bool _vinFromObd = false, _leeMonitores;
-
-
         private double? _StftB1,_LtftB1,_MafGs,_MafKgH,_Tps,_TimingAdvance,_O2S1_V,_O2S2_V, _FuelLevel,_vOff, _CCM,_vOn;
-
         private IReadOnlyList<int> _Pids_01_20 = Array.Empty<int>(), _Pids_21_40 = Array.Empty<int>(), _Pids_41_60 = Array.Empty<int>();
-
-
+        private readonly IObdLogger _logger;
 
         #endregion
+
+
         #region Detectar Puerto
         private string DetectarPuertoElm327(IProgress<string>? progreso = null) {
             var puertos = SerialPort.GetPortNames()
@@ -209,7 +201,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 }
 
                 try {
-                    using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs)) {
+                    using (var elm = new Elm327(portName: _port, baud: _baud, readTimeoutMs: _readTimeoutMs, writeTimeoutMs: _writeTimeoutMs, logger: _logger)) {
                         SivevLogger.Information($"Iniciando lectura OBD en puerto {_port} a {_baud} baudios.");
                         progreso?.Report($"Iniciando lectura OBD");
 
@@ -451,6 +443,29 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
                         porcentaje?.Report(100);
                         SivevLogger.Information($"Lectura OBD finalizada exitosamente. VIN: {_vin}, Protocolo: {_protocolo}");
+                        if (_logger is ObdTxtLogger txtLogger) {
+                            txtLogger.EncabezadoLectura(
+                                vin: _vin ?? "DESCONOCIDO",
+                                protocolo: _protocolo ?? "DESCONOCIDO",
+                                puerto: _port
+                            );
+
+                            txtLogger.ResumenDtc(
+                                raw03: _dtcList03 ?? "",
+                                dec03: string.IsNullOrWhiteSpace(_dtcList03) ? "SIN DTC" : _dtcList03,
+
+                                raw07: _dtcList07 ?? "",
+                                dec07: string.IsNullOrWhiteSpace(_dtcList07) ? "SIN DTC" : _dtcList07,
+
+                                raw0A: _dtcList0A ?? "",
+                                dec0A: string.IsNullOrWhiteSpace(_dtcList0A) ? "SIN DTC" : _dtcList0A
+                            );
+                            try {
+                                txtLogger.ComprimirZip();
+                            } catch (Exception ex) {
+                                SivevLogger.Error($"No se pudo comprimir el log OBD: {ex}");
+                            }
+                        }
                         return new InspeccionObd2Set {
                             ConexionObd = true,
                             VehiculoId = _vin ?? "No se realizo lectura",

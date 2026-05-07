@@ -39,5 +39,6 @@ namespace SQLSIVEV.Infrastructure.Services {
         public bool dvar23 { get; set; } = false;
         public bool dvar24 { get; set; } = false;
         public string dvar25 { get; set; } = "";
+        public bool dvar26 { get; set; } = false;
     }
 }

@@ -267,7 +267,8 @@ namespace Apps_Visual.ObdAppGUI {
                 dvar13 = Leer("ServidorVersionesControlador"),
                 dvar14 = Leer("url"),
                 dvar15 = LeerGuid("EstacionId"),
-                dvar25 = Leer("v25")
+                dvar25 = Leer("v25"),
+                dvar26 = LeerBool("v26", false)
             };
 
             //*
@@ -573,8 +574,9 @@ namespace Apps_Visual.ObdAppGUI {
                 }
             }));
             bool ok = await CapturaVisual.EsperarResultadoAsync();
-            
-           
+            Visual_Core.dvar19 = _placa;
+            Visual_Core.dvar21 = _verificacionId;
+
             if (!_RealizarPruebaOBD) {
                 pnlPanelCambios.Controls.Clear();
                 CapturaVisual.Dispose();
@@ -590,8 +592,7 @@ namespace Apps_Visual.ObdAppGUI {
                     btnInspecionVisual.Visible = true;
                     btnInspecionVisual?.Select();
                     btnInspecionVisual.Focus();
-                    Visual_Core.dvar19 = _placa;
-                    Visual_Core.dvar21 = _verificacionId;
+
                     SivevLogger.Information($"No pasa a prueba OBD la placa {Visual_Core.dvar19}: {_RealizarPruebaOBD}, verificación: {Visual_Core.dvar21}");
                 }
                 return false;

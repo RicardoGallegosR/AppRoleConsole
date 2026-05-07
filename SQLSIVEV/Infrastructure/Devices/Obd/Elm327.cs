@@ -12,11 +12,18 @@ using System.Threading;
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public sealed class Elm327 : IDisposable {
         private readonly SerialPort _port;
-
-        public Elm327(string portName, int baud = 38400, int readTimeoutMs = 10_000, int writeTimeoutMs = 2_000) {
-            // Acepta \\.\COMX o COMX
-            //var p = portName.StartsWith(@"\\.\", StringComparison.OrdinalIgnoreCase) ? portName.Substring(4) : portName;
-            var p = portName; // respeta "COMX" y también "\\.\COMX" (incluye COM10+)
+        private readonly IObdLogger? _logger;
+        #region Configuracion del Logger 
+        public interface IObdLogger {
+            void Info(string mensaje);
+            void RawTx(string comando);
+            void RawRx(string respuesta);
+            void Error(string mensaje, Exception? ex = null);
+        }
+        #endregion
+        public Elm327(string portName, int baud = 38400, int readTimeoutMs = 10_000, int writeTimeoutMs = 2_000, IObdLogger? logger = null) {
+            var p = portName;
+            _logger = logger;
             _port = new SerialPort(p, baud) {
                 Parity = Parity.None,
                 DataBits = 8,
@@ -29,8 +36,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 //DtrEnable = true,
                 DtrEnable = false,
                 //RtsEnable = true
-                RtsEnable = false
-
+                RtsEnable = false,
             };
         }
 
@@ -106,8 +112,10 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
          */
         public string ExecRaw(string cmd, int timeoutMs = 1500) {
             SafeDrain();                 // limpia basura previa
+            _logger?.RawTx(cmd);
             _port.Write(cmd + "\r");
             var resp = ReadUntilPrompt(timeoutMs);
+            _logger?.RawRx(resp);
             var clean = Clean(resp);
             SafeDrain();                 // opcional: deja limpio para el siguiente
             return clean;

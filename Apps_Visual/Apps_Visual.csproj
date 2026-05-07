@@ -10,6 +10,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <FileVersion>6.0.0.5</FileVersion>
     <AssemblyVersion>6.0.0.5</AssemblyVersion>
+	
+	<AssemblyTitle>VISUAL</AssemblyTitle>
+	<AssemblyProduct>LECTOR OBD</AssemblyProduct>
+	<AssemblyCompany>SIVEV</AssemblyCompany>
+	<Authors>Ricardo GALLEGOS</Authors>
+	<AssemblyDescription>Herramienta de lectura OBD-II</AssemblyDescription>
+	<AssemblyCopyright>© Ricardo GALLEGOS</AssemblyCopyright>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -63,6 +70,6 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  
+
 
 </Project>
