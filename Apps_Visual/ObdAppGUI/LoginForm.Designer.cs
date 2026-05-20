@@ -23,6 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmBASE));
             lblGobiernoDeLa = new Label();
             pnlPrincipal = new Panel();
             pnlPanelCambios = new Panel();
@@ -46,7 +47,9 @@
             pnlLateralIzquierdoAbajo = new Panel();
             btnApagar = new Button();
             pnlLateralIzquierdoCentral = new Panel();
+            lblVersion2 = new Label();
             btnInspecionVisual = new Button();
+            lblVersion = new Label();
             pnlPrincipal.SuspendLayout();
             pnlFooter.SuspendLayout();
             pnlCentralFooter.SuspendLayout();
@@ -308,26 +311,50 @@
             // pnlLateralIzquierdoCentral
             // 
             pnlLateralIzquierdoCentral.BackColor = Color.FromArgb(159, 34, 65);
+            pnlLateralIzquierdoCentral.Controls.Add(lblVersion2);
             pnlLateralIzquierdoCentral.Controls.Add(btnInspecionVisual);
+            pnlLateralIzquierdoCentral.Controls.Add(lblVersion);
             pnlLateralIzquierdoCentral.Dock = DockStyle.Fill;
             pnlLateralIzquierdoCentral.Location = new Point(0, 0);
             pnlLateralIzquierdoCentral.Name = "pnlLateralIzquierdoCentral";
             pnlLateralIzquierdoCentral.Size = new Size(120, 466);
             pnlLateralIzquierdoCentral.TabIndex = 0;
             // 
+            // lblVersion2
+            // 
+            lblVersion2.Dock = DockStyle.Fill;
+            lblVersion2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblVersion2.ForeColor = Color.White;
+            lblVersion2.Location = new Point(0, 73);
+            lblVersion2.Name = "lblVersion2";
+            lblVersion2.Size = new Size(120, 393);
+            lblVersion2.TabIndex = 3;
+            lblVersion2.Text = "Version";
+            lblVersion2.TextAlign = ContentAlignment.MiddleLeft;
+            // 
             // btnInspecionVisual
             // 
+            btnInspecionVisual.Dock = DockStyle.Top;
             btnInspecionVisual.FlatAppearance.BorderSize = 0;
             btnInspecionVisual.FlatStyle = FlatStyle.Flat;
             btnInspecionVisual.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnInspecionVisual.ForeColor = Color.Transparent;
-            btnInspecionVisual.Location = new Point(0, 3);
+            btnInspecionVisual.Location = new Point(0, 0);
             btnInspecionVisual.Name = "btnInspecionVisual";
-            btnInspecionVisual.Size = new Size(117, 73);
+            btnInspecionVisual.Size = new Size(120, 73);
             btnInspecionVisual.TabIndex = 1;
             btnInspecionVisual.Text = "Inspección Visual";
             btnInspecionVisual.UseVisualStyleBackColor = true;
             btnInspecionVisual.Click += btnInspecionVisual_Click;
+            // 
+            // lblVersion
+            // 
+            lblVersion.AutoSize = true;
+            lblVersion.Location = new Point(138, 270);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(48, 15);
+            lblVersion.TabIndex = 2;
+            lblVersion.Text = "Version:";
             // 
             // frmBASE
             // 
@@ -337,6 +364,7 @@
             ClientSize = new Size(819, 466);
             ControlBox = false;
             Controls.Add(pnlPrincipal);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MdiChildrenMinimizedAnchorBottom = false;
             MinimizeBox = false;
             Name = "frmBASE";
@@ -357,6 +385,7 @@
             pnlMenuLateral.ResumeLayout(false);
             pnlLateralIzquierdoAbajo.ResumeLayout(false);
             pnlLateralIzquierdoCentral.ResumeLayout(false);
+            pnlLateralIzquierdoCentral.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -386,5 +415,7 @@
         private Panel pnlFooterIquierdo;
         private Panel pnlFooterDerecho;
         private Panel pnlFooterCentro;
+        private Label lblVersion2;
+        private Label lblVersion;
     }
 }

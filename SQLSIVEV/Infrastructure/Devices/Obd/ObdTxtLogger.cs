@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static SQLSIVEV.Infrastructure.Devices.Obd.Elm327;
 using Ionic.Zip;
+using SQLSIVEV.Infrastructure.Utils;
 
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
     public class ObdTxtLogger : IObdLogger {
@@ -18,8 +19,10 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             _ruta = ruta;
             _passwordZip = passwordZip;
             var dir = Path.GetDirectoryName(_ruta);
-            if (!string.IsNullOrWhiteSpace(dir))
+            if (!string.IsNullOrWhiteSpace(dir)) {
                 Directory.CreateDirectory(dir);
+                SivevLogger.Warning($"No existia el directorio {dir}, se ha creado.");
+            }
         }
         public void EncabezadoSesion(string verificacionId, string placa) {
             File.AppendAllText(_ruta,
@@ -82,13 +85,10 @@ DECODIFICADO.: {dec0A}
             using (var zip = new Ionic.Zip.ZipFile()) {
                 zip.Password = _passwordZip;
                 zip.Encryption = EncryptionAlgorithm.WinZipAes256;
-
                 zip.AddFile(_ruta, "");
-
                 zip.Save(zipPath);
             }
-
-            // Si todo salió bien
+            SivevLogger.Information($"Archivo comprimido: {zipPath}");
             File.Delete(_ruta);
         }
 
@@ -111,22 +111,18 @@ DECODIFICADO.: {dec0A}
             try {
                 if (!Directory.Exists(rutaBase))
                     return;
-
                 var limite = DateTime.Now.AddDays(-diasConservar);
-
                 var archivos = Directory.GetFiles(rutaBase, "*.*", SearchOption.AllDirectories);
-
                 foreach (var archivo in archivos) {
                     try {
                         var fecha = File.GetCreationTime(archivo);
 
                         if (fecha < limite)
                             File.Delete(archivo);
-                    } catch {
-                        // ignorar archivo bloqueado
+                    } catch (Exception ex) {
+                        SivevLogger.Warning($"Error al eliminar el archivo {archivo}: {ex.Message}");
                     }
                 }
-
                 // eliminar carpetas vacías
                 foreach (var dir in Directory.GetDirectories(
                     rutaBase,
@@ -135,10 +131,12 @@ DECODIFICADO.: {dec0A}
                     try {
                         if (!Directory.EnumerateFileSystemEntries(dir).Any())
                             Directory.Delete(dir);
-                    } catch {
+                    } catch (Exception ex) {
+                        SivevLogger.Warning($"Error al eliminar la carpeta {dir}: {ex.Message}");
                     }
                 }
-            } catch {
+            } catch (Exception ex) {
+                SivevLogger.Warning($"Error al limpiar logs antiguos: {ex.Message}");
             }
         }
     }

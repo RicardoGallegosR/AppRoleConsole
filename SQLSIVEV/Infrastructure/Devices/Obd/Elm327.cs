@@ -1035,6 +1035,80 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return $"{system}{d1:X}{d2:X}{d3:X}{d4:X}";
         }
 
+        // MODIFICACION 17/04/2026: Nuevo método robusto para leer DTCs en modo 03/07,
+        // compatible con CAN 11/29 e ISO/KWP.
+        // Conforme al analisis de logs reales, muchas ECUs envían los DTCs con formatos variados,
+        // a veces incluyendo bytes de longitud o padding.
+        // Este método maneja esas variaciones de forma segura, extrayendo solo los bytes relevantes
+        // y decodificando correctamente los DTCs, eliminando duplicados y evitando falsos positivos
+        // por datos basura.
+
+        private static List<string> ProcesarRawDtc(string raw, string modo) {
+            if (string.IsNullOrWhiteSpace(raw))
+                return new List<string>();
+
+            string respuestaPositiva = modo switch {
+                "03" => "43",
+                "07" => "47",
+                "0A" => "4A",
+                _ => ""
+            };
+            string respuestaNegativa = $"7F{modo}";
+            var lineas = raw
+                            .Replace("\r", "\n")
+                            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => x.Trim().Replace(" ", "").ToUpper())
+                            .Where(x => x != ">" && x != "NODATA" && x != "SEARCHING...")
+                            .Distinct()
+                            .ToList();
+
+            // Si solo hubo negación al modo consultado
+            if (lineas.Any(x => x.StartsWith(respuestaNegativa)))
+                return new List<string>();
+            var dtcs = new HashSet<string>();
+            foreach (var linea in lineas) {
+                if (!linea.StartsWith(respuestaPositiva))
+                    continue;
+                // Quitar encabezado positivo: 43, 47 o 4A
+                var datos = linea.Substring(2);
+
+                // 4300, 4700, 4A00 = sin DTC
+                if (datos == "00" || datos.All(c => c == '0'))
+                    continue;
+                for (int i = 0; i + 4 <= datos.Length; i += 4) {
+                    var bloque = datos.Substring(i, 4);
+                    if (bloque == "0000")
+                        continue;
+                    var dtc = DecodificarDtc(bloque);
+                    if (!string.IsNullOrWhiteSpace(dtc))
+                        dtcs.Add(dtc);
+                }
+            }
+            return dtcs.OrderBy(x => x).ToList();
+        }
+        private static string DecodificarDtc(string hex4) {
+            if (string.IsNullOrWhiteSpace(hex4) || hex4.Length != 4)
+                return "";
+            int b1 = Convert.ToInt32(hex4.Substring(0, 2), 16);
+            int b2 = Convert.ToInt32(hex4.Substring(2, 2), 16);
+
+            char sistema = (b1 & 0xC0) switch {
+                0x00 => 'P',
+                0x40 => 'C',
+                0x80 => 'B',
+                0xC0 => 'U',
+                _ => 'P'
+            };
+            int primerDigito = (b1 & 0x30) >> 4;
+            int segundoDigito = b1 & 0x0F;
+            return $"{sistema}{primerDigito}{segundoDigito:X}{b2:X2}";
+        }
+
+
+
+
+
+        /* Se cambie a este método por el nuevo "ReadDtcsInternal" que es más robusto y compatible con diferentes formatos de respuesta de las ECUs, evitando problemas comunes como bytes de longitud o padding que pueden confundir a un parser simple. El nuevo método procesa la respuesta cruda de forma segura, extrayendo solo los bytes relevantes y decodificando correctamente los DTCs, eliminando duplicados y evitando falsos positivos por datos basura.
         // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
         // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
         private List<string> ReadDtcsInternal(string cmd, string respPrefix) {
@@ -1090,14 +1164,16 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
-        public List<string> ReadStoredDtcs()
-            => ReadDtcsInternal("03", "43");  // modo 03 → respuesta 43     
+        */
 
-        public List<string> ReadCurrentDtcs()
-            => ReadDtcsInternal("07", "47");  // modo 07 → respuesta 47
+        public List<string> ReadStoredDtcs(string rawModo03 = "03") 
+            => ProcesarRawDtc(ExecRaw(rawModo03), rawModo03);
 
-        public List<string> ReadPermanentDtcs()
-            => ReadDtcsInternal("0A", "4A");  // modo 0A → respuesta 4A
+        public List<string> ReadCurrentDtcs(string rawModo07 = "07")
+            => ProcesarRawDtc(ExecRaw(rawModo07), rawModo07);  // modo 07 → respuesta 47
+
+        public List<string> ReadPermanentDtcs(string rawModo0A = "0A")
+            => ProcesarRawDtc(ExecRaw(rawModo0A), rawModo0A);  // modo 0A → respuesta 4A
 
 
         // ====== Monitor Status (PID 01 01) ======

@@ -31,6 +31,7 @@ using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
+
 //using DPFP_SMA.Models;
 
 
@@ -42,7 +43,7 @@ namespace Apps_Visual.ObdAppGUI {
         private DPFP_SMA.Models.VisualRegistroWindows Visual_48;
         private SQLSIVEV.Infrastructure.Services.VisualRegistroWindows Visual_Core;
         private readonly RegistroCrypto _reg = new();
-
+        private System.Windows.Forms.Timer _timerHora;
 
         private string _placa = string.Empty;
         private Guid _verificacionId = Guid.Empty;
@@ -67,6 +68,7 @@ namespace Apps_Visual.ObdAppGUI {
             InitializeComponent();
             btnInspecionVisual.Enabled = false;
             btnApagar.Enabled = false;
+            MostrarVersion();
 
             this.Load += async (_, __) => {
                 await Task.Delay(200);
@@ -270,6 +272,14 @@ namespace Apps_Visual.ObdAppGUI {
                 dvar25 = Leer("v25"),
                 dvar26 = LeerBool("v26", false)
             };
+            var versionBuild = ObtenerBuildVersion();
+            if (Visual_Core.dvar26) {
+                SivevLogger.Information(
+                    $"|| v26 ACTIVO " +
+                    $"|| Build: {versionBuild} " +
+                    $"|| Logs OBD habilitados"
+                );
+            }
 
             //*
             SivevLogger.Information(
@@ -773,5 +783,37 @@ namespace Apps_Visual.ObdAppGUI {
         }
 
         #endregion
+
+        private void MostrarVersion() {
+            _timerHora = new System.Windows.Forms.Timer();
+            _timerHora.Interval = 1000; // 1 segundo
+            try {
+                var exe = Process.GetCurrentProcess().MainModule.FileName;
+                var info = FileVersionInfo.GetVersionInfo(exe);
+                lblVersion2.Text =$"v{info.FileVersion}\n{Visual_Core.dvar10}\n{DateTime.Now:HH:mm:ss}";
+            }catch (Exception ex) {
+                _timerHora.Tick += (s, ev) =>
+                {
+                    var exe = Process.GetCurrentProcess().MainModule?.FileName;
+                    var info = FileVersionInfo.GetVersionInfo(exe);
+
+                    lblVersion2.Text =
+                        $"v{info.FileVersion}\n" +
+                        $"────────\n" + 
+                        $"{Visual_Core.dvar10}\n" +
+                        $"{DateTime.Now:HH:mm:ss}";
+                };
+
+                _timerHora.Start();
+                SivevLogger.Warning($"No se pudo obtener la versión del ejecutable: {ex.Message}");
+            }
+        }
+        private string ObtenerBuildVersion() {
+            var exe = Process.GetCurrentProcess().MainModule?.FileName;
+            var info = FileVersionInfo.GetVersionInfo(exe);
+
+            return info.FileVersion ?? "0.0.0.0";
+        }
+        
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Apps_Visual.UI.Theme;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
-using Sprache;
+//using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+//using Sprache;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
