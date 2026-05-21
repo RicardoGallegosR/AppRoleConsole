@@ -1,4 +1,4 @@
-﻿using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+﻿//using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config;
 using SQLSIVEV.Infrastructure.Security;

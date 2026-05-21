@@ -10,6 +10,71 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace SQLSIVEV.Infrastructure.Devices.Obd {
+    public class ReadinessFrame {
+        /// Trama completa encontrada.
+        /// Ejemplo: 41010007E100
+        public string Raw { get; init; } = string.Empty;
+
+        /// Byte A
+        /// MIL + cantidad DTC
+        public byte A { get; init; }
+
+        /// Byte B
+        /// Monitores continuos + tipo ignición
+        public byte B { get; init; }
+
+        /// Byte C
+        /// Monitores no continuos soportados
+        public byte C { get; init; }
+
+        /// Byte D
+        /// Monitores no continuos completos
+        public byte D { get; init; }
+
+        /// true = diésel
+        /// false = gasolina
+        public bool CompressionIgnition =>
+            (B & 0x08) != 0;
+
+        /// Cantidad de monitores continuos soportados
+        public int ContinuousSupportedCount =>
+            CountBits(B & 0x07);
+
+        /// Cantidad de monitores no continuos soportados
+        public int NonContinuousSupportedCount =>
+            CountBits(C);
+
+        /// Score total de calidad readiness
+        public int ReadinessScore {
+            get {
+                int score = 0;
+
+                score += ContinuousSupportedCount;
+                score += NonContinuousSupportedCount * 2;
+                if (C == 0)
+                    score -= 5;
+
+                return score;
+            }
+        }
+        public bool HasUsefulReadiness =>
+            ReadinessScore > 0;
+
+        private static int CountBits(int value) {
+            int count = 0;
+
+            while (value != 0) {
+                count += value & 1;
+                value >>= 1;
+            }
+
+            return count;
+        }
+
+        public override string ToString() {
+            return $"{Raw} | Score={ReadinessScore}";
+        }
+    }
     public sealed class Elm327 : IDisposable {
         private readonly SerialPort _port;
         private readonly IObdLogger? _logger;
@@ -952,11 +1017,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             return list;
         }
-        /*
-        var pids_01_20 = PidsSoportadosBloque("0100", 0x01);
-        var pids_21_40 = PidsSoportadosBloque("0120", 0x21);
-        var pids_41_60 = PidsSoportadosBloque("0140", 0x41);
-        */
 
 
 
@@ -1025,15 +1085,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             PushCurrent();
             return ids.Distinct().ToArray();
         }
-        // --- Decode DTC: dos bytes A,B -> "P0XXX" / "C1XXX" / "B2XXX" / "U3XXX" ---
-        private static string DecodeDtc(byte A, byte B) {
-            char system = "PCBU"[A >> 6];
-            int d1 = (A >> 4) & 0x3;
-            int d2 = A & 0xF;
-            int d3 = (B >> 4) & 0xF;
-            int d4 = B & 0xF;
-            return $"{system}{d1:X}{d2:X}{d3:X}{d4:X}";
-        }
+
 
         // MODIFICACION 17/04/2026: Nuevo método robusto para leer DTCs en modo 03/07,
         // compatible con CAN 11/29 e ISO/KWP.
@@ -1278,6 +1330,45 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         private static string ToHex8(byte a, byte b, byte c, byte d)
             => a.ToString("X2") + b.ToString("X2") + c.ToString("X2") + d.ToString("X2");
+        
+        
+        // ACTUALIZACIÓN 20/05/2026:
+        // Nuevo método para seleccionar la mejor respuesta de readiness (PID 01 01)
+        // en caso de múltiples frames "4101" en la respuesta,
+        // lo cual es común en algunas ECUs que envían datos con padding o bytes adicionales.
+        // Este método extrae todas las frames válidas, calcula un "readiness score"
+        // heurístico basado en la cantidad de monitores disponibles y completos,
+        // y selecciona la que tenga el mejor score para interpretar
+        // el estado de los monitores.
+
+        private ReadinessFrame? SelectBestReadinessFrame(string compact) {
+            return ExtractReadinessFrames(compact)
+                .OrderByDescending(f => f.ReadinessScore)
+                .FirstOrDefault();
+        }
+        private List<ReadinessFrame> ExtractReadinessFrames(string compact) {
+            var frames = new List<ReadinessFrame>();
+            for (int i = 0; i <= compact.Length - 12; i++) {
+                if (!compact.Substring(i, 4)
+                    .Equals("4101", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                string raw = compact.Substring(i, 12);
+                try {
+
+                    var frame = new ReadinessFrame {
+                        Raw = raw,
+                        A = Convert.ToByte(raw.Substring(4, 2), 16),
+                        B = Convert.ToByte(raw.Substring(6, 2), 16),
+                        C = Convert.ToByte(raw.Substring(8, 2), 16),
+                        D = Convert.ToByte(raw.Substring(10, 2), 16)
+                    };
+                    frames.Add(frame);
+                } catch(FormatException e) {
+                    SivevLogger.Error($"Error al parsear readiness frame: '{raw}' - {e.Message}");
+                }
+            }
+            return frames;
+        }
 
         public MonitorStatus? ReadStatus() {
             try {
@@ -1289,7 +1380,19 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
                 var resp = ExecRaw("0101", 4000);
                 var compact = resp.Replace(" ", "").Replace("\r", "").Replace("\n", "");
-                var idx = compact.IndexOf("4101", StringComparison.OrdinalIgnoreCase);
+                
+                var best = SelectBestReadinessFrame(compact);
+                if (best == null)
+                    return null;
+                byte A = best.A;
+                byte B = best.B;
+                byte C = best.C;
+                byte D = best.D;
+                /* 
+                 * Cambio para selecionar la mejor ECU en caso de respuestas múltiples, 
+                 * en lugar de buscar el primer "4101" que a veces puede venir con datos basura o padding.
+                 *
+                //var idx = compact.IndexOf("4101", StringComparison.OrdinalIgnoreCase);
                 if (idx < 0 || compact.Length < idx + 12) return null; // necesitamos al menos A..D (4 bytes)
 
                 // Extrae A,B,C,D como bytes
@@ -1297,7 +1400,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 byte B = Convert.ToByte(compact.Substring(idx + 6, 2), 16);
                 byte C = Convert.ToByte(compact.Substring(idx + 8, 2), 16);
                 byte D = Convert.ToByte(compact.Substring(idx + 10, 2), 16);
-
+                */
                 var status = new MonitorStatus {
                     MIL = (A & 0x80) != 0,
                     DtcCount = A & 0x7F
@@ -1371,7 +1474,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 }
 
                 return status;
-            } catch {
+            } catch (Exception e) {
+                SivevLogger.Error($"Error al leer Monitor Status (PID 01 01): {e.Message}");
                 return null; // seguridad: nunca truenes la app si la ECU no soporta este PID
             }
         }

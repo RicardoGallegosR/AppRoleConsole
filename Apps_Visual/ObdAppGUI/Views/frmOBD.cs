@@ -1,6 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 using Microsoft.Data.SqlClient;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+//using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Devices.Obd;
