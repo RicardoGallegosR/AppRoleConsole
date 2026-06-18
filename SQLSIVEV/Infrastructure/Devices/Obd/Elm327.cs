@@ -522,7 +522,10 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             try {
                 return Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
-            } catch { return null; }
+            } catch (Exception e){
+                SivevLogger.Warning($"Error leyendo PID {cmd}. Resp: {resp}.- {e}");
+                return null; 
+            }
         }
         private int? ReadPidAMod09(string cmd, int timeoutMs = 3000) {
             var resp = ExecRaw(cmd, timeoutMs);
@@ -599,30 +602,44 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // PID 011C - OBD requirements to which vehicle is designed
         //public string? NormaObd { get; init; }
 
-        public string? NormativaObdVehiculo(int? A) {
-            return A switch {
-                0x01 => "OBD-II según CARB",
-                0x02 => "OBD según EPA",
-                0x03 => "OBD y OBD-II",
-                0x04 => "OBD-I",
-                0x05 => "No diseñado para cumplir con una norma OBD",
-                0x06 => "EOBD (Europa)",
-                0x07 => "EOBD y OBD-II",
-                0x08 => "EOBD y OBD",
-                0x09 => "EOBD, OBD y OBD-II",
-                0x0A => "JOBD (Japón)",
-                0x0B => "JOBD y OBD-II",
-                0x0C => "JOBD y EOBD",
-                0x0D => "JOBD, EOBD y OBD-II",
-                _ => $"Norma OBD desconocida (A = 0x{A:X2})"
-            };
-        }
+        
 
-        public int? intNormativaObdVehiculo() {
-            var a = ReadPidA("011C", 9000);
-            return a;
+        public byte? LeerNormativaObdVehiculo() {
+            return ReadPidByteA("011C", 9000);
         }
+        private byte? ReadPidByteA(string cmd, int timeoutMs = 3000) {
+            string resp = ExecRaw(cmd, timeoutMs);
+            string compact = resp.Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace(">", "");
 
+            if (compact.Contains("NODATA", StringComparison.OrdinalIgnoreCase)) {
+                return null;
+            }
+
+            string respuestaPositiva = "41" + cmd.Substring(2);
+            int idx = compact.IndexOf(respuestaPositiva, StringComparison.OrdinalIgnoreCase);
+
+            if (idx < 0 || compact.Length < idx + 6) {
+                if (compact.Contains( "7F0112", StringComparison.OrdinalIgnoreCase)) {
+                    SivevLogger.Warning(    $"El PID {cmd} fue rechazado con NRC 12. Respuesta: {resp}");
+                }
+                return null;
+            }
+
+            try {
+                return Convert.ToByte(compact.Substring(idx + 4, 2), 16);
+            } catch (Exception e) {
+                SivevLogger.Warning($"Error leyendo PID {cmd}. Resp: {resp}. {e}");
+                return null;
+            }
+        }
+        /*
+         Actualizacion 25/05/2026
+        Al analizar las tramas se observo que estos PIDs (0105, 0106, 0107)
+        solo contenían datos en el byte A, mientras que el byte B venía con valor null.
+        
+        Se analizaran individualmente para cada PID, y se ajustará la lectura para solo considerar el byte A
+         */
+        /*
         // PID 0105 - Temperatura del refrigerante (°C)
         // public int? CoolantTempC { get; init; }
         public short? TemperaturaRefrigeranteC() {
@@ -671,6 +688,32 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             return ltft;
         }
+        */
+        // PID 0105 - Temperatura del refrigerante (°C)
+        public short? TemperaturaRefrigeranteC() {
+            var A = ReadPidA("0105", 5000);
+            if (!A.HasValue)
+                return null;
+            int tempC = A.Value - 40;
+            return (short)tempC;
+        }
+
+        // PID 0106 - Short Term Fuel Trim Bank 1 (STFT B1)
+        public double? StftBank1() {
+            var A = ReadPidA("0106", 4000);
+            if (!A.HasValue)
+                return null;
+            double stft = (A.Value - 128) * 100.0 / 128.0;
+            return Math.Round(stft, 2);
+        }
+        // PID 0107 - Long Term Fuel Trim Bank 1 (LTFT B1)
+        public double? LtftBank1() {
+            var A = ReadPidA("0107", 4000);
+            if (!A.HasValue)
+                return null;
+            double ltft = (A.Value - 128) * 100.0 / 128.0;
+            return Math.Round(ltft, 2);
+        }
 
         public short? TemperaturaAireAdmisionC() {
             var A = ReadPidA("010F", 3000);
@@ -694,10 +737,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             // Fórmula: ((256 * A) + B) / 100  → resultado en gramos/segundo
             double maf = ((256 * A) + B) / 100.0;
-
-            // Si quieres, puedes redondear:
-            // maf = Math.Round(maf, 2);
-
             return maf;
         }
         public double? FlujoAireMafKgPorHora() {
@@ -1094,7 +1133,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         // Este método maneja esas variaciones de forma segura, extrayendo solo los bytes relevantes
         // y decodificando correctamente los DTCs, eliminando duplicados y evitando falsos positivos
         // por datos basura.
-
+        /*
         private static List<string> ProcesarRawDtc(string raw, string modo) {
             if (string.IsNullOrWhiteSpace(raw))
                 return new List<string>();
@@ -1122,6 +1161,9 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 if (!linea.StartsWith(respuestaPositiva))
                     continue;
                 // Quitar encabezado positivo: 43, 47 o 4A
+                
+        
+        
                 var datos = linea.Substring(2);
 
                 // 4300, 4700, 4A00 = sin DTC
@@ -1132,6 +1174,86 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                     if (bloque == "0000")
                         continue;
                     var dtc = DecodificarDtc(bloque);
+                    if (!string.IsNullOrWhiteSpace(dtc))
+                        dtcs.Add(dtc);
+                }
+            }
+            return dtcs.OrderBy(x => x).ToList();
+        }
+
+        */
+        /*
+         Actualización 17/04/2026: Nuevo método robusto para leer DTCs en modo 03/07
+         */
+        private static List<string> ProcesarRawDtc(string raw, string modo) {
+            if (string.IsNullOrWhiteSpace(raw))
+                return new List<string>();
+
+            modo = modo.Trim().ToUpper();
+
+            string respuestaPositiva = modo switch {
+                "03" => "43",
+                "07" => "47",
+                "0A" => "4A",
+                _ => ""
+            };
+
+            string respuestaNegativa = $"7F{modo}";
+            var lineas = raw.Replace("\r", "\n")
+                            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => x.Trim().Replace(" ", "").ToUpper())
+                            .Where(x => x != ">" && x != "NODATA" && x != "SEARCHING..." && x != modo)
+                            .Distinct()
+                            .ToList();
+
+            if (lineas.Any(x => x.StartsWith(respuestaNegativa)))
+                return new List<string>();
+
+            var dtcs = new HashSet<string>();
+
+            foreach (var linea in lineas) {
+                if (!linea.StartsWith(respuestaPositiva))
+                    continue;
+
+                // Quitar respuesta positiva: 43, 47 o 4A
+                var datos = linea.Substring(2);
+
+                if (string.IsNullOrWhiteSpace(datos))
+                    continue;
+
+                // 4300, 4700, 4A00 = sin DTC
+                if (datos == "00" || datos.All(c => c == '0'))
+                    continue;
+
+                /*
+                    Algunos módulos/adaptadores pueden responder:
+                    43 + cantidad + DTCs
+
+                    Ejemplo:
+                    43 02 06 50 06 60
+                       ^^
+                       cantidad = 2
+
+                    Solo se toma como contador si el resto cuadra exactamente:
+                    cantidad * 4 caracteres hexadecimales.
+                */
+                if (datos.Length >= 2) {
+                    int posibleCantidad = Convert.ToInt32(datos.Substring(0, 2), 16);
+                    int longitudRestante = datos.Length - 2;
+
+                    if (posibleCantidad > 0 && longitudRestante == posibleCantidad * 4) {
+                        datos = datos.Substring(2);
+                    }
+                }
+
+                for (int i = 0; i + 4 <= datos.Length; i += 4) {
+                    var bloque = datos.Substring(i, 4);
+
+                    if (bloque == "0000")
+                        continue;
+
+                    var dtc = DecodificarDtc(bloque);
+
                     if (!string.IsNullOrWhiteSpace(dtc))
                         dtcs.Add(dtc);
                 }
@@ -1155,68 +1277,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             int segundoDigito = b1 & 0x0F;
             return $"{sistema}{primerDigito}{segundoDigito:X}{b2:X2}";
         }
-
-
-
-
-
-        /* Se cambie a este método por el nuevo "ReadDtcsInternal" que es más robusto y compatible con diferentes formatos de respuesta de las ECUs, evitando problemas comunes como bytes de longitud o padding que pueden confundir a un parser simple. El nuevo método procesa la respuesta cruda de forma segura, extrayendo solo los bytes relevantes y decodificando correctamente los DTCs, eliminando duplicados y evitando falsos positivos por datos basura.
-        // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
-        // Parser robusto de DTCs para modo 03/07 (funciona en CAN 11/29 e ISO/KWP)
-        private List<string> ReadDtcsInternal(string cmd, string respPrefix) {
-            // Salida limpia para evitar headers y bytes de transporte
-            ExecRaw("ATCAF1", 600);  // auto-format ON
-            ExecRaw("ATH0", 600);  // sin headers
-            ExecRaw("ATS0", 600);  // sin espacios
-            ExecRaw("ATAT1", 600);  // adaptive timing
-
-            var resp = ExecRaw(cmd, 9000); // 03 ó 07
-
-            // Extrae solo pares hex (2 dígitos)
-            var tokens = Regex.Matches(resp, "[0-9A-Fa-f]{2}")
-                            .Select(m => m.Value.ToUpperInvariant())
-                            .ToList();
-
-            // Busca el prefijo de respuesta (43 para 03, 47 para 07)
-            int k = tokens.FindIndex(t => t == respPrefix);
-            if (k < 0) return new List<string>();
-
-            // Bytes de datos después del prefijo
-            var data = new List<byte>();
-            for (int i = k + 1; i < tokens.Count; i++) {
-                if (byte.TryParse(tokens[i], NumberStyles.HexNumber, null, out var b))
-                    data.Add(b);
-            }
-
-            // Algunas ECUs ponen un "byte de longitud" justo después de 43/47.
-            // Heurística segura:
-            //  - si la cantidad de bytes es IMPAR, descarta el primero
-            //  - o si el primer byte coincide con el resto (conteo), descártalo
-            if (data.Count > 0 && (data.Count % 2 == 1 || data[0] == data.Count - 1))
-                data.RemoveAt(0);
-
-            // Forma pares A,B y decodifica, ignorando 00 00 (padding)
-            var dtcs = new List<string>();
-            for (int i = 0; i + 1 < data.Count; i += 2) {
-                byte A = data[i], B = data[i + 1];
-                if (A == 0x00 && B == 0x00) continue;
-
-                // P/C/B/U según bits altos
-                char system = "PCBU"[A >> 6];
-                int d1 = (A >> 4) & 0x3;
-                int d2 = A & 0xF;
-                int d3 = (B >> 4) & 0xF;
-                int d4 = B & 0xF;
-                dtcs.Add($"{system}{d1:X}{d2:X}{d3:X}{d4:X}");
-            }
-            // 17/04/2026 cambio para eliminar duplicados (algunas ECUs envían cada DTC varias veces)
-            //return dtcs;
-            return dtcs
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
-        */
 
         public List<string> ReadStoredDtcs(string rawModo03 = "03") 
             => ProcesarRawDtc(ExecRaw(rawModo03), rawModo03);

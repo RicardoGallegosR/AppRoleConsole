@@ -292,10 +292,10 @@ namespace Apps_Visual.ObdAppGUI {
                 $"|| RollAcceso: {Visual_Core.dvar7}, " +
                 $"|| opcionMenu: {Visual_Core.dvar8}, " +
                 $"|| estacionId: {Visual_Core.dvar15}, " +
-                //$"|| v25: {Visual_Core.dvar25} " 
+                //$"|| v25: {Visual_Core.dvar25} " +
                 ""
             );
-            //MostrarMensaje($"{Visual_Core.dvar1}");
+            //MostrarMensaje($"{Visual_Core.dvar25}");
             //*/
             return vacio(Visual_Core.dvar1)
                  || vacio(Visual_Core.dvar2)

@@ -659,7 +659,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_41_60", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_41_60 });
 
             // TinyInt (byte)
-            cmd.Parameters.Add(new SqlParameter("@tiNEV", SqlDbType.TinyInt) { Value = 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiNEV", SqlDbType.TinyInt) { Value = obd.NEV });
             cmd.Parameters.Add(new SqlParameter("@tiConexionObd", SqlDbType.TinyInt) { Value = obd.ConexionObd });
             cmd.Parameters.Add(new SqlParameter("@tiIntentos", SqlDbType.TinyInt) { Value = obd.Intentos });
             cmd.Parameters.Add(new SqlParameter("@tiMil", SqlDbType.TinyInt) { Value = obd.Mil });

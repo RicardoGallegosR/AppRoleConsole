@@ -40,6 +40,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private TaskCompletionSource<bool>? _tcsResultado;
         private bool _leyendoObd = false;
         private int _Intentos = 0;
+        #endregion
 
         #region Credenciales de la bdd
 
@@ -52,12 +53,10 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private int coQ = 0, coA = 0, coP = 0;
         private enum Modo { Mod0, Mod1, Mod2, Mod3 }
-        private static Random _r = new Random();
+        private static Random _r;
         #endregion
 
-
-        #endregion
-
+        #region Contrucctor de produccion
         //*                      PRODUCCION
         public frmOBD(VisualRegistroWindows visual) {
             _fontSizeInicial = this.Font.Size;
@@ -69,14 +68,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
             ResetForm();
             
         }
+        #endregion
         //*/
         #region BOTON CONECTAR
-
-        #region Configuración del logger 
-        
-        #endregion
-
-
         private async void btnConectar_Click(object sender, EventArgs e) {
             R = null;
             pbLecturaObd.Visible = true;
@@ -108,13 +102,25 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 lblLecturaOBD.Text = $"Credencial {_Visual.dvar18} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión - Placa: {_Visual.dvar19}";
 
                 await Task.Delay(300);
-
+                /* 
+                 * Actualizacion 2026-06-16: Se cambia el log al servidor principal por 
+                 * comodidad a la hora de revisar los logs, ya que el proceso de conexión SBD es 
+                 * el que más falla y así se evita tener que revisar logs locales o pedirlos a los usuarios.
                 if (_Visual.dvar26) {
                     ObdTxtLogger.LimpiarLogsAntiguos(@"C:\SIVEV\LogsOBD",7);
                     var carpeta = $@"C:\SIVEV\LogsOBD\{DateTime.Now:yyyy-MM-dd}";
-                    var archivo = $@"{carpeta}\{_Visual.dvar21}_{_Visual.dvar19}_{DateTime.Now:HHmmss}.txt";
+                    var archivo = $@"{carpeta}\{_Visual.dvar19}_{_Visual.dvar21}_{DateTime.Now:HHmmss}.txt";
                     var logger = new ObdTxtLogger(archivo, _Visual.dvar21.ToString().ToUpper());
                     logger.EncabezadoSesion(  verificacionId: _Visual.dvar21.ToString(), placa: _Visual.dvar19.ToString());
+                    randy = new RBGR(logger);
+                } */
+                if (_Visual.dvar26) {
+                    var verificacionId = _Visual.dvar21.ToString().ToUpper();
+                    var placa = _Visual.dvar19.ToString().ToUpper();
+                    var centroServidor = _Visual.dvar12.ToString();
+                    var archivo = Logs.CrearRutaLogObd(placa, verificacionId, centroServidor);
+                    var logger = new ObdTxtLogger(archivo, verificacionId);
+                    logger.EncabezadoSesion(verificacionId: verificacionId, placa: placa);
                     randy = new RBGR(logger);
                 } else {
                     randy = new RBGR();
@@ -137,14 +143,13 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 }
                 //*/
             } catch (Exception ex) {
-                // Si falla, deja el intento contado y muestra mensaje
                 lblLecturaOBD.Text = $"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}";
                 SivevLogger.Error($"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}");
             } finally {
                 // Si ya se agotaron intentos, bloquea definitivamente el botón
                 if (_intentosConexion >= MAX_INTENTOS && (R == null || !R.ConexionObd)) {
                     btnConectar.Enabled = false;
-                    btnConectar.Visible = true;
+                    btnConectar.Visible = false;
                     btnConectar.Text = "Sin intentos";
                     lblLecturaOBD.Text = $"Se agotaron los {MAX_INTENTOS} intentos de conexión SBD. Desconecte el dispositivo";
                     var respuestaDefaulObd = new InspeccionObd2Set{
@@ -261,7 +266,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
         #endregion
 
-
+        #region Mensajes y bitacora
         private void MostrarMensaje(string mensaje) {
             using (var dlg = new frmMensajes(mensaje)) {
                 dlg.StartPosition = FormStartPosition.CenterParent;
@@ -287,6 +292,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 SourceError = "DESCONOCIDO"
             };
         }
+        #endregion
         public Task<bool> EsperarResultadoAsync() {
             _tcsResultado = new TaskCompletionSource<bool>();
             return _tcsResultado.Task;
@@ -346,5 +352,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
+
     }
 }

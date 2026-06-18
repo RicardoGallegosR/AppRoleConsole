@@ -150,8 +150,7 @@
         public string? VehiculoId { get; set; } = "DESCONOCIDO";
         public decimal? CCM { get; set; } = 0;
         public int? WarmUpsDesdeBorrado { get; set; } = 0;
-        public int? NEV { get; set; } = 0;
-        public string? NEV_string { get; set; } = "DESCONOCIDO";
+        public byte? NEV { get; set; } = 0;
         public short? TR { get; set; } = 0;
         //public byte? ConexionObd { get; set; } = 0;
         public string? ProtocoloObd { get; set; } = "DESCONOCIDO";
