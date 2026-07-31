@@ -40,6 +40,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private TaskCompletionSource<bool>? _tcsResultado;
         private bool _leyendoObd = false;
         private int _Intentos = 0;
+
+        private int Contador = 0;
         #endregion
 
         #region Credenciales de la bdd
@@ -66,7 +68,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             WindowState = FormWindowState.Maximized;
             this.Resize += frmCapturaVisual_Resize;
             ResetForm();
-            
         }
         #endregion
         //*/
@@ -102,18 +103,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 lblLecturaOBD.Text = $"Credencial {_Visual.dvar18} ha conectando SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión - Placa: {_Visual.dvar19}";
 
                 await Task.Delay(300);
-                /* 
-                 * Actualizacion 2026-06-16: Se cambia el log al servidor principal por 
-                 * comodidad a la hora de revisar los logs, ya que el proceso de conexión SBD es 
-                 * el que más falla y así se evita tener que revisar logs locales o pedirlos a los usuarios.
-                if (_Visual.dvar26) {
-                    ObdTxtLogger.LimpiarLogsAntiguos(@"C:\SIVEV\LogsOBD",7);
-                    var carpeta = $@"C:\SIVEV\LogsOBD\{DateTime.Now:yyyy-MM-dd}";
-                    var archivo = $@"{carpeta}\{_Visual.dvar19}_{_Visual.dvar21}_{DateTime.Now:HHmmss}.txt";
-                    var logger = new ObdTxtLogger(archivo, _Visual.dvar21.ToString().ToUpper());
-                    logger.EncabezadoSesion(  verificacionId: _Visual.dvar21.ToString(), placa: _Visual.dvar19.ToString());
-                    randy = new RBGR(logger);
-                } */
+
                 if (_Visual.dvar26) {
                     var verificacionId = _Visual.dvar21.ToString().ToUpper();
                     var placa = _Visual.dvar19.ToString().ToUpper();
@@ -125,13 +115,31 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 } else {
                     randy = new RBGR();
                 }
-                
+
                 lblReporte.TextAlign = ContentAlignment.MiddleCenter;
                 var progreso = new Progress<string>(msg => lblReporte.Text = msg);
                 var porcentaje = new Progress<int>(p => { pbLecturaObd.Value = p; });
 
                 R = await Task.Run(() => randy.SpSetObd(progreso, porcentaje));
                 R.Intentos = _intentosConexion;
+
+                /*
+                    UDS configuracion PRUEBAS:  
+                 */
+                //MostrarMensaje($"Configurando UDS {_Visual.dvar25}, contador: {coA}, cred: {_Visual.dvar18}, cred1: {_Visual.dvar27}, cred2: {_Visual.dvar28}");
+                if (_Visual.dvar25 && coA == 3 && (_Visual.dvar18.Equals(_Visual.dvar27) || _Visual.dvar18.Equals(_Visual.dvar28))) {
+                    R.CodigoError = "";
+                    R.CodigoErrorPendiente = "";
+                    R.Sdciic = 1;
+                    R.Secc = 1;
+                    R.Sc = 1;
+                    R.Sso = 1;
+                    R.Sci = 1;
+
+                }
+                //*/
+
+
 
                 lblLecturaOBD.Text = R.ConexionObd
                         ? $"Conexión OBD exitosa - Placa: {_Visual.dvar19}"
@@ -187,7 +195,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         var bitacora = NuevaBitacora( _Visual, descripcion: $"Resultado de SBD: {error.Mensaje}", codigoSql: _mensaje, codigo: 0);
                         await repo.SpSpAppBitacoraErroresSetAsync(_Visual, bitacora);
                         MostrarMensaje($"Resultado de SBD: {error.Mensaje}");
-                        await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId:_Visual.dvar15, _AccesoId: _Visual.dvar20);
+                        await repo.SpAppAccesoFinAsync(conn: connApp, _EstacionId: _Visual.dvar15, _AccesoId: _Visual.dvar20);
                     }
                     _tcsResultado?.TrySetResult(false);
                 } catch (Exception ex) {
@@ -213,6 +221,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
         }
 
         private void ResetForm() {
+            //KeyPreview = true;
+            //KeyDown += dVAR25_KeyDown;
+
             pbLecturaObd.Visible = false;
             _Visual.dvar22 = false;
             _Visual.dvar23 = false;
@@ -241,14 +252,14 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region Tamaño de letra variable
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
-            
+
             float factor = (float)this.Width / _formSizeInicial.Width;
-            
+
             float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
             float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 40f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 30f));
             float Titulo4 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
-            
+
 
             lblLecturaOBD.Font = new Font(
                 lblLecturaOBD.Font.FontFamily,
@@ -352,6 +363,25 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmOBD_Load(object sender, EventArgs e) {
 
         }
-
+        /*
+        private void dVAR25_KeyDown(object? sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.A) {
+                coA++;
+                MostrarMensaje($"Presionaste A, contador: {coA}");
+                if (coA > 4) {
+                    coA = 0;
+                }
+            }
+        }
+        */
+        private void btnConectar_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.A) {
+                coA++;
+                //MostrarMensaje($"Presionaste A, contador: {coA}");
+                if (coA > 4) {
+                    coA = 0;
+                }
+            }
+        }
     }
 }

@@ -179,7 +179,7 @@
             // 
             // pnlSeparadorFooterGrimsonII
             // 
-            pnlSeparadorFooterGrimsonII.BackColor = Color.FromArgb(159, 34, 65);
+            pnlSeparadorFooterGrimsonII.BackColor = Color.Crimson;
             pnlSeparadorFooterGrimsonII.Dock = DockStyle.Left;
             pnlSeparadorFooterGrimsonII.Location = new Point(0, 0);
             pnlSeparadorFooterGrimsonII.Name = "pnlSeparadorFooterGrimsonII";
@@ -244,7 +244,7 @@
             // 
             // pnlSeparadorFooterGrimsonI
             // 
-            pnlSeparadorFooterGrimsonI.BackColor = Color.FromArgb(159, 34, 65);
+            pnlSeparadorFooterGrimsonI.BackColor = Color.Crimson;
             pnlSeparadorFooterGrimsonI.Dock = DockStyle.Right;
             pnlSeparadorFooterGrimsonI.Location = new Point(255, 0);
             pnlSeparadorFooterGrimsonI.Name = "pnlSeparadorFooterGrimsonI";
@@ -274,7 +274,7 @@
             // 
             // pnlMenuLateral
             // 
-            pnlMenuLateral.BackColor = Color.FromArgb(159, 34, 65);
+            pnlMenuLateral.BackColor = Color.Crimson;
             pnlMenuLateral.Controls.Add(pnlLateralIzquierdoAbajo);
             pnlMenuLateral.Controls.Add(pnlLateralIzquierdoCentral);
             pnlMenuLateral.Dock = DockStyle.Left;
@@ -322,6 +322,7 @@
             // 
             // lblVersion2
             // 
+            lblVersion2.BackColor = Color.Crimson;
             lblVersion2.Dock = DockStyle.Fill;
             lblVersion2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblVersion2.ForeColor = Color.White;
@@ -334,6 +335,7 @@
             // 
             // btnInspecionVisual
             // 
+            btnInspecionVisual.BackColor = Color.Crimson;
             btnInspecionVisual.Dock = DockStyle.Top;
             btnInspecionVisual.FlatAppearance.BorderSize = 0;
             btnInspecionVisual.FlatStyle = FlatStyle.Flat;
@@ -344,7 +346,7 @@
             btnInspecionVisual.Size = new Size(120, 73);
             btnInspecionVisual.TabIndex = 1;
             btnInspecionVisual.Text = "Inspección Visual";
-            btnInspecionVisual.UseVisualStyleBackColor = true;
+            btnInspecionVisual.UseVisualStyleBackColor = false;
             btnInspecionVisual.Click += btnInspecionVisual_Click;
             // 
             // lblVersion

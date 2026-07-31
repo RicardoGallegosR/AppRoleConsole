@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <Version>7.$([System.DateTime]::Now.ToString("yyMM")).$([System.DateTime]::Now.ToString("dd")).$([System.DateTime]::Now.ToString("HH"))</Version>
+	  <FileVersion>$(Version)</FileVersion>
+	  <AssemblyVersion>7.0.0.0</AssemblyVersion>
+	  <InformationalVersion>$(Version)</InformationalVersion>
+  </PropertyGroup>
+	
+
+  <ItemGroup>
+    <ProjectReference Include="..\FrmComun\FrmComun.csproj" />
+    <ProjectReference Include="..\SQLSIVEV\SQLSIVEV.csproj" />
+  </ItemGroup>
+
+</Project>

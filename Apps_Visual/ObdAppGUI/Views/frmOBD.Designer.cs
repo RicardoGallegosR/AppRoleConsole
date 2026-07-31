@@ -73,6 +73,7 @@
             btnConectar.Text = "C O N E C T A R";
             btnConectar.UseVisualStyleBackColor = true;
             btnConectar.Click += btnConectar_Click;
+            btnConectar.KeyDown += btnConectar_KeyDown;
             // 
             // pnlPrincipal
             // 

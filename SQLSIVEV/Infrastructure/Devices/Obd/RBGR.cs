@@ -14,11 +14,11 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         #region Declaración de Variables
 
-        private int? _rpm,  _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03, _OperacionMotor, _WarmUpsDesdeBorrado,
+        private int? _rpm, _rpmOff, _rpmOn,  _distMilKm, _distSinceClrKm, _runTimeMilMin, _timeSinceClr, _fallas03, _OperacionMotor, _WarmUpsDesdeBorrado,
             _EcuAddressInt, _ID_Calib, _ReadCvnMessageCount, _TiempoMotorEnMarchaSeg;
         private uint ? _odometro;
         private short? _vel, _BarometricPressure, _IatC, _IatCCoolantTempC;
-        private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A, _rpmOff, _rpmOn, cnt03, cnt07, cnt0A;
+        private int _baud = 38400, _readTimeoutMs = 6000, _writeTimeoutMs = 1200, _fallas07,_fallas0A, cnt03, cnt07, cnt0A;
         private static string SafeStr(object? x, string empty = "—") => x == null ? empty : x.ToString() ?? empty;
         private string _port = ""//"COM4"
             , _vin = string.Empty, _calJoined = string.Empty;
@@ -190,7 +190,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
 
         #region Clase produccion 
-        public InspeccionObd2Set SpSetObd(IProgress<string>? progreso = null, IProgress<int>? porcentaje = null) {
+        public InspeccionObd2Set SpSetObd(IProgress<string>? progreso = null, IProgress<int>? porcentaje = null, IProgress<int>? rpmProgress = null, IProgress<double> batteryProgress = null) {
             string mensaje = "";
             var errores = new Dictionary<string, string>();
 
@@ -216,68 +216,110 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         progreso?.Report($"Pensando");
                         porcentaje?.Report(1);
                         _rpm = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores)?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores)?? 0.0);
                         //SivevLogger.Information($"PID 011C.- RPM leída: {_rpm?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(2);
                         _vel = TryQuery<short?>("Velocidad", () => elm.ReadSpeedKmh(), null, errores); //010D
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 010D.- Velocidad leída: {_vel?.ToString() ?? "null"} km/h.");
 
                         porcentaje?.Report(3);
                         _vin = TryQuery<string>("VIN", () => elm.ReadVin() ?? "DESCONOCIDO", "DESCONOCIDO", errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0902.- VIN leída: {_vin}.");
 
                         porcentaje?.Report(4);
                         _cal = TryQuery<string[]>("CAL", () => elm.ReadCalibrationIds(), Array.Empty<string>(), errores);//0904
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0904.- CAL leída: {(_cal.Length > 0 ? string.Join(", ", _cal) : "null")}.");
 
                         porcentaje?.Report(5);
                         _vOn = TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"Voltage leída: {_vOn?.ToString() ?? "null"} V.");
 
                         porcentaje?.Report(6);
                         _dtcList03 = LeerYUnirDtcs("GET_DTC", () => elm.ReadStoredDtcs(), errores, out cnt03);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
 
                         porcentaje?.Report(7);
                         _dtcList07 = LeerYUnirDtcs("GET_CURRENT_DTC", () => elm.ReadCurrentDtcs(), errores, out cnt07);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
 
                         porcentaje?.Report(8);
                         _dtcList0A = LeerYUnirDtcs("GET_PERMANENT_DTC", () => elm.ReadPermanentDtcs(), errores, out cnt0A);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);   
+
                         porcentaje?.Report(9);
                         _LeeDtcConfirmados = cnt03 > 0;
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+
                         porcentaje?.Report(10);
                         _LeeDtcPendientes = cnt07 > 0;
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+
                         porcentaje?.Report(11);
                         _LeeDtcPermanentes = cnt0A > 0;
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+
                         porcentaje?.Report(12);
                         _vinFromObd = (!string.IsNullOrWhiteSpace(_vin) && !string.Equals(_vin, "DESCONOCIDO", StringComparison.OrdinalIgnoreCase)) ? true : false;
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         // NUEVOS VALORES 
 
                         porcentaje?.Report(13);
                         _distMilKm = TryQuery<int?>("DISTANCE_W_MIL", () => elm.ReadDistanceWithMilKm(), null, errores); //0121
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0121.- Distancia recorrida con MIL encendido: {_distMilKm?.ToString() ?? "null"} km.");
 
                         porcentaje?.Report(14);
                         _distSinceClrKm = TryQuery<int?>("DISTANCE_SINCE_DTC_CLEAR", () => elm.ReadDistanceSinceClearKm(), null, errores);//0131
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0131.- Distancia recorrida desde el último borrado de DTC: {_distSinceClrKm?.ToString() ?? "null"} km.");
 
                         porcentaje?.Report(15);
                         _runTimeMilMin = TryQuery<int?>("RUN_TIME_MIL", () => elm.ReadRunTimeMilMinutes(), null, errores);//014D
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 014D.- Tiempo de funcionamiento con MIL encendido: {_runTimeMilMin?.ToString() ?? "null"} minutos.");
 
                         porcentaje?.Report(16);
                         _timeSinceClr = TryQuery<int?>("TIME_SINCE_DTC_CLEARED", () => elm.ReadTimeSinceDtcClearedMinutes(), null, errores);//014E
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 014E.- Tiempo transcurrido desde el último borrado de DTC: {_timeSinceClr?.ToString() ?? "null"} minutos.");
 
                         porcentaje?.Report(17);
                         _OperacionMotor = TryQuery<int?>("TiempoTotalSegundosOperacionMotor", () => elm.TiempoTotalSegundosOperacionMotor(), null, errores);//011F
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0); 
                         //SivevLogger.Information($"PID 011F.- Tiempo total de operación del motor: {_OperacionMotor?.ToString() ?? "null"} segundos.");
 
                         porcentaje?.Report(18);
                         _WarmUpsDesdeBorrado = TryQuery<int?>("WarmUpsDesdeBorrado", () => elm.WarmUpsSinceCodesCleared(), null, errores);//0130
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);   
                         //SivevLogger.Information($"PID 0130.- Número de ciclos de calentamiento desde el último borrado de DTC: {_WarmUpsDesdeBorrado?.ToString() ?? "null"}.");
 
 
                         porcentaje?.Report(19);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         var status = TryQuery<Elm327.MonitorStatus?>("STATUS PID 0101", () => elm.ReadStatus(), null, errores);
                         
                         porcentaje?.Report(20);
@@ -320,126 +362,192 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
                         porcentaje?.Report(21);
                         _leeMonitores = (status != null);
-
-
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         /////////////////////////////////////////////////////////////////////////////////////////////////
                         porcentaje?.Report(22);
                         _intNormativaObdVehiculo = TryQuery<byte?>("NORMATIVA_OBD_VEHICULO_int", () => elm.LeerNormativaObdVehiculo(), null, errores);//011C
-                        SivevLogger.Information($"PID 011C.- Normativa OBD del vehículo (int): {_intNormativaObdVehiculo?.ToString() ?? "null"}.");
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+                        //SivevLogger.Information($"PID 011C.- Normativa OBD del vehículo (int): {_intNormativaObdVehiculo?.ToString() ?? "null"}.");
 
-                        //porcentaje?.Report(23);
+                        porcentaje?.Report(23);
                         //_NormativaObdVehiculo = TryQuery<string?>("NORMATIVA_OBD_VEHICULO_string", () => elm.NormativaObdVehiculo(_intNormativaObdVehiculo), null, errores);//011C
                         //SivevLogger.Information($"PID 011C.- Normativa OBD del vehículo (string): {_NormativaObdVehiculo ?? "null"}.");
 
                         porcentaje?.Report(24);
                         _IatCCoolantTempC = TryQuery<short?>("COOLANTTEMPC", () => elm.TemperaturaRefrigeranteC(), null, errores);//0105
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0105.- Temperatura del refrigerante (°C): {_IatCCoolantTempC?.ToString() ?? "null"} °C.");
 
                         porcentaje?.Report(25);
                         _StftB1 = TryQuery<double?>("STFTB1", () => elm.StftBank1(), null, errores);//0106
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0106.- STFT Bank 1: {_StftB1?.ToString() ?? "null"} %.");
 
                         porcentaje?.Report(26);
                         _LtftB1 = TryQuery<double?>("LTFTB1", () => elm.LtftBank1(), null, errores);//0107
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0107.- LTFT Bank 1: {_LtftB1?.ToString() ?? "null"} %.");
+
+                        _rpmOn = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
 
                         porcentaje?.Report(27);
                         _IatC = TryQuery<short?>("IATC", () => elm.TemperaturaAireAdmisionC(), null, errores);//010F
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 010F.- Temperatura del aire de admisión (°C): {_IatC?.ToString() ?? "null"} °C.");
 
                         porcentaje?.Report(28);
                         _MafGs = TryQuery<double?>("MAFGS", () => elm.FlujoAireMaf(), null, errores);//0110
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0110.- Flujo de aire MAF (g/s): {_MafGs?.ToString() ?? "null"} g/s.");
 
                         porcentaje?.Report(29);
                         _MafKgH = TryQuery<double?>("MAFKGH", () => elm.FlujoAireMafKgPorHora(), null, errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0110.- Flujo de aire MAF (kg/h): {_MafKgH?.ToString() ?? "null"} kg/h.");
 
                         porcentaje?.Report(30);
                         _Tps = TryQuery<double?>("TPS", () => elm.PosicionAcelerador(), null, errores);//0111
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0111.- Posición del acelerador (TPS): {_Tps?.ToString() ?? "null"} %.");
 
                         porcentaje?.Report(31);
                         _TimingAdvance = TryQuery<double?>("TIMING_ADVANCE", () => elm.AvanceEncendido(), null, errores);//010E
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 010E.- Avance de encendido: {_TimingAdvance?.ToString() ?? "null"} grados.");
 
                         porcentaje?.Report(32);
                         _O2S1_V = TryQuery<double?>("O2S1_V", () => elm.O2Sensor1Voltage(), null, errores);//0114
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);   
                         //SivevLogger.Information($"PID 0114.- Voltaje del sensor de oxígeno 1: {_O2S1_V?.ToString() ?? "null"} V.");
 
                         porcentaje?.Report(33);
                         _O2S2_V = TryQuery<double?>("O2S2_V", () => elm.O2Sensor2Voltage(), null, errores);//0115
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0115.- Voltaje del sensor de oxígeno 2: {_O2S2_V?.ToString() ?? "null"} V.");
 
                         porcentaje?.Report(34);
                         _FuelLevel = TryQuery<double?>("FUEL_LEVEL", () => elm.NivelCombustible(), null, errores);//012F
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 012F.- Nivel de combustible: {_FuelLevel?.ToString() ?? "null"} %.");
 
                         porcentaje?.Report(35);
                         _BarometricPressure = TryQuery<short?>("BAROMETRIC_PRESSURE", () => elm.PresionBarometrica(), null, errores);//0133
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0133.- Presión barométrica: {_BarometricPressure?.ToString() ?? "null"} kPa.");
 
                         porcentaje?.Report(36);
                         _FuelType = TryQuery<string?>("FUEL_TYPE", () => elm.TipoCombustible(), null, errores);//0151
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0151.- Tipo de combustible: {_FuelType ?? "null"}.");
 
                         porcentaje?.Report(37);
                         _IntFuelType = TryQuery<byte?>("INT_FUEL_TYPE", () => elm.byteTipoCombustible0151(), null, errores);//0151
-                       // SivevLogger.Information($"PID 0151.- Tipo de combustible (int): {_IntFuelType?.ToString() ?? "null"}.");
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+                        //SivevLogger.Information($"PID 0151.- Tipo de combustible (int): {_IntFuelType?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(38);
                         _IntTipoCombustible0907 = TryQuery<byte?>("INT_TIPO_COMBUSTIBLE_0907", () => elm.intTipoCombustible0907(), null, errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0907.- Tipo de combustible (int): {_IntTipoCombustible0907?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(39);
                         _EcuAddress = TryQuery<string?>("ECU_ADDRESS", () => elm.EcuAddress(), null, errores); //090A
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 090A.- Dirección ECU: {_EcuAddress ?? "null"}.");
 
                         porcentaje?.Report(40);
                         _EcuAddressInt = TryQuery<int?>("ECU_ADDRESS_INT", () => elm.EcuAddressInt(), null, errores);//090A int
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 090A.- Dirección ECU (int): {_EcuAddressInt?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(41);
                         _CCM = TryQuery<double?>("CCM", () => elm.LoadCalc(), null, errores); //0104
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0104.- Carga calculada (CCM): {_CCM?.ToString() ?? "null"} %.");
 
                         porcentaje?.Report(42);
                         _EmissionCode = TryQuery<byte?>("EMISSION_CODE", () => elm.RequisitosEmisionesVehiculo(), null, errores);//015F
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);   
                         //SivevLogger.Information($"PID 015F.- Requisitos de emisiones del vehículo: {_EmissionCode?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(43);
                         _Pids_01_20 = TryQuery<IReadOnlyList<int>>("PIDS_01_20", () => elm.PidsSoportadosBloque("0100", 0x01), Array.Empty<int>(), errores);
-                       // SivevLogger.Information($"PID 0100.- PIDs soportados (01-20): {_Pids_01_20?.Count ?? 0}.");
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+                        // SivevLogger.Information($"PID 0100.- PIDs soportados (01-20): {_Pids_01_20?.Count ?? 0}.");
 
                         porcentaje?.Report(44);
                         _Pids_21_40 = TryQuery<IReadOnlyList<int>>("PIDS_21_40", () => elm.PidsSoportadosBloque("0120", 0x21), Array.Empty<int>(), errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0120.- PIDs soportados (21-40): {_Pids_21_40?.Count ?? 0}.");
                         
                         porcentaje?.Report(45);
                         _Pids_41_60 = TryQuery<IReadOnlyList<int>>("PIDS_41_60", () => elm.PidsSoportadosBloque("0140", 0x41), Array.Empty<int>(), errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0140.- PIDs soportados (41-60): {_Pids_41_60?.Count ?? 0}.");
 
                         porcentaje?.Report(46);
                         _odometro = TryQuery<uint?>("Odometro", () => elm.ReadOdometer01A6(), null, errores);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 01A6.- Odómetro: {_odometro?.ToString() ?? "null"} km.");
 
                         porcentaje?.Report(47);
                         _fallas = ContarPxxxxUnicos(_dtcList03);
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
+
                         porcentaje?.Report(48);
                         _ID_Calib = TryQuery<int?>("_ID_Calib", () => elm.CalibIdMessageCount(), null, errores);// 0903
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0903.- ID de calibración: {_ID_Calib?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(49);
                         _ReadCvnMessageCount = TryQuery<int?>("_ReadCvnMessageCount", () => elm.ReadCvnMessageCount(), null, errores);// 0905
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0905.- Número de mensajes CVN leídos: {_ReadCvnMessageCount?.ToString() ?? "null"}.");
 
                         porcentaje?.Report(50);
                         _ReadCvnsRobusto = TryQuery<string?>("ReadCvnsRobusto", () => elm.ReadCvnsRobusto(_ReadCvnMessageCount), null, errores); //0906
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0906.- CVNs leídos (robusto): {(_ReadCvnsRobusto != null ? _ReadCvnsRobusto.Substring(0, Math.Min(100, _ReadCvnsRobusto.Length)) + ( _ReadCvnsRobusto.Length > 100 ? "..." : "") : "null")}.");
 
                         porcentaje?.Report(51);
                         _TiempoMotorEnMarchaSeg = TryQuery<int?>("TiempoMotorEnMarchaSeg", () => elm.TiempoMotorEnMarchaSeg(), null, errores); //017F
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 017F.- Tiempo total que el motor ha estado en marcha (segundos): {_TiempoMotorEnMarchaSeg?.ToString() ?? "null"} segundos.");
+
+                        porcentaje?.Report(52);
+                        _rpmOff = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
+                        //rpmProgress?.Report(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
+                        //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
 
                         porcentaje?.Report(100);
                         SivevLogger.Information($"Lectura OBD finalizada exitosamente. VIN: {_vin}, Protocolo: {_protocolo}");

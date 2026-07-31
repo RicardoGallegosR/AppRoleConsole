@@ -858,5 +858,65 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 MensajeId = _MensajeId,
             };
         }
+        //*
+        public async Task<SpAppDatosVehiculoObdNewSet> SpAppDatosVehiculoObdNewGetSetAsync(VisualRegistroWindows V,  CancellationToken ct = default) {
+            var resultado = new SpAppDatosVehiculoObdNewSet();
+            try {
+                using (var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5)) {
+                    if (connApp.State != ConnectionState.Open) await connApp.OpenAsync(ct);
+                    using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
+                        using var cmd = connApp.CreateCommand();
+                        cmd.CommandText = "VfcVisual.SpAppDatosVehiculoObdNewGet";
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Entradas
+                        var pEstacionId = new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar15 };
+                        var pAccesoId = new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = V.dvar20 };
+                        var pVerificacionId = new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar21 };
+
+                        // Salidaas
+                        var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                        var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+
+                        // Valor de retorno (RETURN @@ERROR)
+                        var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+                        
+                        cmd.Parameters.Add(pMensajeId);
+                        cmd.Parameters.Add(pResultado);
+                        cmd.Parameters.Add(pEstacionId);
+                        cmd.Parameters.Add(pAccesoId);
+                        cmd.Parameters.Add(pVerificacionId);
+                        cmd.Parameters.Add(pReturn);
+
+                        await using (var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow,ct)) {
+                            if (await reader.ReadAsync(ct)) {
+                                resultado.Marca = ObtenerString(reader, "Marca");
+                                resultado.SubMarca = ObtenerString(reader, "SubMarca");
+                                resultado.Modelo = ObtenerString(reader, "Modelo");
+                                resultado.DTCConfirmado = ObtenerString(reader, "CodigoError");
+                                resultado.DTCPendiente = ObtenerString(reader, "CodigoErrorPendientes");
+                                resultado.Protocolo = ObtenerString(reader, "ProtocoloObd");
+                            }
+                        }
+                        resultado.MensajeId = pMensajeId.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensajeId.Value);
+                        resultado.Resultado = pResultado.Value == DBNull.Value ? 0 : Convert.ToInt32(pResultado.Value);
+                        int codigoRetorno = pReturn.Value == DBNull.Value? 0 : Convert.ToInt32(pReturn.Value);
+                        if (codigoRetorno != 0) {
+                            SivevLogger.Error($"VfcVisual.SpAppDatosVehiculoObdNewGet retornó el código {codigoRetorno}");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                SivevLogger.Error($"SivSpComun.SpAppBitacoraErroresSet {e}");
+            }
+            return resultado;
+        }
+        private static string ObtenerString(SqlDataReader reader, string nombreColumna) {
+            int ordinal = reader.GetOrdinal(nombreColumna);
+            if (reader.IsDBNull(ordinal))
+                return string.Empty;
+            return Convert.ToString(reader.GetValue(ordinal)) ?? string.Empty;
+        }
+        //*/
     }
 }

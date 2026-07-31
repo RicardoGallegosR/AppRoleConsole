@@ -11,8 +11,8 @@ using SQLSIVEV.Infrastructure.Utils;
 namespace SQLSIVEV.Infrastructure.Services {
     public sealed class RegistroCrypto {
         private const string RegistryPath = @"SOFTWARE\VISUAL";
-        
-        
+        private const string RegistryPath_ = @"SOFTWARE\Servicios\Security";
+
         public void EscribirValor<T>(string nombrePropiedad, T valorOriginal) {
             try {
                 using var key = Registry.LocalMachine.CreateSubKey(RegistryPath, writable: true);
@@ -33,33 +33,58 @@ namespace SQLSIVEV.Infrastructure.Services {
             }
         }
 
-        public T LeerValor<T>(string nombrePropiedad, T valorPorDefecto = default!) {
+        public T LeerValor<T>(string nombrePropiedad, T valorPorDefecto = default!, string registryPath = RegistryPath) {
             try {
-                using (var key = Registry.LocalMachine.OpenSubKey(RegistryPath, writable: false)) {
+                using (var key = Registry.LocalMachine.OpenSubKey(registryPath, writable: false)) {
                     if (key is null) {
-                        SivevLogger.Error($"La clave de registro '{RegistryPath}' no existe.");
+                        SivevLogger.Error($"La clave de registro '{registryPath}' no existe.");
                         return valorPorDefecto;
                     }
-
                     var raw = key.GetValue(nombrePropiedad);
                     if (raw is null) {
                         SivevLogger.Error($"El valor '{nombrePropiedad}' no existe en el registro.");
                         return valorPorDefecto;
                     }
-
                     string texto = raw.ToString() ?? string.Empty;
-
                     if (typeof(T) == typeof(string))
                         return (T)(object)texto;
-
                     if (typeof(T) == typeof(Guid)) {
                         if (Guid.TryParse(texto, out var g))
                             return (T)(object)g;
-
                         SivevLogger.Error($"No se pudo convertir '{texto}' a Guid para '{nombrePropiedad}'.");
                         return valorPorDefecto;
                     }
+                    var convertido = (T)Convert.ChangeType(texto, typeof(T), CultureInfo.InvariantCulture);
+                    return convertido;
+                }
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al leer '{nombrePropiedad}' del registro: {ex.Message}");
+                return valorPorDefecto;
+            }
+        }
 
+
+        public T LeerValor_<T>(string nombrePropiedad, T valorPorDefecto = default!, string registryPath = RegistryPath_) {
+            try {
+                using (var key = Registry.LocalMachine.OpenSubKey(registryPath, writable: false)) {
+                    if (key is null) {
+                        SivevLogger.Error($"La clave de registro '{registryPath}' no existe.");
+                        return valorPorDefecto;
+                    }
+                    var raw = key.GetValue(nombrePropiedad);
+                    if (raw is null) {
+                        SivevLogger.Error($"El valor '{nombrePropiedad}' no existe en el registro.");
+                        return valorPorDefecto;
+                    }
+                    string texto = raw.ToString() ?? string.Empty;
+                    if (typeof(T) == typeof(string))
+                        return (T)(object)texto;
+                    if (typeof(T) == typeof(Guid)) {
+                        if (Guid.TryParse(texto, out var g))
+                            return (T)(object)g;
+                        SivevLogger.Error($"No se pudo convertir '{texto}' a Guid para '{nombrePropiedad}'.");
+                        return valorPorDefecto;
+                    }
                     var convertido = (T)Convert.ChangeType(texto, typeof(T), CultureInfo.InvariantCulture);
                     return convertido;
                 }

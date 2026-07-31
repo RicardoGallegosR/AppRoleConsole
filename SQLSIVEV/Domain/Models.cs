@@ -141,6 +141,23 @@
         public short Resultado { get; set; }
         public int MensajeId { get; set; }
     }
+    public sealed class SpAppDatosVehiculoObdNewGet {
+        public int MensajeId { get; set; } = 0;
+        public int Resultado { get; set; } = 0;
+        public Guid EstacionId { get; set; } = Guid.Empty;
+        public Guid AccesoId { get; set; } = Guid.Empty;
+        public Guid VerificacionId { get; set; } = Guid.Empty;
+    }
+    public sealed class SpAppDatosVehiculoObdNewSet {
+        public int MensajeId { get; set; } = 0;
+        public int Resultado { get; set; } = 0;
+        public string Marca { get; set; } = "";
+        public string SubMarca { get; set; } = "";
+        public string Modelo { get; set; } = "";
+        public string DTCConfirmado { get; set; } = "";
+        public string DTCPendiente { get; set; } = "";
+        public string Protocolo { get; set; } = "";
+    }
 
     public sealed class InspeccionObd2Set {
         public bool ConexionObd { get; set; } = false;

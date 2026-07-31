@@ -56,6 +56,7 @@
             // btnCerrar
             // 
             btnCerrar.AutoSize = true;
+            btnCerrar.BackColor = Color.Crimson;
             btnCerrar.Dock = DockStyle.Fill;
             btnCerrar.FlatStyle = FlatStyle.Flat;
             btnCerrar.Font = new Font("Segoe UI", 20F);
@@ -65,7 +66,7 @@
             btnCerrar.Size = new Size(116, 450);
             btnCerrar.TabIndex = 1;
             btnCerrar.Text = "Cerrar";
-            btnCerrar.UseVisualStyleBackColor = true;
+            btnCerrar.UseVisualStyleBackColor = false;
             btnCerrar.Click += btnCerrar_Click;
             // 
             // txbMensaje

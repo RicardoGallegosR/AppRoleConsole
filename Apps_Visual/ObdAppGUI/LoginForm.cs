@@ -58,8 +58,13 @@ namespace Apps_Visual.ObdAppGUI {
         private VerificationForm frmverification;
         private frmCapturaVisual CapturaVisual;
         private frmOBD PruebaOBD;
+        private OBDII _OBDII;
         private bool _cerrandoAplicacion = false;
         private bool _bitacoraFinalizada = false;
+        private const string RegistryPath = @"SOFTWARE\Servicios\Security";
+        private const string RegistryPathVisual = @"SOFTWARE\VISUAL";
+        //private System.Windows.Forms.Timer? _timerHora;
+        private string _versionTexto = "vDESCONOCIDA";
         #endregion
 
         #region inicio
@@ -68,8 +73,8 @@ namespace Apps_Visual.ObdAppGUI {
             InitializeComponent();
             btnInspecionVisual.Enabled = false;
             btnApagar.Enabled = false;
+            LecturaRegedit();
             MostrarVersion();
-
             this.Load += async (_, __) => {
                 await Task.Delay(200);
                 if (LecturaRegedit()) {
@@ -80,15 +85,13 @@ namespace Apps_Visual.ObdAppGUI {
                     } else {
                         SivevLogger.Information("Se ha revisado el registro de windows y las configuraciones son correctas, problemas por aqui no son :)");
                         // Inicia Bitacora de Aplicaciones 
-
                         await IniciaBiatcoraAplicaciones(Visual_Core);
-
-
                         btnInspecionVisual.Focus();
                         pnlHome();
                     }
                 }
             };
+            
         }
         #endregion
 
@@ -252,7 +255,28 @@ namespace Apps_Visual.ObdAppGUI {
             lector.CargarEnCryptoHelper();
             var conf = lector.GetConfig();
             CryptoHelper.Configurar(conf);
-           
+            DevUDSCore dev = new();
+            
+            if (int.TryParse(LeerYDesencriptar("v27"), out var c))
+                dev.v27 = c.ToString();
+            else
+                dev.v27  = string.Empty;
+
+            if (int.TryParse(LeerYDesencriptar("v28"), out var c_))
+                dev.v28 = c_.ToString();
+            else
+                dev.v28 = string.Empty;
+
+            if (bool.TryParse(LeerYDesencriptar("v26"), out var b))
+                dev.v26 = b;
+            else if (LeerYDesencriptar("v26") == "1")
+                dev.v26 = true;
+            else if (LeerYDesencriptar("v26") == "0")
+                dev.v26 = false;
+            else
+                dev.v26 = false;
+
+
             Visual_Core = new VisualRegistroWindows{
                 dvar1 = Leer("Server"),
                 dvar2 = Leer("Database"),
@@ -269,17 +293,12 @@ namespace Apps_Visual.ObdAppGUI {
                 dvar13 = Leer("ServidorVersionesControlador"),
                 dvar14 = Leer("url"),
                 dvar15 = LeerGuid("EstacionId"),
-                dvar25 = Leer("v25"),
-                dvar26 = LeerBool("v26", false)
+                dvar26 = LeerBool("v26"),
+                dvar25 = dev.v26,
+                dvar27 = dev.v27,
+                dvar28 = dev.v28
             };
             var versionBuild = ObtenerBuildVersion();
-            if (Visual_Core.dvar26) {
-                SivevLogger.Information(
-                    $"|| v26 ACTIVO " +
-                    $"|| Build: {versionBuild} " +
-                    $"|| Logs OBD habilitados"
-                );
-            }
 
             //*
             SivevLogger.Information(
@@ -295,7 +314,8 @@ namespace Apps_Visual.ObdAppGUI {
                 //$"|| v25: {Visual_Core.dvar25} " +
                 ""
             );
-            //MostrarMensaje($"{Visual_Core.dvar25}");
+            //MostrarMensaje($"v26: {Visual_Core.dvar26}, v27: {Visual_Core.dvar27}, v28: {Visual_Core.dvar28}");
+            //MostrarMensaje($"v25: {Visual_Core.dvar25}, v26: {Visual_Core.dvar26}, v27: {Visual_Core.dvar27}, v28: {Visual_Core.dvar28}");
             //*/
             return vacio(Visual_Core.dvar1)
                  || vacio(Visual_Core.dvar2)
@@ -619,26 +639,39 @@ namespace Apps_Visual.ObdAppGUI {
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
-            if (PruebaOBD == null || PruebaOBD.IsDisposed) {
+            /*if (PruebaOBD == null || PruebaOBD.IsDisposed) {
                 PruebaOBD = new frmOBD(Visual_Core);
-            }
+            }*/
+            if (_OBDII == null || _OBDII.IsDisposed) {
+                _OBDII = new OBDII(Visual_Core);
+            }/*
             PruebaOBD._panelX = pnlPanelCambios.Width;
             PruebaOBD._panelY = pnlPanelCambios.Height;
             PruebaOBD.InicializarTamanoYFuente();
             PruebaOBD._Visual = Visual_Core;
-           
-            pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
+           */
+            _OBDII._Visual = Visual_Core;
+
+            //pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
+            _OBDII.Dock = DockStyle.Fill;
+            pnlPanelCambios.Controls.Add(_OBDII);
 
             pnlPanelCambios.BeginInvoke(new Action(() => {
                 this.Activate();
-                PruebaOBD.btnConectar.Visible = true;
-                PruebaOBD.btnConectar.Enabled = true;
-                if (!PruebaOBD.btnConectar.Focus())
-                    SivevLogger.Warning("Focus() devolvió false en PruebaOBD.btnConectar");
+                //PruebaOBD.btnConectar.Visible = true;
+                //PruebaOBD.btnConectar.Enabled = true;
+                _OBDII.btnConectar.Visible = true;
+                _OBDII.btnConectar.Enabled = true;
+                /*if (!PruebaOBD.btnConectar.Focus())
+                    SivevLogger.Warning("Focus() devolvió false en PruebaOBD.btnConectar");//*/
+                if (!_OBDII.btnConectar.Focus())
+                    SivevLogger.Warning("Focus() devolvió false en _OBDII.btnConectar");
 
-                SivevLogger.Information($"CanFocus={PruebaOBD.btnConectar.CanFocus}");
+                //SivevLogger.Information($"CanFocus={PruebaOBD.btnConectar.CanFocus}");
+                SivevLogger.Information($"CanFocus={_OBDII.btnConectar.CanFocus}");
             }));
-            bool ok = await PruebaOBD.EsperarResultadoAsync();
+            //bool ok = await PruebaOBD.EsperarResultadoAsync();
+            bool ok = await _OBDII.EsperarResultadoAsync();
             pnlPanelCambios.Controls.Clear();
             CapturaVisual.Dispose();
             CapturaVisual = null;
@@ -659,9 +692,14 @@ namespace Apps_Visual.ObdAppGUI {
                 btnApagar.Visible = true;
 
             }
+            /*
             PruebaOBD.Controls.Clear();
             PruebaOBD.Dispose();
             PruebaOBD = null;
+            */
+            _OBDII.Controls.Clear();
+            _OBDII.Dispose();
+            _OBDII = null;
             if (ok) {
                 return true;
             }else {
@@ -687,7 +725,6 @@ namespace Apps_Visual.ObdAppGUI {
         private async Task CerrarAplicacionAsync(bool apagarEquipo = false) {
             if (_cerrandoAplicacion) return;
             _cerrandoAplicacion = true;
-
             try {
                 if (!_bitacoraFinalizada) {
                     await FinalizaBiatcoraAplicaciones(Visual_Core);
@@ -696,7 +733,6 @@ namespace Apps_Visual.ObdAppGUI {
             } catch (Exception ex) {
                 SivevLogger.Error($"Error al finalizar bitácora: {ex.Message}");
             }
-
             if (apagarEquipo)
                 Process.Start("shutdown", "/s /t 0");
             else
@@ -730,6 +766,13 @@ namespace Apps_Visual.ObdAppGUI {
 
         private string Leer(string nombrePropiedad) {
             string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
+            if (string.IsNullOrWhiteSpace(cifrado))
+                return string.Empty;
+            return CryptoHelper.Desencriptar(cifrado);
+        }
+        
+        private string LeerYDesencriptar(string nombrePropiedad) {
+            string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty, RegistryPath);
             if (string.IsNullOrWhiteSpace(cifrado))
                 return string.Empty;
             return CryptoHelper.Desencriptar(cifrado);
@@ -785,28 +828,35 @@ namespace Apps_Visual.ObdAppGUI {
         #endregion
 
         private void MostrarVersion() {
-            _timerHora = new System.Windows.Forms.Timer();
-            _timerHora.Interval = 1000; // 1 segundo
             try {
-                var exe = Process.GetCurrentProcess().MainModule.FileName;
-                var info = FileVersionInfo.GetVersionInfo(exe);
-                lblVersion2.Text =$"v{info.FileVersion}\n{Visual_Core.dvar10}\n{DateTime.Now:HH:mm:ss}";
-            }catch (Exception ex) {
-                _timerHora.Tick += (s, ev) =>
-                {
-                    var exe = Process.GetCurrentProcess().MainModule?.FileName;
-                    var info = FileVersionInfo.GetVersionInfo(exe);
+                string exe = Application.ExecutablePath;
+                FileVersionInfo info = FileVersionInfo.GetVersionInfo(exe);
+                _versionTexto = $"v{info.FileVersion ?? Application.ProductVersion}";
+            } catch (Exception ex) {
+                _versionTexto = "vDESCONOCIDA";
 
-                    lblVersion2.Text =
-                        $"v{info.FileVersion}\n" +
-                        $"────────\n" + 
-                        $"{Visual_Core.dvar10}\n" +
-                        $"{DateTime.Now:HH:mm:ss}";
-                };
-
-                _timerHora.Start();
                 SivevLogger.Warning($"No se pudo obtener la versión del ejecutable: {ex.Message}");
             }
+            // Evita crear varios timers si MostrarVersion se llama más de una vez.
+            _timerHora?.Stop();
+            _timerHora?.Dispose();
+            _timerHora = new System.Windows.Forms.Timer { Interval = 1000 };
+            _timerHora.Tick += TimerHora_Tick;
+
+            // Muestra los datos inmediatamente, sin esperar el primer segundo.
+            ActualizarVersionYHora();
+            _timerHora.Start();
+        }
+
+        private void TimerHora_Tick(object? sender, EventArgs e) {
+            ActualizarVersionYHora();
+        }
+
+        private void ActualizarVersionYHora() {
+            lblVersion2.Text =
+                $"{_versionTexto}\n" +
+                $"{Visual_Core.dvar10}\n" +
+                $"{DateTime.Now:HH:mm:ss}";
         }
         private string ObtenerBuildVersion() {
             var exe = Process.GetCurrentProcess().MainModule?.FileName;
