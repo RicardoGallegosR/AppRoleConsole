@@ -61,7 +61,7 @@ namespace Apps_Visual.ObdAppGUI {
         private OBDII _OBDII;
         private bool _cerrandoAplicacion = false;
         private bool _bitacoraFinalizada = false;
-        private const string RegistryPath = @"SOFTWARE\Servicios\Security";
+        //private const string RegistryPath = @"SOFTWARE\Servicios\Security";
         private const string RegistryPathVisual = @"SOFTWARE\VISUAL";
         //private System.Windows.Forms.Timer? _timerHora;
         private string _versionTexto = "vDESCONOCIDA";
@@ -255,26 +255,6 @@ namespace Apps_Visual.ObdAppGUI {
             lector.CargarEnCryptoHelper();
             var conf = lector.GetConfig();
             CryptoHelper.Configurar(conf);
-            DevUDSCore dev = new();
-            
-            if (int.TryParse(LeerYDesencriptar("v27"), out var c))
-                dev.v27 = c.ToString();
-            else
-                dev.v27  = string.Empty;
-
-            if (int.TryParse(LeerYDesencriptar("v28"), out var c_))
-                dev.v28 = c_.ToString();
-            else
-                dev.v28 = string.Empty;
-
-            if (bool.TryParse(LeerYDesencriptar("v26"), out var b))
-                dev.v26 = b;
-            else if (LeerYDesencriptar("v26") == "1")
-                dev.v26 = true;
-            else if (LeerYDesencriptar("v26") == "0")
-                dev.v26 = false;
-            else
-                dev.v26 = false;
 
 
             Visual_Core = new VisualRegistroWindows{
@@ -293,12 +273,8 @@ namespace Apps_Visual.ObdAppGUI {
                 dvar13 = Leer("ServidorVersionesControlador"),
                 dvar14 = Leer("url"),
                 dvar15 = LeerGuid("EstacionId"),
-                dvar26 = LeerBool("v26"),
-                dvar25 = dev.v26,
-                dvar27 = dev.v27,
-                dvar28 = dev.v28
+                dvar26 = LeerBool("v26")
             };
-            var versionBuild = ObtenerBuildVersion();
 
             //*
             SivevLogger.Information(
@@ -507,15 +483,6 @@ namespace Apps_Visual.ObdAppGUI {
             if (frmcredenciales == null || frmcredenciales.IsDisposed) {
                 frmcredenciales = new frmAuth();
                 frmcredenciales.AccesoObtenido += Frmcredenciales_AccesoObtenido;
-                /*
-                frmcredenciales.SetCallbacks (credencial => {
-                    if (int.TryParse(credencial, out var c)) {
-                        frmcredenciales.credencial = c;
-                    } else {
-                        SivevLogger.Warning($"Credencial ingresada no es numérica: {credencial}");
-                    }
-                });
-                */
             }
             frmcredenciales.panelX = pnlPanelCambios.Width;
             frmcredenciales.panelY = pnlPanelCambios.Height;
@@ -636,41 +603,25 @@ namespace Apps_Visual.ObdAppGUI {
 
 
         private async Task<bool> PruebaOBDPanel() {
+            Visual_Core.dvar29 = _versionTexto;
             foreach (Control c in pnlPanelCambios.Controls)
                 c.Dispose();
             pnlPanelCambios.Controls.Clear();
-            /*if (PruebaOBD == null || PruebaOBD.IsDisposed) {
-                PruebaOBD = new frmOBD(Visual_Core);
-            }*/
             if (_OBDII == null || _OBDII.IsDisposed) {
                 _OBDII = new OBDII(Visual_Core);
-            }/*
-            PruebaOBD._panelX = pnlPanelCambios.Width;
-            PruebaOBD._panelY = pnlPanelCambios.Height;
-            PruebaOBD.InicializarTamanoYFuente();
-            PruebaOBD._Visual = Visual_Core;
-           */
+            }
             _OBDII._Visual = Visual_Core;
-
-            //pnlPanelCambios.Controls.Add(PruebaOBD.GetPanel());
             _OBDII.Dock = DockStyle.Fill;
             pnlPanelCambios.Controls.Add(_OBDII);
 
             pnlPanelCambios.BeginInvoke(new Action(() => {
                 this.Activate();
-                //PruebaOBD.btnConectar.Visible = true;
-                //PruebaOBD.btnConectar.Enabled = true;
                 _OBDII.btnConectar.Visible = true;
                 _OBDII.btnConectar.Enabled = true;
-                /*if (!PruebaOBD.btnConectar.Focus())
-                    SivevLogger.Warning("Focus() devolvió false en PruebaOBD.btnConectar");//*/
                 if (!_OBDII.btnConectar.Focus())
                     SivevLogger.Warning("Focus() devolvió false en _OBDII.btnConectar");
-
-                //SivevLogger.Information($"CanFocus={PruebaOBD.btnConectar.CanFocus}");
                 SivevLogger.Information($"CanFocus={_OBDII.btnConectar.CanFocus}");
             }));
-            //bool ok = await PruebaOBD.EsperarResultadoAsync();
             bool ok = await _OBDII.EsperarResultadoAsync();
             pnlPanelCambios.Controls.Clear();
             CapturaVisual.Dispose();
@@ -692,11 +643,6 @@ namespace Apps_Visual.ObdAppGUI {
                 btnApagar.Visible = true;
 
             }
-            /*
-            PruebaOBD.Controls.Clear();
-            PruebaOBD.Dispose();
-            PruebaOBD = null;
-            */
             _OBDII.Controls.Clear();
             _OBDII.Dispose();
             _OBDII = null;
@@ -753,26 +699,16 @@ namespace Apps_Visual.ObdAppGUI {
         private void Frmcredenciales_AccesoObtenido(Guid accesoObtenido) {
             bool ok = accesoObtenido != Guid.Empty;
             if (ok) {
-                //_AccesoIdObtenido = accesoObtenido;
                 Visual_Core.dvar20 = accesoObtenido;
                 pnlPanelCambios.Controls.Clear();
                 frmcredenciales.Dispose();
                 frmcredenciales = null;
-                //frmverification.Close();
-                //frmverification=null;
             }
             _tcsAcceso?.TrySetResult(ok);
         }
 
         private string Leer(string nombrePropiedad) {
             string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
-            if (string.IsNullOrWhiteSpace(cifrado))
-                return string.Empty;
-            return CryptoHelper.Desencriptar(cifrado);
-        }
-        
-        private string LeerYDesencriptar(string nombrePropiedad) {
-            string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty, RegistryPath);
             if (string.IsNullOrWhiteSpace(cifrado))
                 return string.Empty;
             return CryptoHelper.Desencriptar(cifrado);
@@ -858,12 +794,5 @@ namespace Apps_Visual.ObdAppGUI {
                 $"{Visual_Core.dvar10}\n" +
                 $"{DateTime.Now:HH:mm:ss}";
         }
-        private string ObtenerBuildVersion() {
-            var exe = Process.GetCurrentProcess().MainModule?.FileName;
-            var info = FileVersionInfo.GetVersionInfo(exe);
-
-            return info.FileVersion ?? "0.0.0.0";
-        }
-        
     }
 }

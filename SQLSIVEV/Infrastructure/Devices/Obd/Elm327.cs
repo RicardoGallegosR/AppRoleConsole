@@ -251,7 +251,23 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             //SivevLogger.Information($"Lectura PID 0100 valor {proto}");
             return proto;
         }
+        public short? ReadRpmShort() {
+            var resp = ExecRaw("010C", 5_000);
+            var compact = resp.Replace(" ", "").Replace("\r", "").Replace("\n", "");
+            int idx = compact.IndexOf("410C", StringComparison.OrdinalIgnoreCase);
 
+            if (idx < 0 || compact.Length < idx + 8)
+                return null;
+
+            try {
+                int a = Convert.ToInt32(compact.Substring(idx + 4, 2), 16);
+                int b = Convert.ToInt32(compact.Substring(idx + 6, 2), 16);
+
+                return (short)(((a << 8) | b) / 4);
+            } catch {
+                return null;
+            }
+        }
 
 
         public int? ReadRpm() {
@@ -484,6 +500,14 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return v;
             return null;
         }
+        public decimal? ReadVoltageDecimal() {
+            var resp = ExecRaw("ATRV", 2000).Replace(" ", "").Replace("\n", "").Replace("\r", "");
+            var m = Regex.Match(resp, @"(\d+(?:\.\d+)?)V", RegexOptions.IgnoreCase);
+            if (!m.Success) return null;
+            if (double.TryParse(m.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var v))
+                return (decimal)v;
+            return null;
+        }
 
         // -- Helper genérico para PIDs 01xx que devuelven A y B (2 bytes) --
         private (int A, int B)? ReadPidAB(string cmd, int timeoutMs = 3000) {
@@ -706,6 +730,13 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             double stft = (A.Value - 128) * 100.0 / 128.0;
             return Math.Round(stft, 2);
         }
+        public decimal? StftBank1_decimal() {
+            var A = ReadPidA("0106", 4000);
+            if (!A.HasValue)
+                return null;
+            double stft = (A.Value - 128) * 100.0 / 128.0;
+            return (decimal)Math.Round(stft, 2);
+        }
         // PID 0107 - Long Term Fuel Trim Bank 1 (LTFT B1)
         public double? LtftBank1() {
             var A = ReadPidA("0107", 4000);
@@ -713,6 +744,13 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return null;
             double ltft = (A.Value - 128) * 100.0 / 128.0;
             return Math.Round(ltft, 2);
+        }
+        public decimal? LtftBank1_decimal() {
+            var A = ReadPidA("0107", 4000);
+            if (!A.HasValue)
+                return null;
+            double ltft = (A.Value - 128) * 100.0 / 128.0;
+            return (decimal)Math.Round(ltft, 2);
         }
 
         public short? TemperaturaAireAdmisionC() {
@@ -727,7 +765,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return (short)tempC;
         }
 
-        public double? FlujoAireMaf() {
+        public decimal? FlujoAireMaf() {
             var ab = ReadPidAB("0110", 3000);
             if (!ab.HasValue)
                 return null;
@@ -736,29 +774,30 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             int B = ab.Value.B;
 
             // Fórmula: ((256 * A) + B) / 100  → resultado en gramos/segundo
-            double maf = ((256 * A) + B) / 100.0;
+            decimal maf = ((256 * A) + B) / 100.0m;
             return maf;
         }
-        public double? FlujoAireMafKgPorHora() {
+        public decimal? FlujoAireMafKgPorHora() {
             var mafGs = FlujoAireMaf();
             if (!mafGs.HasValue)
                 return null;
 
             // g/s → kg/h
-            return mafGs.Value * 3.6 / 1000.0;
+            var mafKgH = mafGs.Value * 3.6m / 1000.0m;
+            return mafKgH;
         }
 
 
         // PID 0111 - Throttle Position (TPS) en %
         // public double? Tps { get; init; }
-        public double? PosicionAcelerador() {
+        public decimal? PosicionAcelerador() {
             var ab = ReadPidAB("0111", 5000);
             if (!ab.HasValue)
                 return null;
 
             int A = ab.Value.A;   // A es int
 
-            double tps = (A * 100.0) / 255.0;
+            decimal tps = (A * 100.0m) / 255.0m;
 
             // Si quieres, lo puedes redondear:
             // tps = Math.Round(tps, 1);
@@ -1539,5 +1578,298 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                 return null; // seguridad: nunca truenes la app si la ECU no soporta este PID
             }
         }
+
+        /*
+         FUNCIONES AGREGADAS 19/08/2026: Lectura de parámetros de motor (PID 01 02) y otros PIDs extendidos.
+         */
+
+        public decimal? Lambda() {
+            var ab = ReadPidAB("0144", 4000);
+            if (!ab.HasValue) return null;
+
+            return Math.Round(
+                ((256 * ab.Value.A) + ab.Value.B) / 32768m,
+                3);
+        }
+
+        public decimal? STFT_B2() {
+            var A = ReadPidA("0108", 4000);
+            if (!A.HasValue) return null;
+            return Math.Round((A.Value - 128) * 100m / 128m, 2);
+        }
+
+        public decimal? LTFT_B2() {
+            var A = ReadPidA("0109", 4000);
+            if (!A.HasValue) return null;
+            return Math.Round((A.Value - 128) * 100m / 128m, 2);
+        }
+
+        public decimal? O2_B2S1_Voltage() {
+            var ab = ReadPidAB("0118", 3000);
+            if (!ab.HasValue) return null;
+
+            return Math.Round(ab.Value.A / 200m, 3);
+        }
+
+        public decimal? O2_B2S2_Voltage() {
+            var ab = ReadPidAB("0119", 3000);
+            if (!ab.HasValue) return null;
+            return Math.Round(ab.Value.A / 200m, 3);
+        }
+
+        public short? MAP() {
+            var A = ReadPidA("010B", 5000);
+            if (!A.HasValue) return null;
+
+            return (short)A.Value;
+        }
+
+        public decimal? RelativeAcceleratorPedalPosition() {
+            var A = ReadPidA("015A", 3000);
+            if (!A.HasValue) return null;
+
+            return Math.Round(A.Value * 100m / 255m, 2);
+        }
+
+        public decimal? AbsoluteLoadValue() {
+            var ab = ReadPidAB("0143", 3000);
+            if (!ab.HasValue) return null;
+
+            int raw = (256 * ab.Value.A) + ab.Value.B;
+
+            return Math.Round(raw * 100m / 255m, 2);
+        }
+
+        public short? AmbientAirTemperature() {
+            var A = ReadPidA("0146", 5000);
+            if (!A.HasValue) return null;
+
+            return (short)(A.Value - 40);
+        }
+
+        public short? EngineOilTemperature() {
+            var A = ReadPidA("015C", 5000);
+            if (!A.HasValue) return null;
+
+            return (short)(A.Value - 40);
+        }
+
+        public short? EngineCoolantTemperature() {
+            var A = ReadPidA("0105", 5000);
+            if (!A.HasValue) return null;
+
+            return (short)(A.Value - 40);
+        }
+
+        public short? IntakeAirTemperature() {
+            var A = ReadPidA("010F", 5000);
+            if (!A.HasValue) return null;
+
+            return (short)(A.Value - 40);
+        }
+
+
+        //Valores dudosos
+
+        private decimal? ReadCatalystTemperature(string pid) {
+            var ab = ReadPidAB(pid, 5000);
+
+            if (!ab.HasValue)
+                return null;
+
+            double temp =
+        ((256 * ab.Value.A) + ab.Value.B) / 10.0 - 40;
+
+            return (decimal)Math.Round(temp, 1);
+        }
+        //CatalystTemp
+        public decimal? B2S1() => ReadCatalystTemperature("013D");
+        public decimal? B2S2() => ReadCatalystTemperature("013F");
+        public decimal? B1S1() => ReadCatalystTemperature("013C");
+        public decimal? B1S2() => ReadCatalystTemperature("013E");
+
+
+        private decimal? ReadWidebandVoltage(string pid, int timeout = 4000) {
+            var abcd = ReadPidABCD(pid, timeout);
+            if (!abcd.HasValue)
+                return null;
+            double voltage = ((256 * abcd.Value.C) + abcd.Value.D) / 8192.0;
+            return (decimal)Math.Round(voltage, 3);
+        }
+        public decimal? B1S1_V() => ReadWidebandVoltage("0124");
+        public decimal? B1S2_V() => ReadWidebandVoltage("0125");
+        public decimal? B2S1_V() => ReadWidebandVoltage("0128");
+        public decimal? B2S2_V() => ReadWidebandVoltage("0129");
+
+
+        public byte[]? ReadPidBytes(string pid, int timeout, int expectedBytes) {
+            var resp = ExecRaw(pid, timeout);
+            if (string.IsNullOrWhiteSpace(resp))
+                return null;
+
+            var isoPayload = new List<byte>();
+            // Para respuestas ATH0 tipo:
+            // 0:4178...
+            // 1:FFFFFFFF...
+            var numberedPayload = new List<byte>();
+            bool hasNumberedFrames = false;
+            int? totalLength = null;
+            string[] lines = resp.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string rawLine in lines) {
+                string line = rawLine.Trim().TrimEnd('>').Replace(" ", "");
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                if (line.Contains("SEARCHING", StringComparison.OrdinalIgnoreCase) ||
+                    line.Contains("NODATA", StringComparison.OrdinalIgnoreCase) ||
+                    line.Contains("STOPPED", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // -------------------------------------------
+                // ATH0 + respuesta multilínea del ELM:
+                //
+                // 00B
+                // 0:4178FFFFFFFF
+                // 1:FFFFFFFFFF0000
+                // -------------------------------------------
+                int colon = line.IndexOf(':');
+                if (colon >= 0) {
+                    string hex = line.Substring(colon + 1);
+                    if (hex.Length % 2 != 0 ||
+                        !hex.All(Uri.IsHexDigit))
+                        continue;
+                    hasNumberedFrames = true;
+                    for (int i = 0; i < hex.Length; i += 2) {
+                        numberedPayload.Add(
+                            Convert.ToByte(hex.Substring(i, 2), 16));
+                    }
+                    continue;
+                }
+
+                // -------------------------------------------
+                // ATH1 - CAN 29 bits
+                //
+                // 18DAF111100B4178FFFFFFFF
+                // ^^^^^^^^
+                // Header CAN de 8 caracteres
+                // -------------------------------------------
+
+                if (!line.All(Uri.IsHexDigit))
+                    continue;
+
+                // Una trama CAN 29-bit necesita al menos:
+                // 8 chars header + PCI
+                if (line.Length < 10)
+                    continue;
+
+                // Quitamos 18DAF111
+                string frameHex = line.Substring(8);
+
+                if (frameHex.Length % 2 != 0)
+                    continue;
+
+                var frame = new List<byte>();
+
+                for (int i = 0; i < frameHex.Length; i += 2) {
+                    frame.Add(Convert.ToByte(frameHex.Substring(i, 2), 16));
+                }
+
+                if (frame.Count == 0)
+                    continue;
+
+                byte pci = frame[0];
+                int frameType = pci >> 4;
+
+                switch (frameType) {
+                    // Single Frame
+                    // Ejemplo:
+                    // 04 41 0C 0F A0
+                    case 0x0: {
+                            int length = pci & 0x0F;
+                            if (frame.Count < 1 + length)
+                                continue;
+                            isoPayload.AddRange(
+                                frame.Skip(1).Take(length));
+                            totalLength = length;
+                            break;
+                        }
+
+                    // First Frame
+                    // Ejemplo:
+                    // 10 0B 41 78 FF FF FF FF
+                    case 0x1: {
+
+                            if (frame.Count < 2)
+                                continue;
+                            totalLength =
+                                ((pci & 0x0F) << 8) |
+                                frame[1];
+                            isoPayload.AddRange(
+                                frame.Skip(2));
+                            break;
+                        }
+
+                    // Consecutive Frame
+                    // Ejemplo:
+                    // 21 FF FF FF FF FF 00 00
+                    case 0x2: {
+                            isoPayload.AddRange(
+                                frame.Skip(1));
+                            break;
+                        }
+                }
+                if (totalLength.HasValue &&
+                    isoPayload.Count >= totalLength.Value) {
+                    isoPayload =  isoPayload.Take(totalLength.Value).ToList();
+                    break;
+                }
+            }
+            List<byte> payload = hasNumberedFrames ? numberedPayload : isoPayload;
+            if (payload.Count == 0)
+                return null;
+
+            // 0178 -> buscamos 41 78
+            byte responsePid;
+            try {
+                responsePid =
+                    Convert.ToByte(pid.Substring(2, 2), 16);
+            } catch {
+                return null;
+            }
+            for (int i = 0; i <= payload.Count - (expectedBytes + 2); i++) {
+                if (payload[i] == 0x41 &&
+                    payload[i + 1] == responsePid) {
+                    return payload
+                        .Skip(i + 2)
+                        .Take(expectedBytes)
+                        .ToArray();
+                }
+            }
+            return null;
+        }
+        private short? ReadEgt(string pid, int sensor, int timeout = 5000) {
+            var data = ReadPidBytes(pid, timeout, 9);
+            if (data == null || data.Length < 9)
+                return null;
+            int sensorBit = sensor - 1;
+            // El sensor no está soportado
+            if ((data[0] & (1 << sensorBit)) == 0)
+                return null;
+            int index = 1 + ((sensor - 1) * 2);
+            int msb = data[index];
+            int lsb = data[index + 1];
+            int raw = (msb << 8) | lsb;
+            // FFFF no lo aceptamos como una temperatura válida
+            if (raw == 0xFFFF)
+                return null;
+            double tempC = raw / 10.0 - 40.0;
+            return (short)Math.Round(tempC);
+        }
+        public short? EGT_B1S1() => ReadEgt("0178", 1);
+        public short? EGT_B1S2() => ReadEgt("0178", 2);
+        public short? EGT_B2S1() => ReadEgt("0179", 1);
+        public short? EGT_B2S2() => ReadEgt("0179", 2);
+
     }
 }

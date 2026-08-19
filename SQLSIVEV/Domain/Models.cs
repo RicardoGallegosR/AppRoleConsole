@@ -161,15 +161,11 @@
 
     public sealed class InspeccionObd2Set {
         public bool ConexionObd { get; set; } = false;
-        public Guid EstacionId { get; set; } = Guid.Empty;
-        public Guid AccesoId { get; set; } = Guid.Empty;
-        public Guid VerificacionId { get; set; } = Guid.Empty;
         public string? VehiculoId { get; set; } = "DESCONOCIDO";
         public decimal? CCM { get; set; } = 0;
         public int? WarmUpsDesdeBorrado { get; set; } = 0;
         public byte? NEV { get; set; } = 0;
         public short? TR { get; set; } = 0;
-        //public byte? ConexionObd { get; set; } = 0;
         public string? ProtocoloObd { get; set; } = "DESCONOCIDO";
         public int Intentos { get; set; } = 0;
         public byte? Mil { get; set; } = 0;
@@ -214,7 +210,7 @@
         public decimal? AvanceEnc { get; set; } = 0;
         public decimal? Volt_O2 { get; set; } = 0;
         public decimal? Volt_O2_S2 { get; set; } = 0;
-        public int? TiemppoDeArranque { get; set; } = 0;
+        public int? TiempoDeArranque { get; set; } = 0;
         public decimal? NivelComb { get; set; } = 0;
         public short? Pres_Baro { get; set; } = 0;
         public string? FuelType { get; set; } = "DESCONOCIDO";
@@ -242,7 +238,33 @@
         public int? ReadCvnMessageCount { get; set; } = 0;
         public string ReadCvnsRobusto { get; set; } = "DESCONOCIDO";
         public string TramaPid0101 { get; set; } = "DESCONOCIDO";
+        /*
+         Nuevos campos para la versión 
+         */
 
+        public string _VersionSoftware { get; set; } = "DESCONOCIDO";
+        public decimal? _Lambda { get; set; } = 0;
+        public decimal? _B2S1 { get; set; } = 0;
+        public decimal? _B2S2 { get; set; } = 0;
+        public decimal? _B1S1 { get; set; } = 0;
+        public decimal? _B1S2 { get; set; } = 0;
+        public decimal? _StftB2 { get; set; } = 0;
+        public decimal? _LtftB2 { get; set; } = 0;
+        public int? _EgtB1S1 { get; set; } = 0;
+        public int? _EgtB1S2 { get; set; } = 0;
+        public int? _EgtB2S1 { get; set; } = 0;
+        public int? _EgtB2S2 { get; set; } = 0;
+        public int? _Map { get; set; } = 0;
+        public decimal? _B1S1_V { get; set; } = 0;
+        public decimal? _B1S2_V { get; set; } = 0;
+        public decimal? _B2S1_V { get; set; } = 0;
+        public decimal? _B2S2_V { get; set; } = 0;
+        public decimal? _RelativeAcceleratorPedalPosition { get; set; } = 0;
+        public decimal? _AbsoluteLoadValue { get; set; } = 0;
+        public int? _AmbientAirTemperature { get; set; } = 0;
+        public int? _EngineOilTemperature { get; set; } = 0;
+        public int? _EngineCoolantTemperature { get; set; } = 0;
+        public int? _IntakeAirTemperature { get; set; } = 0;
         public string? Mensaje { get; set; } = "DESCONOCIDO";
         public int? MensajeId { get; set; } = 0;
     }

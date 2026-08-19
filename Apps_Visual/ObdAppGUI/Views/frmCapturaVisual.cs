@@ -7,6 +7,8 @@ using SQLSIVEV.Infrastructure.Security;
 using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Utils;
+using FrmComun.Utils;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -53,6 +55,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         private int _MensajeSQL = 0;
         public int odometro = 0;
+        private SivevRepository _repo = new SivevRepository();
 
         #endregion
 
@@ -78,7 +81,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             InicializarMapaCapturaVisual();
             txbOdometro.KeyDown += txbOdometro_KeyDown;
             ResetForm();
-
         }
 
 
@@ -90,7 +92,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             QuizVisual();
         }
 
-        private async void QuizVisual() {
+        private async void QuizVisual(CancellationToken ct = default) {
             tiTaponCombustible = ValorCheckboxNegado(cbTaponCombustible);
             tiTaponAceite = ValorCheckboxNegado(cbTaponAceite);
             tiBayonetaAceite = ValorCheckboxNegado(cbBayonetaAceite);
@@ -120,7 +122,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         tiNeumaticos: tiNeumaticos,
                         tiComponentesEmisiones: tiComponentesEmisiones,
                         tiMotorGobernado:tiMotorGobernado,
-                        odometro:odometro);
+                        odometro:odometro, ct:ct);
             if (r.MensajeId == 0) {
                 await Task.Delay(500);
 
@@ -251,7 +253,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
 
-        public async Task<bool> InicializarAsync() {
+        public async Task<bool> InicializarAsync(CancellationToken ct = default) {
+            var repo = _repo;
             SivevLogger.Information("Entra a InicializarAsync()");
             lblTitulo.Visible = true;
             lblTitulo.Text = "Buscando Verificaciones disponibles";
@@ -261,51 +264,55 @@ namespace Apps_Visual.ObdAppGUI.Views {
                 IsSet(_Visual.dvar4) && IsSet(_Visual.dvar5) && IsSet(_Visual.dvar17) &&
                 _Visual.dvar16 != Guid.Empty &&_Visual.dvar15 != Guid.Empty &&
                 _Visual.dvar20 != Guid.Empty) {
+                
+                await using var connApp = SqlConnectionFactory.Create( server: _Visual.dvar1, db: _Visual.dvar2, user: _Visual.dvar3, pass: _Visual.dvar4, appName: _Visual.dvar5);
+                try {
+                    // 1. Abrimos UNA sola vez
+                    await connApp.OpenAsync(ct);
 
-                var r = await GetAccesoSQLVerificaciones(V:_Visual);
-                _MensajeSQL = r.MensajeId;
+                    // 2. Nos enrolamos UNA sola vez
+                    using var scope = new AppRoleScope(connApp, role: _Visual.dvar17,  password: _Visual.dvar16.ToString().ToUpper());
+                    var r = await GetAccesoSQLVerificaciones(connApp, _repo, V:_Visual, ct:ct);
+                    _MensajeSQL = r.MensajeId;
 
-                if (_MensajeSQL == 0) {
-                    await Task.Delay(500);
-                    lblTitulo.Text = "Inspección Visual";
-                    lblPlaca.Visible = true;
-                    lblOdometro.Visible = true;
-                    txbOdometro.Visible = true;
-                    txbOdometro.Enabled = true;
+                    if (_MensajeSQL == 0) {
+                        await Task.Delay(500);
+                        lblTitulo.Text = "Inspección Visual";
+                        lblPlaca.Visible = true;
+                        lblOdometro.Visible = true;
+                        txbOdometro.Visible = true;
+                        txbOdometro.Enabled = true;
 
-                    lblPlaca.Text = r.PlacaId;
-                    _placa = r.PlacaId;
-                    _verificacionId = r.VerificacionId;
-                    _Visual.dvar21 = _verificacionId;
-                    _protocoloVerificacíon = r.ProtocoloVerificacionId;
+                        lblPlaca.Text = r.PlacaId;
+                        _placa = r.PlacaId;
+                        _verificacionId = r.VerificacionId;
+                        _Visual.dvar21 = _verificacionId;
+                        _protocoloVerificacíon = r.ProtocoloVerificacionId;
 
-                    var r2 = await BanderasAEvaluar(V:_Visual,elemento: "DESCONOCIDO", combustible: 0 );
-                    if (r2.MensajeId == 0) {
-                        AplicarCapturaVisual(r2.Items);
-                    }
-                    return true;
-                } else {
-                    if (_MensajeSQL != 0) {
-                        var repo = new SivevRepository();
-                        CancellationToken ct = default;
-                        using (var connApp = SqlConnectionFactory.Create(server: _Visual.dvar1, db: _Visual.dvar2, user: _Visual.dvar3, pass: _Visual.dvar4, appName: _Visual.dvar5)) {
-                            await connApp.OpenAsync(ct);
-                            using (var scope = new AppRoleScope(connApp, _Visual.dvar17, _Visual.dvar16.ToString().ToUpper())) {
-                                var error = await repo.PrintIfMsgAsync(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL);
-                                var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
-                                var bitacora = NuevaBitacora(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
-                                await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
-                                SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
-                            }
+                        var r2 = await BanderasAEvaluar(connApp, repo, V:_Visual,elemento: "DESCONOCIDO", combustible: 0, ct:ct);
+                        if (r2.MensajeId == 0) {
+                            AplicarCapturaVisual(r2.Items);
                         }
-
+                        return true;
+                    } else {
+                        if (_MensajeSQL != 0) {
+                            var error = await repo.MensajeIdSQL(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL, ct: ct);
+                            var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
+                            var bitacora = Bitacora.ErroresSQL(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
+                            await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
+                            SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
+                        }
+                        HabilitarPruebas?.Invoke(false);
+                        return false;
                     }
-                    HabilitarPruebas?.Invoke(false);
+
+                } catch (Exception ex) {
+                    SivevLogger.Error($"Error en InicializarAsync: {ex.Message}");
                     return false;
                 }
             } else {
                 SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}, Acceso: {_Visual.dvar20.ToString().ToUpper()}");
-                MostrarMensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}, Acceso: {_Visual.dvar20.ToString().ToUpper()}");
+                Mostrar.Mensaje($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync\n Hay algo que no se valido revisar los datos server: {_Visual.dvar1}, db: {_Visual.dvar2}, user: {_Visual.dvar3}, pass: {_Visual.dvar4}, appName: {_Visual.dvar5}, Acceso: {_Visual.dvar20.ToString().ToUpper()}");
                 foreach (Control c in pnlPrincipal.Controls)
                     c.Dispose();
                 pnlPrincipal.Controls.Clear();
@@ -321,52 +328,45 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
         #region SQL
         #region primer store 
-        private async Task<VerificacionVisualIniResult> GetAccesoSQLVerificaciones(VisualRegistroWindows V, CancellationToken ct = default) {
+        private async Task<VerificacionVisualIniResult> GetAccesoSQLVerificaciones(SqlConnection connApp, SivevRepository repo, VisualRegistroWindows V, CancellationToken ct = default) {
+            if (connApp is null) {
+                SivevLogger.Error($"GetAccesoSQLVerificaciones: connApp is null");
+                throw new ArgumentNullException(nameof(connApp));
+            }
+            if (connApp.State != ConnectionState.Open) {
+                SivevLogger.Error($"GetAccesoSQLVerificaciones: connApp is not open");
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
+
             int _mensaje = 100;
             short _resultado = 0;
             Guid _verificacion = Guid.Empty;
             byte _protocoloVerificacionId = (byte)0;
 
-            var repo = new SivevRepository();
+            var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.dvar15, accesoId:V.dvar20, ct:ct);
 
-            try {
-                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
-                await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
-                    var rinicial = await repo.SpAppVerificacionVisualIniAsync( conn:connApp, estacionId:V.dvar15, accesoId:V.dvar20);
-
-                    _resultado = rinicial.Resultado;
-                    _mensaje = rinicial.MensajeId;
-                    _verificacion = rinicial.VerificacionId;
-                    _protocoloVerificacionId = rinicial.ProtocoloVerificacionId;
-                    _placa = rinicial.PlacaId;
+            _resultado = rinicial.Resultado;
+            _mensaje = rinicial.MensajeId;
+            _verificacion = rinicial.VerificacionId;
+            _protocoloVerificacionId = rinicial.ProtocoloVerificacionId;
+            _placa = rinicial.PlacaId;
 
 
-                    if (_mensaje != 0) {
-                        var error = await repo.PrintIfMsgAsync(connApp, $"MensajeId: {_mensaje}", _mensaje);
-                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-                        MostrarMensaje($"{error.Mensaje}");
-                        return new VerificacionVisualIniResult {
-                            MensajeId = _mensaje,
-                            Resultado = _resultado,
-                            VerificacionId = Guid.Empty,
-                            ProtocoloVerificacionId = 0,
-                            PlacaId = "DESCONOCIDO"
-                        };
-                    }
-                }
-            } catch (Exception e) {
-                try {
-                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
-                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
-                } catch (Exception logEx) {
-                    SivevLogger.Warning($"Falló la búsqueda de verificaciones en catch, GetAccesoSQLVerificaciones: {logEx.Message}");
-                }
-                MostrarMensaje($"{e.Message}");
-                SivevLogger.Error($"Error en Get_Acceso_SQL_Verificaciones {e.Message}");
+            if (_mensaje != 0) {
+                var error = await repo.MensajeIdSQL(connApp, $"MensajeId: {_mensaje}", _mensaje, ct: ct);
+                var bitacora = Bitacora.ErroresSQL(V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
+                await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                Mostrar.Mensaje($"{error.Mensaje}");
+                return new VerificacionVisualIniResult {
+                    MensajeId = _mensaje,
+                    Resultado = _resultado,
+                    VerificacionId = Guid.Empty,
+                    ProtocoloVerificacionId = 0,
+                    PlacaId = "DESCONOCIDO"
+                };
             }
-
+            
+            
             return new VerificacionVisualIniResult {
                 MensajeId = 0,
                 Resultado = 0,
@@ -379,146 +379,93 @@ namespace Apps_Visual.ObdAppGUI.Views {
         #endregion
 
         #region Segundo store
-        private async Task<CapturaVisualGetResult> BanderasAEvaluar(VisualRegistroWindows V, string? elemento, byte combustible, CancellationToken ct = default) {
-            var repo = new SivevRepository();
-            var result = new CapturaVisualGetResult();
-            try {
-                using var connApp = SqlConnectionFactory.Create( server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
-                await connApp.OpenAsync(ct);
-                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
-                    var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.dvar15, accesoId:V.dvar20, verificacionId: V.dvar21, elemento: elemento, tiCombustible: combustible);
-
-                    //MostrarMensaje($"estacionId: {V.dvar15}, accesoId: {V.AccesoId}, verificacionId: {V.dvar21}, elemento: {elemento}, tiCombustible: {combustible}");
-
-                    result.Resultado = rbanderas.Resultado;
-                    result.MensajeId = rbanderas.MensajeId;
-                    result.ReturnCode = rbanderas.ReturnCode;
-                    result.Items.AddRange(rbanderas.Items);
-
-                    if (result.MensajeId != 0) {
-                        var error = await repo.PrintIfMsgAsync( connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}",result.MensajeId);
-                        var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-                        MostrarMensaje($"Error SQL en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
-                    }
-
-                }
-            } catch (Exception e) {
-                try {
-                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
-                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
-                } catch (Exception logEx) {
-                    SivevLogger.Warning($"Falló la búsqueda de banderas en catch, BanderasAEvaluar: {logEx.Message}");
-                }
-                MostrarMensaje($"{e.Message}");
-                SivevLogger.Error($"Error en Apps_Visual.ObdAppGUI.Views.Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.BanderasAEvaluar: {e.Message}");
-
-                result.MensajeId = -2;
-                result.Resultado = -2;
-                result.ReturnCode = -2;
+        private async Task<CapturaVisualGetResult> BanderasAEvaluar(SqlConnection connApp, SivevRepository repo, VisualRegistroWindows V, string? elemento, byte combustible, CancellationToken ct = default) {
+            if (connApp is null) {
+                SivevLogger.Error($"BanderasAEvaluar: connApp is null");
+                throw new ArgumentNullException(nameof(connApp));
             }
+            if (connApp.State != ConnectionState.Open) {
+                SivevLogger.Error($"BanderasAEvaluar: connApp is not open");
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
+            var result = new CapturaVisualGetResult();
+            var rbanderas = await repo.SpAppCapturaVisualGetAsync(conn: connApp, estacionId: V.dvar15, accesoId:V.dvar20, verificacionId: V.dvar21, elemento: elemento, tiCombustible: combustible, ct:ct);
 
-            return result;
+            //Mostrar.Mensaje($"estacionId: {V.dvar15}, accesoId: {V.AccesoId}, verificacionId: {V.dvar21}, elemento: {elemento}, tiCombustible: {combustible}");
+
+            result.Resultado = rbanderas.Resultado;
+            result.MensajeId = rbanderas.MensajeId;
+            result.ReturnCode = rbanderas.ReturnCode;
+            result.Items.AddRange(rbanderas.Items);
+
+            if (result.MensajeId != 0) {
+                var error = await repo.MensajeIdSQL(connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}", result.MensajeId, ct: ct );
+                var msg = error?.Mensaje ?? "Mensaje no disponible";
+                var bitacora = Bitacora.ErroresSQL(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
+                Mostrar.Mensaje($"Error SQL en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
+            }
+           return result;
         }
         #endregion
 
         #region Tercer store
         private async Task<CapturaInspeccionVisualNewSetResult> CapturaInspeccionVisual(VisualRegistroWindows V, byte tiTaponCombustible, byte tiTaponAceite, byte tiBayonetaAceite, byte tiPortafiltroAire, byte tiTuboEscape, byte tiFugasMotorTrans, byte tiNeumaticos, byte tiComponentesEmisiones, byte tiMotorGobernado, int odometro, CancellationToken ct = default) {
-            var repo = new SivevRepository();
+            var repo = _repo;
             var result = new CapturaInspeccionVisualNewSetResult();
+            await using var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
 
             try {
-                using var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5);
+
                 await connApp.OpenAsync(ct);
+                using var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper());
+                var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(conn: connApp, verificacionId: V.dvar21,
+                                                                            estacionId: V.dvar15,
+                                                                            accesoId: V.dvar20,
+                                                                            tiTaponCombustible: tiTaponCombustible,
+                                                                            tiTaponAceite: tiTaponAceite,
+                                                                            tiBayonetaAceite: tiBayonetaAceite,
+                                                                            tiPortafiltroAire: tiPortafiltroAire,
+                                                                            tiTuboEscape: tiTuboEscape,
+                                                                            tiFugasMotorTrans: tiFugasMotorTrans,
+                                                                            tiNeumaticos: tiNeumaticos,
+                                                                            tiComponentesEmisiones: tiComponentesEmisiones,
+                                                                            tiMotorGobernado: tiMotorGobernado,
+                                                                            odometro: odometro,
+                                                                            ct: ct);
 
-                using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
-                    var r = await repo.SpAppCapturaInspeccionVisualNewSetAsync(
-                                                                                conn: connApp,
-                                                                                verificacionId: V.dvar21,
-                                                                                estacionId: V.dvar15,
-                                                                                accesoId:V.dvar20,
+                result.Resultado = r.Resultado;
+                result.MensajeId = r.MensajeId;
+                result.ReturnCode = r.ReturnCode;
+                result.CheckObd = r.CheckObd;
 
-                                                                                tiTaponCombustible:tiTaponCombustible,
-                                                                                tiTaponAceite: tiTaponAceite,
+                if (result.MensajeId != 0) {
+                    bool requiereFinAcceso = result.MensajeId is 50025 or 50263;
+                    var error = await repo.MensajeIdSQL( connApp, requiereFinAcceso ? $"{result.MensajeId}" : $"Captura Inspección Visual MensajeId {result.MensajeId}", result.MensajeId,ct: ct);
+                    string msg = error?.Mensaje ?? "Mensaje no disponible";
+                    var bitacora = Bitacora.ErroresSQL(V, descripcion: msg, codigoSql: result.MensajeId);
 
-                                                                                tiBayonetaAceite: tiBayonetaAceite,
-                                                                                tiPortafiltroAire: tiPortafiltroAire,
+                    // MISMA conexión
+                    await repo.SpSpAppBitacoraErroresSetAsyncPool(connApp: connApp, visual: V,bitacora: bitacora, ct: ct);
 
-                                                                                tiTuboEscape: tiTuboEscape,
-                                                                                tiFugasMotorTrans: tiFugasMotorTrans,
+                    if (requiereFinAcceso) {
+                        // MISMA conexión
+                        await repo.SpAppAccesoFinAsync(connApp, V.dvar15, V.dvar20);
+                        SivevLogger.Information(
+                            $"CapturaInspeccionVisual: " +
+                            $"Mensaje {result.MensajeId}, " +
+                            $"{msg}. Se finaliza el acceso.");
 
-                                                                                tiNeumaticos: tiNeumaticos,
-                                                                                tiComponentesEmisiones: tiComponentesEmisiones,
-
-                                                                                tiMotorGobernado:tiMotorGobernado,
-                                                                                odometro:odometro );
-                    result.Resultado = r.Resultado;
-                    result.MensajeId = r.MensajeId;
-                    result.ReturnCode = r.ReturnCode;
-                    result.CheckObd = r.CheckObd;
-                    /*
-                        50025.-	Captura de datos finalizada. Avance el vehículo a la posición de prueba
-                        50263.-	No ha aprobado la verificación por inspección visual. Avance el vehículo a la zona de resultados
-                     */
-                    /*
-                    if (result.MensajeId is not 0 and not 50025 and not 50263) {
-                        var error = await repo.PrintIfMsgAsync( connApp, $"Error en CapturaInspeccionVisual MensajeId {result.MensajeId}",result.MensajeId);
-                        var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-                        MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
-                    }
-                    if (result.MensajeId is 50025) {
-                        var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
-                        var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
-                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
-                        MostrarMensaje($"{msg} ♥");
-                    }
-
-                    if (result.MensajeId is 50263) {
-                        var error = await repo.PrintIfMsgAsync( connApp, $"{result.MensajeId}",result.MensajeId);
-                        var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var bitacora = NuevaBitacora(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-                        var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
-                        SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, {error.Mensaje} se finaliza el acceso.");
-                        MostrarMensaje($"{msg} ♥");
-                    }
-                    */
-                    if (result.MensajeId != 0) {
-                        var requiereFinAcceso = result.MensajeId is 50025 or 50263;
-                        var error = await repo.PrintIfMsgAsync(connApp, requiereFinAcceso ? $"{result.MensajeId}"
-                                : $"Captura Inspección Visual MensajeId {result.MensajeId}", result.MensajeId );
-
-                        var msg = error?.Mensaje ?? "Mensaje no disponible";
-                        var bitacora = NuevaBitacora(V, descripcion: msg, codigoSql: result.MensajeId);
-                        await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
-
-                        if (requiereFinAcceso) {
-                            await repo.SpAppAccesoFinAsync(connApp, _Visual.dvar15, _Visual.dvar20);
-                            SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual, Mensaje {result.MensajeId}, {msg} se finaliza el acceso.");
-                            MostrarMensaje($"{msg} ♥");
-                        } else {
-                            MostrarMensaje($"Error en CapturaInspeccionVisual MensajeId = {result.MensajeId}: {msg}");
-                        }
+                        Mostrar.Mensaje($"{msg} ♥");
+                    } else {
+                        Mostrar.Mensaje($"Error CapturaInspeccionVisual ", $"MensajeId={result.MensajeId}: {msg}");
                     }
                 }
-            } catch (Exception e) {
-                try {
-                    var bitacora = NuevaBitacora( V, descripcion: e.ToString(), codigoSql: 0, codigo: e.HResult);
-                    await repo.SpSpAppBitacoraErroresSetAsync(V, bitacora, ct);
-                } catch (Exception logEx) {
-                    SivevLogger.Warning($"Falló la búsqueda de banderas en catch, BanderasAEvaluar: {logEx.Message}");
-                }
-                MostrarMensaje($"Error en la conexión a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
-                SivevLogger.Error($"Error en la conexion a la BDD Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.CapturaInspeccionVisual: {e.Message}");
+                return result;
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error en CapturaInspeccionVisual: {ex}");
+                throw;
             }
-
-            return result;
         }
         #endregion
         #endregion
@@ -529,8 +476,8 @@ namespace Apps_Visual.ObdAppGUI.Views {
         private void frmCapturaVisual_Resize(object sender, EventArgs e) {
             float factor = (float)this.Width / _formSizeInicial.Width;
             ///*
-            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 60f));
-            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 50f));
+            float Titulo1 = Math.Max(24f, Math.Min(_fontSizeInicial * factor, 50f));
+            float Titulo2 = Math.Max(20f, Math.Min(_fontSizeInicial * factor, 40f));
             float Titulo3 = Math.Max(12f, Math.Min(_fontSizeInicial * factor, 20f));
             //*/
 
@@ -663,24 +610,6 @@ namespace Apps_Visual.ObdAppGUI.Views {
             }
         }
         #endregion
-        private SpAppBitacoraErroresSet NuevaBitacora(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
-            return new SpAppBitacoraErroresSet {
-                EstacionId = V.dvar15,
-                Centro = V.dvar12,
-                NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.dvar8,
-                FechaError = DateTime.Now,
-                Libreria = Path.GetFileName(callerFile),
-                Clase = Path.GetFileNameWithoutExtension(callerFile),
-                Metodo = callerMember,
-                CodigoErrorSql = codigoSql,
-                CodigoError = codigo,
-                DescripcionError = descripcion,
-                LineaCodigo = callerLine,
-                LastDllError = 0,
-                SourceError = "DESCONOCIDO"
-            };
-        }
         private void AplicarCapturaVisual(IReadOnlyList<CapturaVisualItem> items) {
 
             var allChecks = new[] {
@@ -769,16 +698,5 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //Close();
         }
         #endregion
-
-        # region MostrarMensaje
-        private void MostrarMensaje(string mensaje) {
-            using (var dlg = new frmMensajes(mensaje)) {
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.TopMost = true;
-                dlg.ShowDialog(this);
-            }
-        }
-        #endregion
-
     }
 }

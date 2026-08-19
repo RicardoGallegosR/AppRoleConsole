@@ -15,5 +15,7 @@ namespace FrmComun.Utils {
         public string DTCConfirmado { get; set; } = "";
         public string DTCPendiente { get; set; } = "";
         public string Protocolo { get; set; } = "";
+        public int MensajeId { get; set; } = 0;
+        public int Resultado { get; set; } = 0;
     }
 }

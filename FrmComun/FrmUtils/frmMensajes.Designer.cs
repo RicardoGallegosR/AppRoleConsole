@@ -48,7 +48,7 @@
             pnlPrincipal.Dock = DockStyle.Fill;
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
-            pnlPrincipal.Size = new Size(800, 450);
+            pnlPrincipal.Size = new Size(822, 477);
             pnlPrincipal.TabIndex = 0;
             // 
             // splitContainer1
@@ -64,8 +64,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(splitContainer2);
-            splitContainer1.Size = new Size(800, 450);
-            splitContainer1.SplitterDistance = 101;
+            splitContainer1.Size = new Size(822, 477);
+            splitContainer1.SplitterDistance = 103;
             splitContainer1.TabIndex = 0;
             // 
             // btnCerrar
@@ -76,7 +76,7 @@
             btnCerrar.ForeColor = Color.White;
             btnCerrar.Location = new Point(0, 0);
             btnCerrar.Name = "btnCerrar";
-            btnCerrar.Size = new Size(101, 450);
+            btnCerrar.Size = new Size(103, 477);
             btnCerrar.TabIndex = 1;
             btnCerrar.Text = "Cerrar";
             btnCerrar.UseVisualStyleBackColor = false;
@@ -96,8 +96,8 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(lblMensajes);
-            splitContainer2.Size = new Size(695, 450);
-            splitContainer2.SplitterDistance = 82;
+            splitContainer2.Size = new Size(715, 477);
+            splitContainer2.SplitterDistance = 86;
             splitContainer2.TabIndex = 0;
             // 
             // lblTitulo
@@ -106,7 +106,7 @@
             lblTitulo.Font = new Font("Segoe UI", 24F);
             lblTitulo.Location = new Point(0, 0);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(695, 82);
+            lblTitulo.Size = new Size(715, 86);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "¿Qué es Lorem Ipsum?";
             lblTitulo.TextAlign = ContentAlignment.MiddleCenter;
@@ -117,7 +117,7 @@
             lblMensajes.Font = new Font("Segoe UI", 16F);
             lblMensajes.Location = new Point(0, 0);
             lblMensajes.Name = "lblMensajes";
-            lblMensajes.Size = new Size(695, 364);
+            lblMensajes.Size = new Size(715, 387);
             lblMensajes.TabIndex = 0;
             lblMensajes.Text = resources.GetString("lblMensajes.Text");
             // 
@@ -125,7 +125,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(822, 477);
             ControlBox = false;
             Controls.Add(pnlPrincipal);
             MaximizeBox = false;

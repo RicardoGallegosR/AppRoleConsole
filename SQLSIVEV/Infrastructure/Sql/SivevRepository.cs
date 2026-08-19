@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-//using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
@@ -369,9 +368,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
         }
 
-        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync(SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible,
-                        CancellationToken ct = default) {
-
+        public async Task<CapturaVisualGetResult> SpAppCapturaVisualGetAsync(SqlConnection conn, Guid estacionId, Guid accesoId, Guid verificacionId, string? elemento, byte? tiCombustible, CancellationToken ct = default) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open) await conn.OpenAsync(ct);
 
@@ -654,76 +651,76 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@vcNumVerifCalib", SqlDbType.VarChar, 16) { Value = obd.ReadCvnsRobusto });
             cmd.Parameters.Add(new SqlParameter("@vcLista_CVN", SqlDbType.VarChar, 200) { Value = obd.ReadCvnsRobusto });
             cmd.Parameters.Add(new SqlParameter("@vcEst_Mon_DTC_Borrado", SqlDbType.VarChar, 100) { Value = obd.Est_Mon_DTC_Borrado ?? "DESCONOCIDO" });
-            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_01_20", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_01_20 });
-            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_21_40", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_21_40 });
-            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_41_60", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_41_60 });
+            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_01_20", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_01_20 ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_21_40", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_21_40 ?? "DESCONOCIDO" });
+            cmd.Parameters.Add(new SqlParameter("@vcPIDS_Sup_41_60", SqlDbType.VarChar, 300) { Value = obd.PIDS_Sup_41_60 ?? "DESCONOCIDO" });
 
             // TinyInt (byte)
-            cmd.Parameters.Add(new SqlParameter("@tiNEV", SqlDbType.TinyInt) { Value = obd.NEV });
+            cmd.Parameters.Add(new SqlParameter("@tiNEV", SqlDbType.TinyInt) { Value = obd.NEV ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@tiConexionObd", SqlDbType.TinyInt) { Value = obd.ConexionObd });
             cmd.Parameters.Add(new SqlParameter("@tiIntentos", SqlDbType.TinyInt) { Value = obd.Intentos });
-            cmd.Parameters.Add(new SqlParameter("@tiMil", SqlDbType.TinyInt) { Value = obd.Mil });
-            cmd.Parameters.Add(new SqlParameter("@siFallas", SqlDbType.TinyInt) { Value = obd.Fallas }); // SP lo define tinyint
-            cmd.Parameters.Add(new SqlParameter("@tiSdciic", SqlDbType.TinyInt) { Value = obd.Sdciic });
-            cmd.Parameters.Add(new SqlParameter("@tiSecc", SqlDbType.TinyInt) { Value = obd.Secc });
-            cmd.Parameters.Add(new SqlParameter("@tiSc", SqlDbType.TinyInt) { Value = obd.Sc });
-            cmd.Parameters.Add(new SqlParameter("@tiSso", SqlDbType.TinyInt) { Value = obd.Sso });
-            cmd.Parameters.Add(new SqlParameter("@tiSci", SqlDbType.TinyInt) { Value = obd.Sci });
-            cmd.Parameters.Add(new SqlParameter("@tiSccc", SqlDbType.TinyInt) { Value = obd.Sccc });
-            cmd.Parameters.Add(new SqlParameter("@tiSe", SqlDbType.TinyInt) { Value = obd.Se });
-            cmd.Parameters.Add(new SqlParameter("@tiSsa", SqlDbType.TinyInt) { Value = obd.Ssa });
-            cmd.Parameters.Add(new SqlParameter("@tiSfaa", SqlDbType.TinyInt) { Value = obd.Sfaa });
-            cmd.Parameters.Add(new SqlParameter("@tiScso", SqlDbType.TinyInt) { Value = obd.Scso });
-            cmd.Parameters.Add(new SqlParameter("@tiSrge", SqlDbType.TinyInt) { Value = obd.Srge });
-            cmd.Parameters.Add(new SqlParameter("@tiSpsa", SqlDbType.TinyInt) { Value = obd.Spsa });
-            cmd.Parameters.Add(new SqlParameter("@tiSge", SqlDbType.TinyInt) { Value = obd.Sge });
-            cmd.Parameters.Add(new SqlParameter("@tiSchnm", SqlDbType.TinyInt) { Value = obd.Schnm });
-            cmd.Parameters.Add(new SqlParameter("@tiSfp", SqlDbType.TinyInt) { Value = obd.Sfp });
-            cmd.Parameters.Add(new SqlParameter("@tiSscrron", SqlDbType.TinyInt) { Value = obd.Sscrron });
-            cmd.Parameters.Add(new SqlParameter("@tiReq_Emisiones", SqlDbType.TinyInt) { Value = obd.Req_Emisiones });
-            cmd.Parameters.Add(new SqlParameter("@tiCombustible0151Id", SqlDbType.TinyInt) { Value = obd.Combustible0151Id });
-            cmd.Parameters.Add(new SqlParameter("@tiCombustible0907Id", SqlDbType.TinyInt) { Value = obd.Combustible0907Id });
+            cmd.Parameters.Add(new SqlParameter("@tiMil", SqlDbType.TinyInt) { Value = obd.Mil ?? 0});
+            cmd.Parameters.Add(new SqlParameter("@siFallas", SqlDbType.TinyInt) { Value = obd.Fallas ?? 0 }); // SP lo define tinyint
+            cmd.Parameters.Add(new SqlParameter("@tiSdciic", SqlDbType.TinyInt) { Value = obd.Sdciic ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSecc", SqlDbType.TinyInt) { Value = obd.Secc ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSc", SqlDbType.TinyInt) { Value = obd.Sc ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSso", SqlDbType.TinyInt) { Value = obd.Sso ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSci", SqlDbType.TinyInt) { Value = obd.Sci ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSccc", SqlDbType.TinyInt) { Value = obd.Sccc ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSe", SqlDbType.TinyInt) { Value = obd.Se ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSsa", SqlDbType.TinyInt) { Value = obd.Ssa ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSfaa", SqlDbType.TinyInt) { Value = obd.Sfaa ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiScso", SqlDbType.TinyInt) { Value = obd.Scso ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSrge", SqlDbType.TinyInt) { Value = obd.Srge ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSpsa", SqlDbType.TinyInt) { Value = obd.Spsa ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSge", SqlDbType.TinyInt) { Value = obd.Sge ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSchnm", SqlDbType.TinyInt) { Value = obd.Schnm ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSfp", SqlDbType.TinyInt) { Value = obd.Sfp ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiSscrron", SqlDbType.TinyInt) { Value = obd.Sscrron ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiReq_Emisiones", SqlDbType.TinyInt) { Value = obd.Req_Emisiones ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiCombustible0151Id", SqlDbType.TinyInt) { Value = obd.Combustible0151Id ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@tiCombustible0907Id", SqlDbType.TinyInt) { Value = obd.Combustible0907Id ?? 0 });
 
             // Decimales
-            cmd.Parameters.Add(new SqlParameter("@dVoltsSwOff", SqlDbType.Decimal) { Precision = 4, Scale = 1, Value = obd.VoltsSwOff });
-            cmd.Parameters.Add(new SqlParameter("@dVoltsSwOn", SqlDbType.Decimal) { Precision = 4, Scale = 1, Value = obd.VoltsSwOn });
-            cmd.Parameters.Add(new SqlParameter("@dSTFT_B1", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.STFT_B1 });
-            cmd.Parameters.Add(new SqlParameter("@dLTFT_B1", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.LTFT_B1 });
-            cmd.Parameters.Add(new SqlParameter("@dMAF", SqlDbType.Decimal) { Precision = 8, Scale = 3, Value = obd.MAF });
-            cmd.Parameters.Add(new SqlParameter("@dTPS", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.TPS });
-            cmd.Parameters.Add(new SqlParameter("@dAvanceEnc", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.AvanceEnc });
-            cmd.Parameters.Add(new SqlParameter("@dVolt_O2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd.Volt_O2 });
-            cmd.Parameters.Add(new SqlParameter("@dVolt_O2_S2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd.Volt_O2_S2 });
-            cmd.Parameters.Add(new SqlParameter("@dNivelComb", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.NivelComb });
-            cmd.Parameters.Add(new SqlParameter("@dCCM", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.CCM });
+            cmd.Parameters.Add(new SqlParameter("@dVoltsSwOff", SqlDbType.Decimal) { Precision = 4, Scale = 1, Value = obd.VoltsSwOff ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dVoltsSwOn", SqlDbType.Decimal) { Precision = 4, Scale = 1, Value = obd.VoltsSwOn ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dSTFT_B1", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.STFT_B1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dLTFT_B1", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.LTFT_B1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dMAF", SqlDbType.Decimal) { Precision = 8, Scale = 3, Value = obd.MAF ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dTPS", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.TPS ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dAvanceEnc", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.AvanceEnc ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dVolt_O2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd.Volt_O2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dVolt_O2_S2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd.Volt_O2_S2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dNivelComb", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.NivelComb ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dCCM", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd.CCM ?? 0 });
 
 
             // Smallint
-            cmd.Parameters.Add(new SqlParameter("@siIAT", SqlDbType.SmallInt) { Value = obd.IAT });
-            cmd.Parameters.Add(new SqlParameter("@siRpmOn", SqlDbType.SmallInt) { Value = obd.RpmOn });
-            cmd.Parameters.Add(new SqlParameter("@siRpmOff", SqlDbType.SmallInt) { Value = obd.RpmOff });
-            cmd.Parameters.Add(new SqlParameter("@siRpmCheck", SqlDbType.SmallInt) { Value = obd.RpmCheck });
-            cmd.Parameters.Add(new SqlParameter("@siCodigoProtocolo", SqlDbType.SmallInt) { Value = obd.CodigoProtocolo });
-            cmd.Parameters.Add(new SqlParameter("@siVelVeh", SqlDbType.SmallInt) { Value = obd.VelVeh });
-            cmd.Parameters.Add(new SqlParameter("@siPres_Baro", SqlDbType.SmallInt) { Value = obd.Pres_Baro });
-            cmd.Parameters.Add(new SqlParameter("@siTR", SqlDbType.SmallInt) { Value = obd.TR });
+            cmd.Parameters.Add(new SqlParameter("@siIAT", SqlDbType.SmallInt) { Value = obd.IAT ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siRpmOn", SqlDbType.SmallInt) { Value = obd.RpmOn ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siRpmOff", SqlDbType.SmallInt) { Value = obd.RpmOff ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siRpmCheck", SqlDbType.SmallInt) { Value = obd.RpmCheck ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siCodigoProtocolo", SqlDbType.SmallInt) { Value = obd.CodigoProtocolo ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siVelVeh", SqlDbType.SmallInt) { Value = obd.VelVeh ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siPres_Baro", SqlDbType.SmallInt) { Value = obd.Pres_Baro ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siTR", SqlDbType.SmallInt) { Value = obd.TR ?? 0 });
 
 
             // Bits
-            cmd.Parameters.Add(new SqlParameter("@bLeeMonitores", SqlDbType.Bit) { Value = obd.LeeMonitores });
-            cmd.Parameters.Add(new SqlParameter("@bLeeDtc", SqlDbType.Bit) { Value = obd.LeeDtc });
-            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPend", SqlDbType.Bit) { Value = obd.LeeDtcPend });
-            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPerm", SqlDbType.Bit) { Value = obd.LeeDtcPerm });
-            cmd.Parameters.Add(new SqlParameter("@bLeeVin", SqlDbType.Bit) { Value = obd.LeeVin });
+            cmd.Parameters.Add(new SqlParameter("@bLeeMonitores", SqlDbType.Bit) { Value = obd.LeeMonitores ?? false    });
+            cmd.Parameters.Add(new SqlParameter("@bLeeDtc", SqlDbType.Bit) { Value = obd.LeeDtc ?? false });
+            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPend", SqlDbType.Bit) { Value = obd.LeeDtcPend ?? false });
+            cmd.Parameters.Add(new SqlParameter("@bLeeDtcPerm", SqlDbType.Bit) { Value = obd.LeeDtcPerm ?? false });
+            cmd.Parameters.Add(new SqlParameter("@bLeeVin", SqlDbType.Bit) { Value = obd.LeeVin ?? false });
 
 
             // Ints
-            cmd.Parameters.Add(new SqlParameter("@intTpo_Arranque", SqlDbType.Int) { Value = obd.TiemppoDeArranque });
+            cmd.Parameters.Add(new SqlParameter("@intTpo_Arranque", SqlDbType.Int) { Value = obd.TiempoDeArranque ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@intMotorTipoId", SqlDbType.Int) { Value = obd.MotorTipoId ?? 0 });
-            cmd.Parameters.Add(new SqlParameter("@intDist_MIL_On", SqlDbType.Int) { Value = obd.Dist_MIL_On });
-            cmd.Parameters.Add(new SqlParameter("@intDist_Borrado_DTC", SqlDbType.Int) { Value = obd.Dist_Borrado_DTC });
-            cmd.Parameters.Add(new SqlParameter("@intTpo_MIL_On", SqlDbType.Int) { Value = obd.Tpo_MIL_On });
-            cmd.Parameters.Add(new SqlParameter("@intTpo_Borrado_DTC", SqlDbType.Int) { Value = obd.Tpo_Borrado_DTC });
+            cmd.Parameters.Add(new SqlParameter("@intDist_MIL_On", SqlDbType.Int) { Value = obd.Dist_MIL_On ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@intDist_Borrado_DTC", SqlDbType.Int) { Value = obd.Dist_Borrado_DTC ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@intTpo_MIL_On", SqlDbType.Int) { Value = obd.Tpo_MIL_On ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@intTpo_Borrado_DTC", SqlDbType.Int) { Value = obd.Tpo_Borrado_DTC ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@intID_Calib", SqlDbType.Int) { Value = obd.ID_Calib ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@intCalentamientosPostDTC", SqlDbType.Int) { Value = obd.WarmUpsDesdeBorrado ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@intNumVerifCalib", SqlDbType.Int) { Value = obd.ReadCvnMessageCount ?? 0 });
@@ -733,6 +730,34 @@ namespace SQLSIVEV.Infrastructure.Sql {
             //BigInt
             cmd.Parameters.Add(new SqlParameter("@biOdometro", SqlDbType.BigInt) { Value = obd.Odometro ?? 0 });
 
+            // NUEVOS VALORES 
+
+            cmd.Parameters.Add(new SqlParameter("@vcVersionSoftware", SqlDbType.VarChar, 20) { Value = string.IsNullOrWhiteSpace(obd.VehiculoId) ? "DESCONOCIDO" : obd._VersionSoftware.Trim() });
+            // Decimal
+            cmd.Parameters.Add(new SqlParameter("@dLambda", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._Lambda ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB2S1", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B2S1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB2S2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B2S2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB1S1", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B1S1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB1S2", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B1S2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dSTFT_B2", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd._StftB2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dLTFT_B2", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd._LtftB2  ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB1S1_V", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B1S1_V ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB1S2_V", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B1S2_V ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB2S1_V", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._B2S1_V ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dB2S2_V", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd._B2S2_V ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dRelativeAcceleratorPedalPosition", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd._RelativeAcceleratorPedalPosition ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@dAbsoluteLoadValue", SqlDbType.Decimal) { Precision = 5, Scale = 2, Value = obd._AbsoluteLoadValue ?? 0 });
+            //smallint
+            cmd.Parameters.Add(new SqlParameter("@siEGT_B1S1", SqlDbType.SmallInt) { Value = obd._EgtB1S1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siEGT_B2S1", SqlDbType.SmallInt) { Value = obd._EgtB2S1 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siEGT_B1S2", SqlDbType.SmallInt) { Value = obd._EgtB1S2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siEGT_B2S2", SqlDbType.SmallInt) { Value = obd._EgtB2S2 ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siMAP", SqlDbType.SmallInt) { Value = obd._Map ?? 0 });
+            
+            cmd.Parameters.Add(new SqlParameter("@siAmbientAirTemperature", SqlDbType.SmallInt) { Value = obd._AmbientAirTemperature ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siEngineOilTemperature", SqlDbType.SmallInt) { Value = obd._EngineOilTemperature ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siEngineCoolantTemperature", SqlDbType.SmallInt) { Value = obd._EngineCoolantTemperature ?? 0 });
+            cmd.Parameters.Add(new SqlParameter("@siIntakeAirTemperature", SqlDbType.SmallInt) { Value = obd._IntakeAirTemperature ?? 0 });
 
 
             // Outputs
@@ -757,6 +782,55 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 Resultado = _Resultado
             };
         }
+        public async Task<ResultadoSql> SpSpAppBitacoraErroresSetAsyncPool(SqlConnection connApp, VisualRegistroWindows visual,SpAppBitacoraErroresSet bitacora, CancellationToken ct = default) { 
+            short _Resultado = 0;
+            int   _MensajeId = 0;
+            if (connApp is null) {
+                SivevLogger.Error($"SpAppBitacoraErroresSetAsyncPool: connApp is null");
+                throw new ArgumentNullException(nameof(connApp));
+            }
+            if (connApp.State != ConnectionState.Open) {
+                SivevLogger.Error($"SpAppBitacoraErroresSetAsyncPool: connApp is not open");
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
+
+            using var cmd = connApp.CreateCommand();
+            cmd.CommandText = "SivAppComun.SpAppBitacoraErroresSet";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Entradas
+            cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = bitacora.EstacionId });
+            cmd.Parameters.Add(new SqlParameter("@siCentro", SqlDbType.SmallInt) { Value = bitacora.Centro });
+            cmd.Parameters.Add(new SqlParameter("@vcNombreCpu", SqlDbType.VarChar, 25) { Value = bitacora.NombreCpu });
+            cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.SmallInt) { Value = bitacora.OpcionMenuId });
+            cmd.Parameters.Add(new SqlParameter("@dtFechaError", SqlDbType.DateTime) { Value = bitacora.FechaError });
+            cmd.Parameters.Add(new SqlParameter("@vcLibreria", SqlDbType.VarChar, 50) { Value = bitacora.Libreria });
+            cmd.Parameters.Add(new SqlParameter("@vcClase", SqlDbType.VarChar, 50) { Value = bitacora.Clase });
+            cmd.Parameters.Add(new SqlParameter("@vcMetodo", SqlDbType.VarChar, 50) { Value = bitacora.Metodo });
+            cmd.Parameters.Add(new SqlParameter("@iCodigoErrorSql", SqlDbType.Int) { Value = bitacora.CodigoErrorSql });
+            cmd.Parameters.Add(new SqlParameter("@iCodigoError", SqlDbType.Int) { Value = bitacora.CodigoError });
+            cmd.Parameters.Add(new SqlParameter("@vcDescripcionError", SqlDbType.VarChar, 500) { Value = bitacora.DescripcionError?.Length > 500 ? bitacora.DescripcionError.Substring(0, 500) : (object?)bitacora.DescripcionError ?? DBNull.Value});
+            cmd.Parameters.Add(new SqlParameter("@iLineaCodigo", SqlDbType.Int) { Value = bitacora.LineaCodigo });
+            cmd.Parameters.Add(new SqlParameter("@iLastDllError", SqlDbType.Int) { Value = bitacora.LastDllError });
+            cmd.Parameters.Add(new SqlParameter("@vcSourceError", SqlDbType.VarChar, 50) { Value = bitacora.SourceError });
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+            // Valor de retorno (RETURN @@ERROR)
+            var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+            cmd.Parameters.Add(pReturn);
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            _Resultado = (pResultado.Value == DBNull.Value) ? (short)0 : Convert.ToInt16(pResultado.Value);
+            _MensajeId = (pMensajeId.Value == DBNull.Value) ? 0 : Convert.ToInt32(pMensajeId.Value);
+
+            return new ResultadoSql {
+                Resultado = _Resultado,
+                MensajeId = _MensajeId,
+            };
+        }
+
 
         public async Task<ResultadoSql> SpAppCapturaAbandonaAsync(VisualRegistroWindows V, CancellationToken ct = default) {
             short _Resultado = 0;
@@ -858,59 +932,58 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 MensajeId = _MensajeId,
             };
         }
-        //*
-        public async Task<SpAppDatosVehiculoObdNewSet> SpAppDatosVehiculoObdNewGetSetAsync(VisualRegistroWindows V,  CancellationToken ct = default) {
+        public async Task<SpAppDatosVehiculoObdNewSet> SpAppDatosVehiculoObdNewGetSetAsync(SqlConnection connApp, VisualRegistroWindows V, CancellationToken ct = default) {
+            if (connApp is null) {
+                SivevLogger.Error($"SpAppDatosVehiculoObdNewGetSetAsync: connApp is null");
+                throw new ArgumentNullException(nameof(connApp));
+            }
+            if (connApp.State != ConnectionState.Open) {
+                SivevLogger.Error($"SpAppDatosVehiculoObdNewGetSetAsync: connApp is not open");
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
             var resultado = new SpAppDatosVehiculoObdNewSet();
-            try {
-                using (var connApp = SqlConnectionFactory.Create(server: V.dvar1, db: V.dvar2, user: V.dvar3, pass: V.dvar4, appName: V.dvar5)) {
-                    if (connApp.State != ConnectionState.Open) await connApp.OpenAsync(ct);
-                    using (var scope = new AppRoleScope(connApp, role: V.dvar17, password: V.dvar16.ToString().ToUpper())) {
-                        using var cmd = connApp.CreateCommand();
-                        cmd.CommandText = "VfcVisual.SpAppDatosVehiculoObdNewGet";
-                        cmd.CommandType = CommandType.StoredProcedure;
+            using var cmd = connApp.CreateCommand();
+            cmd.CommandText = "VfcVisual.SpAppDatosVehiculoObdNewGet";
+            cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Entradas
-                        var pEstacionId = new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar15 };
-                        var pAccesoId = new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = V.dvar20 };
-                        var pVerificacionId = new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar21 };
+            // Entradas
+            var pEstacionId = new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar15 };
+            var pAccesoId = new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = V.dvar20 };
+            var pVerificacionId = new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = V.dvar21 };
 
-                        // Salidaas
-                        var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
-                        var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+            // Salidaas
+            var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
 
-                        // Valor de retorno (RETURN @@ERROR)
-                        var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
-                        
-                        cmd.Parameters.Add(pMensajeId);
-                        cmd.Parameters.Add(pResultado);
-                        cmd.Parameters.Add(pEstacionId);
-                        cmd.Parameters.Add(pAccesoId);
-                        cmd.Parameters.Add(pVerificacionId);
-                        cmd.Parameters.Add(pReturn);
+            // Valor de retorno (RETURN @@ERROR)
+            var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
 
-                        await using (var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow,ct)) {
-                            if (await reader.ReadAsync(ct)) {
-                                resultado.Marca = ObtenerString(reader, "Marca");
-                                resultado.SubMarca = ObtenerString(reader, "SubMarca");
-                                resultado.Modelo = ObtenerString(reader, "Modelo");
-                                resultado.DTCConfirmado = ObtenerString(reader, "CodigoError");
-                                resultado.DTCPendiente = ObtenerString(reader, "CodigoErrorPendientes");
-                                resultado.Protocolo = ObtenerString(reader, "ProtocoloObd");
-                            }
-                        }
-                        resultado.MensajeId = pMensajeId.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensajeId.Value);
-                        resultado.Resultado = pResultado.Value == DBNull.Value ? 0 : Convert.ToInt32(pResultado.Value);
-                        int codigoRetorno = pReturn.Value == DBNull.Value? 0 : Convert.ToInt32(pReturn.Value);
-                        if (codigoRetorno != 0) {
-                            SivevLogger.Error($"VfcVisual.SpAppDatosVehiculoObdNewGet retornó el código {codigoRetorno}");
-                        }
-                    }
+            cmd.Parameters.Add(pMensajeId);
+            cmd.Parameters.Add(pResultado);
+            cmd.Parameters.Add(pEstacionId);
+            cmd.Parameters.Add(pAccesoId);
+            cmd.Parameters.Add(pVerificacionId);
+            cmd.Parameters.Add(pReturn);
+
+            await using (var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow, ct)) {
+                if (await reader.ReadAsync(ct)) {
+                    resultado.Marca = ObtenerString(reader, "Marca");
+                    resultado.SubMarca = ObtenerString(reader, "SubMarca");
+                    resultado.Modelo = ObtenerString(reader, "Modelo");
+                    resultado.DTCConfirmado = ObtenerString(reader, "CodigoError");
+                    resultado.DTCPendiente = ObtenerString(reader, "CodigoErrorPendientes");
+                    resultado.Protocolo = ObtenerString(reader, "ProtocoloObd");
                 }
-            } catch (Exception e) {
-                SivevLogger.Error($"SivSpComun.SpAppBitacoraErroresSet {e}");
+            }
+            resultado.MensajeId = pMensajeId.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensajeId.Value);
+            resultado.Resultado = pResultado.Value == DBNull.Value ? 0 : Convert.ToInt32(pResultado.Value);
+            int codigoRetorno = pReturn.Value == DBNull.Value? 0 : Convert.ToInt32(pReturn.Value);
+            if (codigoRetorno != 0) {
+                SivevLogger.Error($"VfcVisual.SpAppDatosVehiculoObdNewGet retornó el código {codigoRetorno}");
             }
             return resultado;
         }
+
         private static string ObtenerString(SqlDataReader reader, string nombreColumna) {
             int ordinal = reader.GetOrdinal(nombreColumna);
             if (reader.IsDBNull(ordinal))

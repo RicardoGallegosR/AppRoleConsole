@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrmComun", "FrmComun\FrmCom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apps_Captura", "Apps_Captura\Apps_Captura.csproj", "{2BFF1F3F-D775-4E6E-A3C5-C8A39288F2A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apps_Administrativa", "Apps_Administrativa\Apps_Administrativa.csproj", "{9EB3E55D-4819-4613-9AD0-A86353FEC23E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{2BFF1F3F-D775-4E6E-A3C5-C8A39288F2A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BFF1F3F-D775-4E6E-A3C5-C8A39288F2A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BFF1F3F-D775-4E6E-A3C5-C8A39288F2A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EB3E55D-4819-4613-9AD0-A86353FEC23E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EB3E55D-4819-4613-9AD0-A86353FEC23E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EB3E55D-4819-4613-9AD0-A86353FEC23E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EB3E55D-4819-4613-9AD0-A86353FEC23E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

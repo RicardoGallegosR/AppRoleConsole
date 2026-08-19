@@ -42,6 +42,7 @@ namespace SQLSIVEV.Infrastructure.Services {
         public bool dvar26 { get; set; } = false;
         public string dvar27 { get; set; } = "";
         public string dvar28 { get; set; } = "";
+        public string dvar29 { get; set; } = "";
 
     }
     public sealed class DevUDSCore {

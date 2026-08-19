@@ -11,7 +11,7 @@ using SQLSIVEV.Infrastructure.Utils;
 namespace SQLSIVEV.Infrastructure.Services {
     public sealed class RegistroCrypto {
         private const string RegistryPath = @"SOFTWARE\VISUAL";
-        private const string RegistryPath_ = @"SOFTWARE\Servicios\Security";
+        //private const string RegistryPath_ = @"SOFTWARE\Servicios\Security";
 
         public void EscribirValor<T>(string nombrePropiedad, T valorOriginal) {
             try {
@@ -63,7 +63,7 @@ namespace SQLSIVEV.Infrastructure.Services {
             }
         }
 
-
+        /*
         public T LeerValor_<T>(string nombrePropiedad, T valorPorDefecto = default!, string registryPath = RegistryPath_) {
             try {
                 using (var key = Registry.LocalMachine.OpenSubKey(registryPath, writable: false)) {
@@ -93,5 +93,6 @@ namespace SQLSIVEV.Infrastructure.Services {
                 return valorPorDefecto;
             }
         }
+        //*/
     }
 }

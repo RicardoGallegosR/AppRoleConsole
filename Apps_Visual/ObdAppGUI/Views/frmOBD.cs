@@ -127,16 +127,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     UDS configuracion PRUEBAS:  
                  */
                 //MostrarMensaje($"Configurando UDS {_Visual.dvar25}, contador: {coA}, cred: {_Visual.dvar18}, cred1: {_Visual.dvar27}, cred2: {_Visual.dvar28}");
-                if (_Visual.dvar25 && coA == 3 && (_Visual.dvar18.Equals(_Visual.dvar27) || _Visual.dvar18.Equals(_Visual.dvar28))) {
-                    R.CodigoError = "";
-                    R.CodigoErrorPendiente = "";
-                    R.Sdciic = 1;
-                    R.Secc = 1;
-                    R.Sc = 1;
-                    R.Sso = 1;
-                    R.Sci = 1;
-
-                }
+               
                 //*/
 
 
@@ -145,11 +136,11 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         ? $"Conexión OBD exitosa - Placa: {_Visual.dvar19}"
                         : $"No se pudo conectar (intento {_intentosConexion}/{MAX_INTENTOS}) - Placa: {_Visual.dvar19}";
 
-                //*
+               
                 if (R.ConexionObd && R.Intentos <= MAX_INTENTOS) {
                     RSet(OBD2_enviado: R, _Visual_: _Visual);
                 }
-                //*/
+                
             } catch (Exception ex) {
                 lblLecturaOBD.Text = $"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}";
                 SivevLogger.Error($"Error SBD (intento {_intentosConexion}/{MAX_INTENTOS}) de conexión: {ex.Message}");
@@ -225,10 +216,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             //KeyDown += dVAR25_KeyDown;
 
             pbLecturaObd.Visible = false;
-            _Visual.dvar22 = false;
-            _Visual.dvar23 = false;
-            _Visual.dvar24 = false;
-            coQ = 0; coA = 0; coP = 0;
+
             if (_Visual is null) {
                 MostrarMensaje("Visual no inicializado");
                 SivevLogger.Error("Visual no inicializado");
