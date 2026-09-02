@@ -269,5 +269,12 @@
         public int? MensajeId { get; set; } = 0;
     }
 
+    public class EstacionEncontrada {
+        public Guid EstacionId { get; set; } = Guid.Empty;
+        public short CentroId { get; set; } = 0;
+        public string Centro { get; set; } = string.Empty;
+        public string Aplicacion { get; set; } = string.Empty;
+    }
+
 
 }

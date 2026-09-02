@@ -1,27 +1,43 @@
-﻿using SQLSIVEV.Comun;
+﻿using FrmComun.Utils;
+using Microsoft.IdentityModel.Tokens;
+using SQLSIVEV.Comun;
 using SQLSIVEV.Infrastructure.Services;
-using FrmComun.Utils;
-using DPFP_SMA.Utils;
+using SQLSIVEV.Infrastructure.Utils;
+using SQLSIVEV.Infrastructure.Sql;
+using SQLSIVEV.Infrastructure.Sql.Configuracion;
+using Apps_Regedit.Services;
 
 namespace Apps_Regedit.Views.Verificentros {
     public partial class Visual : UserControl {
         private Regedit regedit = new("VISUAL");
-
+        private const string UrlVisual = "http://192.168.16.233/ClickOnce/Visual/Apps_Visual.application";
         public Visual() {
             InitializeComponent();
             pnlFooter.BringToFront();
             
-            if (ucAcciones1 == null) {
-                Mostrar.Mensaje("Error", "ucAcciones1 ES NULL");
-                return;
-            }
             ucAcciones1.LeerClick += ucAcciones_LeerClick;
             ucAcciones1.GuardarClick += ucAcciones_GuardarClick;
             ucAcciones1.BuscarEstacionClick += ucAcciones_BuscarEstacionClick;
             ucAcciones1.BitacoraClick += ucAcciones_BitacoraClick;
+            ucAcciones1.AutoLogonClick += ucAcciones_AutoLogonClick;
         }
 
         #region Eventos de botones
+        #region AutoLogon
+        private void ucAcciones_AutoLogonClick(object? sender, EventArgs e) {
+            ConfigurarAutoLogon();
+        }
+        private void ConfigurarAutoLogon() {
+            try {
+                WindowsAutoLogon.Configurar(ucEstacion1.Usuario, ucEstacion1.PasswordUsuario);
+                SivevLogger.Information($"AutoLogon configurado correctamente para {ucEstacion1.Usuario}.", SivevOrigen.Configurador);
+                Mostrar.Mensaje("AutoLogon", "AutoLogon configurado correctamente.");
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al configurar AutoLogon: {ex.Message}", SivevOrigen.Configurador);
+                Mostrar.Mensaje("Error", $"Ocurrió un error al configurar el AutoLogon.\n\n{ex.Message}");
+            }
+        }
+        #endregion
         #region Leer Registro
         private void ucAcciones_LeerClick(object? sender, EventArgs e) {
             LeerConfiguracion();
@@ -66,10 +82,12 @@ namespace Apps_Regedit.Views.Verificentros {
             ucEstacion1.Usuario = visual.dvar10;
             ucEstacion1.OpcionMenu = visual.dvar8.ToString();
             ucEstacion1.Estacion = visual.dvar15.ToString().ToUpper();
-            ucEstacion1.Centro = visual.dvar12.ToString();
+            ucEstacion1.CentroId = visual.dvar12.ToString();
+            ucEstacion1.Centro = visual.dvar30;
             ucEstacion1.Log = visual.dvar26;
 
             ucEstacion1.SoloLectura = true;
+
         }
         #endregion
         #endregion
@@ -85,10 +103,76 @@ namespace Apps_Regedit.Views.Verificentros {
 
         #region Probar Conexion
         private async void ucAcciones_BuscarEstacionClick(object? sender, EventArgs e) {
-            await ProbarConexionAsync();
+            await BuscarEstacionAsync();
         }
-        private async Task ProbarConexionAsync() {
+        private async Task BuscarEstacionAsync() {
+            string servidor = ucDataBase1.Server.Trim();
+            string ip = ucEstacion1.IP.Trim();
 
+            if (string.IsNullOrWhiteSpace(servidor) ||
+                servidor.Equals("SIVSRV", StringComparison.OrdinalIgnoreCase)) {
+                Mostrar.Mensaje("Error", "El campo Servidor no puede estar vacío.");
+
+                ucDataBase1.Server = Red.ObtenerIP192ServerPrincipal();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(ip)) {
+                Mostrar.Mensaje("Error", "La IP de la estación no puede estar vacía.");
+                return;
+            }
+
+            try {
+
+                ucAcciones1.BuscarEstacionHabilitado = false;
+                ucAcciones1.TextoBuscarEstacion = "Buscando...";
+                Mostrar.Mensaje("Buscando estación", $"Se está buscando la estación con IP {ip} en el servidor {servidor}. Esto puede tardar unos segundos...");
+                var visual = await Task.Run(() => BuscarEstacion(servidor, ip));
+                Mostrar.Mensaje("Estación encontrada", $"Se encontró la estación con IP {ip} en el servidor {servidor}.\n\nCentro: {visual.dvar30}\nEstación: {visual.dvar15}\nUsuario: {visual.dvar10}");
+                CargarValoresFormulario(visual);
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al buscar la estación {ip}. {ex.Message}", SivevOrigen.Configurador);
+                Mostrar.Mensaje("Error",$"No fue posible obtener la configuración de la estación.\n\n{ex.Message}");
+            } finally {
+
+                ucAcciones1.BuscarEstacionHabilitado = true;
+                ucAcciones1.TextoBuscarEstacion = "Buscar estación";
+            }
+        }
+
+        private async Task<VisualRegistroWindows> BuscarEstacion(string servidor, string ip) {
+
+            cnx conexionInicial = new cnx {
+                Servidor = servidor,
+                BDD = "SIVEV",
+                User = "SivevCentros",
+                Pass = "CentrosSivev",
+                AppName = "SivAppVfcRegistro",
+            };
+
+            var repo = new SivevRepository();
+            var r = await repo.ObtenerEstacionPorIpAsync(ip: ip, conf: conexionInicial, aplicacionId: 48);
+
+            if (r == null)
+                throw new InvalidOperationException($"No se encontró una estación activa para la IP {ip}.");
+
+            char ultimoDigito = ip.Last(char.IsDigit);
+
+            return new VisualRegistroWindows {
+                dvar1 = conexionInicial.Servidor,
+                dvar2 = conexionInicial.BDD,
+                dvar3 = conexionInicial.User,
+                dvar4 = conexionInicial.Pass,
+                dvar5 = r.Aplicacion,
+                dvar6 = "RollSivev",
+                dvar7 = Guid.Parse("53CE7B6E-1426-403A-857E-A890BB63BFE6"),
+                dvar8 = 151,
+                dvar10 = $"Linea0{ultimoDigito}Visual",
+                dvar11 = ip,
+                dvar12 = r.CentroId,
+                dvar15 = r.EstacionId,
+                dvar30 = r.Centro,
+            };
         }
         #endregion
 
@@ -141,8 +225,33 @@ namespace Apps_Regedit.Views.Verificentros {
 
         #endregion
 
+        #region Activador de directivas de seguridad
+        
+        private void VerificarActivador() {
+            try {
+                var activador = new ActivadorBatCreator("http://192.168.16.233/ClickOnce/Visual/Apps_Visual.application", "DPDevTS.bat");
+
+                if (activador.Exists())
+                    return;
+
+                BatCreationResult resultado = activador.CreateOrUpdate();
+
+                if (!resultado.Success) {
+                    SivevLogger.Error($"No fue posible crear el activador de Visual: {resultado.Message}", SivevOrigen.Configurador);
+                    Mostrar.Mensaje("Activador",  resultado.Message);
+                    return;
+                }
+                SivevLogger.Information($"Activador de Visual creado en {resultado.FilePath}.",SivevOrigen.Configurador);
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al verificar el activador de Visual: {ex.Message}", SivevOrigen.Configurador);
+            }
+        }
+        #endregion
+
+
         private void Visual_Load(object sender, EventArgs e) {
             ActualizarEstadoBitacora();
+            VerificarActivador();
         }
     }
 }

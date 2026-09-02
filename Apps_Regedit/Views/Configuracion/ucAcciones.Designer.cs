@@ -26,6 +26,7 @@
             flpBotones = new FlowLayoutPanel();
             btnGuardar = new Button();
             btnLeer = new Button();
+            btnAutoLogon = new Button();
             btnBuscarEstacion = new Button();
             btnBitacora = new Button();
             flpBotones.SuspendLayout();
@@ -35,6 +36,7 @@
             // 
             flpBotones.Controls.Add(btnGuardar);
             flpBotones.Controls.Add(btnLeer);
+            flpBotones.Controls.Add(btnAutoLogon);
             flpBotones.Controls.Add(btnBuscarEstacion);
             flpBotones.Controls.Add(btnBitacora);
             flpBotones.Dock = DockStyle.Fill;
@@ -76,13 +78,26 @@
             btnLeer.Text = "Leer";
             btnLeer.UseVisualStyleBackColor = false;
             // 
+            // btnAutoLogon
+            // 
+            btnAutoLogon.BackColor = Color.White;
+            btnAutoLogon.FlatAppearance.BorderColor = Color.FromArgb(210, 210, 210);
+            btnAutoLogon.FlatStyle = FlatStyle.Flat;
+            btnAutoLogon.ForeColor = Color.FromArgb(45, 55, 65);
+            btnAutoLogon.Location = new Point(495, 7);
+            btnAutoLogon.Name = "btnAutoLogon";
+            btnAutoLogon.Size = new Size(120, 34);
+            btnAutoLogon.TabIndex = 4;
+            btnAutoLogon.Text = "Auto Logon";
+            btnAutoLogon.UseVisualStyleBackColor = false;
+            // 
             // btnBuscarEstacion
             // 
             btnBuscarEstacion.BackColor = Color.White;
             btnBuscarEstacion.FlatAppearance.BorderColor = Color.FromArgb(210, 210, 210);
             btnBuscarEstacion.FlatStyle = FlatStyle.Flat;
             btnBuscarEstacion.ForeColor = Color.FromArgb(45, 55, 65);
-            btnBuscarEstacion.Location = new Point(469, 8);
+            btnBuscarEstacion.Location = new Point(343, 8);
             btnBuscarEstacion.Margin = new Padding(4);
             btnBuscarEstacion.Name = "btnBuscarEstacion";
             btnBuscarEstacion.Size = new Size(145, 34);
@@ -96,7 +111,7 @@
             btnBitacora.FlatAppearance.BorderColor = Color.FromArgb(210, 210, 210);
             btnBitacora.FlatStyle = FlatStyle.Flat;
             btnBitacora.ForeColor = Color.FromArgb(45, 55, 65);
-            btnBitacora.Location = new Point(292, 8);
+            btnBitacora.Location = new Point(166, 8);
             btnBitacora.Margin = new Padding(4);
             btnBitacora.Name = "btnBitacora";
             btnBitacora.Size = new Size(169, 34);
@@ -124,5 +139,6 @@
         private Button btnLeer;
         private Button btnBuscarEstacion;
         private Button btnBitacora;
+        private Button btnAutoLogon;
     }
 }

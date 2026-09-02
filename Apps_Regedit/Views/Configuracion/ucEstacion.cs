@@ -71,7 +71,7 @@ namespace Apps_Regedit.Views.Configuracion {
                 txtIp.ReadOnly = value;
                 txtUsuarioDeLinea.ReadOnly = value;
                 //txtPasswordAutoLogin.ReadOnly = value;
-                cbActivarLog.Enabled = !value;
+                //cbActivarLog.Enabled = !value;
             }
         }
         #endregion

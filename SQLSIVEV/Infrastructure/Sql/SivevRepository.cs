@@ -3,6 +3,7 @@ using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
 using SQLSIVEV.Infrastructure.Services;
+using SQLSIVEV.Infrastructure.Sql.Configuracion;
 using SQLSIVEV.Infrastructure.Utils;
 using System.Data;
 using System.Linq.Expressions;
@@ -991,5 +992,61 @@ namespace SQLSIVEV.Infrastructure.Sql {
             return Convert.ToString(reader.GetValue(ordinal)) ?? string.Empty;
         }
         //*/
+
+        public async Task<EstacionEncontrada> ObtenerEstacionPorIpAsync(string ip, cnx conf, int aplicacionId) {
+            if (string.IsNullOrWhiteSpace(ip))
+                throw new ArgumentException("La IP no puede venir vacía.", nameof(ip));
+
+            if (!System.Net.IPAddress.TryParse(ip, out _))
+                throw new InvalidOperationException("La IP no tiene un formato válido.");
+
+            string[] partesIp = ip.Split('.');
+            int ultimoOctetoIp = int.Parse(partesIp[3]);
+
+            string cadenaConexion =
+                $"Server={conf.Servidor};" +
+                $"Database={conf.BDD};" +
+                $"User Id={conf.User};" +
+                $"Password={conf.Pass};" +
+                $"Application Name={conf.AppName};" +
+                $"TrustServerCertificate=True;";
+
+            using var conn = new SqlConnection(cadenaConexion);
+            await conn.OpenAsync();
+            var resultado = new EstacionEncontrada();
+
+            // Estación
+            using (var cmd = new SqlCommand(@"
+                SELECT EstacionId, E.VerificentroId AS CentroId, CVV.NombreDominio AS Centro
+                FROM Sivev.Equipos.Estaciones E
+                    JOIN Sivev.Verificentros.Verificentros  CVV ON CVV.VerificentroId = E.VerificentroId
+                WHERE TipoEstacionId = @TipoEstacionId
+                     AND E.Activo = 1;", conn)) {
+
+                cmd.Parameters.Add("@TipoEstacionId", SqlDbType.Int).Value = ultimoOctetoIp;
+
+                using var rd = await cmd.ExecuteReaderAsync();
+
+                if (!await rd.ReadAsync())
+                    throw new InvalidOperationException($"No se encontró una estación activa para la IP {ip}.");
+
+                resultado.EstacionId = rd.GetGuid(rd.GetOrdinal("EstacionId"));
+                resultado.CentroId = Convert.ToInt16(rd["CentroId"]);
+                resultado.Centro = Convert.ToString(rd["Centro"]) ?? string.Empty;
+            }
+
+            // Aplicación
+            using (var cmd = new SqlCommand(@"
+                SELECT Aplicacion
+                FROM Sivev.Aplicaciones.Aplicaciones
+                WHERE AplicacionId = @AplicacionId;", conn)) {
+
+                cmd.Parameters.Add("@AplicacionId", SqlDbType.Int).Value = aplicacionId;
+                object? aplicacion =  await cmd.ExecuteScalarAsync();
+                resultado.Aplicacion = aplicacion?.ToString() ?? string.Empty;
+            }
+
+            return resultado;
+        }
     }
 }

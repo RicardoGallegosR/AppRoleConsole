@@ -9,6 +9,7 @@ namespace SQLSIVEV.Infrastructure.Utils {
         public const string Emisiones = "EMISIONES";
         public const string Administrativa = "ADMINISTRATIVA";
         public const string Configurador = "CONFIGURADOR";
+        public const string HerramientasSivev = "HERRAMIENTAS-SIVEV";
     }
 
     public static class SivevLogger {

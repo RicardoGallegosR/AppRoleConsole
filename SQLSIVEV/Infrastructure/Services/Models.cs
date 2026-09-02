@@ -43,6 +43,7 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string dvar27 { get; set; } = "";
         public string dvar28 { get; set; } = "";
         public string dvar29 { get; set; } = "";
+        public string dvar30 { get; set; } = "";
 
     }
 
@@ -66,17 +67,9 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string dvar17 { get; set; } = string.Empty;
 
         public string dvar18 { get; set; } = string.Empty;
-        public string dvar19 { get; set; } = string.Empty;
-        public Guid dvar20 { get; set; } = Guid.Empty;
-        public Guid dvar21 { get; set; } = Guid.Empty;
-        public bool dvar22 { get; set; } = false;
-        public bool dvar23 { get; set; } = false;
-        public bool dvar24 { get; set; } = false;
-        public bool dvar25 { get; set; } = false;
-        public bool dvar26 { get; set; } = false;
-        public string dvar27 { get; set; } = "";
-        public string dvar28 { get; set; } = "";
-        public string dvar29 { get; set; } = "";
+        public bool dvar19 { get; set; } = false;
+        public string dvar20 { get; set; } = string.Empty;
+
 
     }
     public sealed class DevUDSCore {

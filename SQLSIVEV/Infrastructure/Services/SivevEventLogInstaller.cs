@@ -12,7 +12,8 @@ namespace SQLSIVEV.Infrastructure.Services {
             "PROVEEDOR",
             "EMISIONES",
             "ADMINISTRATIVA",
-            "CONFIGURADOR"
+            "CONFIGURADOR",
+            "HERRAMIENTAS-SIVEV"
         };
 
         public static bool TodasLasFuentesExisten() {

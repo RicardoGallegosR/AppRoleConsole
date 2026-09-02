@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace SQLSIVEV.Comun.Configuracion {
     public class ConfiguracionCaptura {
-        private const string Origen = "CAPTURA";
-        Regedit regedit = new Regedit(origen: Origen);
+        Regedit regedit = new Regedit(origen: SivevOrigen.Captura);
 
         public  CapturaRegistroWindows Cargar() {
             var lector = new GuardarWinRarConf();
@@ -34,7 +33,7 @@ namespace SQLSIVEV.Comun.Configuracion {
                 dvar13 = regedit.Leer("ServidorVersionesControlador"),
                 dvar14 = regedit.Leer("url"),
                 dvar15 = regedit.LeerGuid("EstacionId"),
-                dvar26 = regedit.LeerBool("v26")
+                dvar19 = regedit.LeerBool("v19")
             };
             RegistrarConfiguracion(capturaCore);
             return capturaCore;
@@ -67,7 +66,32 @@ namespace SQLSIVEV.Comun.Configuracion {
                 $"|| APPROLE: {config.dvar6}, " +
                 $"|| OpcionMenu: {config.dvar8}, " +
                 $"|| EstacionId: {config.dvar15}"
-            , origen: Origen);
+            , origen: SivevOrigen.Captura);
+        }
+
+
+        public static bool ValidarAccesoRuta(string ruta, out string mensaje) {
+            try {
+                if (!Directory.Exists(ruta)) {
+                    mensaje = $"No fue posible acceder a la ruta:\n{ruta}";
+                    return false;
+                }
+
+                // Forzar realmente una enumeración para comprobar acceso.
+                _ = Directory
+                    .EnumerateFileSystemEntries(ruta)
+                    .Take(1)
+                    .ToList();
+
+                mensaje = "Acceso correcto.";
+                return true;
+            } catch (UnauthorizedAccessException) {
+                mensaje = $"El usuario actual no tiene permisos sobre:\n{ruta}";
+                return false;
+            } catch (Exception ex) {
+                mensaje = $"No fue posible validar la ruta.\n\n{ex.Message}";
+                return false;
+            }
         }
     }
 }

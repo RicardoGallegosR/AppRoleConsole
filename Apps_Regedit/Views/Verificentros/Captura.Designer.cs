@@ -27,7 +27,7 @@
             groupBox1 = new GroupBox();
             pnlValoresUnicos = new Panel();
             tlpDatos = new TableLayoutPanel();
-            txtServer = new TextBox();
+            txtRutaEscaneos = new TextBox();
             lblRuta = new Label();
             tableLayoutPanel1 = new TableLayoutPanel();
             grpBaseDatos = new GroupBox();
@@ -95,7 +95,7 @@
             tlpDatos.ColumnCount = 2;
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
-            tlpDatos.Controls.Add(txtServer, 1, 0);
+            tlpDatos.Controls.Add(txtRutaEscaneos, 1, 0);
             tlpDatos.Controls.Add(lblRuta, 0, 0);
             tlpDatos.Dock = DockStyle.Fill;
             tlpDatos.Font = new Font("Segoe UI", 12F);
@@ -114,14 +114,14 @@
             tlpDatos.Size = new Size(944, 185);
             tlpDatos.TabIndex = 1;
             // 
-            // txtServer
+            // txtRutaEscaneos
             // 
-            txtServer.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtServer.Location = new Point(294, 78);
-            txtServer.Margin = new Padding(6);
-            txtServer.Name = "txtServer";
-            txtServer.Size = new Size(630, 29);
-            txtServer.TabIndex = 0;
+            txtRutaEscaneos.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtRutaEscaneos.Location = new Point(294, 78);
+            txtRutaEscaneos.Margin = new Padding(6);
+            txtRutaEscaneos.Name = "txtRutaEscaneos";
+            txtRutaEscaneos.Size = new Size(630, 29);
+            txtRutaEscaneos.TabIndex = 0;
             // 
             // lblRuta
             // 
@@ -242,14 +242,21 @@
             // 
             // ucAcciones1
             // 
+            ucAcciones1.AutoLogonHabilitado = true;
+            ucAcciones1.BitacoraHabilitada = true;
+            ucAcciones1.BuscarEstacionHabilitado = true;
             ucAcciones1.Dock = DockStyle.Fill;
             ucAcciones1.Font = new Font("Segoe UI", 12F);
+            ucAcciones1.GuardarHabilitado = true;
             ucAcciones1.Location = new Point(8, 8);
             ucAcciones1.Margin = new Padding(0);
             ucAcciones1.Name = "ucAcciones1";
             ucAcciones1.Padding = new Padding(4);
             ucAcciones1.Size = new Size(948, 59);
             ucAcciones1.TabIndex = 0;
+            ucAcciones1.TextoAutoLogon = "Auto Logon";
+            ucAcciones1.TextoBitacora = "Bitácora ";
+            ucAcciones1.TextoBuscarEstacion = "Buscar estación";
             // 
             // Captura
             // 
@@ -289,7 +296,7 @@
         private GroupBox groupBox1;
         private Panel pnlValoresUnicos;
         private TableLayoutPanel tlpDatos;
-        private TextBox txtServer;
+        private TextBox txtRutaEscaneos;
         private Label lblRuta;
     }
 }

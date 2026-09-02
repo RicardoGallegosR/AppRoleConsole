@@ -15,6 +15,7 @@ namespace Apps_Regedit.Views.Configuracion {
         public event EventHandler? LeerClick;
         public event EventHandler? BuscarEstacionClick;
         public event EventHandler? BitacoraClick;
+        public event EventHandler? AutoLogonClick;
         #endregion
 
         #region Propiedades
@@ -27,6 +28,29 @@ namespace Apps_Regedit.Views.Configuracion {
             get => btnBitacora.Enabled;
             set => btnBitacora.Enabled = value;
         }
+
+        public string TextoBuscarEstacion {
+            get => btnBuscarEstacion.Text;
+            set => btnBuscarEstacion.Text = value;
+        }
+
+        public bool BuscarEstacionHabilitado {
+            get => btnBuscarEstacion.Enabled;
+            set => btnBuscarEstacion.Enabled = value;
+        }
+        public bool GuardarHabilitado {
+            get => btnGuardar.Enabled;
+            set => btnGuardar.Enabled = value;
+        }
+        public bool AutoLogonHabilitado {
+            get => btnAutoLogon.Enabled;
+            set => btnAutoLogon.Enabled = value;
+        }
+
+        public string TextoAutoLogon {
+            get => btnAutoLogon.Text;
+            set => btnAutoLogon.Text = value;
+        }
         #endregion
         #region Constructor
         public ucAcciones() {
@@ -36,6 +60,7 @@ namespace Apps_Regedit.Views.Configuracion {
             btnLeer.Click += btnLeer_Click;
             btnBuscarEstacion.Click += btnBuscarEstacion_Click;
             btnBitacora.Click += btnBitacora_Click;
+            btnAutoLogon.Click += btnAutoLogon_Click;
         }
         #endregion
 
@@ -48,6 +73,8 @@ namespace Apps_Regedit.Views.Configuracion {
             BuscarEstacionClick?.Invoke(this, e);
         private void btnBitacora_Click(object sender, EventArgs e) => 
             BitacoraClick?.Invoke(this, e);
+        private void btnAutoLogon_Click(object sender, EventArgs e) => 
+            AutoLogonClick?.Invoke(this, e);
         #endregion
     }
 }
