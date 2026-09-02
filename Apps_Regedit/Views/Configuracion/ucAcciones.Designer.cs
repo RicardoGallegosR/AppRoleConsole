@@ -26,7 +26,7 @@
             flpBotones = new FlowLayoutPanel();
             btnGuardar = new Button();
             btnLeer = new Button();
-            btnProbarConexion = new Button();
+            btnBuscarEstacion = new Button();
             btnBitacora = new Button();
             flpBotones.SuspendLayout();
             SuspendLayout();
@@ -35,7 +35,7 @@
             // 
             flpBotones.Controls.Add(btnGuardar);
             flpBotones.Controls.Add(btnLeer);
-            flpBotones.Controls.Add(btnProbarConexion);
+            flpBotones.Controls.Add(btnBuscarEstacion);
             flpBotones.Controls.Add(btnBitacora);
             flpBotones.Dock = DockStyle.Fill;
             flpBotones.FlowDirection = FlowDirection.RightToLeft;
@@ -76,19 +76,19 @@
             btnLeer.Text = "Leer";
             btnLeer.UseVisualStyleBackColor = false;
             // 
-            // btnProbarConexion
+            // btnBuscarEstacion
             // 
-            btnProbarConexion.BackColor = Color.White;
-            btnProbarConexion.FlatAppearance.BorderColor = Color.FromArgb(210, 210, 210);
-            btnProbarConexion.FlatStyle = FlatStyle.Flat;
-            btnProbarConexion.ForeColor = Color.FromArgb(45, 55, 65);
-            btnProbarConexion.Location = new Point(469, 8);
-            btnProbarConexion.Margin = new Padding(4);
-            btnProbarConexion.Name = "btnProbarConexion";
-            btnProbarConexion.Size = new Size(145, 34);
-            btnProbarConexion.TabIndex = 2;
-            btnProbarConexion.Text = "Probar conexión";
-            btnProbarConexion.UseVisualStyleBackColor = false;
+            btnBuscarEstacion.BackColor = Color.White;
+            btnBuscarEstacion.FlatAppearance.BorderColor = Color.FromArgb(210, 210, 210);
+            btnBuscarEstacion.FlatStyle = FlatStyle.Flat;
+            btnBuscarEstacion.ForeColor = Color.FromArgb(45, 55, 65);
+            btnBuscarEstacion.Location = new Point(469, 8);
+            btnBuscarEstacion.Margin = new Padding(4);
+            btnBuscarEstacion.Name = "btnBuscarEstacion";
+            btnBuscarEstacion.Size = new Size(145, 34);
+            btnBuscarEstacion.TabIndex = 2;
+            btnBuscarEstacion.Text = "Buscar estación";
+            btnBuscarEstacion.UseVisualStyleBackColor = false;
             // 
             // btnBitacora
             // 
@@ -122,7 +122,7 @@
         private FlowLayoutPanel flpBotones;
         private Button btnGuardar;
         private Button btnLeer;
-        private Button btnProbarConexion;
+        private Button btnBuscarEstacion;
         private Button btnBitacora;
     }
 }

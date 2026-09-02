@@ -13,7 +13,7 @@ namespace Apps_Regedit.Views.Configuracion {
         #region Eventos
         public event EventHandler? GuardarClick;
         public event EventHandler? LeerClick;
-        public event EventHandler? ProbarConexionClick;
+        public event EventHandler? BuscarEstacionClick;
         public event EventHandler? BitacoraClick;
         #endregion
 
@@ -34,16 +34,20 @@ namespace Apps_Regedit.Views.Configuracion {
 
             btnGuardar.Click += btnGuardar_Click;
             btnLeer.Click += btnLeer_Click;
-            btnProbarConexion.Click += btnProbarConexion_Click;
+            btnBuscarEstacion.Click += btnBuscarEstacion_Click;
             btnBitacora.Click += btnBitacora_Click;
         }
         #endregion
 
         #region Métodos
-        private void btnGuardar_Click(object sender, EventArgs e) =>  GuardarClick?.Invoke(this, e);
-        private void btnLeer_Click(object sender, EventArgs e) => LeerClick?.Invoke(this, e);
-        private void btnProbarConexion_Click(object sender, EventArgs e) => ProbarConexionClick?.Invoke(this, e);
-        private void btnBitacora_Click(object sender, EventArgs e) => BitacoraClick?.Invoke(this, e);
+        private void btnGuardar_Click(object sender, EventArgs e) => 
+            GuardarClick?.Invoke(this, e);
+        private void btnLeer_Click(object sender, EventArgs e) => 
+            LeerClick?.Invoke(this, e);
+        private void btnBuscarEstacion_Click(object sender, EventArgs e) => 
+            BuscarEstacionClick?.Invoke(this, e);
+        private void btnBitacora_Click(object sender, EventArgs e) => 
+            BitacoraClick?.Invoke(this, e);
         #endregion
     }
 }

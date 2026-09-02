@@ -22,7 +22,7 @@ namespace Apps_Regedit.Views.Verificentros {
 
             ucAcciones1.LeerClick += ucAcciones_LeerClick;
             ucAcciones1.GuardarClick += ucAcciones_GuardarClick;
-            ucAcciones1.ProbarConexionClick += ucAcciones_ProbarConexionClick;
+            ucAcciones1.BuscarEstacionClick += ucAcciones_BuscarEstacionClick;
             ucAcciones1.BitacoraClick += ucAcciones_BitacoraClick;
         }
         #region Eventos de botones
@@ -49,7 +49,7 @@ namespace Apps_Regedit.Views.Verificentros {
 
 
         #region Probar Conexión
-        private async void ucAcciones_ProbarConexionClick(object? sender, EventArgs e) {
+        private async void ucAcciones_BuscarEstacionClick(object? sender, EventArgs e) {
             await ProbarConexionAsync();
         }
         private async Task ProbarConexionAsync() {

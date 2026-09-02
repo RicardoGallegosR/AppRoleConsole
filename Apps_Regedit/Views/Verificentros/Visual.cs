@@ -10,10 +10,14 @@ namespace Apps_Regedit.Views.Verificentros {
         public Visual() {
             InitializeComponent();
             pnlFooter.BringToFront();
-
+            
+            if (ucAcciones1 == null) {
+                Mostrar.Mensaje("Error", "ucAcciones1 ES NULL");
+                return;
+            }
             ucAcciones1.LeerClick += ucAcciones_LeerClick;
             ucAcciones1.GuardarClick += ucAcciones_GuardarClick;
-            ucAcciones1.ProbarConexionClick += ucAcciones_ProbarConexionClick;
+            ucAcciones1.BuscarEstacionClick += ucAcciones_BuscarEstacionClick;
             ucAcciones1.BitacoraClick += ucAcciones_BitacoraClick;
         }
 
@@ -80,7 +84,7 @@ namespace Apps_Regedit.Views.Verificentros {
         #endregion
 
         #region Probar Conexion
-        private async void ucAcciones_ProbarConexionClick(object? sender, EventArgs e) {
+        private async void ucAcciones_BuscarEstacionClick(object? sender, EventArgs e) {
             await ProbarConexionAsync();
         }
         private async Task ProbarConexionAsync() {
@@ -91,19 +95,54 @@ namespace Apps_Regedit.Views.Verificentros {
 
         #region Bitacora
         private void ucAcciones_BitacoraClick(object? sender, EventArgs e) {
-            AbrirBitacora();
+            CrearBitacoras();
         }
-        private void AbrirBitacora() {
+        private void CrearBitacoras() {
 
+            // Bloquear inmediatamente para evitar doble clic
+            ucAcciones1.BitacoraHabilitada = false;
+            ucAcciones1.TextoBitacora = "Creando...";
+
+            try {
+                bool resultado =  SivevEventLogInstaller.CrearFuentes(out string mensaje);
+
+                if (!resultado) {
+                    Mostrar.Mensaje("Error", mensaje);
+                    ActualizarEstadoBitacora();
+                    return;
+                }
+
+                Mostrar.Mensaje("Bitácoras", mensaje);
+                ActualizarEstadoBitacora();
+
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error", $"No se pudieron crear las bitácoras.\n\n{ex.Message}");
+                ActualizarEstadoBitacora();
+            }
+        }
+        private void ActualizarEstadoBitacora() {
+            try {
+                if (SivevEventLogInstaller.TodasLasFuentesExisten()) {
+                    ucAcciones1.TextoBitacora = "Bitácoras creadas";
+                    ucAcciones1.BitacoraHabilitada = false;
+                    return;
+                }
+
+                List<string> faltantes = SivevEventLogInstaller.ObtenerFuentesFaltantes();
+                ucAcciones1.TextoBitacora = $"Crear bitácoras ({faltantes.Count})";
+                ucAcciones1.BitacoraHabilitada = true;
+
+            } catch {
+                ucAcciones1.TextoBitacora = "Crear bitácoras";
+                ucAcciones1.BitacoraHabilitada = true;
+            }
         }
         #endregion
 
-
-
-
-
-
         #endregion
 
+        private void Visual_Load(object sender, EventArgs e) {
+            ActualizarEstadoBitacora();
+        }
     }
 }

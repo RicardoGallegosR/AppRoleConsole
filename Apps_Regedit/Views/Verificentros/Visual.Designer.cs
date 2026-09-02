@@ -116,9 +116,9 @@
             // 
             ucDataBase1.Dock = DockStyle.Fill;
             ucDataBase1.Location = new Point(2, 22);
-            ucDataBase1.Margin = new Padding(4);
             ucDataBase1.Name = "ucDataBase1";
             ucDataBase1.Size = new Size(411, 314);
+            ucDataBase1.SoloLectura = false;
             ucDataBase1.TabIndex = 0;
             // 
             // grpEstacion
@@ -149,8 +149,10 @@
             // 
             ucEstacion1.Dock = DockStyle.Top;
             ucEstacion1.Location = new Point(0, 0);
+            ucEstacion1.Margin = new Padding(4, 4, 4, 4);
             ucEstacion1.Name = "ucEstacion1";
-            ucEstacion1.Size = new Size(392, 400);
+            ucEstacion1.Size = new Size(392, 442);
+            ucEstacion1.SoloLectura = false;
             ucEstacion1.TabIndex = 0;
             // 
             // pnlFooter
@@ -166,14 +168,15 @@
             // 
             // ucAcciones1
             // 
+            ucAcciones1.BitacoraHabilitada = true;
             ucAcciones1.Dock = DockStyle.Fill;
             ucAcciones1.Font = new Font("Segoe UI", 12F);
             ucAcciones1.Location = new Point(8, 8);
             ucAcciones1.Margin = new Padding(0);
             ucAcciones1.Name = "ucAcciones1";
-            ucAcciones1.Padding = new Padding(4);
             ucAcciones1.Size = new Size(840, 59);
             ucAcciones1.TabIndex = 0;
+            ucAcciones1.TextoBitacora = "Bitácora ";
             // 
             // pnlHeader
             // 
@@ -203,6 +206,7 @@
             Controls.Add(pnlPrincipal);
             Name = "Visual";
             Size = new Size(856, 621);
+            Load += Visual_Load;
             pnlPrincipal.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
@@ -220,14 +224,14 @@
         private Panel pnlHeader;
         private Label lblTituloConfiguracion;
         private Panel pnlFooter;
-        private Configuracion.ucAcciones ucAcciones1;
         private TableLayoutPanel tableLayoutPanel1;
         private GroupBox grpBaseDatos;
-        private Configuracion.ucDataBase ucDataBase1;
         private GroupBox grpEstacion;
         private Panel pnlScrollEstacion;
-        private Configuracion.ucEstacion ucEstacion1;
         private GroupBox groupBox1;
         private Panel pnlValoresUnicos;
+        private Configuracion.ucDataBase ucDataBase1;
+        private Configuracion.ucEstacion ucEstacion1;
+        private Configuracion.ucAcciones ucAcciones1;
     }
 }

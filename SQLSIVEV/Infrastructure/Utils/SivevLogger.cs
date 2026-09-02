@@ -2,10 +2,19 @@
 using System.Diagnostics.Tracing;
 
 namespace SQLSIVEV.Infrastructure.Utils {
+    public static class SivevOrigen {
+        public const string Visual = "VISUAL";
+        public const string Captura = "CAPTURA";
+        public const string Proveedor = "PROVEEDOR";
+        public const string Emisiones = "EMISIONES";
+        public const string Administrativa = "ADMINISTRATIVA";
+        public const string Configurador = "CONFIGURADOR";
+    }
 
     public static class SivevLogger {
         private const string DefaultEventSource = "VISUAL";
         private const string EventLogName = "SIVEV";
+
 
         public static bool InicializarOrigen(string origen = DefaultEventSource) {
             try {
