@@ -174,17 +174,6 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             return int.TryParse(numeros, out int n) ? n : int.MaxValue;
         }
 
-        private static string LimpiarTextoLog(string texto) {
-            if (string.IsNullOrWhiteSpace(texto))
-                return "(sin respuesta)";
-
-            return texto.Replace("\r", " ")
-                        .Replace("\n", " ")
-                        .Trim();
-        }
-
-
-
         #endregion
 
 

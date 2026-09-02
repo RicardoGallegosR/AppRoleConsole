@@ -5,7 +5,56 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SQLSIVEV.Infrastructure.Devices.Obd {
+/*
+                     Elm327.cs
+                        │
+              enviar/recibir bytes
+                        │
+                 UdsTransportElm
+                        │
+             ┌──────────┴──────────┐
+             │                     │
+          UDS.cs                OBDonUDS
+     ISO 14229 genérico          J1979-2
+             │                     │
+      10 / 22 / 3E / 19       F501 / DTC...
+ 
+
+
+
+
+22 → ReadDataByIdentifier
+62 → Positive Response de 22
+
+19 → ReadDTCInformation
+59 → Positive Response de 19
+
+10 → DiagnosticSessionControl
+50 → Positive Response de 10
+
+3E → TesterPresent
+7E → Positive Response de 3E
+
+7F → Negative Response
+
+
+START
+  │
+  ├─ Functional request: 01 00
+  │       │
+  │       └─ hay respuesta positiva → SAE J1979 clásico
+  │
+  └─ si NO:
+          Functional request: 22 F8 10
+                  │
+                  └─ respuesta positiva con protocol ID != 0
+                              ↓
+                         OBDonUDS
+
+ */
+
+
+namespace SQLSIVEV.Infrastructure.Devices.UDS {
     #region Referencia de bits en F401
     public sealed class UdsMonitorStatusF401 {
         public byte RawA { get; set; }
@@ -153,11 +202,8 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
         private string SendAt(string command) {
             _logger?.Invoke($"UDS AT TX {command}");
-
             string raw = _send(command);
-
             _logger?.Invoke($"UDS AT RX {raw}");
-
             return raw;
         }
 
@@ -197,9 +243,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             }
 
             byte expectedPositiveService = (byte)(requestService + 0x40);
-
             int positiveIndex = bytes.FindIndex(b => b == expectedPositiveService);
-
             if (positiveIndex < 0) {
                 return UdsResponse.Fail(
                     raw,
@@ -208,17 +252,15 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
             }
 
             var data = bytes.Skip(positiveIndex + 1).ToList();
-
             return UdsResponse.Positive(raw, expectedPositiveService, data);
         }
+
         public UdsMonitorStatusF401? ReadMonitorStatusF401() {
             var response = ReadDataByIdentifier(0xF401);
-
             if (!response.Success) {
                 _logger?.Invoke($"UDS F401 ERROR: {response.ErrorMessage}");
                 return null;
             }
-
             return DecodeMonitorStatusF401(response.DataBytes);
         }
 
@@ -245,8 +287,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
 
             bool compressionIgnition = GetBit(B, 3);
 
-            var result = new UdsMonitorStatusF401
-    {
+            var result = new UdsMonitorStatusF401 {
                 RawA = A,
                 RawB = B,
                 RawC = C,
@@ -333,60 +374,5 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
         }
     }
 
-    public sealed class UdsResponse {
-        public bool Success { get; private set; }
-        public bool IsNegativeResponse { get; private set; }
-
-        public string RawResponse { get; private set; } = string.Empty;
-        public string? ErrorMessage { get; private set; }
-
-        public byte? PositiveService { get; private set; }
-        public byte? NegativeOriginalService { get; private set; }
-        public byte? NegativeResponseCode { get; private set; }
-
-        public List<byte> DataBytes { get; private set; } = new();
-
-        public static UdsResponse Positive(string raw, byte positiveService, List<byte> data) {
-            return new UdsResponse {
-                Success = true,
-                IsNegativeResponse = false,
-                RawResponse = raw,
-                PositiveService = positiveService,
-                DataBytes = data ?? new List<byte>()
-            };
-        }
-
-        public static UdsResponse Negative(string raw, byte originalService, byte nrc, string description) {
-            return new UdsResponse {
-                Success = false,
-                IsNegativeResponse = true,
-                RawResponse = raw,
-                NegativeOriginalService = originalService,
-                NegativeResponseCode = nrc,
-                ErrorMessage = description
-            };
-        }
-
-        public static UdsResponse Fail(string raw, string error) {
-            return new UdsResponse {
-                Success = false,
-                IsNegativeResponse = false,
-                RawResponse = raw,
-                ErrorMessage = error
-            };
-        }
-
-        public override string ToString() {
-            if (Success) {
-                string data = string.Join(" ", DataBytes.Select(b => b.ToString("X2")));
-                return $"OK | Servicio positivo: {PositiveService:X2} | Data: {data}";
-            }
-
-            if (IsNegativeResponse) {
-                return $"NEGATIVA | Servicio: {NegativeOriginalService:X2} | NRC: {NegativeResponseCode:X2} | {ErrorMessage}";
-            }
-
-            return $"ERROR | {ErrorMessage}";
-        }
-    }
+    
 }

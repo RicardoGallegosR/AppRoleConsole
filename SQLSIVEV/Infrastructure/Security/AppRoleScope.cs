@@ -5,7 +5,6 @@ namespace SQLSIVEV.Infrastructure.Security {
     public sealed class AppRoleScope : IDisposable {
         private readonly SqlConnection _conn;
         private readonly byte[] _cookie;
-        private Guid _password;
 
         public AppRoleScope(SqlConnection conn, string role, string password) {
             _conn = conn ?? throw new ArgumentNullException(nameof(conn));

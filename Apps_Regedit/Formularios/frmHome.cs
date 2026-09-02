@@ -1,24 +1,20 @@
-﻿using FrmComun.Utils;
-using SQLSIVEV.Infrastructure.Utils;
+﻿using Apps_Regedit.Views;
+using FrmComun.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Apps_Regedit.Views.Verificentros;
 
-namespace Apps_Captura.Frm {
-    public partial class Home : Form {
-        private System.Windows.Forms.Timer _timerHora;
-        private string _versionTexto = "vDESCONOCIDA";
+namespace Apps_Regedit.Formularios {
+    public partial class frmHome : Form {
         private BarraLateral _barraLateral;
-        private readonly Dictionary<string, Button> _botonesVistas = new();
-
-        public Home() {
+        public frmHome() {
             InitializeComponent();
             _barraLateral = new BarraLateral(
                 flpVistasAbiertas,
@@ -28,8 +24,16 @@ namespace Apps_Captura.Frm {
                 _barraLateral.MostrarVista("Home", "Home", () => new Views.Home(), mostrarEnMenu: false);
             });
         }
-       
-        
+        #region Verificentros
+        private async void msCAPTURA_Click(object sender, EventArgs e) {
+            _barraLateral.MostrarVista("Captura", "Captura", () => new Captura());
+        }
+
+        private async void msVISUAL_Click(object sender, EventArgs e) {
+            _barraLateral.MostrarVista("Visual", "Visual", () => new Visual());
+        }
+        #endregion
+
+
     }
 }
-

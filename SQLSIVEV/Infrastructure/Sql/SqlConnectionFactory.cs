@@ -9,7 +9,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 InitialCatalog = db,
                 UserID = user,
                 Password = pass,
-                //IntegratedSecurity = true,
+                //IntegratedSecurity = true,  // true = Windows Auth, false = SQL Server Auth
                 Encrypt = false,
                 TrustServerCertificate = true,
                 ApplicationName = appName,
