@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>7.$([System.DateTime]::Now.ToString("yyMM")).$([System.DateTime]::Now.ToString("dd")).$([System.DateTime]::Now.ToString("HH"))</Version>
+	  <Version>7.$([System.DateTime]::Now.ToString("yy")).$([System.DateTime]::Now.ToString("MM")).$([System.DateTime]::Now.ToString("ddHH"))</Version>
 	  <FileVersion>$(Version)</FileVersion>
 	  <AssemblyVersion>7.0.0.0</AssemblyVersion>
 	  <InformationalVersion>$(Version)</InformationalVersion>

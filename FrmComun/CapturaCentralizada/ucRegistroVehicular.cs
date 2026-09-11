@@ -1,13 +1,5 @@
 ﻿using SQLSIVEV.Infrastructure.Sql.Vicente;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using FrmComun.Utils;
 
 namespace FrmComun.CapturaCentralizada {
     public partial class ucRegistroVehicular : UserControl {
@@ -28,6 +20,8 @@ namespace FrmComun.CapturaCentralizada {
             _centro = centro;
 
             InitializeComponent();
+            txtPlaca.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtPlaca, @"[^A-HJ-NPR-Z0-9]");
+            txtLinea.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtLinea, @"[^1-7]");
         }
     }
 }
