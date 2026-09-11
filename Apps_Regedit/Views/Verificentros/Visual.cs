@@ -9,8 +9,12 @@ using Apps_Regedit.Services;
 
 namespace Apps_Regedit.Views.Verificentros {
     public partial class Visual : UserControl {
-        private Regedit regedit = new("VISUAL");
+        private Regedit regedit;
+        private readonly CryptoHelper32 conf;
+        private readonly Encriptador encriptador;
+
         private const string UrlVisual = "http://192.168.16.233/ClickOnce/Visual/Apps_Visual.application";
+        
         public Visual() {
             InitializeComponent();
             pnlFooter.BringToFront();
@@ -20,6 +24,24 @@ namespace Apps_Regedit.Views.Verificentros {
             ucAcciones1.BuscarEstacionClick += ucAcciones_BuscarEstacionClick;
             ucAcciones1.BitacoraClick += ucAcciones_BitacoraClick;
             ucAcciones1.AutoLogonClick += ucAcciones_AutoLogonClick;
+
+            conf = new CryptoHelper32 {
+                Password = "DEFAULT_KEY",
+                SaltText = "DEFAULT_SALT",
+                Iterations = 100_000,
+                KeySizeBits = 256,
+                WinRarConfRegistryPath = @"SOFTWARE\WinRAR\Options"
+            };
+
+            encriptador = new Encriptador(
+                password: conf.Password,
+                saltText: conf.SaltText,
+                registryPath: @"SOFTWARE\VISUAL",
+                iterations: conf.Iterations,
+                keySizeBits: (short)conf.KeySizeBits
+            );
+
+            regedit = new Regedit("VISUAL", conf);
         }
 
         #region Eventos de botones
@@ -53,7 +75,7 @@ namespace Apps_Regedit.Views.Verificentros {
                     dvar4 = regedit.LeerString("Password"),
                     dvar5 = regedit.LeerString("AppName"),
                     dvar6 = regedit.LeerString("AppRole"),
-                    dvar12= regedit.LeerShort("Centro"),
+                    dvar12= regedit.LeerShort("CentroId"),
                     dvar7 = regedit.LeerGuid("AppRolePassword"),
                     dvar26 = regedit.LeerBool("v26"),
                     dvar8 = regedit.LeerShort("OpcionMenuId"),
@@ -61,9 +83,10 @@ namespace Apps_Regedit.Views.Verificentros {
                     dvar10 = regedit.LeerString("UsuarioLinea"),
                     dvar11 = regedit.LeerString("Ip")
                 };
+                
                 CargarValoresFormulario(visual);
             } catch (Exception ex) {
-                SivevLogger.Error($"Error al leer y desencriptar configuración desde el registro.\n{ex.Message}");
+                SivevLogger.Error($"Error al leer y desencriptar configuración desde el registro.\n{ex.Message}", SivevOrigen.Configurador);
                 Mostrar.Mensaje("Error", $"Ocurrió un error al leer la configuración.\n\n{ex.Message}");
             }
         }
@@ -97,7 +120,53 @@ namespace Apps_Regedit.Views.Verificentros {
             GuardarConfiguracion();
         }
         private void GuardarConfiguracion() {
+            try {
+                var visual = LeerDesdeFormulario();
 
+                encriptador.EscribirValor("Server", visual.dvar1);
+                encriptador.EscribirValor("Database",visual.dvar2);
+                encriptador.EscribirValor("User", visual.dvar3);
+                encriptador.EscribirValor("Password", visual.dvar4);
+                encriptador.EscribirValor("AppName", visual.dvar5);
+                encriptador.EscribirValor("AppRole", visual.dvar6);
+                encriptador.EscribirValor("AppRolePassword", visual.dvar7.ToString());
+                encriptador.EscribirValor("OpcionMenuId", visual.dvar8.ToString());
+                encriptador.EscribirValor("Relleno", visual.dvar9.ToString());
+                encriptador.EscribirValor("UsuarioLinea", visual.dvar10);
+                encriptador.EscribirValor("Ip", visual.dvar11);
+                encriptador.EscribirValor("Centro", visual.dvar30);
+                encriptador.EscribirValor("EstacionId",visual.dvar15.ToString());
+                encriptador.EscribirValor("v26",visual.dvar26.ToString());
+                SivevLogger.Information("Configuración de VisualRegistroWindows guardada en HKLM\\SOFTWARE\\SIVEV.", SivevOrigen.Configurador);
+                Mostrar.Mensaje("Éxito",  "Configuración guardada correctamente en el registro.");
+            } catch (Exception ex) {
+                SivevLogger.Error("Error al guardar la configuración en el registro.", SivevOrigen.Configurador);
+                Mostrar.Mensaje("Error", $"Ocurrió un error al guardar la configuración.\n\n{ex.Message}");
+            }
+        }
+        private VisualRegistroWindows LeerDesdeFormulario() {
+
+            var visual = new VisualRegistroWindows {
+                // Base de datos
+                dvar1 = ucDataBase1.Server.Trim(),
+                dvar2 = ucDataBase1.Database.Trim(),
+                dvar3 = ucDataBase1.User.Trim(),
+                dvar4 = ucDataBase1.Password,
+                dvar5 = ucDataBase1.AppName.Trim(),
+                dvar6 = ucDataBase1.AppRole.Trim(),
+                dvar7 = Guid.TryParse(ucDataBase1.AppRolePassword.Trim(),out Guid appRolePassword) ? appRolePassword : Guid.Empty,
+                // Estación
+                dvar15 = Guid.TryParse(ucEstacion1.Estacion.Trim(), out Guid estacionId) ? estacionId : Guid.Empty,
+                dvar10 = ucEstacion1.Usuario.Trim(),
+                dvar11 = ucEstacion1.IP.Trim(),
+                dvar30 = ucEstacion1.Centro.Trim(),
+                dvar26 = ucEstacion1.Log,
+                dvar8 = short.TryParse(ucEstacion1.OpcionMenu.Trim(), out short opcionMenu) ? opcionMenu : (short)0,
+                dvar12 = short.TryParse(ucEstacion1.CentroId.Trim(), out short centro) ? centro : (short) 0,
+                
+            };
+
+            return visual;
         }
         #endregion
 
@@ -229,7 +298,7 @@ namespace Apps_Regedit.Views.Verificentros {
         
         private void VerificarActivador() {
             try {
-                var activador = new ActivadorBatCreator("http://192.168.16.233/ClickOnce/Visual/Apps_Visual.application", "DPDevTS.bat");
+                var activador = new ActivadorBatCreator(UrlVisual, "DPDevTS.bat");
 
                 if (activador.Exists())
                     return;
@@ -252,6 +321,11 @@ namespace Apps_Regedit.Views.Verificentros {
         private void Visual_Load(object sender, EventArgs e) {
             ActualizarEstadoBitacora();
             VerificarActivador();
+            var escritor = new GuardarWinRarConf(conf);
+
+            if (!escritor.Guardar()) {
+                Mostrar.Mensaje("Error", "No fue posible guardar la configuración criptográfica.");
+            }
         }
     }
 }

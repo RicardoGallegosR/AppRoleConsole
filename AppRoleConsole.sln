@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service_Proveedores", "Serv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apps_Regedit", "Apps_Regedit\Apps_Regedit.csproj", "{5C6EF090-73F2-4BF2-B155-66BC5CFB43AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apps_Vicente", "Apps_Vicente\Apps_Vicente.csproj", "{F1BA006D-BEDD-4259-812D-E42223BF5262}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{5C6EF090-73F2-4BF2-B155-66BC5CFB43AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6EF090-73F2-4BF2-B155-66BC5CFB43AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C6EF090-73F2-4BF2-B155-66BC5CFB43AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1BA006D-BEDD-4259-812D-E42223BF5262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1BA006D-BEDD-4259-812D-E42223BF5262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1BA006D-BEDD-4259-812D-E42223BF5262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1BA006D-BEDD-4259-812D-E42223BF5262}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

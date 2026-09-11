@@ -252,9 +252,9 @@ namespace Apps_Visual.ObdAppGUI {
         private bool LecturaRegedit() {
             bool vacio(string s) => string.IsNullOrWhiteSpace(s);
             var lector = new GuardarWinRarConf();
-            lector.CargarEnCryptoHelper();
+            lector.Cargar();
             var conf = lector.GetConfig();
-            CryptoHelper.Configurar(conf);
+            CryptoHelper.Configurar(conf, "VISUAL");
 
 
             Visual_Core = new VisualRegistroWindows{

@@ -10,6 +10,20 @@ namespace SQLSIVEV.Infrastructure.Utils {
         public const string Administrativa = "ADMINISTRATIVA";
         public const string Configurador = "CONFIGURADOR";
         public const string HerramientasSivev = "HERRAMIENTAS-SIVEV";
+        public const string Vicente = "VICENTE";
+        public const string LoginCredencial = "LOGIN-CREDENCIAL";
+
+        public static readonly IReadOnlyList<string> Todos = new[] {
+            Visual,
+            Captura,
+            Proveedor,
+            Emisiones,
+            Administrativa,
+            Configurador,
+            HerramientasSivev,
+            Vicente,
+            LoginCredencial
+        };
     }
 
     public static class SivevLogger {

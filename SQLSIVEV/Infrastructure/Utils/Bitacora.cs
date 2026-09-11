@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace SQLSIVEV.Infrastructure.Utils {
     public static class Bitacora {
-        public static SpAppBitacoraErroresSet ErroresSQL(VisualRegistroWindows V, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
+        public static SpAppBitacoraErroresSet ErroresSQL(Guid estacionId, short centro, short opcionMenuId, string descripcion, int codigoSql = 0, int codigo = 0, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) {
             return new SpAppBitacoraErroresSet {
-                EstacionId = V.dvar15,
-                Centro = V.dvar12,
+                EstacionId = estacionId,
+                Centro = centro,
                 NombreCpu = Environment.MachineName,
-                OpcionMenuId = V.dvar8,
+                OpcionMenuId = opcionMenuId,
                 FechaError = DateTime.Now,
                 Libreria = Path.GetFileName(callerFile),
                 Clase = Path.GetFileNameWithoutExtension(callerFile),

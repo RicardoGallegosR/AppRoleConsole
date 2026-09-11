@@ -215,7 +215,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         MensajeId = respuestaOBD.MensajeId,
                         Resultado = respuestaOBD.Resultado
                     };
-                    //Mostrar.Mensaje("", $"Mensaje: {respuestaOBD.MensajeId}, Resultado: {respuestaOBD.Resultado}");
+                    Mostrar.Mensaje("", $"Mensaje: {respuestaOBD.MensajeId}, Resultado: {respuestaOBD.Resultado}");
                     Mostrar.MensajesResultadoOBDII(this, resultadoOBDII);
 
 
@@ -234,7 +234,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         );
                     }
                     try {
-                        var bitacora = Bitacora.ErroresSQL(visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
+                        //var bitacora = Bitacora.ErroresSQL(visual, descripcion: ex.ToString(), codigoSql: 0, codigo: ex.HResult);
                     } catch (Exception logEx) {
                         SivevLogger.Error($"Falló bitácora OBD placa {visual.dvar19}: {logEx.Message}");
                     }
@@ -269,9 +269,9 @@ namespace Apps_Visual.ObdAppGUI.Views {
             if (mensaje != 0) {
                 //SivevLogger.Information( $"OBD SQL [3] Antes de PrintIfMsgAsync. MensajeId={mensaje}");
                 var error = await repo.MensajeIdSQL(connApp, $"MensajeId: {mensaje}", mensaje, ct: ct);
-                var bitacora = Bitacora.ErroresSQL(visual, descripcion: error.Mensaje, codigoSql: mensaje);
+                //var bitacora = Bitacora.ErroresSQL(visual, descripcion: error.Mensaje, codigoSql: mensaje);
                 //SivevLogger.Information($"OBD SQL [4] Terminó PrintIfMsgAsync: {error.Mensaje}");
-                await repo.SpSpAppBitacoraErroresSetAsyncPool(connApp:connApp, visual: visual, bitacora: bitacora, ct: ct);
+                //await repo.SpSpAppBitacoraErroresSetAsyncPool(connApp:connApp, visual: visual, bitacora: bitacora, ct: ct);
             }
             //SivevLogger.Information($"OBD SQL [7] Regresando {mensaje}/{resultado}");
             return new ResultadoSql {

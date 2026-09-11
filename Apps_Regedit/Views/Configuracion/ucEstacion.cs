@@ -69,7 +69,7 @@ namespace Apps_Regedit.Views.Configuracion {
                 txtCentroId.ReadOnly = value;
                 txtCentro.ReadOnly = value;
                 txtIp.ReadOnly = value;
-                txtUsuarioDeLinea.ReadOnly = value;
+                //txtUsuarioDeLinea.ReadOnly = value;
                 //txtPasswordAutoLogin.ReadOnly = value;
                 //cbActivarLog.Enabled = !value;
             }

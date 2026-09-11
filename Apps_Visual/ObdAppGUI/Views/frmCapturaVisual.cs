@@ -298,7 +298,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                         if (_MensajeSQL != 0) {
                             var error = await repo.MensajeIdSQL(connApp, "GetAccesoSQLVerificaciones", _MensajeSQL, ct: ct);
                             var fin = await repo.SpAppAccesoFinAsync(connApp,_Visual.dvar15,_Visual.dvar20);
-                            var bitacora = Bitacora.ErroresSQL(_Visual, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
+                            var bitacora = Bitacora.ErroresSQL(estacionId: _Visual.dvar15, centro: _Visual.dvar12, opcionMenuId: _Visual.dvar8, descripcion: $"{error.Mensaje}", codigoSql: _MensajeSQL);
                             await repo.SpSpAppBitacoraErroresSetAsync(V: _Visual, A: bitacora, ct: ct);
                             SivevLogger.Information($"Apps_Visual.ObdAppGUI.Views.frmCapturaVisual.InicializarAsync.GetAccesoSQLVerificaciones, {error.Mensaje} se finaliza el acceso.");
                         }
@@ -354,7 +354,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
             if (_mensaje != 0) {
                 var error = await repo.MensajeIdSQL(connApp, $"MensajeId: {_mensaje}", _mensaje, ct: ct);
-                var bitacora = Bitacora.ErroresSQL(V, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
+                var bitacora = Bitacora.ErroresSQL(estacionId: V.dvar15, centro: V.dvar12, opcionMenuId: V.dvar8, descripcion: $"{error.Mensaje}", codigoSql: _mensaje);
                 await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
                 Mostrar.Mensaje($"{error.Mensaje}");
                 return new VerificacionVisualIniResult {
@@ -401,7 +401,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             if (result.MensajeId != 0) {
                 var error = await repo.MensajeIdSQL(connApp, $"Error en SpAppCapturaVisualGetAsync MensajeId {result.MensajeId}", result.MensajeId, ct: ct );
                 var msg = error?.Mensaje ?? "Mensaje no disponible";
-                var bitacora = Bitacora.ErroresSQL(V, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
+                var bitacora = Bitacora.ErroresSQL(estacionId: V.dvar15, centro: V.dvar12, opcionMenuId: V.dvar8, descripcion: $"{error.Mensaje}", codigoSql: result.MensajeId);
                 await repo.SpSpAppBitacoraErroresSetAsync(V: V, A: bitacora, ct: ct);
                 Mostrar.Mensaje($"Error SQL en SpAppCapturaVisualGetAsync MensajeId = {result.MensajeId}: {msg}");
             }
@@ -443,7 +443,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
                     bool requiereFinAcceso = result.MensajeId is 50025 or 50263;
                     var error = await repo.MensajeIdSQL( connApp, requiereFinAcceso ? $"{result.MensajeId}" : $"Captura Inspección Visual MensajeId {result.MensajeId}", result.MensajeId,ct: ct);
                     string msg = error?.Mensaje ?? "Mensaje no disponible";
-                    var bitacora = Bitacora.ErroresSQL(V, descripcion: msg, codigoSql: result.MensajeId);
+                    var bitacora = Bitacora.ErroresSQL(estacionId: V.dvar15, centro: V.dvar12, opcionMenuId: V.dvar8, descripcion: msg, codigoSql: result.MensajeId);
 
                     // MISMA conexión
                     await repo.SpSpAppBitacoraErroresSetAsyncPool(connApp: connApp, visual: V,bitacora: bitacora, ct: ct);

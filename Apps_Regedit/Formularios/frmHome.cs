@@ -1,5 +1,7 @@
 ﻿using Apps_Regedit.Views;
+using Apps_Regedit.Views.Verificentros;
 using FrmComun.Utils;
+using SQLSIVEV.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Apps_Regedit.Views.Verificentros;
 
 namespace Apps_Regedit.Formularios {
     public partial class frmHome : Form {
@@ -20,9 +21,16 @@ namespace Apps_Regedit.Formularios {
                 flpVistasAbiertas,
                 splitPrincipal.Panel2
             );
+            _barraLateral.CrearCabecera(
+                "SMA", "Regedit", () => {
+               _barraLateral.MostrarVista("Home", "Home", () => new Views.Home(), mostrarEnMenu: false);
+           });
+            /*
             _barraLateral.CrearCabecera(() => {
                 _barraLateral.MostrarVista("Home", "Home", () => new Views.Home(), mostrarEnMenu: false);
             });
+            */
+            _barraLateral.MostrarVista("Home", "Home", () => new Views.Home ());
         }
         #region Verificentros
         private async void msCAPTURA_Click(object sender, EventArgs e) {

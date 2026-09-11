@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SQLSIVEV.Infrastructure.Sql.Vicente;
+using SQLSIVEV.Infrastructure.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SQLSIVEV.Infrastructure.Utils;
 
 namespace Apps_Proveedores.Formularios {
     public partial class Home : Form {
@@ -16,6 +17,7 @@ namespace Apps_Proveedores.Formularios {
         private string _versionTexto = "vDESCONOCIDA";
         private bool _cerrandoAplicacion = false;
         private bool _bitacoraFinalizada = false;
+        private readonly SivevConnectionFactory _sql;
 
         public Home() {
             InitializeComponent();

@@ -200,6 +200,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         progreso?.Report($"Identificando protocolo de comunicación");
                         //_protocolo = elm.WaitAndGetProtocolText(); //0100
                         p1.ProtocoloObd = elm.WaitAndGetProtocolText(); //0100
+                        p1.ProtocoloObd = p1.ProtocoloObd?.Replace("\r", "").Replace("\n", "").Replace(">", "").Trim();
                         SivevLogger.Information($"Protocolo identificado: {_protocolo}. Iniciando consultas de datos...");
                         
                         progreso?.Report($"Pensando");
@@ -422,7 +423,7 @@ namespace SQLSIVEV.Infrastructure.Devices.Obd {
                         //batteryProgress?.Report(TryQuery<double?>("VOLTAGE", () => elm.ReadVoltage(), null, errores) ?? 0.0);
                         //SivevLogger.Information($"PID 0107.- LTFT Bank 1: {_LtftB1?.ToString() ?? "null"} %.");
 
-                        _rpmOn = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
+                        //_rpmOn = TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores);//010C
                         p1.RpmCheck = (short)(TryQuery<int?>("RPM", () => elm.ReadRpm(), null, errores) ?? 0);
 
                         porcentaje?.Report(i++);

@@ -10,6 +10,7 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string SaltText { get; set; } = "DEFAULT_SALT";
         public int Iterations { get; set; } = 100_000;
         public int KeySizeBits { get; set; } = 256;
+        public string WinRarConfRegistryPath { get; set; } = @"SOFTWARE\WinRAR\Options";
     }
 
     public sealed class VisualRegistroWindows {
@@ -69,6 +70,8 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string dvar18 { get; set; } = string.Empty;
         public bool dvar19 { get; set; } = false;
         public string dvar20 { get; set; } = string.Empty;
+        public int dvar21 { get; set; } = 0;
+        public Guid dvar22 { get; set; } = Guid.Empty;
 
 
     }

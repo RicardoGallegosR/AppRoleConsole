@@ -87,7 +87,7 @@
             // lblCredencial
             // 
             lblCredencial.Dock = DockStyle.Fill;
-            lblCredencial.Font = new Font("Segoe UI", 20F);
+            lblCredencial.Font = new Font("Segoe UI", 36F);
             lblCredencial.Location = new Point(3, 0);
             lblCredencial.Name = "lblCredencial";
             lblCredencial.Size = new Size(907, 71);
@@ -98,8 +98,8 @@
             // lblPassword
             // 
             lblPassword.Dock = DockStyle.Fill;
-            lblPassword.Font = new Font("Segoe UI", 20F);
-            lblPassword.Location = new Point(3, 120);
+            lblPassword.Font = new Font("Segoe UI", 36F);
+            lblPassword.Location = new Point(3, 148);
             lblPassword.Name = "lblPassword";
             lblPassword.Size = new Size(907, 71);
             lblPassword.TabIndex = 0;
@@ -109,20 +109,20 @@
             // txbCredencial
             // 
             txbCredencial.Dock = DockStyle.Fill;
-            txbCredencial.Font = new Font("Segoe UI", 20F);
+            txbCredencial.Font = new Font("Segoe UI", 36F);
             txbCredencial.Location = new Point(3, 74);
             txbCredencial.Name = "txbCredencial";
-            txbCredencial.Size = new Size(907, 43);
+            txbCredencial.Size = new Size(907, 71);
             txbCredencial.TabIndex = 1;
             txbCredencial.TextAlign = HorizontalAlignment.Center;
             // 
             // txbPassword
             // 
             txbPassword.Dock = DockStyle.Fill;
-            txbPassword.Font = new Font("Segoe UI", 20F);
-            txbPassword.Location = new Point(3, 194);
+            txbPassword.Font = new Font("Segoe UI", 36F);
+            txbPassword.Location = new Point(3, 222);
             txbPassword.Name = "txbPassword";
-            txbPassword.Size = new Size(907, 43);
+            txbPassword.Size = new Size(907, 71);
             txbPassword.TabIndex = 2;
             txbPassword.TextAlign = HorizontalAlignment.Center;
             txbPassword.UseSystemPasswordChar = true;
@@ -130,12 +130,12 @@
             // 
             // btnAcceder
             // 
-            btnAcceder.BackColor = Color.FromArgb(159, 34, 65);
+            btnAcceder.BackColor = Color.Crimson;
             btnAcceder.Dock = DockStyle.Top;
             btnAcceder.FlatStyle = FlatStyle.Flat;
-            btnAcceder.Font = new Font("Segoe UI", 18F);
+            btnAcceder.Font = new Font("Segoe UI", 48F);
             btnAcceder.ForeColor = Color.White;
-            btnAcceder.Location = new Point(3, 243);
+            btnAcceder.Location = new Point(3, 299);
             btnAcceder.Name = "btnAcceder";
             btnAcceder.Size = new Size(907, 125);
             btnAcceder.TabIndex = 3;
@@ -158,7 +158,7 @@
             lblTituloLogin.BackColor = Color.Transparent;
             lblTituloLogin.Dock = DockStyle.Fill;
             lblTituloLogin.Font = new Font("Segoe UI", 48F);
-            lblTituloLogin.ForeColor = Color.FromArgb(159, 34, 65);
+            lblTituloLogin.ForeColor = Color.Crimson;
             lblTituloLogin.Location = new Point(0, 0);
             lblTituloLogin.Name = "lblTituloLogin";
             lblTituloLogin.Size = new Size(913, 79);

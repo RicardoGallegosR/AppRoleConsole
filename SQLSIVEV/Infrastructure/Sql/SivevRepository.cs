@@ -732,7 +732,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@biOdometro", SqlDbType.BigInt) { Value = obd.Odometro ?? 0 });
 
             // NUEVOS VALORES 
-
+            /*
             cmd.Parameters.Add(new SqlParameter("@vcVersionSoftware", SqlDbType.VarChar, 20) { Value = string.IsNullOrWhiteSpace(obd.VehiculoId) ? "DESCONOCIDO" : obd._VersionSoftware.Trim() });
             // Decimal
             cmd.Parameters.Add(new SqlParameter("@dLambda", SqlDbType.Decimal) { Precision = 5, Scale = 3, Value = obd._Lambda ?? 0 });
@@ -759,7 +759,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add(new SqlParameter("@siEngineOilTemperature", SqlDbType.SmallInt) { Value = obd._EngineOilTemperature ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@siEngineCoolantTemperature", SqlDbType.SmallInt) { Value = obd._EngineCoolantTemperature ?? 0 });
             cmd.Parameters.Add(new SqlParameter("@siIntakeAirTemperature", SqlDbType.SmallInt) { Value = obd._IntakeAirTemperature ?? 0 });
-
+            */
 
             // Outputs
             var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output, Value = 0 };
@@ -933,6 +933,69 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 MensajeId = _MensajeId,
             };
         }
+
+
+        public async Task<SpAppBitacoraErroresSet> SpSpAppBitacoraErroresSetAsync2026(SqlConnection cnn, SpAppBitacoraErroresSet A, CancellationToken ct = default) {
+            short _Resultado = 0;
+            int   _MensajeId = 0;
+            try {
+                        using var cmd = cnn.CreateCommand();
+                        cmd.CommandText = "SivAppComun.SpAppBitacoraErroresSet";
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Entradas
+                        cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = A.EstacionId });
+                        cmd.Parameters.Add(new SqlParameter("@siCentro", SqlDbType.SmallInt) { Value = A.Centro });
+                        cmd.Parameters.Add(new SqlParameter("@vcNombreCpu", SqlDbType.VarChar, 25) { Value = A.NombreCpu });
+                        cmd.Parameters.Add(new SqlParameter("@siOpcionMenuId", SqlDbType.SmallInt) { Value = A.OpcionMenuId });
+                        cmd.Parameters.Add(new SqlParameter("@dtFechaError", SqlDbType.DateTime) { Value = A.FechaError });
+                        cmd.Parameters.Add(new SqlParameter("@vcLibreria", SqlDbType.VarChar, 50) { Value = A.Libreria });
+                        cmd.Parameters.Add(new SqlParameter("@vcClase", SqlDbType.VarChar, 50) { Value = A.Clase });
+                        cmd.Parameters.Add(new SqlParameter("@vcMetodo", SqlDbType.VarChar, 50) { Value = A.Metodo });
+                        cmd.Parameters.Add(new SqlParameter("@iCodigoErrorSql", SqlDbType.Int) { Value = A.CodigoErrorSql });
+                        cmd.Parameters.Add(new SqlParameter("@iCodigoError", SqlDbType.Int) { Value = A.CodigoError });
+                        cmd.Parameters.Add(
+                            new SqlParameter("@vcDescripcionError", SqlDbType.VarChar, 500) {
+                                Value = A.DescripcionError?.Length > 500
+                                    ? A.DescripcionError.Substring(0, 500)
+                                    : (object?)A.DescripcionError ?? DBNull.Value
+                            }
+                        );
+                        cmd.Parameters.Add(new SqlParameter("@iLineaCodigo", SqlDbType.Int) { Value = A.LineaCodigo });
+                        cmd.Parameters.Add(new SqlParameter("@iLastDllError", SqlDbType.Int) { Value = A.LastDllError });
+                        cmd.Parameters.Add(new SqlParameter("@vcSourceError", SqlDbType.VarChar, 50) { Value = A.SourceError });
+
+                        var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                        var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+
+                        cmd.Parameters.Add(pMensajeId);
+                        cmd.Parameters.Add(pResultado);
+
+                        // Valor de retorno (RETURN @@ERROR)
+                        var pReturn = new SqlParameter { Direction = ParameterDirection.ReturnValue };
+                        cmd.Parameters.Add(pReturn);
+
+
+                        await cmd.ExecuteNonQueryAsync(ct);
+                        _Resultado = (pResultado.Value == DBNull.Value) ? (short)0 : Convert.ToInt16(pResultado.Value);
+                        _MensajeId = (pMensajeId.Value == DBNull.Value) ? 0 : Convert.ToInt32(pMensajeId.Value);
+
+                    
+                
+            } catch (Exception e) {
+                SivevLogger.Error($"SivSpComun.SpAppBitacoraErroresSet {e}");
+            }
+            return new SpAppBitacoraErroresSet {
+                Resultado = _Resultado,
+                MensajeId = _MensajeId,
+            };
+        }
+
+
+
+
+
+
         public async Task<SpAppDatosVehiculoObdNewSet> SpAppDatosVehiculoObdNewGetSetAsync(SqlConnection connApp, VisualRegistroWindows V, CancellationToken ct = default) {
             if (connApp is null) {
                 SivevLogger.Error($"SpAppDatosVehiculoObdNewGetSetAsync: connApp is null");

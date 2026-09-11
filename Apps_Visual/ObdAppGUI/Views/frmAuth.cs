@@ -216,7 +216,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
             };
         }
 
-
+        
         private async Task<CredencialExisteHuellaResult> CredencialExisteHuella(VisualRegistroWindows V, int credencial, CancellationToken ct = default) {
             int mensaje = 100;
             string _msm = string.Empty;

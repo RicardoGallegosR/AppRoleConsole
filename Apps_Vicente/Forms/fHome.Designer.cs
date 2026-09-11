@@ -1,5 +1,5 @@
-﻿namespace Apps_Captura.Frm {
-    partial class Home {
+﻿namespace Apps_Vicente.Forms {
+    partial class fHome {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -23,35 +23,33 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Home));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fHome));
             pnlPrincipal = new Panel();
             splitPrincipal = new SplitContainer();
             pnlInfo = new Panel();
             flpVistasAbiertas = new FlowLayoutPanel();
-            menuStrip1 = new MenuStrip();
-            msCaptura = new ToolStripMenuItem();
-            msPassword = new ToolStripMenuItem();
-            msHuella = new ToolStripMenuItem();
-            msMeteorologica = new ToolStripMenuItem();
-            msApagar = new ToolStripMenuItem();
+            ms = new MenuStrip();
+            msReportes = new ToolStripMenuItem();
+            msCertificados = new ToolStripMenuItem();
+            msRemante = new ToolStripMenuItem();
             pnlPrincipal.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitPrincipal).BeginInit();
             splitPrincipal.Panel1.SuspendLayout();
             splitPrincipal.SuspendLayout();
             pnlInfo.SuspendLayout();
-            menuStrip1.SuspendLayout();
+            ms.SuspendLayout();
             SuspendLayout();
             // 
             // pnlPrincipal
             // 
             pnlPrincipal.BackColor = Color.White;
             pnlPrincipal.Controls.Add(splitPrincipal);
-            pnlPrincipal.Controls.Add(menuStrip1);
+            pnlPrincipal.Controls.Add(ms);
             pnlPrincipal.Dock = DockStyle.Fill;
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
             pnlPrincipal.Size = new Size(800, 450);
-            pnlPrincipal.TabIndex = 0;
+            pnlPrincipal.TabIndex = 1;
             // 
             // splitPrincipal
             // 
@@ -89,88 +87,68 @@
             flpVistasAbiertas.Size = new Size(105, 417);
             flpVistasAbiertas.TabIndex = 0;
             // 
-            // menuStrip1
+            // ms
             // 
-            menuStrip1.Font = new Font("Segoe UI", 14.25F);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { msCaptura, msPassword, msHuella, msMeteorologica, msApagar });
-            menuStrip1.Location = new Point(0, 0);
-            menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(800, 33);
-            menuStrip1.TabIndex = 0;
-            menuStrip1.Text = "menuStrip1";
+            ms.Font = new Font("Segoe UI", 14.25F);
+            ms.Items.AddRange(new ToolStripItem[] { msReportes });
+            ms.Location = new Point(0, 0);
+            ms.Name = "ms";
+            ms.Size = new Size(800, 33);
+            ms.TabIndex = 0;
+            ms.Text = "menuStrip1";
             // 
-            // msCaptura
+            // msReportes
             // 
-            msCaptura.Name = "msCaptura";
-            msCaptura.Size = new Size(91, 29);
-            msCaptura.Text = "Captura";
-            msCaptura.Click += msCaptura_Click;
+            msReportes.DropDownItems.AddRange(new ToolStripItem[] { msCertificados });
+            msReportes.Name = "msReportes";
+            msReportes.Size = new Size(97, 29);
+            msReportes.Text = "Reportes";
             // 
-            // msPassword
+            // msCertificados
             // 
-            msPassword.Name = "msPassword";
-            msPassword.Size = new Size(120, 29);
-            msPassword.Text = "Contraseña";
+            msCertificados.DropDownItems.AddRange(new ToolStripItem[] { msRemante });
+            msCertificados.Name = "msCertificados";
+            msCertificados.Size = new Size(184, 30);
+            msCertificados.Text = "Certificados";
             // 
-            // msHuella
+            // msRemante
             // 
-            msHuella.Name = "msHuella";
-            msHuella.Size = new Size(78, 29);
-            msHuella.Text = "Huella";
+            msRemante.Name = "msRemante";
+            msRemante.Size = new Size(157, 30);
+            msRemante.Text = "Remante";
+            msRemante.Click += msRemante_Click;
             // 
-            // msMeteorologica
-            // 
-            msMeteorologica.Name = "msMeteorologica";
-            msMeteorologica.Size = new Size(147, 29);
-            msMeteorologica.Text = "Meteorologica";
-            // 
-            // msApagar
-            // 
-            msApagar.Name = "msApagar";
-            msApagar.Size = new Size(85, 29);
-            msApagar.Text = "Apagar";
-            // 
-            // Home
+            // fHome
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            AutoSize = true;
-            BackColor = Color.Crimson;
             ClientSize = new Size(800, 450);
-            ControlBox = false;
             Controls.Add(pnlPrincipal);
-            ForeColor = Color.White;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            MainMenuStrip = menuStrip1;
-            MdiChildrenMinimizedAnchorBottom = false;
-            MinimizeBox = false;
-            Name = "Home";
+            Name = "fHome";
             StartPosition = FormStartPosition.CenterScreen;
             WindowState = FormWindowState.Maximized;
-            FormClosing += Home_FormClosing;
-            Load += Home_Load;
+            Load += fHome_Load;
             pnlPrincipal.ResumeLayout(false);
             pnlPrincipal.PerformLayout();
             splitPrincipal.Panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitPrincipal).EndInit();
             splitPrincipal.ResumeLayout(false);
             pnlInfo.ResumeLayout(false);
-            menuStrip1.ResumeLayout(false);
-            menuStrip1.PerformLayout();
+            ms.ResumeLayout(false);
+            ms.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
         private Panel pnlPrincipal;
-        private MenuStrip menuStrip1;
-        private ToolStripMenuItem msCaptura;
-        private ToolStripMenuItem msPassword;
-        private ToolStripMenuItem msHuella;
-        private ToolStripMenuItem msMeteorologica;
-        private ToolStripMenuItem msApagar;
         private SplitContainer splitPrincipal;
         private Panel pnlInfo;
         private FlowLayoutPanel flpVistasAbiertas;
+        private MenuStrip ms;
+        private ToolStripMenuItem msReportes;
+        private ToolStripMenuItem msCertificados;
+        private ToolStripMenuItem msRemante;
     }
 }

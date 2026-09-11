@@ -9,6 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="fontawesome.sharp" Version="6.6.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\SQLSIVEV\SQLSIVEV.csproj" />
 		<ProjectReference Include="H:\Apps C#\Biometria\DPFP_SMA\DPFP_SMA.csproj" />
 	</ItemGroup>

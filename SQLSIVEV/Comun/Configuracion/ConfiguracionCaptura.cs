@@ -13,9 +13,9 @@ namespace SQLSIVEV.Comun.Configuracion {
 
         public  CapturaRegistroWindows Cargar() {
             var lector = new GuardarWinRarConf();
-            lector.CargarEnCryptoHelper();
+            lector.Cargar();
             var conf = lector.GetConfig();
-            CryptoHelper.Configurar(conf);
+            //CryptoHelper.Configurar(conf);
 
             CapturaRegistroWindows capturaCore = new() {
                 dvar1 = regedit.Leer("Server"),

@@ -96,7 +96,9 @@
             spcPrincipal.Panel2.Controls.Add(tlpOdometro);
             spcPrincipal.Size = new Size(800, 325);
             spcPrincipal.SplitterDistance = 548;
+            spcPrincipal.SplitterWidth = 1;
             spcPrincipal.TabIndex = 0;
+            spcPrincipal.TabStop = false;
             // 
             // tlpTabla
             // 
@@ -253,7 +255,7 @@
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 5.8139534F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 17.44186F));
             tlpOdometro.RowStyles.Add(new RowStyle(SizeType.Percent, 38.3720932F));
-            tlpOdometro.Size = new Size(248, 325);
+            tlpOdometro.Size = new Size(251, 325);
             tlpOdometro.TabIndex = 0;
             // 
             // lblPlaca
@@ -264,7 +266,7 @@
             lblPlaca.ForeColor = Color.Black;
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
-            lblPlaca.Size = new Size(242, 124);
+            lblPlaca.Size = new Size(245, 124);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "PlacaID";
             lblPlaca.TextAlign = ContentAlignment.TopCenter;
@@ -277,7 +279,7 @@
             lblOdometro.ForeColor = Color.Black;
             lblOdometro.Location = new Point(3, 142);
             lblOdometro.Name = "lblOdometro";
-            lblOdometro.Size = new Size(242, 56);
+            lblOdometro.Size = new Size(245, 56);
             lblOdometro.TabIndex = 0;
             lblOdometro.Text = "Odometro";
             lblOdometro.TextAlign = ContentAlignment.MiddleCenter;
@@ -288,7 +290,7 @@
             txbOdometro.Font = new Font("Segoe UI", 14F);
             txbOdometro.Location = new Point(3, 201);
             txbOdometro.Name = "txbOdometro";
-            txbOdometro.Size = new Size(242, 32);
+            txbOdometro.Size = new Size(245, 32);
             txbOdometro.TabIndex = 10;
             txbOdometro.TextAlign = HorizontalAlignment.Center;
             // 
@@ -298,7 +300,7 @@
             pnlRellenoOdometro.Dock = DockStyle.Fill;
             pnlRellenoOdometro.Location = new Point(3, 127);
             pnlRellenoOdometro.Name = "pnlRellenoOdometro";
-            pnlRellenoOdometro.Size = new Size(242, 12);
+            pnlRellenoOdometro.Size = new Size(245, 12);
             pnlRellenoOdometro.TabIndex = 0;
             // 
             // pnlCentralFooter

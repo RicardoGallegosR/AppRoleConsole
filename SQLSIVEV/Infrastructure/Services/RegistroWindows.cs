@@ -11,14 +11,7 @@ namespace SQLSIVEV.Infrastructure.Services {
     public sealed class RegistroWindows {
         private readonly string _registryPath;
         private readonly string _origen;
-        private readonly RegistroCrypto _reg = new();
 
-        public string LeerYDesencriptar(string nombrePropiedad) {
-            string cifrado = _reg.LeerValor(nombrePropiedad, string.Empty);
-            if (string.IsNullOrWhiteSpace(cifrado))
-                return string.Empty;
-            return CryptoHelper.Desencriptar(cifrado);
-        }
 
         public RegistroWindows(string registryPath, string origen) {
             if (string.IsNullOrWhiteSpace(registryPath))
@@ -26,30 +19,6 @@ namespace SQLSIVEV.Infrastructure.Services {
 
             _registryPath = registryPath;
             _origen = origen;
-        }
-
-        public void EscribirValor<T>(string nombrePropiedad, T valorOriginal) {
-            try {
-                using var key = Registry.LocalMachine.CreateSubKey(_registryPath, writable: true);
-                if (key is null) {
-                    SivevLogger.Error($"No se pudo crear/abrir la clave '{_registryPath}'.");
-                    return;
-                }
-
-                string valorTexto = valorOriginal switch {
-                    Guid g => g.ToString("D"),
-                    null => string.Empty,
-                    _ => valorOriginal!.ToString() ?? string.Empty
-                };
-
-                key.SetValue(nombrePropiedad, valorTexto, RegistryValueKind.String);
-
-                // IMPORTANTE:
-                // no registrar valorTexto porque podría ser contraseña.
-                SivevLogger.Information($"[REG] Valor escrito: {nombrePropiedad}", origen: _origen);
-            } catch (Exception ex) {
-                SivevLogger.Error($"Error al escribir '{nombrePropiedad}': {ex.Message}", origen: _origen);
-            }
         }
 
         public T LeerValor<T>(string nombrePropiedad, T valorPorDefecto = default!) {

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using SQLSIVEV.Infrastructure.Utils;
+using System.Diagnostics;
 
 
 namespace SQLSIVEV.Infrastructure.Services {
@@ -6,15 +7,7 @@ namespace SQLSIVEV.Infrastructure.Services {
 
         public const string LogName = "SIVEV";
 
-        public static readonly string[] Sources = {
-            "VISUAL",
-            "CAPTURA",
-            "PROVEEDOR",
-            "EMISIONES",
-            "ADMINISTRATIVA",
-            "CONFIGURADOR",
-            "HERRAMIENTAS-SIVEV"
-        };
+        public static IReadOnlyList<string> Sources =>  SivevOrigen.Todos;
 
         public static bool TodasLasFuentesExisten() {
             try {
