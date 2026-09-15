@@ -1,13 +1,5 @@
-﻿using FrmComun.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using FontAwesome.Sharp;
+using FrmComun.Utils;
 
 namespace FrmComun.CapturaCentralizada.Complementos {
     public partial class ucVisitante : UserControl {
@@ -15,6 +7,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public string Nombre => txtNombre.Text.Trim();
         public string ApellidoPaterno => txtApellidoP.Text.Trim();
         public string ApellidoMaterno => txtApellidoM.Text.Trim();
+
+
         public ucVisitante() {
             InitializeComponent();
             txtNombre.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtNombre, @"[^A-ZÁÉÍÓÚÜÑ ]"); 
@@ -29,9 +23,29 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             txtApellidoP.MaxLength = 50;
             txtApellidoM.MaxLength = 50;
 
-            btnAcceso.Click += btnAcceso_Click;
+            btnAcceso.Click += (s, e) => SolicitarAcceso();
+            txtApellidoM.KeyDown += txtApellidoM_KeyDown;
+
         }
-        private void btnAcceso_Click(object sender, EventArgs e) =>
-            Acceso?.Invoke(this, e);
+        public void EnfocarNombre() {
+            BeginInvoke(() => {
+                txtNombre.Focus();
+                txtNombre.SelectAll();
+            });
+        }
+
+        private void txtApellidoM_KeyDown(object? sender, KeyEventArgs e) {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.SuppressKeyPress = true;
+            e.Handled = true;
+            SolicitarAcceso();
+        }
+
+        private void SolicitarAcceso() {
+            Acceso?.Invoke(this, EventArgs.Empty);
+        }
+
     }
 }

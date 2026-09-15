@@ -82,6 +82,7 @@
             txtApellidoM.Name = "txtApellidoM";
             txtApellidoM.Size = new Size(184, 26);
             txtApellidoM.TabIndex = 3;
+            txtApellidoM.Text = "Rodriguez";
             // 
             // txtApellidoP
             // 
@@ -92,6 +93,7 @@
             txtApellidoP.Name = "txtApellidoP";
             txtApellidoP.Size = new Size(184, 26);
             txtApellidoP.TabIndex = 2;
+            txtApellidoP.Text = "Gallegos";
             // 
             // lblApellidoM
             // 
@@ -135,6 +137,7 @@
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(184, 26);
             txtNombre.TabIndex = 1;
+            txtNombre.Text = "Ricardo";
             // 
             // pblFooter
             // 

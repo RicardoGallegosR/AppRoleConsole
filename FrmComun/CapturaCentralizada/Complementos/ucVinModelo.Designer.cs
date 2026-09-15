@@ -24,19 +24,19 @@
         /// </summary>
         private void InitializeComponent() {
             pnlPrincipal = new Panel();
+            tlpVinModelo = new TableLayoutPanel();
+            txtVin = new TextBox();
+            lblVin = new Label();
+            lblModelo = new Label();
+            nudModelo = new NumericUpDown();
             pblFooter = new Panel();
             flpVinModelo = new FlowLayoutPanel();
             btnSeleccionVehiculo = new Button();
-            tlpVinModelo = new TableLayoutPanel();
-            lblModelo = new Label();
-            lblVin = new Label();
-            txtVin = new TextBox();
-            nudModelo = new NumericUpDown();
             pnlPrincipal.SuspendLayout();
-            pblFooter.SuspendLayout();
-            flpVinModelo.SuspendLayout();
             tlpVinModelo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudModelo).BeginInit();
+            pblFooter.SuspendLayout();
+            flpVinModelo.SuspendLayout();
             SuspendLayout();
             // 
             // pnlPrincipal
@@ -50,6 +50,70 @@
             pnlPrincipal.Name = "pnlPrincipal";
             pnlPrincipal.Size = new Size(371, 134);
             pnlPrincipal.TabIndex = 0;
+            // 
+            // tlpVinModelo
+            // 
+            tlpVinModelo.ColumnCount = 2;
+            tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpVinModelo.Controls.Add(txtVin, 1, 1);
+            tlpVinModelo.Controls.Add(lblVin, 0, 1);
+            tlpVinModelo.Controls.Add(lblModelo, 0, 0);
+            tlpVinModelo.Controls.Add(nudModelo, 1, 0);
+            tlpVinModelo.Dock = DockStyle.Fill;
+            tlpVinModelo.Location = new Point(0, 0);
+            tlpVinModelo.Name = "tlpVinModelo";
+            tlpVinModelo.RowCount = 2;
+            tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlpVinModelo.Size = new Size(371, 84);
+            tlpVinModelo.TabIndex = 1;
+            // 
+            // txtVin
+            // 
+            txtVin.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtVin.Font = new Font("Segoe UI", 10.5F);
+            txtVin.Location = new Point(185, 50);
+            txtVin.Margin = new Padding(0);
+            txtVin.Name = "txtVin";
+            txtVin.Size = new Size(186, 26);
+            txtVin.TabIndex = 2;
+            txtVin.TabStop = false;
+            txtVin.Text = "LZWNNNGM1NC830678";
+            // 
+            // lblVin
+            // 
+            lblVin.Dock = DockStyle.Fill;
+            lblVin.Font = new Font("Segoe UI", 10.5F);
+            lblVin.Location = new Point(3, 42);
+            lblVin.Name = "lblVin";
+            lblVin.Size = new Size(179, 42);
+            lblVin.TabIndex = 0;
+            lblVin.Text = "VIN";
+            lblVin.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblModelo
+            // 
+            lblModelo.Dock = DockStyle.Fill;
+            lblModelo.Font = new Font("Segoe UI", 10.5F);
+            lblModelo.Location = new Point(3, 0);
+            lblModelo.Name = "lblModelo";
+            lblModelo.Size = new Size(179, 42);
+            lblModelo.TabIndex = 0;
+            lblModelo.Text = "AÑO MODELO";
+            lblModelo.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // nudModelo
+            // 
+            nudModelo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            nudModelo.Enabled = false;
+            nudModelo.Location = new Point(188, 9);
+            nudModelo.Maximum = new decimal(new int[] { 3000, 0, 0, 0 });
+            nudModelo.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
+            nudModelo.Name = "nudModelo";
+            nudModelo.Size = new Size(180, 23);
+            nudModelo.TabIndex = 1;
+            nudModelo.Value = new decimal(new int[] { 1900, 0, 0, 0 });
             // 
             // pblFooter
             // 
@@ -86,67 +150,6 @@
             btnSeleccionVehiculo.Text = "Selección de Vehiculo";
             btnSeleccionVehiculo.UseVisualStyleBackColor = false;
             // 
-            // tlpVinModelo
-            // 
-            tlpVinModelo.ColumnCount = 2;
-            tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tlpVinModelo.Controls.Add(txtVin, 1, 1);
-            tlpVinModelo.Controls.Add(lblVin, 0, 1);
-            tlpVinModelo.Controls.Add(lblModelo, 0, 0);
-            tlpVinModelo.Controls.Add(nudModelo, 1, 0);
-            tlpVinModelo.Dock = DockStyle.Fill;
-            tlpVinModelo.Location = new Point(0, 0);
-            tlpVinModelo.Name = "tlpVinModelo";
-            tlpVinModelo.RowCount = 2;
-            tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpVinModelo.Size = new Size(371, 84);
-            tlpVinModelo.TabIndex = 1;
-            // 
-            // lblModelo
-            // 
-            lblModelo.Dock = DockStyle.Fill;
-            lblModelo.Font = new Font("Segoe UI", 10.5F);
-            lblModelo.Location = new Point(3, 0);
-            lblModelo.Name = "lblModelo";
-            lblModelo.Size = new Size(179, 42);
-            lblModelo.TabIndex = 0;
-            lblModelo.Text = "AÑO MODELO";
-            lblModelo.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblVin
-            // 
-            lblVin.Dock = DockStyle.Fill;
-            lblVin.Font = new Font("Segoe UI", 10.5F);
-            lblVin.Location = new Point(3, 42);
-            lblVin.Name = "lblVin";
-            lblVin.Size = new Size(179, 42);
-            lblVin.TabIndex = 0;
-            lblVin.Text = "VIN";
-            lblVin.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // txtVin
-            // 
-            txtVin.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtVin.Font = new Font("Segoe UI", 10.5F);
-            txtVin.Location = new Point(185, 50);
-            txtVin.Margin = new Padding(0);
-            txtVin.Name = "txtVin";
-            txtVin.Size = new Size(186, 26);
-            txtVin.TabIndex = 2;
-            // 
-            // nudModelo
-            // 
-            nudModelo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            nudModelo.Location = new Point(188, 9);
-            nudModelo.Maximum = new decimal(new int[] { 3000, 0, 0, 0 });
-            nudModelo.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
-            nudModelo.Name = "nudModelo";
-            nudModelo.Size = new Size(180, 23);
-            nudModelo.TabIndex = 1;
-            nudModelo.Value = new decimal(new int[] { 1900, 0, 0, 0 });
-            // 
             // ucVinModelo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -155,11 +158,11 @@
             Name = "ucVinModelo";
             Size = new Size(371, 134);
             pnlPrincipal.ResumeLayout(false);
-            pblFooter.ResumeLayout(false);
-            flpVinModelo.ResumeLayout(false);
             tlpVinModelo.ResumeLayout(false);
             tlpVinModelo.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nudModelo).EndInit();
+            pblFooter.ResumeLayout(false);
+            flpVinModelo.ResumeLayout(false);
             ResumeLayout(false);
         }
 

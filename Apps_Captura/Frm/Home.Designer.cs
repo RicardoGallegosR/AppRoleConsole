@@ -108,24 +108,28 @@
             // 
             // msPassword
             // 
+            msPassword.Enabled = false;
             msPassword.Name = "msPassword";
             msPassword.Size = new Size(120, 29);
             msPassword.Text = "Contraseña";
             // 
             // msHuella
             // 
+            msHuella.Enabled = false;
             msHuella.Name = "msHuella";
             msHuella.Size = new Size(78, 29);
             msHuella.Text = "Huella";
             // 
             // msMeteorologica
             // 
+            msMeteorologica.Enabled = false;
             msMeteorologica.Name = "msMeteorologica";
             msMeteorologica.Size = new Size(147, 29);
             msMeteorologica.Text = "Meteorologica";
             // 
             // msApagar
             // 
+            msApagar.Enabled = false;
             msApagar.Name = "msApagar";
             msApagar.Size = new Size(85, 29);
             msApagar.Text = "Apagar";
@@ -137,7 +141,6 @@
             AutoSize = true;
             BackColor = Color.Crimson;
             ClientSize = new Size(800, 450);
-            ControlBox = false;
             Controls.Add(pnlPrincipal);
             ForeColor = Color.White;
             Icon = (Icon)resources.GetObject("$this.Icon");

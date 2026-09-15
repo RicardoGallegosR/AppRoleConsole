@@ -16,6 +16,75 @@
         public byte[] Huella { get; init; } = Array.Empty<byte>();
     }
 
+    #region Carga de Captura Centralizada
+    public sealed class CombustibleDto {
+        public byte CombustibleId { get; init; }
+        public string Combustible { get; init; } = string.Empty;
+        public decimal FactorCalculo { get; init; }
+        public byte ModuloEquipoId { get; init; }
+    }
+    public sealed class StoreResult<T> {
+        public int MensajeId { get; init; }
+        public short ResultadoId { get; init; }
+        public T Data { get; init; } = default!;
+    }
+    #region Bitacoras de accesos
+    public sealed class CapturaIniciaResult {
+        public int MensajeId { get; init; }
+        public short ResultadoId { get; init; }
+
+        public Guid? VerificacionId { get; init; }
+
+        public byte TipoVerificacionId { get; init; }
+        public byte EstadoId { get; init; }
+    }
+    #endregion
+
+    #region Vin Modelo
+
+    public sealed class CapturaVinModeloResult {
+        public int MensajeId { get; init; }
+        public short ResultadoId { get; init; }
+
+        public short Modelo { get; init; }
+        public int MarcaId { get; init; }
+    }
+
+    #endregion
+
+    #region Targeta de Circulacion
+    public sealed class EntidadesFederativasDto {
+        public byte EntidadFederativaId { get; init; }
+        public string EntidadFederativa { get; init; } = string.Empty;
+        public string Abreviacion { get; init; } = string.Empty;
+    }
+
+    public sealed class MarcasDto {
+        public int MarcaId { get; init; }
+        public string Marca { get; init; } = string.Empty;
+        public byte TipoMarcaId { get; init; }
+    }
+    public sealed class SubmarcaDto {
+        public int SubmarcaId { get; init; }
+        public string Submarca { get; init; } = string.Empty;
+    }
+    public sealed class TiposAdeudosDto {
+        public byte TipoAdeudoId { get; init; }
+        public string TipoAdeudo { get; init; } = string.Empty;
+    }
+
+    public sealed class TiposLineasCapturaDto {
+        public byte TipoLineaCapturaId { get; init; }
+        public byte TipoAdeudoId { get; init; }
+        public string TipoLineaCaptura { get; init; } = string.Empty;
+        public byte Vigencia { get; init; }
+        public string Mascara { get; init; } = string.Empty;
+        public bool Conciliable { get; init; }
+        public bool Verificable { get; init; }
+        public string Url { get; init; } = string.Empty;
+    }
+    #endregion
+    #endregion
 
     public sealed class SpAppChecaCpuResult {
         public int ReturnCode { get; init; }

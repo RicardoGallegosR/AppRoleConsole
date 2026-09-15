@@ -1,5 +1,9 @@
-﻿using SQLSIVEV.Infrastructure.Sql.Vicente;
+﻿using FrmComun.CapturaCentralizada.Complementos;
 using FrmComun.Utils;
+using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Sql;
+using SQLSIVEV.Infrastructure.Sql.Vicente;
+using SQLSIVEV.Infrastructure.Utils;
 
 namespace FrmComun.CapturaCentralizada {
     public partial class ucRegistroVehicular : UserControl {
@@ -9,19 +13,259 @@ namespace FrmComun.CapturaCentralizada {
         private readonly string _passRoll;
         private readonly short _opcionMenu;
         private readonly Guid _estacionId;
+        private readonly Guid _accesoId;
         private readonly short _centro;
+        private readonly CatalogosCaptura _catalogos;
+        private readonly AppRoleSqlExecutor _sqlExecutor;
+        private Guid _verificacionId;
 
-        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, short centro) {
+        private enum EtapaCaptura {
+            Inicio = 0,
+            Visitante = 1,
+            Acceso = 2,
+            Vehiculo = 3,
+            TarjetaCirculacion = 4,
+            Documentos = 5,
+            Escaneo = 6,
+            Finalizado = 7
+        }
+        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, Guid accesoId, short centro) {
             _sql = sql ?? throw new ArgumentNullException(nameof(sql));
             _roll = roll ?? throw new ArgumentNullException(nameof(roll));
-            _passRoll = passRoll.ToUpper() ?? throw new ArgumentNullException(nameof(passRoll));
+            _passRoll = (passRoll ?? throw new ArgumentNullException(nameof(passRoll))).ToUpperInvariant();
             _opcionMenu = opcionMenu;
             _estacionId = estacionId;
+            _accesoId = accesoId;
             _centro = centro;
 
             InitializeComponent();
+
+            _sqlExecutor = new AppRoleSqlExecutor(_sql, _roll, _passRoll);
             txtPlaca.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtPlaca, @"[^A-HJ-NPR-Z0-9]");
+            txtPlaca.MaxLength = 11;
             txtLinea.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtLinea, @"[^1-7]");
+            txtPlaca.Focus();
+            //FlujoGrama(EtapaCaptura.Inicio);
+            _catalogos = new CatalogosCaptura(sql: _sql, roll: _roll, passRoll: _passRoll, estacion: _estacionId, accesoId: _accesoId, opcionMenu: _opcionMenu, centro: _centro);
+            ucVisitante1.Acceso += ucVisitante1_Acceso;
+            ucAccesoConsulta1.CrearVerificacion += ucAccesoConsulta1_CrearVerificacion;
+            Load += ucRegistroVehicular_Load;
+            ucVinModelo1.ConsultarVin += ucVinModelo1_ConsultarVin;
+
         }
+        private async void ucRegistroVehicular_Load(object? sender, EventArgs e) {
+            try {
+                await _catalogos.CargarAsync();
+                ucTarjetaCirculacion1.CargarMarcas(_catalogos.Marcas);
+                ucTarjetaCirculacion1.CargarCombustibles(_catalogos.Combustibles);
+                ucTarjetaCirculacion1.FiltroSubmarcaChanged += Tarjeta_FiltroSubmarcaChanged;
+
+                ucTarjetaCirculacion1.SubmarcaSeleccionada += ucTarjetaCirculacion1_SubmarcaSeleccionada;
+
+                BeginInvoke(() => {
+                    txtPlaca.Focus();
+                    txtPlaca.SelectAll();
+                });
+            } catch (Exception ex) {
+                Mostrar.Mensaje( "Error al cargar catálogos", ex.ToString());
+                SivevLogger.Warning($"No fue posible cargar los catálogos: {ex}", SivevOrigen.Captura);
+            }
+        }
+
+        private void txtPlaca_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                e.SuppressKeyPress = true;
+                IniciarCaptura();
+            }
+        }
+        private void ucTarjetaCirculacion1_SubmarcaSeleccionada(object? sender, EventArgs e) {
+            int? submarcaId = ucTarjetaCirculacion1.SubmarcaId;
+
+            if (submarcaId is null)
+                return;
+
+            // continuar flujo...
+        }
+
+        private void IniciarCaptura() {
+            if (string.IsNullOrWhiteSpace(txtPlaca.Text)) {
+                Mostrar.Mensaje("Error", "Debe ingresar una placa válida.");
+                txtPlaca.Clear();
+                txtPlaca.Focus();
+                txtPlaca.Text = string.Empty;
+                return;
+            }
+            //FlujoGrama(EtapaCaptura.Visitante);
+            ucVisitante1.EnfocarNombre();
+                     
+        }
+
+        private void ucVisitante1_Acceso(object? sender, EventArgs e) {
+            string nombre = ucVisitante1.Nombre;
+            string apellidoP = ucVisitante1.ApellidoPaterno;
+            string apellidoM = ucVisitante1.ApellidoMaterno;
+            
+            if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(apellidoP) || string.IsNullOrWhiteSpace(apellidoM)) {
+                Mostrar.Mensaje("Error", "Debe ingresar el nombre completo del visitante.");
+                ucVisitante1.EnfocarNombre();
+                return;
+            }
+            //FlujoGrama(EtapaCaptura.Acceso);
+
+            ucAccesoConsulta1.Placa = txtPlaca.Text.Trim();
+
+        }
+
+        
+
+
+
+
+
+        private async void Tarjeta_FiltroSubmarcaChanged(object? sender, EventArgs e) {
+            int? marcaId = ucTarjetaCirculacion1.MarcaId;
+            int modelo = ucTarjetaCirculacion1.Modelo;
+
+            if (marcaId is null) {
+                ucTarjetaCirculacion1.CargarSubmarcas(Array.Empty<SubmarcaDto>());
+                return;
+            }
+
+            await _catalogos.CargarSubmarcasAsync(marcaId.Value, modelo);
+            ucTarjetaCirculacion1.CargarSubmarcas(_catalogos.Submarcas);
+        }
+
+
+        private void FlujoGrama(EtapaCaptura etapa) {
+            bool mostrarBody = etapa > EtapaCaptura.Inicio;
+
+            tlpBody.Visible = mostrarBody;
+            tlpBody.Enabled = mostrarBody;
+
+            gbAcceso.Visible = etapa >= EtapaCaptura.Acceso;
+            gbAcceso.Enabled = etapa >= EtapaCaptura.Acceso;
+
+            gbVisitante.Visible = etapa >= EtapaCaptura.Visitante;
+            gbVisitante.Enabled = etapa >= EtapaCaptura.Visitante;
+
+            gbSeleccionVehicular.Visible = etapa >= EtapaCaptura.Vehiculo;
+            gbSeleccionVehicular.Enabled = etapa >= EtapaCaptura.Vehiculo;
+
+            gbVinModelo.Visible = etapa >= EtapaCaptura.Vehiculo;
+            gbVinModelo.Enabled = etapa >= EtapaCaptura.Vehiculo;
+
+            gbTarjetaCirculacion.Visible = etapa >= EtapaCaptura.TarjetaCirculacion;
+            gbTarjetaCirculacion.Enabled = etapa >= EtapaCaptura.TarjetaCirculacion;
+
+            gbDocumentosAdicionales.Visible = etapa >= EtapaCaptura.Documentos;
+            gbDocumentosAdicionales.Enabled = etapa >= EtapaCaptura.Documentos;
+
+            gbEscaneoDocumentos.Visible = etapa >= EtapaCaptura.Escaneo;
+            gbEscaneoDocumentos.Enabled = etapa >= EtapaCaptura.Escaneo;
+        }
+
+
+        #region Crear verificacion 
+        private async void ucAccesoConsulta1_CrearVerificacion(object? sender, CrearVerificacionEventArgs e) {
+            var datos = e.Datos;
+            try {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
+                    var repo = new SivevRepository();
+
+                    var r = await repo.SpAppCapturaIniciaWebSrvNewAsync(
+                        cnn: connApp,
+                        estacionId: _estacionId,
+                        accesoId: _accesoId,
+                        placa: txtPlaca.Text.Trim(),
+
+                        pet: cbPET.Checked,
+                        
+                        // Son datos que vienen de la consulta de acceso, no del formulario de captura
+                        consultasSemoviId: datos.ConsultasSemoviId,
+
+                        vin: datos.Vin,
+                        modelo: datos.Modelo,
+                        tipoServicio: datos.TipoServicio,
+                        folioAuto: datos.FolioAuto,
+                        fechaTC: datos.FechaTC,
+
+                        testFM: datos.TestFM,
+
+                        conexionWs: datos.ConexionWs,
+                        conexionWebSrv: datos.ConexionWebSrv,
+
+                        adeudoFotoCivicas: datos.AdeudoFotoCivicas,
+                        adeudoTenencia: datos.AdeudoTenencia,
+                        adeudoInfraccion: datos.AdeudoInfraccion,
+
+                        gdfNoRegistrado: datos.GdfNoRegistrado
+                    );
+
+                    if (r.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCapturaIniciaWebSrvNew {r.MensajeId}", r.MensajeId);
+                        Mostrar.Mensaje("Error al iniciar verificación", error.Mensaje);
+                        return;
+                    }
+                    if (r.VerificacionId is null) {
+                        Mostrar.Mensaje("Error","No se recibió un identificador de verificación.");
+                        return;
+                    }
+                    _verificacionId = r.VerificacionId.Value;
+                    //Mostrar.Mensaje("Verificación iniciada", $"Se ha iniciado la verificación con ID: {_verificacionId}");
+                    //FlujoGrama(EtapaCaptura.Vehiculo);
+                    ucAccesoConsulta1.HabilitarCrearVerificacion(false);
+                });
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error al iniciar verificación", ex.Message);
+                SivevLogger.Error($"SpAppCapturaIniciaWebSrvNew: {ex}", SivevOrigen.Captura);
+            }
+        }
+        #endregion
+
+        #region VIN Modelo
+        private async void ucVinModelo1_ConsultarVin(object? sender,  EventArgs e) {
+            try {
+                if (_verificacionId == Guid.Empty) {
+                    Mostrar.Mensaje("Error", "Primero debe iniciar la verificación.");
+                    return;
+                }
+
+                await _sqlExecutor.EjecutarAsync( async connApp => {
+                    var repo = new SivevRepository();
+
+                        var r = await repo.SpAppCapturaVinModeloSetAsync(
+                        cnn: connApp,
+                        estacionId: _estacionId,
+                        accesoId: _accesoId,
+                        verificacionId: _verificacionId,
+                        vin: ucVinModelo1.Vin,
+                        odometro: 0
+                    );
+
+                    if (r.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp,  $"Error en SpAppCapturaVinModeloSet {r.MensajeId}", r.MensajeId);
+                        Mostrar.Mensaje("Error al consultar VIN", error.Mensaje);
+                        return;
+                    }
+
+                    if (r.Modelo <= 0) {
+                        Mostrar.Mensaje("VIN", "No se obtuvo un modelo válido.");
+                        return;
+                    }
+                    ucVinModelo1.EstablecerModelo(r.Modelo);
+
+                    // También ya tenemos:
+                    int marcaId = r.MarcaId;
+                    ucTarjetaCirculacion1.SeleccionarMarca(r.MarcaId);
+                    ucVinModelo1.EstablecerModelo(r.Modelo);
+                });
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error al consultar VIN", ex.Message);
+                SivevLogger.Error($"SpAppCapturaVinModeloSet: {ex}", SivevOrigen.Captura);
+            }
+        }
+        #endregion
+
+
     }
 }

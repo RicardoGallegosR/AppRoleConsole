@@ -28,10 +28,7 @@
             nudTubosEscape = new NumericUpDown();
             nudModelo = new NumericUpDown();
             txtClaveVehicular = new TextBox();
-            txtCombustible = new TextBox();
-            txtSubMarca = new TextBox();
             txtFolioTC = new TextBox();
-            txtMarca = new TextBox();
             txtPropietario = new TextBox();
             lblFTC = new Label();
             lblClaveVehicular = new Label();
@@ -43,10 +40,13 @@
             lblModelo = new Label();
             lblPropietario = new Label();
             dtpFTC = new DateTimePicker();
+            cbMarcas = new ComboBox();
             pnlFooter = new Panel();
             flpSeleecionVehicular = new FlowLayoutPanel();
             btnGuardar = new Button();
             btnEditar = new Button();
+            cbSubmarcas = new ComboBox();
+            cbCombustibles = new ComboBox();
             pnlPrincipal.SuspendLayout();
             tlpTarjetaCirculacion.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudTubosEscape).BeginInit();
@@ -61,6 +61,7 @@
             pnlPrincipal.Controls.Add(tlpTarjetaCirculacion);
             pnlPrincipal.Controls.Add(pnlFooter);
             pnlPrincipal.Dock = DockStyle.Fill;
+            pnlPrincipal.ForeColor = Color.FromArgb(45, 55, 65);
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
             pnlPrincipal.Size = new Size(789, 265);
@@ -73,13 +74,12 @@
             tlpTarjetaCirculacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tlpTarjetaCirculacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tlpTarjetaCirculacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpTarjetaCirculacion.Controls.Add(cbCombustibles, 1, 3);
+            tlpTarjetaCirculacion.Controls.Add(cbSubmarcas, 1, 2);
             tlpTarjetaCirculacion.Controls.Add(nudTubosEscape, 3, 2);
             tlpTarjetaCirculacion.Controls.Add(nudModelo, 3, 0);
             tlpTarjetaCirculacion.Controls.Add(txtClaveVehicular, 3, 3);
-            tlpTarjetaCirculacion.Controls.Add(txtCombustible, 1, 3);
-            tlpTarjetaCirculacion.Controls.Add(txtSubMarca, 1, 2);
             tlpTarjetaCirculacion.Controls.Add(txtFolioTC, 3, 1);
-            tlpTarjetaCirculacion.Controls.Add(txtMarca, 1, 1);
             tlpTarjetaCirculacion.Controls.Add(txtPropietario, 1, 0);
             tlpTarjetaCirculacion.Controls.Add(lblFTC, 0, 4);
             tlpTarjetaCirculacion.Controls.Add(lblClaveVehicular, 2, 3);
@@ -91,6 +91,7 @@
             tlpTarjetaCirculacion.Controls.Add(lblModelo, 2, 0);
             tlpTarjetaCirculacion.Controls.Add(lblPropietario, 0, 0);
             tlpTarjetaCirculacion.Controls.Add(dtpFTC, 1, 4);
+            tlpTarjetaCirculacion.Controls.Add(cbMarcas, 1, 1);
             tlpTarjetaCirculacion.Dock = DockStyle.Fill;
             tlpTarjetaCirculacion.Location = new Point(0, 0);
             tlpTarjetaCirculacion.Name = "tlpTarjetaCirculacion";
@@ -135,26 +136,6 @@
             txtClaveVehicular.Size = new Size(198, 26);
             txtClaveVehicular.TabIndex = 9;
             // 
-            // txtCombustible
-            // 
-            txtCombustible.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtCombustible.Font = new Font("Segoe UI", 10.5F);
-            txtCombustible.Location = new Point(197, 137);
-            txtCombustible.Margin = new Padding(0);
-            txtCombustible.Name = "txtCombustible";
-            txtCombustible.Size = new Size(197, 26);
-            txtCombustible.TabIndex = 4;
-            // 
-            // txtSubMarca
-            // 
-            txtSubMarca.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtSubMarca.Font = new Font("Segoe UI", 10.5F);
-            txtSubMarca.Location = new Point(197, 94);
-            txtSubMarca.Margin = new Padding(0);
-            txtSubMarca.Name = "txtSubMarca";
-            txtSubMarca.Size = new Size(197, 26);
-            txtSubMarca.TabIndex = 3;
-            // 
             // txtFolioTC
             // 
             txtFolioTC.Anchor = AnchorStyles.Left | AnchorStyles.Right;
@@ -164,16 +145,6 @@
             txtFolioTC.Name = "txtFolioTC";
             txtFolioTC.Size = new Size(198, 26);
             txtFolioTC.TabIndex = 7;
-            // 
-            // txtMarca
-            // 
-            txtMarca.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtMarca.Font = new Font("Segoe UI", 10.5F);
-            txtMarca.Location = new Point(197, 51);
-            txtMarca.Margin = new Padding(0);
-            txtMarca.Name = "txtMarca";
-            txtMarca.Size = new Size(197, 26);
-            txtMarca.TabIndex = 2;
             // 
             // txtPropietario
             // 
@@ -233,6 +204,7 @@
             // 
             lblSubMarca.Dock = DockStyle.Fill;
             lblSubMarca.Font = new Font("Segoe UI", 10.5F);
+            lblSubMarca.ForeColor = Color.FromArgb(45, 55, 65);
             lblSubMarca.Location = new Point(3, 86);
             lblSubMarca.Name = "lblSubMarca";
             lblSubMarca.Size = new Size(191, 43);
@@ -255,6 +227,7 @@
             // 
             lblMarca.Dock = DockStyle.Fill;
             lblMarca.Font = new Font("Segoe UI", 10.5F);
+            lblMarca.ForeColor = Color.FromArgb(45, 55, 65);
             lblMarca.Location = new Point(3, 43);
             lblMarca.Name = "lblMarca";
             lblMarca.Size = new Size(191, 43);
@@ -277,6 +250,7 @@
             // 
             lblPropietario.Dock = DockStyle.Fill;
             lblPropietario.Font = new Font("Segoe UI", 10.5F);
+            lblPropietario.ForeColor = Color.FromArgb(45, 55, 65);
             lblPropietario.Location = new Point(3, 0);
             lblPropietario.Name = "lblPropietario";
             lblPropietario.Size = new Size(191, 43);
@@ -290,6 +264,18 @@
             dtpFTC.Name = "dtpFTC";
             dtpFTC.Size = new Size(191, 23);
             dtpFTC.TabIndex = 12;
+            // 
+            // cbMarcas
+            // 
+            cbMarcas.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cbMarcas.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbMarcas.Font = new Font("Segoe UI", 12F);
+            cbMarcas.ForeColor = Color.Black;
+            cbMarcas.FormattingEnabled = true;
+            cbMarcas.Location = new Point(200, 53);
+            cbMarcas.Name = "cbMarcas";
+            cbMarcas.Size = new Size(191, 29);
+            cbMarcas.TabIndex = 13;
             // 
             // pnlFooter
             // 
@@ -343,6 +329,30 @@
             btnEditar.Text = "Editar";
             btnEditar.UseVisualStyleBackColor = true;
             // 
+            // cbSubmarcas
+            // 
+            cbSubmarcas.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cbSubmarcas.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbSubmarcas.Font = new Font("Segoe UI", 12F);
+            cbSubmarcas.ForeColor = Color.Black;
+            cbSubmarcas.FormattingEnabled = true;
+            cbSubmarcas.Location = new Point(200, 96);
+            cbSubmarcas.Name = "cbSubmarcas";
+            cbSubmarcas.Size = new Size(191, 29);
+            cbSubmarcas.TabIndex = 14;
+            // 
+            // cbCombustibles
+            // 
+            cbCombustibles.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cbCombustibles.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbCombustibles.Font = new Font("Segoe UI", 12F);
+            cbCombustibles.ForeColor = Color.Black;
+            cbCombustibles.FormattingEnabled = true;
+            cbCombustibles.Location = new Point(200, 139);
+            cbCombustibles.Name = "cbCombustibles";
+            cbCombustibles.Size = new Size(191, 29);
+            cbCombustibles.TabIndex = 15;
+            // 
             // ucTarjetaCirculacion
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -386,13 +396,13 @@
         private Label lblPropietario;
         private TextBox textBox8;
         private TextBox txtClaveVehicular;
-        private TextBox txtCombustible;
-        private TextBox txtSubMarca;
         private TextBox txtFolioTC;
-        private TextBox txtMarca;
         private TextBox txtPropietario;
         private NumericUpDown nudTubosEscape;
         private NumericUpDown nudModelo;
         private DateTimePicker dtpFTC;
+        private ComboBox cbMarcas;
+        private ComboBox cbCombustibles;
+        private ComboBox cbSubmarcas;
     }
 }

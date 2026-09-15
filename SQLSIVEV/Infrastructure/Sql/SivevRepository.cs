@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Presentation;
+using Microsoft.Data.SqlClient;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
@@ -76,6 +77,418 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
 
         }
+
+        #region Vin Modelo
+        public async Task<CapturaVinModeloResult> SpAppCapturaVinModeloSetAsync( SqlConnection cnn, Guid estacionId, Guid accesoId, Guid verificacionId, string vin, int odometro = 0, CancellationToken ct = default) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaVinModeloSet";
+
+            cmd.CommandTimeout = _timeout;
+
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+
+            pResultado.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId",   SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId",SqlDbType.UniqueIdentifier).Value = verificacionId;
+            cmd.Parameters.Add("@vcVin", SqlDbType.VarChar, 17).Value = vin;
+
+            var pModelo = cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt);
+            pModelo.Direction = ParameterDirection.Output;
+            cmd.Parameters.Add("@iOdometro", SqlDbType.Int).Value = odometro;
+
+            var pMarcaId = cmd.Parameters.Add("@iMarcaId",SqlDbType.Int);
+            pMarcaId.Direction = ParameterDirection.Output;
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            return new CapturaVinModeloResult {
+                MensajeId =     pMensaje.Value == DBNull.Value ? 0          : Convert.ToInt32(pMensaje.Value),
+                ResultadoId =   pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value),
+                Modelo =        pModelo.Value == DBNull.Value  ? (short)0   : Convert.ToInt16(pModelo.Value),
+                MarcaId =       pMarcaId.Value == DBNull.Value ? 0          : Convert.ToInt32(pMarcaId.Value)
+            };
+        }
+        #endregion
+
+
+
+        #region bitacora de adeudos
+        public async Task<CapturaIniciaResult> SpAppCapturaIniciaWebSrvNewAsync(SqlConnection cnn, Guid estacionId, Guid accesoId, string placa, bool pet, int consultasSemoviId, string vin, short modelo, string tipoServicio, string folioAuto, DateTime fechaTC, bool testFM, bool conexionWs, byte conexionWebSrv, bool adeudoFotoCivicas, bool adeudoTenencia, bool adeudoInfraccion, bool gdfNoRegistrado, CancellationToken ct = default) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaIniciaWebSrvNew";
+            cmd.CommandTimeout = _timeout;
+
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pResultado.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId",   SqlDbType.UniqueIdentifier).Value = accesoId;
+            
+            var pVerificacionId = cmd.Parameters.Add("@uiVerificacionId", SqlDbType.VarChar,36);
+
+            pVerificacionId.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@vcPlacaId", SqlDbType.VarChar,20).Value = placa;
+            cmd.Parameters.Add("@bPet", SqlDbType.Bit).Value = pet;
+
+            var pTipoVerificacion = cmd.Parameters.Add("@tiTipoVerificacionId",SqlDbType.TinyInt);
+
+            pTipoVerificacion.Direction = ParameterDirection.Output;
+
+            var pEstado = cmd.Parameters.Add("@tiEstadoId", SqlDbType.TinyInt);
+            pEstado.Direction = ParameterDirection.Output;
+            cmd.Parameters.Add("@iConsultasSemoviId", SqlDbType.Int).Value = consultasSemoviId;
+            cmd.Parameters.Add("@vcVin", SqlDbType.VarChar,  50).Value = vin;
+            cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt).Value = modelo;
+            cmd.Parameters.Add("@vcTipoServicio", SqlDbType.VarChar,  50).Value = tipoServicio;
+            cmd.Parameters.Add("@vcFolioAuto", SqlDbType.VarChar, 50).Value = folioAuto;
+            cmd.Parameters.Add("@dtFechaTC", SqlDbType.DateTime).Value = fechaTC;
+            cmd.Parameters.Add("@bTestFM", SqlDbType.Bit).Value = testFM;
+            cmd.Parameters.Add("@bConexionWs", SqlDbType.Bit).Value = conexionWs;
+            cmd.Parameters.Add("@tiConexionWebSrv", SqlDbType.TinyInt).Value = conexionWebSrv;
+            cmd.Parameters.Add("@bAdeudoGdfFotoCivicas", SqlDbType.Bit).Value = adeudoFotoCivicas;
+            cmd.Parameters.Add("@bAdeudoTenencia", SqlDbType.Bit).Value = adeudoTenencia;
+            cmd.Parameters.Add("@bAdeudoInfraccion",SqlDbType.Bit).Value = adeudoInfraccion;
+            cmd.Parameters.Add("@bGdfNoRegiostrado",SqlDbType.Bit).Value = gdfNoRegistrado;
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            int mensajeId = pMensaje.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensaje.Value);
+            short resultadoId = pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value);
+            byte tipoVerificacionId = pTipoVerificacion.Value == DBNull.Value ? (byte)0 : Convert.ToByte(pTipoVerificacion.Value);
+            byte estadoId = pEstado.Value == DBNull.Value ? (byte)0 : Convert.ToByte(pEstado.Value);
+            Guid? verificacionId = null;
+
+            if (pVerificacionId.Value != DBNull.Value && Guid.TryParse(pVerificacionId.Value?.ToString(), out Guid guid)) {
+                verificacionId = guid;
+            }
+
+            return new CapturaIniciaResult {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                VerificacionId = verificacionId,
+                TipoVerificacionId = tipoVerificacionId,
+                EstadoId = estadoId
+            };
+        }
+        #endregion
+
+
+
+        #region Combustibles, EntidadesFederativas, Marcas, TiposAdeudos, TiposLineasCaptura para captura centralizada
+        public StoreResult<List<CombustibleDto>> SpAppCombustiblesGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var combustibles = new List<CombustibleDto>();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppCombustiblesGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId",   SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int ordCombustibleId = reader.GetOrdinal("CombustibleId");
+                int ordCombustible = reader.GetOrdinal("Combustible");
+                int ordFactorCalculo = reader.GetOrdinal("FactorCalculo");
+                int ordModuloEquipoId = reader.GetOrdinal("ModuloEquipoId");
+
+                while (reader.Read()) {
+                    combustibles.Add(new CombustibleDto {
+                        CombustibleId =     reader.IsDBNull(ordCombustibleId)   ?(byte)0  : reader.GetByte(ordCombustibleId),
+                        Combustible =       reader.IsDBNull(ordCombustible)     ? string.Empty : reader.GetString(ordCombustible),
+                        FactorCalculo =     reader.IsDBNull(ordFactorCalculo)   ? 0m : reader.GetDecimal(ordFactorCalculo), 
+                        ModuloEquipoId =    reader.IsDBNull(ordModuloEquipoId)  ?(byte)0 : reader.GetByte(ordModuloEquipoId)
+                    });
+                }
+            }
+
+            // IMPORTANTE:
+            // los parámetros OUTPUT se leen después de cerrar el DataReader.
+            
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+            
+            return new StoreResult<List<CombustibleDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = combustibles
+            };
+        }
+
+
+        public StoreResult<List<EntidadesFederativasDto>> SpAppEntidadesFederativasGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var entidadesFederativas = new List<EntidadesFederativasDto >();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppEntidadesFederativasGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int ordEntidadFederativaId = reader.GetOrdinal("EntidadFederativaId");
+                int ordEntidadFederativa = reader.GetOrdinal("EntidadFederativa");
+                int Abreviacion = reader.GetOrdinal("Abreviacion");
+
+                while (reader.Read()) {
+                    entidadesFederativas.Add(new EntidadesFederativasDto {
+                        EntidadFederativaId = reader.IsDBNull(ordEntidadFederativaId) ? (byte)0 : reader.GetByte(ordEntidadFederativaId),
+                        EntidadFederativa   = reader.IsDBNull(ordEntidadFederativa) ? string.Empty : reader.GetString(ordEntidadFederativa),
+                        Abreviacion         = reader.IsDBNull(Abreviacion) ? string.Empty : reader.GetString(Abreviacion)   
+                    });
+                }
+            }
+
+            // IMPORTANTE:
+            // los parámetros OUTPUT se leen después de cerrar el DataReader.
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<EntidadesFederativasDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = entidadesFederativas
+            };
+        }
+
+
+        public StoreResult<List<MarcasDto>> SpAppMarcasGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var marcas = new List<MarcasDto >();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppMarcasGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int MarcaId = reader.GetOrdinal("MarcaId");
+                int Marca = reader.GetOrdinal("Marca");
+                int TipoMarcaId = reader.GetOrdinal("TipoMarcaId");
+
+                while (reader.Read()) {
+                    marcas.Add(new MarcasDto {
+                        MarcaId = reader.IsDBNull(MarcaId) ? 0 : reader.GetInt32(MarcaId),
+                        Marca = reader.IsDBNull(Marca) ? string.Empty : reader.GetString(Marca),
+                        TipoMarcaId = reader.IsDBNull(TipoMarcaId) ? (byte)0 : reader.GetByte(TipoMarcaId)
+                    });
+                }
+            }
+
+            // IMPORTANTE:
+            // los parámetros OUTPUT se leen después de cerrar el DataReader.
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<MarcasDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = marcas
+            };
+        }
+        public StoreResult<List<SubmarcaDto>> SpAppSubmarcasGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId,  int marcaId,    short modelo) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var submarcas = new List<SubmarcaDto>();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppSubmarcasGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado",SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+            cmd.Parameters.Add("@uiAccesoId",   SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@iMarcaId",     SqlDbType.Int             ).Value = marcaId;
+            cmd.Parameters.Add("@siModelo",     SqlDbType.SmallInt        ).Value = modelo;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int ordSubmarcaId = reader.GetOrdinal("SubmarcaId");
+                int ordSubmarca   = reader.GetOrdinal("Submarca");
+
+                while (reader.Read()) {
+                    submarcas.Add(new SubmarcaDto {
+                        SubmarcaId = reader.IsDBNull(ordSubmarcaId) ? 0 : Convert.ToInt32(reader.GetValue(ordSubmarcaId)),
+                        Submarca = reader.IsDBNull(ordSubmarca)     ? string.Empty : reader.GetString(ordSubmarca)
+                    });
+                }
+            }
+            int mensajeId = pMsg.Value == DBNull.Value ? 0 : Convert.ToInt32(pMsg.Value);
+            short resultadoId =  pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<SubmarcaDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = submarcas
+            };
+        }
+
+        public StoreResult<List<TiposAdeudosDto>> SpAppTiposAdeudosGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var tiposAdeudos = new List<TiposAdeudosDto >();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppTiposAdeudosGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int TipoAdeudoId = reader.GetOrdinal("TipoAdeudoId");
+                int TipoAdeudo = reader.GetOrdinal("TipoAdeudo");
+
+                while (reader.Read()) {
+                    tiposAdeudos.Add(new TiposAdeudosDto {
+                        TipoAdeudoId = reader.IsDBNull(TipoAdeudoId) ? (byte)0 : reader.GetByte(TipoAdeudoId),
+                        TipoAdeudo = reader.IsDBNull(TipoAdeudo) ? string.Empty : reader.GetString(TipoAdeudo   )
+                    });
+                }
+            }
+
+            // IMPORTANTE:
+            // los parámetros OUTPUT se leen después de cerrar el DataReader.
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<TiposAdeudosDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = tiposAdeudos
+            };
+        }
+
+        public StoreResult<List<TiposLineasCapturaDto>> SpAppTiposLineasCapturaGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var tiposAdeudos = new List<TiposLineasCapturaDto >();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppTiposLineasCapturaGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int TipoLineaCapturaId = reader.GetOrdinal("TipoLineaCapturaId");
+                int TipoLineaCaptura = reader.GetOrdinal("TipoLineaCaptura");
+                int Vigencia = reader.GetOrdinal("Vigencia");
+                int Mascara = reader.GetOrdinal("Mascara");
+                int Conciliable = reader.GetOrdinal("Conciliable");
+                int Verificable = reader.GetOrdinal("Verificable");
+                int Url = reader.GetOrdinal("Url");
+
+                while (reader.Read()) {
+                    tiposAdeudos.Add(new TiposLineasCapturaDto {
+                        TipoLineaCapturaId = reader.IsDBNull(TipoLineaCapturaId) ? (byte)0 : reader.GetByte(TipoLineaCapturaId),
+                        TipoLineaCaptura = reader.IsDBNull(TipoLineaCaptura) ? string.Empty : reader.GetString(TipoLineaCaptura),
+                        Vigencia = reader.IsDBNull(Vigencia) ? (byte)0 : reader.GetByte(Vigencia),
+                        Mascara = reader.IsDBNull(Mascara) ? string.Empty : reader.GetString(Mascara),
+                        Conciliable = reader.IsDBNull(Conciliable) ? false : reader.GetBoolean(Conciliable),
+                        Verificable = reader.IsDBNull(Verificable) ? false : reader.GetBoolean(Verificable),
+                        Url = reader.IsDBNull(Url) ? string.Empty : reader.GetString(Url)
+                    });
+                }
+            }
+
+            // IMPORTANTE:
+            // los parámetros OUTPUT se leen después de cerrar el DataReader.
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<TiposLineasCapturaDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = tiposAdeudos
+            };
+        }
+
+        #endregion
+
         public SpAppChecaCpuResult SpAppChecaCpu(SqlConnection conn, string estacionId, string aplicacion, string version, string identificadorEquipo, string serieDisco) {
             if (conn is null) throw new ArgumentNullException(nameof(conn));
             if (conn.State != ConnectionState.Open)

@@ -30,17 +30,24 @@
             gbVinModelo = new GroupBox();
             ucVinModelo1 = new FrmComun.CapturaCentralizada.Complementos.ucVinModelo();
             gbAcceso = new GroupBox();
+            ucAccesoConsulta1 = new FrmComun.CapturaCentralizada.Complementos.ucAccesoConsulta();
             gbVisitante = new GroupBox();
             ucVisitante1 = new FrmComun.CapturaCentralizada.Complementos.ucVisitante();
             tlpFila2 = new TableLayoutPanel();
             gbTarjetaCirculacion = new GroupBox();
+            ucTarjetaCirculacion1 = new FrmComun.CapturaCentralizada.Complementos.ucTarjetaCirculacion();
             gbSeleccionVehicular = new GroupBox();
             ucSeleccionVehiculo1 = new FrmComun.CapturaCentralizada.Complementos.ucSeleccionVehiculo();
             tlpFila3 = new TableLayoutPanel();
             gbEscaneoDocumentos = new GroupBox();
+            ucEscaneoDocumentos1 = new FrmComun.CapturaCentralizada.Complementos.ucEscaneoDocumentos();
             gbDocumentosAdicionales = new GroupBox();
+            ucDocumentosAdicionales1 = new FrmComun.CapturaCentralizada.Complementos.ucDocumentosAdicionales();
             pnlHeader = new Panel();
             tlpHeader = new TableLayoutPanel();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            lblPET = new Label();
+            cbPET = new CheckBox();
             tlpPlacaHeader = new TableLayoutPanel();
             lblPlaca = new Label();
             txtPlaca = new TextBox();
@@ -48,18 +55,21 @@
             txtLinea = new TextBox();
             lblLinea = new Label();
             ipbLogo = new FontAwesome.Sharp.IconPictureBox();
-            ucTarjetaCirculacion1 = new FrmComun.CapturaCentralizada.Complementos.ucTarjetaCirculacion();
             pnlPrincipal.SuspendLayout();
             tlpBody.SuspendLayout();
             tlpFila1.SuspendLayout();
             gbVinModelo.SuspendLayout();
+            gbAcceso.SuspendLayout();
             gbVisitante.SuspendLayout();
             tlpFila2.SuspendLayout();
             gbTarjetaCirculacion.SuspendLayout();
             gbSeleccionVehicular.SuspendLayout();
             tlpFila3.SuspendLayout();
+            gbEscaneoDocumentos.SuspendLayout();
+            gbDocumentosAdicionales.SuspendLayout();
             pnlHeader.SuspendLayout();
             tlpHeader.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
             tlpPlacaHeader.SuspendLayout();
             tlpLinea.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)ipbLogo).BeginInit();
@@ -67,14 +77,14 @@
             // 
             // pnlPrincipal
             // 
-            pnlPrincipal.BackColor = Color.White;
+            pnlPrincipal.BackColor = Color.WhiteSmoke;
             pnlPrincipal.Controls.Add(tlpBody);
             pnlPrincipal.Controls.Add(pnlHeader);
             pnlPrincipal.Dock = DockStyle.Fill;
             pnlPrincipal.ForeColor = Color.FromArgb(1, 118, 71);
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
-            pnlPrincipal.Size = new Size(1009, 579);
+            pnlPrincipal.Size = new Size(1009, 706);
             pnlPrincipal.TabIndex = 0;
             // 
             // tlpBody
@@ -89,19 +99,19 @@
             tlpBody.Location = new Point(0, 100);
             tlpBody.Name = "tlpBody";
             tlpBody.RowCount = 3;
-            tlpBody.RowStyles.Add(new RowStyle(SizeType.Percent, 37F));
             tlpBody.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
-            tlpBody.RowStyles.Add(new RowStyle(SizeType.Percent, 29F));
-            tlpBody.Size = new Size(1009, 479);
+            tlpBody.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
+            tlpBody.RowStyles.Add(new RowStyle(SizeType.Percent, 36F));
+            tlpBody.Size = new Size(1009, 606);
             tlpBody.TabIndex = 1;
             // 
             // tlpFila1
             // 
             tlpFila1.ColumnCount = 4;
             tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-            tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 39F));
+            tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43F));
             tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 13F));
+            tlpFila1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 9F));
             tlpFila1.Controls.Add(gbAcciones, 3, 0);
             tlpFila1.Controls.Add(gbVinModelo, 2, 0);
             tlpFila1.Controls.Add(gbAcceso, 1, 0);
@@ -111,34 +121,36 @@
             tlpFila1.Name = "tlpFila1";
             tlpFila1.RowCount = 1;
             tlpFila1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpFila1.Size = new Size(1003, 171);
+            tlpFila1.Size = new Size(1003, 200);
             tlpFila1.TabIndex = 0;
             // 
             // gbAcciones
             // 
+            gbAcciones.BackColor = SystemColors.Window;
             gbAcciones.Dock = DockStyle.Fill;
             gbAcciones.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbAcciones.ForeColor = Color.Crimson;
-            gbAcciones.Location = new Point(876, 5);
+            gbAcciones.Location = new Point(916, 5);
             gbAcciones.Margin = new Padding(5);
             gbAcciones.Name = "gbAcciones";
             gbAcciones.Padding = new Padding(10);
-            gbAcciones.Size = new Size(122, 161);
+            gbAcciones.Size = new Size(82, 190);
             gbAcciones.TabIndex = 3;
             gbAcciones.TabStop = false;
             gbAcciones.Text = "ACCIONES";
             // 
             // gbVinModelo
             // 
+            gbVinModelo.BackColor = SystemColors.Window;
             gbVinModelo.Controls.Add(ucVinModelo1);
             gbVinModelo.Dock = DockStyle.Fill;
             gbVinModelo.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbVinModelo.ForeColor = Color.Crimson;
-            gbVinModelo.Location = new Point(676, 5);
+            gbVinModelo.Location = new Point(716, 5);
             gbVinModelo.Margin = new Padding(5);
             gbVinModelo.Name = "gbVinModelo";
             gbVinModelo.Padding = new Padding(10);
-            gbVinModelo.Size = new Size(190, 161);
+            gbVinModelo.Size = new Size(190, 190);
             gbVinModelo.TabIndex = 2;
             gbVinModelo.TabStop = false;
             gbVinModelo.Text = "VIN / MODELO";
@@ -148,11 +160,13 @@
             ucVinModelo1.Dock = DockStyle.Fill;
             ucVinModelo1.Location = new Point(10, 30);
             ucVinModelo1.Name = "ucVinModelo1";
-            ucVinModelo1.Size = new Size(170, 121);
+            ucVinModelo1.Size = new Size(170, 150);
             ucVinModelo1.TabIndex = 0;
             // 
             // gbAcceso
             // 
+            gbAcceso.BackColor = Color.White;
+            gbAcceso.Controls.Add(ucAccesoConsulta1);
             gbAcceso.Dock = DockStyle.Fill;
             gbAcceso.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbAcceso.ForeColor = Color.Crimson;
@@ -160,13 +174,27 @@
             gbAcceso.Margin = new Padding(5);
             gbAcceso.Name = "gbAcceso";
             gbAcceso.Padding = new Padding(10);
-            gbAcceso.Size = new Size(381, 161);
+            gbAcceso.Size = new Size(421, 190);
             gbAcceso.TabIndex = 1;
             gbAcceso.TabStop = false;
             gbAcceso.Text = "ACCESO / CONSULTA";
             // 
+            // ucAccesoConsulta1
+            // 
+            ucAccesoConsulta1.Ambientales = "STATUS AMBIENTALES";
+            ucAccesoConsulta1.Dock = DockStyle.Fill;
+            ucAccesoConsulta1.Fotocivicas = "STATUS FOTOCIIVCAS";
+            ucAccesoConsulta1.Location = new Point(10, 30);
+            ucAccesoConsulta1.Monetarias = "STATUS MONETARIAS\r\n";
+            ucAccesoConsulta1.Name = "ucAccesoConsulta1";
+            ucAccesoConsulta1.Placa = "";
+            ucAccesoConsulta1.Size = new Size(401, 150);
+            ucAccesoConsulta1.TabIndex = 0;
+            ucAccesoConsulta1.Tenencias = "STATUS TENENCIAS";
+            // 
             // gbVisitante
             // 
+            gbVisitante.BackColor = Color.White;
             gbVisitante.Controls.Add(ucVisitante1);
             gbVisitante.Dock = DockStyle.Fill;
             gbVisitante.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
@@ -175,7 +203,7 @@
             gbVisitante.Margin = new Padding(5);
             gbVisitante.Name = "gbVisitante";
             gbVisitante.Padding = new Padding(10);
-            gbVisitante.Size = new Size(270, 161);
+            gbVisitante.Size = new Size(270, 190);
             gbVisitante.TabIndex = 0;
             gbVisitante.TabStop = false;
             gbVisitante.Text = "VISITANTE";
@@ -185,7 +213,7 @@
             ucVisitante1.Dock = DockStyle.Fill;
             ucVisitante1.Location = new Point(10, 30);
             ucVisitante1.Name = "ucVisitante1";
-            ucVisitante1.Size = new Size(250, 121);
+            ucVisitante1.Size = new Size(250, 150);
             ucVisitante1.TabIndex = 0;
             // 
             // tlpFila2
@@ -196,16 +224,17 @@
             tlpFila2.Controls.Add(gbTarjetaCirculacion, 1, 0);
             tlpFila2.Controls.Add(gbSeleccionVehicular, 0, 0);
             tlpFila2.Dock = DockStyle.Fill;
-            tlpFila2.Location = new Point(3, 180);
+            tlpFila2.Location = new Point(3, 209);
             tlpFila2.Name = "tlpFila2";
             tlpFila2.RowCount = 1;
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpFila2.Size = new Size(1003, 156);
+            tlpFila2.Size = new Size(1003, 175);
             tlpFila2.TabIndex = 1;
             // 
             // gbTarjetaCirculacion
             // 
+            gbTarjetaCirculacion.BackColor = SystemColors.Window;
             gbTarjetaCirculacion.Controls.Add(ucTarjetaCirculacion1);
             gbTarjetaCirculacion.Dock = DockStyle.Fill;
             gbTarjetaCirculacion.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
@@ -214,13 +243,22 @@
             gbTarjetaCirculacion.Margin = new Padding(5);
             gbTarjetaCirculacion.Name = "gbTarjetaCirculacion";
             gbTarjetaCirculacion.Padding = new Padding(10);
-            gbTarjetaCirculacion.Size = new Size(432, 146);
+            gbTarjetaCirculacion.Size = new Size(432, 165);
             gbTarjetaCirculacion.TabIndex = 2;
             gbTarjetaCirculacion.TabStop = false;
             gbTarjetaCirculacion.Text = "TARJETA DE CIRCUALCIÓN";
             // 
+            // ucTarjetaCirculacion1
+            // 
+            ucTarjetaCirculacion1.Dock = DockStyle.Fill;
+            ucTarjetaCirculacion1.Location = new Point(10, 30);
+            ucTarjetaCirculacion1.Name = "ucTarjetaCirculacion1";
+            ucTarjetaCirculacion1.Size = new Size(412, 125);
+            ucTarjetaCirculacion1.TabIndex = 0;
+            // 
             // gbSeleccionVehicular
             // 
+            gbSeleccionVehicular.BackColor = SystemColors.Window;
             gbSeleccionVehicular.Controls.Add(ucSeleccionVehiculo1);
             gbSeleccionVehicular.Dock = DockStyle.Fill;
             gbSeleccionVehicular.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
@@ -229,7 +267,7 @@
             gbSeleccionVehicular.Margin = new Padding(5);
             gbSeleccionVehicular.Name = "gbSeleccionVehicular";
             gbSeleccionVehicular.Padding = new Padding(10);
-            gbSeleccionVehicular.Size = new Size(551, 146);
+            gbSeleccionVehicular.Size = new Size(551, 165);
             gbSeleccionVehicular.TabIndex = 1;
             gbSeleccionVehicular.TabStop = false;
             gbSeleccionVehicular.Text = "SELECCION DE VEHICULO";
@@ -239,7 +277,7 @@
             ucSeleccionVehiculo1.Dock = DockStyle.Fill;
             ucSeleccionVehiculo1.Location = new Point(10, 30);
             ucSeleccionVehiculo1.Name = "ucSeleccionVehiculo1";
-            ucSeleccionVehiculo1.Size = new Size(531, 106);
+            ucSeleccionVehiculo1.Size = new Size(531, 125);
             ucSeleccionVehiculo1.TabIndex = 0;
             // 
             // tlpFila3
@@ -250,15 +288,17 @@
             tlpFila3.Controls.Add(gbEscaneoDocumentos, 1, 0);
             tlpFila3.Controls.Add(gbDocumentosAdicionales, 0, 0);
             tlpFila3.Dock = DockStyle.Fill;
-            tlpFila3.Location = new Point(3, 342);
+            tlpFila3.Location = new Point(3, 390);
             tlpFila3.Name = "tlpFila3";
             tlpFila3.RowCount = 1;
             tlpFila3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpFila3.Size = new Size(1003, 134);
+            tlpFila3.Size = new Size(1003, 213);
             tlpFila3.TabIndex = 2;
             // 
             // gbEscaneoDocumentos
             // 
+            gbEscaneoDocumentos.BackColor = SystemColors.Window;
+            gbEscaneoDocumentos.Controls.Add(ucEscaneoDocumentos1);
             gbEscaneoDocumentos.Dock = DockStyle.Fill;
             gbEscaneoDocumentos.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbEscaneoDocumentos.ForeColor = Color.Crimson;
@@ -266,13 +306,23 @@
             gbEscaneoDocumentos.Margin = new Padding(5);
             gbEscaneoDocumentos.Name = "gbEscaneoDocumentos";
             gbEscaneoDocumentos.Padding = new Padding(10);
-            gbEscaneoDocumentos.Size = new Size(422, 124);
+            gbEscaneoDocumentos.Size = new Size(422, 203);
             gbEscaneoDocumentos.TabIndex = 2;
             gbEscaneoDocumentos.TabStop = false;
             gbEscaneoDocumentos.Text = "ESCANEO DE DOCUMENTOS";
             // 
+            // ucEscaneoDocumentos1
+            // 
+            ucEscaneoDocumentos1.Dock = DockStyle.Fill;
+            ucEscaneoDocumentos1.Location = new Point(10, 30);
+            ucEscaneoDocumentos1.Name = "ucEscaneoDocumentos1";
+            ucEscaneoDocumentos1.Size = new Size(402, 163);
+            ucEscaneoDocumentos1.TabIndex = 0;
+            // 
             // gbDocumentosAdicionales
             // 
+            gbDocumentosAdicionales.BackColor = SystemColors.Window;
+            gbDocumentosAdicionales.Controls.Add(ucDocumentosAdicionales1);
             gbDocumentosAdicionales.Dock = DockStyle.Fill;
             gbDocumentosAdicionales.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbDocumentosAdicionales.ForeColor = Color.Crimson;
@@ -280,10 +330,18 @@
             gbDocumentosAdicionales.Margin = new Padding(5);
             gbDocumentosAdicionales.Name = "gbDocumentosAdicionales";
             gbDocumentosAdicionales.Padding = new Padding(10);
-            gbDocumentosAdicionales.Size = new Size(561, 124);
+            gbDocumentosAdicionales.Size = new Size(561, 203);
             gbDocumentosAdicionales.TabIndex = 1;
             gbDocumentosAdicionales.TabStop = false;
             gbDocumentosAdicionales.Text = "DOCUMENTOS ADICIONALES";
+            // 
+            // ucDocumentosAdicionales1
+            // 
+            ucDocumentosAdicionales1.Dock = DockStyle.Fill;
+            ucDocumentosAdicionales1.Location = new Point(10, 30);
+            ucDocumentosAdicionales1.Name = "ucDocumentosAdicionales1";
+            ucDocumentosAdicionales1.Size = new Size(541, 163);
+            ucDocumentosAdicionales1.TabIndex = 0;
             // 
             // pnlHeader
             // 
@@ -296,13 +354,15 @@
             // 
             // tlpHeader
             // 
-            tlpHeader.ColumnCount = 3;
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+            tlpHeader.ColumnCount = 4;
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpHeader.Controls.Add(tableLayoutPanel1, 2, 0);
             tlpHeader.Controls.Add(tlpPlacaHeader, 0, 0);
             tlpHeader.Controls.Add(tlpLinea, 1, 0);
-            tlpHeader.Controls.Add(ipbLogo, 2, 0);
+            tlpHeader.Controls.Add(ipbLogo, 3, 0);
             tlpHeader.Dock = DockStyle.Fill;
             tlpHeader.Location = new Point(0, 0);
             tlpHeader.Name = "tlpHeader";
@@ -310,6 +370,50 @@
             tlpHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpHeader.Size = new Size(1009, 100);
             tlpHeader.TabIndex = 0;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Controls.Add(lblPET, 0, 0);
+            tableLayoutPanel1.Controls.Add(cbPET, 1, 0);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(507, 3);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Size = new Size(246, 94);
+            tableLayoutPanel1.TabIndex = 2;
+            tableLayoutPanel1.TabStop = true;
+            // 
+            // lblPET
+            // 
+            lblPET.Dock = DockStyle.Fill;
+            lblPET.Font = new Font("Segoe UI", 28F);
+            lblPET.ForeColor = Color.Crimson;
+            lblPET.Location = new Point(0, 0);
+            lblPET.Margin = new Padding(0, 0, 10, 0);
+            lblPET.Name = "lblPET";
+            lblPET.Padding = new Padding(0, 0, 12, 0);
+            lblPET.Size = new Size(113, 94);
+            lblPET.TabIndex = 1;
+            lblPET.Text = "PET";
+            lblPET.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // cbPET
+            // 
+            cbPET.AutoSize = true;
+            cbPET.Dock = DockStyle.Left;
+            cbPET.ForeColor = Color.Black;
+            cbPET.Location = new Point(126, 3);
+            cbPET.Name = "cbPET";
+            cbPET.Size = new Size(117, 88);
+            cbPET.TabIndex = 2;
+            cbPET.Text = "Prueba de Evaluación Técnica";
+            cbPET.TextAlign = ContentAlignment.MiddleCenter;
+            cbPET.UseVisualStyleBackColor = true;
             // 
             // tlpPlacaHeader
             // 
@@ -324,7 +428,7 @@
             tlpPlacaHeader.RowCount = 1;
             tlpPlacaHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tlpPlacaHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpPlacaHeader.Size = new Size(347, 94);
+            tlpPlacaHeader.Size = new Size(246, 94);
             tlpPlacaHeader.TabIndex = 0;
             // 
             // lblPlaca
@@ -335,7 +439,7 @@
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
             lblPlaca.Padding = new Padding(0, 0, 12, 0);
-            lblPlaca.Size = new Size(167, 94);
+            lblPlaca.Size = new Size(117, 94);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "Placa";
             lblPlaca.TextAlign = ContentAlignment.MiddleLeft;
@@ -343,13 +447,16 @@
             // txtPlaca
             // 
             txtPlaca.BorderStyle = BorderStyle.FixedSingle;
+            txtPlaca.CharacterCasing = CharacterCasing.Upper;
             txtPlaca.Dock = DockStyle.Fill;
             txtPlaca.Font = new Font("Segoe UI", 28F);
-            txtPlaca.Location = new Point(173, 16);
+            txtPlaca.Location = new Point(123, 16);
             txtPlaca.Margin = new Padding(0, 16, 0, 16);
             txtPlaca.Name = "txtPlaca";
-            txtPlaca.Size = new Size(174, 57);
+            txtPlaca.Size = new Size(123, 57);
             txtPlaca.TabIndex = 1;
+            txtPlaca.Text = "ABC1234";
+            txtPlaca.KeyDown += txtPlaca_KeyDown;
             // 
             // tlpLinea
             // 
@@ -359,12 +466,12 @@
             tlpLinea.Controls.Add(txtLinea, 1, 0);
             tlpLinea.Controls.Add(lblLinea, 0, 0);
             tlpLinea.Dock = DockStyle.Fill;
-            tlpLinea.Location = new Point(356, 3);
+            tlpLinea.Location = new Point(255, 3);
             tlpLinea.Name = "tlpLinea";
             tlpLinea.RowCount = 1;
             tlpLinea.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tlpLinea.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpLinea.Size = new Size(296, 94);
+            tlpLinea.Size = new Size(246, 94);
             tlpLinea.TabIndex = 0;
             tlpLinea.TabStop = true;
             // 
@@ -373,11 +480,12 @@
             txtLinea.BorderStyle = BorderStyle.FixedSingle;
             txtLinea.Dock = DockStyle.Fill;
             txtLinea.Font = new Font("Segoe UI", 28F);
-            txtLinea.Location = new Point(148, 16);
+            txtLinea.Location = new Point(123, 16);
             txtLinea.Margin = new Padding(0, 16, 0, 16);
             txtLinea.Name = "txtLinea";
-            txtLinea.Size = new Size(148, 57);
-            txtLinea.TabIndex = 2;
+            txtLinea.Size = new Size(123, 57);
+            txtLinea.TabIndex = 0;
+            txtLinea.TabStop = false;
             // 
             // lblLinea
             // 
@@ -388,7 +496,7 @@
             lblLinea.Margin = new Padding(0, 0, 10, 0);
             lblLinea.Name = "lblLinea";
             lblLinea.Padding = new Padding(0, 0, 12, 0);
-            lblLinea.Size = new Size(138, 94);
+            lblLinea.Size = new Size(113, 94);
             lblLinea.TabIndex = 1;
             lblLinea.Text = "Línea";
             lblLinea.TextAlign = ContentAlignment.MiddleLeft;
@@ -408,32 +516,29 @@
             ipbLogo.TabIndex = 1;
             ipbLogo.TabStop = false;
             // 
-            // ucTarjetaCirculacion1
-            // 
-            ucTarjetaCirculacion1.Dock = DockStyle.Fill;
-            ucTarjetaCirculacion1.Location = new Point(10, 30);
-            ucTarjetaCirculacion1.Name = "ucTarjetaCirculacion1";
-            ucTarjetaCirculacion1.Size = new Size(412, 106);
-            ucTarjetaCirculacion1.TabIndex = 0;
-            // 
             // ucRegistroVehicular
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(pnlPrincipal);
             Name = "ucRegistroVehicular";
-            Size = new Size(1009, 579);
+            Size = new Size(1009, 706);
             pnlPrincipal.ResumeLayout(false);
             tlpBody.ResumeLayout(false);
             tlpFila1.ResumeLayout(false);
             gbVinModelo.ResumeLayout(false);
+            gbAcceso.ResumeLayout(false);
             gbVisitante.ResumeLayout(false);
             tlpFila2.ResumeLayout(false);
             gbTarjetaCirculacion.ResumeLayout(false);
             gbSeleccionVehicular.ResumeLayout(false);
             tlpFila3.ResumeLayout(false);
+            gbEscaneoDocumentos.ResumeLayout(false);
+            gbDocumentosAdicionales.ResumeLayout(false);
             pnlHeader.ResumeLayout(false);
             tlpHeader.ResumeLayout(false);
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             tlpPlacaHeader.ResumeLayout(false);
             tlpPlacaHeader.PerformLayout();
             tlpLinea.ResumeLayout(false);
@@ -470,5 +575,11 @@
         private Complementos.ucVisitante ucVisitante1;
         private Complementos.ucSeleccionVehiculo ucSeleccionVehiculo1;
         private Complementos.ucTarjetaCirculacion ucTarjetaCirculacion1;
+        private Complementos.ucEscaneoDocumentos ucEscaneoDocumentos1;
+        private Complementos.ucDocumentosAdicionales ucDocumentosAdicionales1;
+        private Complementos.ucAccesoConsulta ucAccesoConsulta1;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Label lblPET;
+        private CheckBox cbPET;
     }
 }

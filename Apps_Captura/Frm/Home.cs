@@ -233,12 +233,13 @@ namespace Apps_Captura.Frm {
             _barraLateral.MostrarVista("RegistroVehicular", "RegistroVehicular", () => {
 
                 var registro = new ucRegistroVehicular(
-                    _sql,
-                    _capturaRegistroWindows.dvar17,
-                    _capturaRegistroWindows.dvar16.ToString().ToUpper(),
-                    _capturaRegistroWindows.dvar8,
-                    _capturaRegistroWindows.dvar15,
-                    _capturaRegistroWindows.dvar12
+                    sql: _sql,
+                    roll: _capturaRegistroWindows.dvar17,
+                    passRoll: _capturaRegistroWindows.dvar16.ToString().ToUpper(),
+                    opcionMenu: _capturaRegistroWindows.dvar8,
+                    estacionId: _capturaRegistroWindows.dvar15,
+                    accesoId: _capturaRegistroWindows.dvar22,
+                    centro: _capturaRegistroWindows.dvar12
                 );
                 return registro;
             });
