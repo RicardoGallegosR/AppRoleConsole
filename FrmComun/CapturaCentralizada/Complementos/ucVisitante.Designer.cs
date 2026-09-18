@@ -49,7 +49,7 @@
             pnlPrincipal.ForeColor = Color.FromArgb(45, 55, 65);
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
-            pnlPrincipal.Size = new Size(368, 189);
+            pnlPrincipal.Size = new Size(375, 177);
             pnlPrincipal.TabIndex = 0;
             // 
             // tlpVisitante
@@ -67,20 +67,20 @@
             tlpVisitante.Location = new Point(0, 0);
             tlpVisitante.Name = "tlpVisitante";
             tlpVisitante.RowCount = 3;
-            tlpVisitante.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlpVisitante.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlpVisitante.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlpVisitante.Size = new Size(368, 139);
+            tlpVisitante.RowStyles.Add(new RowStyle());
+            tlpVisitante.RowStyles.Add(new RowStyle());
+            tlpVisitante.RowStyles.Add(new RowStyle());
+            tlpVisitante.Size = new Size(375, 127);
             tlpVisitante.TabIndex = 1;
             // 
             // txtApellidoM
             // 
             txtApellidoM.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtApellidoM.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoM.Location = new Point(184, 102);
+            txtApellidoM.Location = new Point(187, 102);
             txtApellidoM.Margin = new Padding(0);
             txtApellidoM.Name = "txtApellidoM";
-            txtApellidoM.Size = new Size(184, 26);
+            txtApellidoM.Size = new Size(188, 26);
             txtApellidoM.TabIndex = 3;
             txtApellidoM.Text = "Rodriguez";
             // 
@@ -88,10 +88,10 @@
             // 
             txtApellidoP.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtApellidoP.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoP.Location = new Point(184, 56);
+            txtApellidoP.Location = new Point(187, 56);
             txtApellidoP.Margin = new Padding(0);
             txtApellidoP.Name = "txtApellidoP";
-            txtApellidoP.Size = new Size(184, 26);
+            txtApellidoP.Size = new Size(188, 26);
             txtApellidoP.TabIndex = 2;
             txtApellidoP.Text = "Gallegos";
             // 
@@ -101,7 +101,7 @@
             lblApellidoM.Font = new Font("Segoe UI", 10.5F);
             lblApellidoM.Location = new Point(3, 92);
             lblApellidoM.Name = "lblApellidoM";
-            lblApellidoM.Size = new Size(178, 47);
+            lblApellidoM.Size = new Size(181, 47);
             lblApellidoM.TabIndex = 0;
             lblApellidoM.Text = "APELLIDO MATERNO";
             lblApellidoM.TextAlign = ContentAlignment.MiddleLeft;
@@ -112,7 +112,7 @@
             lblApellidoP.Font = new Font("Segoe UI", 10.5F);
             lblApellidoP.Location = new Point(3, 46);
             lblApellidoP.Name = "lblApellidoP";
-            lblApellidoP.Size = new Size(178, 46);
+            lblApellidoP.Size = new Size(181, 46);
             lblApellidoP.TabIndex = 0;
             lblApellidoP.Text = "APELLIDO PATERNO";
             lblApellidoP.TextAlign = ContentAlignment.MiddleLeft;
@@ -123,7 +123,7 @@
             lblNombre.Font = new Font("Segoe UI", 10.5F);
             lblNombre.Location = new Point(3, 0);
             lblNombre.Name = "lblNombre";
-            lblNombre.Size = new Size(178, 46);
+            lblNombre.Size = new Size(181, 46);
             lblNombre.TabIndex = 0;
             lblNombre.Text = "NOMBRE";
             lblNombre.TextAlign = ContentAlignment.MiddleLeft;
@@ -132,10 +132,10 @@
             // 
             txtNombre.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtNombre.Font = new Font("Segoe UI", 10.5F);
-            txtNombre.Location = new Point(184, 10);
+            txtNombre.Location = new Point(187, 10);
             txtNombre.Margin = new Padding(0);
             txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(184, 26);
+            txtNombre.Size = new Size(188, 26);
             txtNombre.TabIndex = 1;
             txtNombre.Text = "Ricardo";
             // 
@@ -143,9 +143,9 @@
             // 
             pblFooter.Controls.Add(flpVisita);
             pblFooter.Dock = DockStyle.Bottom;
-            pblFooter.Location = new Point(0, 139);
+            pblFooter.Location = new Point(0, 127);
             pblFooter.Name = "pblFooter";
-            pblFooter.Size = new Size(368, 50);
+            pblFooter.Size = new Size(375, 50);
             pblFooter.TabIndex = 0;
             // 
             // flpVisita
@@ -157,7 +157,7 @@
             flpVisita.Margin = new Padding(1);
             flpVisita.Name = "flpVisita";
             flpVisita.Padding = new Padding(5);
-            flpVisita.Size = new Size(368, 50);
+            flpVisita.Size = new Size(375, 50);
             flpVisita.TabIndex = 0;
             flpVisita.WrapContents = false;
             // 
@@ -169,7 +169,7 @@
             btnAcceso.FlatStyle = FlatStyle.Flat;
             btnAcceso.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             btnAcceso.ForeColor = Color.Black;
-            btnAcceso.Location = new Point(280, 8);
+            btnAcceso.Location = new Point(287, 8);
             btnAcceso.Name = "btnAcceso";
             btnAcceso.Padding = new Padding(5, 0, 0, 0);
             btnAcceso.Size = new Size(75, 34);
@@ -183,7 +183,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(pnlPrincipal);
             Name = "ucVisitante";
-            Size = new Size(368, 189);
+            Size = new Size(375, 177);
             pnlPrincipal.ResumeLayout(false);
             tlpVisitante.ResumeLayout(false);
             tlpVisitante.PerformLayout();

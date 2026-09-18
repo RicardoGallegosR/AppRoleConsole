@@ -9,7 +9,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public event EventHandler? FiltroSubmarcaChanged;
 
 
-        public string Propietario => txtPropietario.Text.Trim();
+        public string Nombre => txtNombre.Text.Trim();
+        public string ApellidoPaterno => txtApellidoPaterno.Text.Trim();
+        public string ApellidoMaterno => txtApellidoMaterno.Text.Trim();
+        public bool EsPersonaFisica =>   cbTipoPersona.Checked;
+
         public DateTime FechaTC => dtpFTC.Value;
         public int Modelo => (int)nudModelo.Value;
         public string FolioTarjetaCirculacion => txtFolioTC.Text.Trim();
@@ -26,32 +30,37 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             dtpFTC.Format = DateTimePickerFormat.Custom;
             dtpFTC.CustomFormat = "yyyy/MM/dd";
+            dtpFTC.MinDate = new DateTime(1900, 1, 1);
+            dtpFTC.MaxDate = DateTime.Today;
+            dtpFTC.Value = DateTime.Today;
 
-            txtPropietario.CharacterCasing = CharacterCasing.Upper;
+
+            txtNombre.CharacterCasing = CharacterCasing.Upper;
 
 
             btnEditar.Click += btnEditar_Click;
             btnGuardar.Click += btnGuardar_Click;
 
             txtClaveVehicular.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtClaveVehicular, @"[^0-9]");
-            txtPropietario.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtPropietario, @"[^A-ZÁÉÍÓÚÜÑ ]");
+            txtNombre.TextChanged += txtNombre_TextChanged;
             txtFolioTC.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtFolioTC, @"[^0-9]");
 
+            txtApellidoPaterno.CharacterCasing = CharacterCasing.Upper;
+            txtApellidoMaterno.CharacterCasing = CharacterCasing.Upper;
 
-            txtPropietario.MaxLength = 50;
+            txtApellidoPaterno.MaxLength = 50;
+            txtApellidoMaterno.MaxLength = 50;
 
+            txtApellidoPaterno.TextChanged += (s, e) => Expresiones.SanitizeByRegex(txtApellidoPaterno, @"[^A-ZÁÉÍÓÚÜÑ ]");
+            txtApellidoMaterno.TextChanged += (s, e) => Expresiones.SanitizeByRegex(txtApellidoMaterno, @"[^A-ZÁÉÍÓÚÜÑ ]");
+
+            txtNombre.MaxLength = 50;
             txtFolioTC.MaxLength = 12;
             txtClaveVehicular.MaxLength = 7; 
-
-
-            nudTubosEscape.ValueChanged += (s, ev) => {
-                if (nudTubosEscape.Value < 0) nudTubosEscape.Value = 0;
-            };
             nudTubosEscape.Minimum = 1;
             nudTubosEscape.Value = 1;
 
             cbMarcas.SelectionChangeCommitted += (s, e) => FiltroSubmarcaChanged?.Invoke(this, EventArgs.Empty);
-
 
             nudModelo.ValueChanged += (s, e) => FiltroSubmarcaChanged?.Invoke(this, EventArgs.Empty);
 
@@ -59,11 +68,52 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbSubmarcas.DropDownStyle = ComboBoxStyle.DropDownList;
             cbSubmarcas.SelectionChangeCommitted += (s, e) => ConfirmarSubmarca();
             cbSubmarcas.KeyDown += cbSubmarcas_KeyDown;
+
+            cbTipoPersona.CheckedChanged += chkPersonaFisica_CheckedChanged;
+            cbTipoPersona.Checked = true;
+            ConfigurarTipoPersona();
         }
         public void SeleccionarMarca(int marcaId) {
             if (cbMarcas.DataSource is null)
                 return;
             cbMarcas.SelectedValue = marcaId;
+        }
+        public void SeleccionarSubMarca(int submarcaId) {
+            if (cbSubmarcas.DataSource is null)
+                return;
+            cbSubmarcas.SelectedValue = submarcaId;
+        }
+        public void SeleccionarCombustible(byte combustibleId) {
+            if (cbCombustibles.DataSource is null)
+                return;
+            cbCombustibles.SelectedValue = combustibleId;
+        }
+
+        public void CargarTarjetaForlio(string TCFolio) {
+            txtFolioTC.Text = TCFolio;
+        }
+
+        public void CargarFechaTC(DateTime fecha) {
+            if (fecha < dtpFTC.MinDate || fecha > dtpFTC.MaxDate)
+                return;
+            dtpFTC.Value = fecha.Date;
+        }
+
+        private void chkPersonaFisica_CheckedChanged(object? sender, EventArgs e) {
+            ConfigurarTipoPersona();
+        }
+
+        private void ConfigurarTipoPersona() {
+            bool personaFisica = EsPersonaFisica;
+
+            lblNombre.Text = personaFisica ? "NOMBRE" : "RAZÓN SOCIAL";
+            cbTipoPersona.Text = personaFisica ? "PERSONA FÍSICA" : "PERSONA MORAL";
+
+            lblApellidoPaterno.Visible = personaFisica;
+            txtApellidoPaterno.Visible = personaFisica;
+
+            lblApellidoMaterno.Visible = personaFisica;
+            txtApellidoMaterno.Visible = personaFisica;
         }
         public void CargarMarcas(IEnumerable<MarcasDto> marcas) {
             cbMarcas.DataSource = null;
@@ -71,6 +121,18 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbMarcas.ValueMember = nameof(MarcasDto.MarcaId);
             cbMarcas.DataSource = marcas.ToList();
             //cbMarcas.SelectedIndex = -1;
+        }
+        public void EstablecerPersonaFisica(string nombre, string apellidoPaterno, string apellidoMaterno) {
+            cbTipoPersona.Checked = true;
+            txtNombre.Text = nombre;
+            txtApellidoPaterno.Text = apellidoPaterno;
+            txtApellidoMaterno.Text = apellidoMaterno;
+        }
+        public void EstablecerPersonaMoral(string razonSocial) {
+            cbTipoPersona.Checked = false;
+            txtNombre.Text = razonSocial;
+            txtApellidoPaterno.Clear();
+            txtApellidoMaterno.Clear();
         }
         public int? MarcaId => cbMarcas.SelectedValue is int id ? id : null;
         public string Marca => cbMarcas.SelectedItem is MarcasDto marca ? marca.Marca : string.Empty;
@@ -90,7 +152,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbCombustibles.DataSource = combustibleDtos.ToList();
             //cbCombustibles.SelectedIndex = -1;
         }
-        public int? CombustibleId => cbCombustibles.SelectedValue is null  ? null : Convert.ToInt32(cbCombustibles.SelectedValue);
+        public byte? CombustibleId => cbCombustibles.SelectedValue is null  ? null : Convert.ToByte(cbCombustibles.SelectedValue);
 
         private void cbSubmarcas_KeyDown(object? sender, KeyEventArgs e) {
             if (e.KeyCode != Keys.Enter)
@@ -106,11 +168,22 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             SubmarcaSeleccionada?.Invoke(this, EventArgs.Empty);
         }
 
+        public void EstablecerModelo(int modelo) {
+            if (modelo < nudModelo.Minimum || modelo > nudModelo.Maximum) {
+                return;
+            }
+            nudModelo.Value = modelo;
+        }
 
 
 
-
-
+        private void txtNombre_TextChanged(object? sender,EventArgs e) {
+            if (EsPersonaFisica) {
+                Expresiones.SanitizeByRegex(txtNombre, @"[^A-ZÁÉÍÓÚÜÑ ]");
+            } else {
+                Expresiones.SanitizeByRegex(txtNombre, @"[^A-ZÁÉÍÓÚÜÑ0-9 .,&'()/-]");
+            }
+        }
 
 
         public int? SubmarcaId =>  cbSubmarcas.SelectedValue is null ? null : Convert.ToInt32(cbSubmarcas.SelectedValue);

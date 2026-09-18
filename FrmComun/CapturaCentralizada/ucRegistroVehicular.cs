@@ -47,12 +47,26 @@ namespace FrmComun.CapturaCentralizada {
             txtPlaca.Focus();
             //FlujoGrama(EtapaCaptura.Inicio);
             _catalogos = new CatalogosCaptura(sql: _sql, roll: _roll, passRoll: _passRoll, estacion: _estacionId, accesoId: _accesoId, opcionMenu: _opcionMenu, centro: _centro);
+            
             ucVisitante1.Acceso += ucVisitante1_Acceso;
+
+            gbVinModelo.Visible = false;
+            gbAcceso.Visible = false;
+            gbAcciones.Visible = false;
+
+            tcPrincipal.TabPages.Remove(tpTC);
+            tcPrincipal.TabPages.Remove(tpDocumentosAdicionales);
+
+
             ucAccesoConsulta1.CrearVerificacion += ucAccesoConsulta1_CrearVerificacion;
             Load += ucRegistroVehicular_Load;
             ucVinModelo1.ConsultarVin += ucVinModelo1_ConsultarVin;
-
+            ucSeleccionVehiculo1.Seleccionar += ucSeleccionVehiculo1_Seleccionar;
+            
         }
+
+       
+        
         private async void ucRegistroVehicular_Load(object? sender, EventArgs e) {
             try {
                 await _catalogos.CargarAsync();
@@ -111,7 +125,7 @@ namespace FrmComun.CapturaCentralizada {
                 return;
             }
             //FlujoGrama(EtapaCaptura.Acceso);
-
+            gbAcceso.Visible = true;
             ucAccesoConsulta1.Placa = txtPlaca.Text.Trim();
 
         }
@@ -139,8 +153,8 @@ namespace FrmComun.CapturaCentralizada {
         private void FlujoGrama(EtapaCaptura etapa) {
             bool mostrarBody = etapa > EtapaCaptura.Inicio;
 
-            tlpBody.Visible = mostrarBody;
-            tlpBody.Enabled = mostrarBody;
+            //tlpBody.Visible = mostrarBody;
+            //tlpBody.Enabled = mostrarBody;
 
             gbAcceso.Visible = etapa >= EtapaCaptura.Acceso;
             gbAcceso.Enabled = etapa >= EtapaCaptura.Acceso;
@@ -214,6 +228,7 @@ namespace FrmComun.CapturaCentralizada {
                     //Mostrar.Mensaje("Verificación iniciada", $"Se ha iniciado la verificación con ID: {_verificacionId}");
                     //FlujoGrama(EtapaCaptura.Vehiculo);
                     ucAccesoConsulta1.HabilitarCrearVerificacion(false);
+                    gbVinModelo.Visible = true;
                 });
             } catch (Exception ex) {
                 Mostrar.Mensaje("Error al iniciar verificación", ex.Message);
@@ -253,11 +268,7 @@ namespace FrmComun.CapturaCentralizada {
                         return;
                     }
                     ucVinModelo1.EstablecerModelo(r.Modelo);
-
-                    // También ya tenemos:
-                    int marcaId = r.MarcaId;
-                    ucTarjetaCirculacion1.SeleccionarMarca(r.MarcaId);
-                    ucVinModelo1.EstablecerModelo(r.Modelo);
+                    ucSeleccionVehiculo_ConsultarVin();
                 });
             } catch (Exception ex) {
                 Mostrar.Mensaje("Error al consultar VIN", ex.Message);
@@ -267,5 +278,63 @@ namespace FrmComun.CapturaCentralizada {
         #endregion
 
 
+        #region Verificacion anterior
+        private async void ucSeleccionVehiculo_ConsultarVin() {
+            try {
+                if (_verificacionId == Guid.Empty) {
+                    Mostrar.Mensaje("Error", "Primero debe iniciar la verificación.");
+                    return;
+                }
+                var repo = new SivevRepository();
+
+                await _sqlExecutor.EjecutarAsync(async connApp => {
+                     var r = await repo.SpAppCapturaVerificacionesAnterioresGetAsync(cnn: connApp, estacionId: _estacionId, accesoId: _accesoId, verificacionId: _verificacionId);
+                    
+                    if (r.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp,  $"Error en SpAppCapturaVinModeloSet {r.MensajeId}", r.MensajeId);
+                        Mostrar.Mensaje("Error al consultar VIN", error.Mensaje);
+                        return;
+                    }
+                    ucSeleccionVehiculo1.CargarVehiculos(r.Data);
+                    
+                });
+                
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error al consultar la verificación anterior", ex.Message);
+                SivevLogger.Error($"SpAppCapturaVerificacionesAnterioresGetAsync: {ex}", SivevOrigen.Captura);
+            }
+        }
+
+
+        #region Seleccionar vehiculo
+        private void ucSeleccionVehiculo1_Seleccionar(object? sender, EventArgs e) {
+            var vehiculo = ucSeleccionVehiculo1.VehiculoSeleccionado;
+
+            if (vehiculo is null)
+                return;
+
+            Guid verificacionAnteriorId = vehiculo.VerificacionAntId;
+
+            string vin = vehiculo.Vin;
+            int marcaId = vehiculo.MarcaId;
+            int submarcaId =  vehiculo.SubMarcaId;
+            int modelo = vehiculo.Modelo;
+            byte combustibleId = vehiculo.CombustibleId;
+           
+
+            //Mostrar.Mensaje("DataSet", $"vin: {vin}\nMarcaId: {marcaId}\nSubmarca: {submarcaId}\nModelo: {modelo}\nCombustible: {combustibleId}");
+
+
+            ucTarjetaCirculacion1.SeleccionarMarca(marcaId);
+            ucTarjetaCirculacion1.SeleccionarSubMarca(submarcaId);
+            ucTarjetaCirculacion1.EstablecerModelo(modelo);
+            ucTarjetaCirculacion1.SeleccionarCombustible(combustibleId);
+            ucTarjetaCirculacion1.EstablecerPersonaFisica(vehiculo.Nombre, vehiculo.ApelPaterno, vehiculo.ApelMaterno);
+            ucTarjetaCirculacion1.CargarTarjetaForlio(vehiculo.TarjetaFolio);
+            ucTarjetaCirculacion1.CargarFechaTC(vehiculo.TarjetaFecha.Value);
+        }
+        #endregion
+        #endregion
+        
     }
 }

@@ -1,7 +1,11 @@
-﻿namespace FrmComun.CapturaCentralizada.Complementos {
+﻿using FrmComun.Utils;
+using SQLSIVEV.Domain.Models;
+
+namespace FrmComun.CapturaCentralizada.Complementos {
     public partial class ucSeleccionVehiculo : UserControl {
         public event EventHandler? NuevoVehiculo;
         public event EventHandler? Seleccionar;
+        //public VerificacionAnteriorDto? VehiculoSeleccionado;
 
         public record ColumnaGrid(string Name, string Header, string DataProperty, int Width );
         public ucSeleccionVehiculo() {
@@ -11,13 +15,51 @@
 
             btnSeleccionar.Click += btnSeleccionar_Click;
             btnVehiculoNuevo.Click += btnVehiculoNuevo_Click;
-        
+            dgvVehiculos.CellDoubleClick += dgvVehiculos_CellDoubleClick;
+
 
         }
-         private void btnSeleccionar_Click(object sender, EventArgs e) =>
+        /*
+        private void btnSeleccionar_Click(object sender, EventArgs e) =>
             Seleccionar?.Invoke(this, e);
+        */
         private void btnVehiculoNuevo_Click(object sender, EventArgs e) =>
             NuevoVehiculo?.Invoke(this, e);
+        public void CargarVehiculos(IEnumerable<VerificacionAnteriorDto> vehiculos) {
+            dgvVehiculos.DataSource = null;
+            dgvVehiculos.DataSource = vehiculos.ToList();
+
+            dgvVehiculos.ClearSelection();
+        }
+
+        public VerificacionAnteriorDto? VehiculoSeleccionado {
+            get {
+                if (dgvVehiculos.CurrentRow?.DataBoundItem
+                    is VerificacionAnteriorDto vehiculo) {
+                    return vehiculo;
+                }
+
+                return null;
+            }
+        }
+
+        private void btnSeleccionar_Click(object? sender, EventArgs e) {
+            ConfirmarSeleccion();
+        }
+
+        private void dgvVehiculos_CellDoubleClick(object? sender, DataGridViewCellEventArgs e) {
+            if (e.RowIndex < 0)
+                return;
+            ConfirmarSeleccion();
+        }
+
+        private void ConfirmarSeleccion() {
+            if (VehiculoSeleccionado is null) {
+                Mostrar.Mensaje("Vehículo","Debe seleccionar un vehículo.");
+                return;
+            }
+            Seleccionar?.Invoke(this,EventArgs.Empty);
+        }
 
 
         #region Configuracion dgv
@@ -48,14 +90,13 @@
             }
         }
         private void ConfigurarDgvVehiculos() {
-            dgvVehiculos.ReadOnly = true;
+            //dgvVehiculos.ReadOnly = true;
             dgvVehiculos.AutoGenerateColumns = false;
 
             dgvVehiculos.AllowUserToAddRows = false;
             dgvVehiculos.AllowUserToDeleteRows = false;
             dgvVehiculos.AllowUserToResizeRows = false;
 
-            dgvVehiculos.ReadOnly = true;
             dgvVehiculos.MultiSelect = false;
 
             dgvVehiculos.SelectionMode =

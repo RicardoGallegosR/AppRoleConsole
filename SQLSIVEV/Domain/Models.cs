@@ -83,6 +83,35 @@
         public bool Verificable { get; init; }
         public string Url { get; init; } = string.Empty;
     }
+
+    #region Verificacion Anterior
+    public sealed class VerificacionAnteriorDto {
+        public Guid VerificacionAntId { get; init; }
+        public DateTime? Fecha { get; init; }
+        public DateTime? Vencimiento { get; init; }
+        public string Placa { get; init; } = string.Empty;
+        public string Vin { get; init; } = string.Empty;
+        public string Marca { get; init; } = string.Empty;
+        public string SubMarca { get; init; } = string.Empty;
+        public short Modelo { get; init; }
+        public string Combustible { get; init; } = string.Empty;
+        public int MarcaId { get; init; }
+        public int SubMarcaId { get; init; }
+        public byte CombustibleId { get; init; }
+        public string Nombre { get; init; } = string.Empty;
+        public string ApelPaterno { get; init; } = string.Empty;
+        public string ApelMaterno { get; init; } = string.Empty;
+        public string TarjetaFolio { get; init; } = string.Empty;
+        public DateTime? TarjetaFecha { get; init; }
+        public int CertificadoFolio { get; init; }
+        public string Propietario => $"{Nombre} {ApelPaterno} {ApelMaterno}".Trim();
+        public bool EsPersonaFisica { get; init; }
+        public string RazonSocial { get; init; } = string.Empty;
+
+    }
+    #endregion
+
+
     #endregion
     #endregion
 

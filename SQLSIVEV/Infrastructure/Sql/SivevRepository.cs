@@ -487,6 +487,86 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
         }
 
+        #region Verificacion Anterior
+        public async Task<StoreResult<List<VerificacionAnteriorDto>>> SpAppCapturaVerificacionesAnterioresGetAsync(SqlConnection cnn, Guid estacionId,Guid accesoId, Guid verificacionId, CancellationToken ct = default) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var verificaciones = new List<VerificacionAnteriorDto>();
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaVerificacionesAnterioresGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pResultado.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId",   SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId",SqlDbType.UniqueIdentifier).Value = verificacionId;
+
+            using (var reader = await cmd.ExecuteReaderAsync(ct)) {
+                int ordVerificacionAntId = reader.GetOrdinal("VerificacionAntId");
+                int ordFecha = reader.GetOrdinal("Fecha");
+                int ordVencimiento = reader.GetOrdinal("Vencimiento");
+                int ordPlaca = reader.GetOrdinal("Placa");
+                int ordVin = reader.GetOrdinal("Vin");
+                int ordMarca = reader.GetOrdinal("Marca");
+                int ordSubMarca = reader.GetOrdinal("SubMarca");
+                int ordModelo = reader.GetOrdinal("Modelo");
+                int ordCombustible = reader.GetOrdinal("Combustible");
+                int ordMarcaId = reader.GetOrdinal("MarcaId");
+                int ordSubMarcaId = reader.GetOrdinal("SubMarcaId");
+                int ordCombustibleId =  reader.GetOrdinal("CombustibleId");
+                int ordNombre = reader.GetOrdinal("Nombre");
+                int ordApelPaterno = reader.GetOrdinal("ApelPaterno");
+                int ordApelMaterno = reader.GetOrdinal("ApelMaterno");
+                int ordTarjetaFolio = reader.GetOrdinal("TarjetaFolio");
+                int ordTarjetaFecha = reader.GetOrdinal("TarjetaFecha");
+                int ordCertificadoFolio = reader.GetOrdinal("CertificadoFolio");
+
+                while (await reader.ReadAsync(ct)) {
+                    verificaciones.Add(
+                        new VerificacionAnteriorDto {
+                            VerificacionAntId =  reader.IsDBNull(ordVerificacionAntId) ? Guid.Empty : reader.GetGuid(ordVerificacionAntId),
+                            Fecha =              reader.IsDBNull(ordFecha)             ? null       : reader.GetDateTime(ordFecha),
+                            Vencimiento =        reader.IsDBNull(ordVencimiento)       ? null       : reader.GetDateTime(ordVencimiento),
+                            Placa =              reader.IsDBNull(ordPlaca)             ? string.Empty: reader.GetString(ordPlaca),
+                            Vin =                reader.IsDBNull(ordVin)               ? string.Empty: reader.GetString(ordVin),
+                            Marca =              reader.IsDBNull(ordMarca)             ? string.Empty: reader.GetString(ordMarca),
+                            SubMarca =           reader.IsDBNull(ordSubMarca)          ? string.Empty: reader.GetString(ordSubMarca),
+                            Modelo =             reader.IsDBNull(ordModelo)            ? (short)0    : Convert.ToInt16(reader.GetValue(ordModelo)),
+                            Combustible =        reader.IsDBNull(ordCombustible)       ? string.Empty: reader.GetString(ordCombustible),
+                            MarcaId =            reader.IsDBNull(ordMarcaId)           ? 0           : Convert.ToInt32(reader.GetValue(ordMarcaId)),
+                            SubMarcaId =         reader.IsDBNull(ordSubMarcaId)        ? 0           : Convert.ToInt32(reader.GetValue(ordSubMarcaId)),
+                            CombustibleId =      reader.IsDBNull(ordCombustibleId)     ? (byte)0     : Convert.ToByte(reader.GetValue(ordCombustibleId)),
+                            Nombre =             reader.IsDBNull(ordNombre)            ? string.Empty: reader.GetString(ordNombre),
+                            ApelPaterno =        reader.IsDBNull(ordApelPaterno)       ? string.Empty: reader.GetString(ordApelPaterno),
+                            ApelMaterno =        reader.IsDBNull(ordApelMaterno)       ? string.Empty: reader.GetString(ordApelMaterno),
+                            TarjetaFolio =       reader.IsDBNull(ordTarjetaFolio)      ? string.Empty: Convert.ToString(reader.GetValue(ordTarjetaFolio)) ?? string.Empty,
+                            TarjetaFecha =       reader.IsDBNull(ordTarjetaFecha)      ? null        : reader.GetDateTime(ordTarjetaFecha),
+                            CertificadoFolio =   reader.IsDBNull(ordCertificadoFolio)  ? 0           : Convert.ToInt32(reader.GetValue(ordCertificadoFolio))
+                        });
+                }
+            }
+
+            int mensajeId =     pMensaje.Value      == DBNull.Value ? 0         : Convert.ToInt32(pMensaje.Value);
+            short resultadoId = pResultado.Value    == DBNull.Value ? (short) 0 : Convert.ToInt16(pResultado.Value);
+
+            return new StoreResult<List<VerificacionAnteriorDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = verificaciones
+            };
+        }
+        #endregion
+
+
+
         #endregion
 
         public SpAppChecaCpuResult SpAppChecaCpu(SqlConnection conn, string estacionId, string aplicacion, string version, string identificadorEquipo, string serieDisco) {

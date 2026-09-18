@@ -79,7 +79,7 @@
             txtVin.Size = new Size(186, 26);
             txtVin.TabIndex = 2;
             txtVin.TabStop = false;
-            txtVin.Text = "LZWNNNGM1NC830678";
+            txtVin.Text = "1HGFA16816L901509";
             // 
             // lblVin
             // 
