@@ -14,7 +14,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             CrearColumnas();
 
             btnSeleccionar.Click += btnSeleccionar_Click;
-            btnVehiculoNuevo.Click += btnVehiculoNuevo_Click;
             dgvVehiculos.CellDoubleClick += dgvVehiculos_CellDoubleClick;
 
 
@@ -23,8 +22,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private void btnSeleccionar_Click(object sender, EventArgs e) =>
             Seleccionar?.Invoke(this, e);
         */
-        private void btnVehiculoNuevo_Click(object sender, EventArgs e) =>
-            NuevoVehiculo?.Invoke(this, e);
+
         public void CargarVehiculos(IEnumerable<VerificacionAnteriorDto> vehiculos) {
             dgvVehiculos.DataSource = null;
             dgvVehiculos.DataSource = vehiculos.ToList();

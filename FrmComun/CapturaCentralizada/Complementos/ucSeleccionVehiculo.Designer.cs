@@ -28,7 +28,6 @@
             pblFoother = new Panel();
             flpSeleecionVehicular = new FlowLayoutPanel();
             btnSeleccionar = new Button();
-            btnVehiculoNuevo = new Button();
             pnlPrincipal.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvVehiculos).BeginInit();
             pblFoother.SuspendLayout();
@@ -69,7 +68,6 @@
             // flpSeleecionVehicular
             // 
             flpSeleecionVehicular.Controls.Add(btnSeleccionar);
-            flpSeleecionVehicular.Controls.Add(btnVehiculoNuevo);
             flpSeleecionVehicular.Dock = DockStyle.Fill;
             flpSeleecionVehicular.FlowDirection = FlowDirection.RightToLeft;
             flpSeleecionVehicular.Location = new Point(0, 0);
@@ -96,19 +94,6 @@
             btnSeleccionar.Text = "Seleccionar";
             btnSeleccionar.UseVisualStyleBackColor = false;
             // 
-            // btnVehiculoNuevo
-            // 
-            btnVehiculoNuevo.FlatAppearance.BorderColor = Color.Crimson;
-            btnVehiculoNuevo.FlatStyle = FlatStyle.Flat;
-            btnVehiculoNuevo.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            btnVehiculoNuevo.Location = new Point(559, 8);
-            btnVehiculoNuevo.Margin = new Padding(3, 3, 20, 3);
-            btnVehiculoNuevo.Name = "btnVehiculoNuevo";
-            btnVehiculoNuevo.Size = new Size(158, 34);
-            btnVehiculoNuevo.TabIndex = 3;
-            btnVehiculoNuevo.Text = "Vehículo Nuevo";
-            btnVehiculoNuevo.UseVisualStyleBackColor = true;
-            // 
             // ucSeleccionVehiculo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -129,7 +114,6 @@
         private Panel pblFoother;
         private FlowLayoutPanel flpSeleecionVehicular;
         private Button btnSeleccionar;
-        private Button btnVehiculoNuevo;
         private DataGridView dgvVehiculos;
     }
 }

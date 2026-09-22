@@ -7,6 +7,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public event EventHandler? Editar;
         public event EventHandler? Guardar;
         public event EventHandler? FiltroSubmarcaChanged;
+        private bool _editando;
 
 
         public string Nombre => txtNombre.Text.Trim();
@@ -72,6 +73,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbTipoPersona.CheckedChanged += chkPersonaFisica_CheckedChanged;
             cbTipoPersona.Checked = true;
             ConfigurarTipoPersona();
+            EstablecerModoEdicion(false);
         }
         public void SeleccionarMarca(int marcaId) {
             if (cbMarcas.DataSource is null)
@@ -184,7 +186,39 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 Expresiones.SanitizeByRegex(txtNombre, @"[^A-ZÁÉÍÓÚÜÑ0-9 .,&'()/-]");
             }
         }
+        public void EnfocarNombre() {
+            BeginInvoke(() => {
+                txtNombre.Focus();
+                txtNombre.SelectAll();
+            });
+        }
+        public void EstablecerModoEdicion(bool editar) {
+            _editando = editar;
 
+            cbTipoPersona.Enabled = editar;
+
+            txtNombre.Enabled = editar;
+            txtApellidoPaterno.Enabled = editar;
+            txtApellidoMaterno.Enabled = editar;
+
+            cbMarcas.Enabled = editar;
+            cbSubmarcas.Enabled = editar;
+            cbCombustibles.Enabled = editar;
+
+            nudModelo.Enabled = editar;
+            nudTubosEscape.Enabled = editar;
+
+            dtpFTC.Enabled = editar;
+
+            txtFolioTC.Enabled = editar;
+
+            btnEditar.Enabled = !editar;
+            //btnGuardar.Enabled = editar;
+        }
+
+        public void EsperarStore(bool flag = false) {
+            pnlPrincipal.Enabled = flag;
+        }
 
         public int? SubmarcaId =>  cbSubmarcas.SelectedValue is null ? null : Convert.ToInt32(cbSubmarcas.SelectedValue);
         public string Submarca =>  cbSubmarcas.SelectedItem is SubmarcaDto submarca ? submarca.Submarca : string.Empty;

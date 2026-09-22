@@ -25,8 +25,8 @@
         private void InitializeComponent() {
             pnlPrincipal = new Panel();
             flpVisita = new FlowLayoutPanel();
-            btnEscanear = new Button();
             btnAgregar = new Button();
+            btnEliminar = new Button();
             dgvDocumentos = new DataGridView();
             pnlPrincipal.SuspendLayout();
             flpVisita.SuspendLayout();
@@ -46,8 +46,8 @@
             // 
             // flpVisita
             // 
-            flpVisita.Controls.Add(btnEscanear);
             flpVisita.Controls.Add(btnAgregar);
+            flpVisita.Controls.Add(btnEliminar);
             flpVisita.Dock = DockStyle.Bottom;
             flpVisita.FlowDirection = FlowDirection.RightToLeft;
             flpVisita.Location = new Point(0, 116);
@@ -58,23 +58,6 @@
             flpVisita.TabIndex = 1;
             flpVisita.WrapContents = false;
             // 
-            // btnEscanear
-            // 
-            btnEscanear.AutoSize = true;
-            btnEscanear.BackColor = Color.White;
-            btnEscanear.FlatAppearance.BorderColor = Color.Crimson;
-            btnEscanear.FlatStyle = FlatStyle.Flat;
-            btnEscanear.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            btnEscanear.ForeColor = Color.Black;
-            btnEscanear.Location = new Point(749, 8);
-            btnEscanear.Margin = new Padding(12, 3, 3, 3);
-            btnEscanear.Name = "btnEscanear";
-            btnEscanear.Padding = new Padding(10, 0, 0, 0);
-            btnEscanear.Size = new Size(93, 34);
-            btnEscanear.TabIndex = 0;
-            btnEscanear.Text = "Escanear";
-            btnEscanear.UseVisualStyleBackColor = false;
-            // 
             // btnAgregar
             // 
             btnAgregar.AutoSize = true;
@@ -83,7 +66,7 @@
             btnAgregar.FlatStyle = FlatStyle.Flat;
             btnAgregar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             btnAgregar.ForeColor = Color.Black;
-            btnAgregar.Location = new Point(646, 8);
+            btnAgregar.Location = new Point(754, 8);
             btnAgregar.Margin = new Padding(12, 3, 3, 3);
             btnAgregar.Name = "btnAgregar";
             btnAgregar.Padding = new Padding(10, 0, 0, 0);
@@ -91,6 +74,23 @@
             btnAgregar.TabIndex = 1;
             btnAgregar.Text = "Agregar";
             btnAgregar.UseVisualStyleBackColor = false;
+            // 
+            // btnEliminar
+            // 
+            btnEliminar.AutoSize = true;
+            btnEliminar.BackColor = Color.White;
+            btnEliminar.FlatAppearance.BorderColor = Color.Crimson;
+            btnEliminar.FlatStyle = FlatStyle.Flat;
+            btnEliminar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            btnEliminar.ForeColor = Color.Black;
+            btnEliminar.Location = new Point(646, 8);
+            btnEliminar.Margin = new Padding(12, 3, 3, 3);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Padding = new Padding(10, 0, 0, 0);
+            btnEliminar.Size = new Size(93, 34);
+            btnEliminar.TabIndex = 2;
+            btnEliminar.Text = "Eliminar";
+            btnEliminar.UseVisualStyleBackColor = false;
             // 
             // dgvDocumentos
             // 
@@ -122,7 +122,7 @@
         private Panel pnlPrincipal;
         private DataGridView dgvDocumentos;
         private FlowLayoutPanel flpVisita;
-        private Button btnEscanear;
         private Button btnAgregar;
+        private Button btnEliminar;
     }
 }

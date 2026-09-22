@@ -25,11 +25,9 @@
         private void InitializeComponent() {
             pnlPrincipal = new Panel();
             tlpTarjetaCirculacion = new TableLayoutPanel();
-            lblTipoPersona = new Label();
-            txtApellidoMaterno = new TextBox();
-            txtApellidoPaterno = new TextBox();
-            lblApellidoPaterno = new Label();
+            lblApellidoMaterno = new Label();
             txtNombre = new TextBox();
+            txtApellidoMaterno = new TextBox();
             lblNombre = new Label();
             lblClaveVehicular = new Label();
             lblTubosEscape = new Label();
@@ -47,7 +45,9 @@
             cbCombustibles = new ComboBox();
             cbSubmarcas = new ComboBox();
             cbMarcas = new ComboBox();
-            lblApellidoMaterno = new Label();
+            lblApellidoPaterno = new Label();
+            lblTipoPersona = new Label();
+            txtApellidoPaterno = new TextBox();
             cbTipoPersona = new CheckBox();
             pnlFooter = new Panel();
             flpSeleecionVehicular = new FlowLayoutPanel();
@@ -117,49 +117,17 @@
             tlpTarjetaCirculacion.Size = new Size(789, 215);
             tlpTarjetaCirculacion.TabIndex = 1;
             // 
-            // lblTipoPersona
+            // lblApellidoMaterno
             // 
-            lblTipoPersona.Dock = DockStyle.Fill;
-            lblTipoPersona.Font = new Font("Segoe UI", 10.5F);
-            lblTipoPersona.ForeColor = Color.FromArgb(45, 55, 65);
-            lblTipoPersona.Location = new Point(397, 0);
-            lblTipoPersona.Name = "lblTipoPersona";
-            lblTipoPersona.Size = new Size(191, 35);
-            lblTipoPersona.TabIndex = 20;
-            lblTipoPersona.Text = "TIPO PERSONA";
-            lblTipoPersona.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // txtApellidoMaterno
-            // 
-            txtApellidoMaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoMaterno.Location = new Point(591, 39);
-            txtApellidoMaterno.Margin = new Padding(0);
-            txtApellidoMaterno.Name = "txtApellidoMaterno";
-            txtApellidoMaterno.Size = new Size(198, 26);
-            txtApellidoMaterno.TabIndex = 19;
-            // 
-            // txtApellidoPaterno
-            // 
-            txtApellidoPaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoPaterno.Location = new Point(197, 39);
-            txtApellidoPaterno.Margin = new Padding(0);
-            txtApellidoPaterno.Name = "txtApellidoPaterno";
-            txtApellidoPaterno.Size = new Size(197, 26);
-            txtApellidoPaterno.TabIndex = 18;
-            // 
-            // lblApellidoPaterno
-            // 
-            lblApellidoPaterno.Dock = DockStyle.Fill;
-            lblApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
-            lblApellidoPaterno.ForeColor = Color.FromArgb(45, 55, 65);
-            lblApellidoPaterno.Location = new Point(3, 35);
-            lblApellidoPaterno.Name = "lblApellidoPaterno";
-            lblApellidoPaterno.Size = new Size(191, 35);
-            lblApellidoPaterno.TabIndex = 16;
-            lblApellidoPaterno.Text = "APELLIDO PATERNO";
-            lblApellidoPaterno.TextAlign = ContentAlignment.MiddleLeft;
+            lblApellidoMaterno.Dock = DockStyle.Fill;
+            lblApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
+            lblApellidoMaterno.ForeColor = Color.FromArgb(45, 55, 65);
+            lblApellidoMaterno.Location = new Point(397, 35);
+            lblApellidoMaterno.Name = "lblApellidoMaterno";
+            lblApellidoMaterno.Size = new Size(191, 35);
+            lblApellidoMaterno.TabIndex = 17;
+            lblApellidoMaterno.Text = "APELLIDO MATERNO";
+            lblApellidoMaterno.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // txtNombre
             // 
@@ -170,6 +138,16 @@
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(197, 26);
             txtNombre.TabIndex = 1;
+            // 
+            // txtApellidoMaterno
+            // 
+            txtApellidoMaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
+            txtApellidoMaterno.Location = new Point(591, 39);
+            txtApellidoMaterno.Margin = new Padding(0);
+            txtApellidoMaterno.Name = "txtApellidoMaterno";
+            txtApellidoMaterno.Size = new Size(198, 26);
+            txtApellidoMaterno.TabIndex = 19;
             // 
             // lblNombre
             // 
@@ -355,17 +333,39 @@
             cbMarcas.Size = new Size(191, 29);
             cbMarcas.TabIndex = 13;
             // 
-            // lblApellidoMaterno
+            // lblApellidoPaterno
             // 
-            lblApellidoMaterno.Dock = DockStyle.Fill;
-            lblApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
-            lblApellidoMaterno.ForeColor = Color.FromArgb(45, 55, 65);
-            lblApellidoMaterno.Location = new Point(397, 35);
-            lblApellidoMaterno.Name = "lblApellidoMaterno";
-            lblApellidoMaterno.Size = new Size(191, 35);
-            lblApellidoMaterno.TabIndex = 17;
-            lblApellidoMaterno.Text = "APELLIDO MATERNO";
-            lblApellidoMaterno.TextAlign = ContentAlignment.MiddleLeft;
+            lblApellidoPaterno.Dock = DockStyle.Fill;
+            lblApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
+            lblApellidoPaterno.ForeColor = Color.FromArgb(45, 55, 65);
+            lblApellidoPaterno.Location = new Point(3, 35);
+            lblApellidoPaterno.Name = "lblApellidoPaterno";
+            lblApellidoPaterno.Size = new Size(191, 35);
+            lblApellidoPaterno.TabIndex = 16;
+            lblApellidoPaterno.Text = "APELLIDO PATERNO";
+            lblApellidoPaterno.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblTipoPersona
+            // 
+            lblTipoPersona.Dock = DockStyle.Fill;
+            lblTipoPersona.Font = new Font("Segoe UI", 10.5F);
+            lblTipoPersona.ForeColor = Color.FromArgb(45, 55, 65);
+            lblTipoPersona.Location = new Point(397, 0);
+            lblTipoPersona.Name = "lblTipoPersona";
+            lblTipoPersona.Size = new Size(191, 35);
+            lblTipoPersona.TabIndex = 20;
+            lblTipoPersona.Text = "TIPO PERSONA";
+            lblTipoPersona.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // txtApellidoPaterno
+            // 
+            txtApellidoPaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
+            txtApellidoPaterno.Location = new Point(197, 39);
+            txtApellidoPaterno.Margin = new Padding(0);
+            txtApellidoPaterno.Name = "txtApellidoPaterno";
+            txtApellidoPaterno.Size = new Size(197, 26);
+            txtApellidoPaterno.TabIndex = 18;
             // 
             // cbTipoPersona
             // 
@@ -415,7 +415,7 @@
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(158, 34);
             btnGuardar.TabIndex = 1;
-            btnGuardar.Text = "Guardar cambios";
+            btnGuardar.Text = "Guardar/Siguiente";
             btnGuardar.UseVisualStyleBackColor = false;
             // 
             // btnEditar

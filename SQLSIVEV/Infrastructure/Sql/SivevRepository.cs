@@ -122,6 +122,9 @@ namespace SQLSIVEV.Infrastructure.Sql {
 
 
 
+        
+
+
         #region bitacora de adeudos
         public async Task<CapturaIniciaResult> SpAppCapturaIniciaWebSrvNewAsync(SqlConnection cnn, Guid estacionId, Guid accesoId, string placa, bool pet, int consultasSemoviId, string vin, short modelo, string tipoServicio, string folioAuto, DateTime fechaTC, bool testFM, bool conexionWs, byte conexionWebSrv, bool adeudoFotoCivicas, bool adeudoTenencia, bool adeudoInfraccion, bool gdfNoRegistrado, CancellationToken ct = default) {
             if (cnn.State != ConnectionState.Open)
@@ -190,10 +193,123 @@ namespace SQLSIVEV.Infrastructure.Sql {
             };
         }
         #endregion
+        #region Captura de datos de Tarjeta de circulación
+        public async Task<SpAppCapturaDatosSetResult> SpAppCapturaDatosSetAsync(SqlConnection cnn, Guid estacionId,  Guid accesoId, Guid verificacionId, Guid verificacionAntId, int submarcaId, byte combustibleId, bool esEmpresa, string nombre, string apelPaterno, string apelMaterno, string tarjetaFolio, DateTime tarjetaFecha, short tubosEscape, byte[] imagenFactura, byte[] imagenTarjetaCirculacion, CancellationToken ct = default) {
+            ArgumentNullException.ThrowIfNull(cnn);
+            using var cmd = new SqlCommand("VfcCaptura.SpAppCapturaDatosSet", cnn) {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            // OUTPUT
+            var pMensaje = new SqlParameter("@iMensajeId", SqlDbType.Int){
+                Direction = ParameterDirection.InputOutput,
+                Value = 0
+            };
+
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.InputOutput,
+                Value = (short)0
+            };
+
+            cmd.Parameters.Add(pMensaje);
+            cmd.Parameters.Add(pResultado);
+
+            // Identificadores
+            cmd.Parameters.Add("@uiEstacionId",         SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId",           SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId",     SqlDbType.UniqueIdentifier).Value = verificacionId;
+            cmd.Parameters.Add("@uiVerificacionAntId",  SqlDbType.UniqueIdentifier).Value = verificacionAntId;
+
+            // Vehículo
+            cmd.Parameters.Add("@iSubmarcaId",      SqlDbType.Int).Value = submarcaId;
+            cmd.Parameters.Add("@tiCombustibleId",  SqlDbType.TinyInt).Value = combustibleId;
+
+            // Propietario
+            cmd.Parameters.Add("@bEsEmpresa",   SqlDbType.Bit).Value = esEmpresa;
+            cmd.Parameters.Add("@vcNombre",     SqlDbType.VarChar,50).Value = nombre;
+            cmd.Parameters.Add("@vcApelPaterno",SqlDbType.VarChar, 50).Value = apelPaterno;
+            cmd.Parameters.Add("@vcApelMaterno",SqlDbType.VarChar,  50).Value = apelMaterno;
+
+            // Tarjeta de circulación
+            cmd.Parameters.Add("@vcTarjetaFolio", SqlDbType.VarChar, 12).Value = tarjetaFolio;
+            cmd.Parameters.Add("@sdTarjetaFecha", SqlDbType.SmallDateTime).Value = tarjetaFecha;
+            cmd.Parameters.Add("@siTubosEscape",  SqlDbType.SmallInt).Value = tubosEscape;
+
+            // Imágenes
+            cmd.Parameters.Add("@imagenFactura",SqlDbType.Image).Value = imagenFactura ?? Array.Empty<byte>();
+            cmd.Parameters.Add("@imagenTarjetaCirculacion", SqlDbType.Image).Value = imagenTarjetaCirculacion ?? Array.Empty<byte>();
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            return new SpAppCapturaDatosSetResult {
+                MensajeId = Convert.ToInt32(pMensaje.Value),
+                ResultadoId = Convert.ToInt16(pResultado.Value)
+            };
+        }
+        #endregion
+
 
 
 
         #region Combustibles, EntidadesFederativas, Marcas, TiposAdeudos, TiposLineasCaptura para captura centralizada
+        #region documentos adicionales 
+        public StoreResult<List<DocumentoAdicionalDto>> SpAppCapturaDocumentosAdicionalesGet(SqlConnection cnn, Guid estacionId, Guid accesoId, Guid verificacionId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var documentos = new List<DocumentoAdicionalDto>();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaDocumentosAdicionalesGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiEstacionId",SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId",  SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier).Value = verificacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int ordDocumentoId = reader.GetOrdinal("DocumentoId");
+                int ordTipoDocumentoId = reader.GetOrdinal("TipoDocumentoId");
+                int ordTituloFolioDocumento = reader.GetOrdinal("TituloFolioDocumento");
+                int ordReferencia =           reader.GetOrdinal("Referencia");
+                int ordTipoAdeudoId =         reader.GetOrdinal("TipoAdeudoId");
+                int ordAdeudoId =             reader.GetOrdinal("AdeudoId");
+                int ordRequiereImagen =       reader.GetOrdinal("RequiereImagen");
+
+                while (reader.Read()) {
+                    documentos.Add(new DocumentoAdicionalDto {
+                        DocumentoId = reader.IsDBNull(ordDocumentoId) ? Guid.Empty : reader.GetGuid(ordDocumentoId),
+                        TipoDocumentoId = reader.IsDBNull(ordTipoDocumentoId) ? 0: Convert.ToInt32(reader.GetValue(ordTipoDocumentoId)),
+                        TituloFolioDocumento = reader.IsDBNull(ordTituloFolioDocumento) ? string.Empty : reader.GetString(ordTituloFolioDocumento),
+                        Referencia =  reader.IsDBNull(ordReferencia)  ? string.Empty : reader.GetString(ordReferencia),
+                        TipoAdeudoId =reader.IsDBNull(ordTipoAdeudoId)? 0 : Convert.ToInt32(reader.GetValue(ordTipoAdeudoId)),
+                        AdeudoId =    reader.IsDBNull(ordAdeudoId) ? Guid.Empty   : reader.GetGuid(ordAdeudoId),
+                        RequiereImagen = !reader.IsDBNull(ordRequiereImagen) && Convert.ToBoolean( reader.GetValue(ordRequiereImagen))
+                    });
+                }
+            }
+
+            // Los OUTPUT se leen después de cerrar el DataReader.
+            int mensajeId =     pMsg.Value == DBNull.Value ? 0 : Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<DocumentoAdicionalDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = documentos
+            };
+        }
+
+        #endregion
+
         public StoreResult<List<CombustibleDto>> SpAppCombustiblesGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
             if (cnn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");

@@ -111,6 +111,42 @@
     }
     #endregion
 
+    #region Captura de datos TC
+    public sealed class SpAppCapturaDatosSetResult {
+        public int MensajeId { get; init; }
+        public short ResultadoId { get; init; }
+    }
+    #endregion
+
+
+    #region Escaneres 
+    public sealed class ScannerDeviceDto {
+        public string Id { get; init; } = string.Empty;
+        public string Nombre { get; init; } = string.Empty;
+        public override string ToString() => Nombre;
+    }
+    #endregion
+
+
+
+    #region Documentos Adicionales para el scaneo
+    public sealed class DocumentoAdicionalDto {
+        public Guid DocumentoId { get; init; }
+        public int TipoDocumentoId { get; init; }
+        public string TituloFolioDocumento { get; init; }  = string.Empty;
+        public string Referencia { get; init; } = string.Empty;
+        public int TipoAdeudoId { get; init; }
+        public Guid AdeudoId { get; init; }
+        public bool RequiereImagen { get; init; }
+
+        // Campos de captura de la UI.
+        // No vienen del GET actual.
+        public string ValorReferencia { get; set; }  = string.Empty;
+        public DateTime? Fecha { get; set; }
+        public bool NoPresenta { get; set; }
+    }
+    #endregion
+
 
     #endregion
     #endregion

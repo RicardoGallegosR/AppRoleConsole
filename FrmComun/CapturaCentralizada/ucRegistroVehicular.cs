@@ -1,4 +1,5 @@
-﻿using FrmComun.CapturaCentralizada.Complementos;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using FrmComun.CapturaCentralizada.Complementos;
 using FrmComun.Utils;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Sql;
@@ -18,6 +19,8 @@ namespace FrmComun.CapturaCentralizada {
         private readonly CatalogosCaptura _catalogos;
         private readonly AppRoleSqlExecutor _sqlExecutor;
         private Guid _verificacionId;
+        private Guid _verificacionAnteriorId;
+
 
         private enum EtapaCaptura {
             Inicio = 0,
@@ -62,7 +65,10 @@ namespace FrmComun.CapturaCentralizada {
             Load += ucRegistroVehicular_Load;
             ucVinModelo1.ConsultarVin += ucVinModelo1_ConsultarVin;
             ucSeleccionVehiculo1.Seleccionar += ucSeleccionVehiculo1_Seleccionar;
-            
+
+            ucTarjetaCirculacion1.Editar += btnEditarTarjetaCirculacion_Click;
+            ucTarjetaCirculacion1.Guardar += btnGuardarTarjetaCirculacion_Click;
+
         }
 
        
@@ -149,36 +155,6 @@ namespace FrmComun.CapturaCentralizada {
             ucTarjetaCirculacion1.CargarSubmarcas(_catalogos.Submarcas);
         }
 
-
-        private void FlujoGrama(EtapaCaptura etapa) {
-            bool mostrarBody = etapa > EtapaCaptura.Inicio;
-
-            //tlpBody.Visible = mostrarBody;
-            //tlpBody.Enabled = mostrarBody;
-
-            gbAcceso.Visible = etapa >= EtapaCaptura.Acceso;
-            gbAcceso.Enabled = etapa >= EtapaCaptura.Acceso;
-
-            gbVisitante.Visible = etapa >= EtapaCaptura.Visitante;
-            gbVisitante.Enabled = etapa >= EtapaCaptura.Visitante;
-
-            gbSeleccionVehicular.Visible = etapa >= EtapaCaptura.Vehiculo;
-            gbSeleccionVehicular.Enabled = etapa >= EtapaCaptura.Vehiculo;
-
-            gbVinModelo.Visible = etapa >= EtapaCaptura.Vehiculo;
-            gbVinModelo.Enabled = etapa >= EtapaCaptura.Vehiculo;
-
-            gbTarjetaCirculacion.Visible = etapa >= EtapaCaptura.TarjetaCirculacion;
-            gbTarjetaCirculacion.Enabled = etapa >= EtapaCaptura.TarjetaCirculacion;
-
-            gbDocumentosAdicionales.Visible = etapa >= EtapaCaptura.Documentos;
-            gbDocumentosAdicionales.Enabled = etapa >= EtapaCaptura.Documentos;
-
-            gbEscaneoDocumentos.Visible = etapa >= EtapaCaptura.Escaneo;
-            gbEscaneoDocumentos.Enabled = etapa >= EtapaCaptura.Escaneo;
-        }
-
-
         #region Crear verificacion 
         private async void ucAccesoConsulta1_CrearVerificacion(object? sender, CrearVerificacionEventArgs e) {
             var datos = e.Datos;
@@ -237,6 +213,43 @@ namespace FrmComun.CapturaCentralizada {
         }
         #endregion
 
+        #region Buscar Documentos Adicionales  
+        private async void BuscarDocumentos() {
+            try {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
+                    var repo = new SivevRepository();
+
+                    var r = repo.SpAppCapturaDocumentosAdicionalesGet(
+                        cnn: connApp,
+                        estacionId: _estacionId,
+                        accesoId: _accesoId,
+                       verificacionId:_verificacionId
+                    );
+
+                    if (r.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCapturaDocumentosAdicionalesGet {r.MensajeId}", r.MensajeId);
+                        Mostrar.Mensaje("Error" , $"Al obtener el listado de documentos adicionales\n{error.Mensaje}");
+                        return;
+                    }
+                    foreach (var documento in r.Data) {
+                        if (documento.TipoDocumentoId == 14) {
+                            documento.Fecha = ucTarjetaCirculacion1.FechaTC;
+                            documento.ValorReferencia = ucTarjetaCirculacion1.FolioTarjetaCirculacion;
+                        } else {
+                            documento.Fecha = DateTime.Today;
+                            documento.ValorReferencia = string.Empty;
+                        }
+                    }
+
+                    ucDocumentosAdicionales1.CargarDocumentos(r.Data);
+                });
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error obtener el listado de documentos adicionales", ex.Message);
+                SivevLogger.Error($"SpAppCapturaDocumentosAdicionalesGet: {ex}", SivevOrigen.Captura);
+            } 
+        }
+        #endregion
+
         #region VIN Modelo
         private async void ucVinModelo1_ConsultarVin(object? sender,  EventArgs e) {
             try {
@@ -269,11 +282,19 @@ namespace FrmComun.CapturaCentralizada {
                     }
                     ucVinModelo1.EstablecerModelo(r.Modelo);
                     ucSeleccionVehiculo_ConsultarVin();
+                    MostrarTabTC();
+
                 });
             } catch (Exception ex) {
                 Mostrar.Mensaje("Error al consultar VIN", ex.Message);
                 SivevLogger.Error($"SpAppCapturaVinModeloSet: {ex}", SivevOrigen.Captura);
             }
+        }
+        private void MostrarTabTC() {
+            if (!tcPrincipal.TabPages.Contains(tpTC)) {
+                tcPrincipal.TabPages.Add(tpTC);
+            }
+            tcPrincipal.SelectedTab = tpTC;
         }
         #endregion
 
@@ -296,8 +317,7 @@ namespace FrmComun.CapturaCentralizada {
                         return;
                     }
                     ucSeleccionVehiculo1.CargarVehiculos(r.Data);
-                    
-                });
+                 });
                 
             } catch (Exception ex) {
                 Mostrar.Mensaje("Error al consultar la verificación anterior", ex.Message);
@@ -313,7 +333,7 @@ namespace FrmComun.CapturaCentralizada {
             if (vehiculo is null)
                 return;
 
-            Guid verificacionAnteriorId = vehiculo.VerificacionAntId;
+            _verificacionAnteriorId = vehiculo.VerificacionAntId;
 
             string vin = vehiculo.Vin;
             int marcaId = vehiculo.MarcaId;
@@ -329,12 +349,120 @@ namespace FrmComun.CapturaCentralizada {
             ucTarjetaCirculacion1.SeleccionarSubMarca(submarcaId);
             ucTarjetaCirculacion1.EstablecerModelo(modelo);
             ucTarjetaCirculacion1.SeleccionarCombustible(combustibleId);
-            ucTarjetaCirculacion1.EstablecerPersonaFisica(vehiculo.Nombre, vehiculo.ApelPaterno, vehiculo.ApelMaterno);
+            if (vehiculo.ApelPaterno.Equals("DESCONOCIDO") && vehiculo.ApelMaterno.Equals("DESCONOCIDO")) {
+                ucTarjetaCirculacion1.EstablecerPersonaMoral(vehiculo.Nombre);
+            } else {
+                ucTarjetaCirculacion1.EstablecerPersonaFisica(vehiculo.Nombre, vehiculo.ApelPaterno, vehiculo.ApelMaterno);
+            }
             ucTarjetaCirculacion1.CargarTarjetaForlio(vehiculo.TarjetaFolio);
             ucTarjetaCirculacion1.CargarFechaTC(vehiculo.TarjetaFecha.Value);
         }
         #endregion
+
+        #region Editar Tarjeta de Circulacion 
+        private void btnEditarTarjetaCirculacion_Click(object? sender, EventArgs e) {
+            ucTarjetaCirculacion1.EstablecerModoEdicion(true);
+            ucTarjetaCirculacion1.EnfocarNombre();
+        }
         #endregion
-        
+
+        #region Guardar Tarjeta de Circulacion 
+        private async void btnGuardarTarjetaCirculacion_Click(object? sender, EventArgs e) {
+            try {
+                if (_verificacionId == Guid.Empty) {
+                    Mostrar.Mensaje("Error", "Primero debe iniciar la verificación.");
+                    SivevLogger.Warning("Se saltaron la creación de verificación.", SivevOrigen.Captura);
+                    return;
+                }
+                if (_verificacionAnteriorId == Guid.Empty) {
+                    Mostrar.Mensaje("Error", "Debe seleccionar una verificación anterior.");
+                    SivevLogger.Warning("No hay verificación anterior.", SivevOrigen.Captura);
+                    return;
+                }
+                if (ucTarjetaCirculacion1.SubmarcaId is null) {
+                    Mostrar.Mensaje("Error","Debe seleccionar una submarca.");
+                    SivevLogger.Warning("No se encontro vericacón anterior", SivevOrigen.Captura);
+                    return;
+                }
+                if (ucTarjetaCirculacion1.CombustibleId is null) {
+                    Mostrar.Mensaje("Error", "Debe seleccionar un combustible.");
+                    SivevLogger.Warning("No seleccionaron el combustible.", SivevOrigen.Captura);
+                    return;
+
+                }
+                if (string.IsNullOrWhiteSpace(ucTarjetaCirculacion1.ClaveVehicular)) {
+                    Mostrar.Mensaje("Error", "Debe capturar la clave vehicular");
+                    SivevLogger.Warning("No registraron la clave vehicular", SivevOrigen.Captura);
+                    return;
+                }
+
+
+                bool esEmpresa = !ucTarjetaCirculacion1.EsPersonaFisica;
+                string apellidoPaterno = esEmpresa ? "DESCONOCIDO" : ucTarjetaCirculacion1.ApellidoPaterno;
+                string apellidoMaterno = esEmpresa ? "DESCONOCIDO" : ucTarjetaCirculacion1.ApellidoMaterno;
+
+                // Bloquear mientras se ejecuta el store
+                ucTarjetaCirculacion1.EsperarStore();
+
+                var repo = new SivevRepository();
+
+                await _sqlExecutor.EjecutarAsync(async connApp =>  {
+                    var r = await repo.SpAppCapturaDatosSetAsync(
+                        cnn: connApp,
+                        estacionId: _estacionId,
+                        accesoId: _accesoId,
+                        verificacionId: _verificacionId,
+                        verificacionAntId: _verificacionAnteriorId,
+
+                        submarcaId:  ucTarjetaCirculacion1.SubmarcaId.Value,
+                        combustibleId: ucTarjetaCirculacion1.CombustibleId.Value,
+                        esEmpresa: esEmpresa,
+                        nombre: ucTarjetaCirculacion1.Nombre,
+                        apelPaterno: apellidoPaterno,
+
+                        apelMaterno: apellidoMaterno,
+                        tarjetaFolio: ucTarjetaCirculacion1.FolioTarjetaCirculacion,
+                        tarjetaFecha: ucTarjetaCirculacion1.FechaTC,
+                        tubosEscape: checked((short) ucTarjetaCirculacion1.TubosEscape),
+                        imagenFactura: new byte[] { 0x00, 0x00, 0x00 },
+                        imagenTarjetaCirculacion: new byte[] { 0x00, 0x00, 0x00 }
+                    );
+                    
+                    if (r.MensajeId != 0) {
+                        var error = await repo.PrintIfMsgAsync(connApp,  $"Error en SpAppCapturaDatosSet {r.MensajeId}", r.MensajeId);
+                        Mostrar.Mensaje("Error al guardar tarjeta de circulación", error.Mensaje);
+                        SivevLogger.Error($"Error al guardar tarjeta de circulación\n{error.Mensaje}", SivevOrigen.Captura);
+                        ucTarjetaCirculacion1.EstablecerModoEdicion(true);
+                        ucTarjetaCirculacion1.EsperarStore(true);
+                        return;
+                    }else {
+                        // Si llegamos aquí, se guardó correctamente.
+                        MostrartpDocumentosAdicionales();
+                        ucTarjetaCirculacion1.EsperarStore();
+
+                        BuscarDocumentos();
+                        //Mostrar.Mensaje("Tarjeta de circulación", "Los datos se guardaron correctamente.");
+                        SivevLogger.Information("Tarjeta de circulación\nLos datos se guardaron correctamente.", SivevOrigen.Captura);
+                    }
+                });
+            } catch (Exception ex) {
+                // Si hubo excepción, permitir corregir/reintentar.
+                ucTarjetaCirculacion1.EstablecerModoEdicion(true);
+                Mostrar.Mensaje("Error al guardar tarjeta de circulación", ex.Message);
+                SivevLogger.Error($"SpAppCapturaDatosSetAsync: {ex}", SivevOrigen.Captura);
+            }
+        }
+
+        private void MostrartpDocumentosAdicionales() {
+            if (!tcPrincipal.TabPages.Contains(tpDocumentosAdicionales)) {
+                tcPrincipal.TabPages.Add(tpDocumentosAdicionales);
+            }
+            tcPrincipal.SelectedTab = tpDocumentosAdicionales;
+        }
+        #endregion
+
+
+        #endregion
+
     }
 }
