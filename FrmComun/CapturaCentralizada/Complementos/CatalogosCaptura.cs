@@ -6,6 +6,7 @@ using SQLSIVEV.Infrastructure.Utils;
 using SQLSIVEV.Domain.Models;
 using static SQLSIVEV.Infrastructure.Config.AppConfig;
 
+
 namespace FrmComun.CapturaCentralizada.Complementos {
      public sealed class CatalogosCaptura {
         private readonly SivevConnectionFactory _sql;
@@ -15,7 +16,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private readonly Guid _accesoId;
         private readonly short _opcionMenu;
         private readonly short _centro;
-
+        private readonly AppRoleSqlExecutor _sqlExecutor;
 
 
         public IReadOnlyList<CombustibleDto> Combustibles { get; private set; }
@@ -36,6 +37,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public IReadOnlyList<SubmarcaDto> Submarcas { get; private set; } 
             = Array.Empty<SubmarcaDto>();
 
+        public IReadOnlyList<MotivosAccesoDto> MotivosAcceso { get; private set; }
+            = Array.Empty<MotivosAccesoDto>();
+
 
 
         public CatalogosCaptura(SivevConnectionFactory sql, string roll, string passRoll, Guid estacion, Guid accesoId, short opcionMenu, short centro) {
@@ -46,6 +50,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             _accesoId = accesoId;
             _opcionMenu = opcionMenu;
             _centro = centro;
+
+            _sqlExecutor = new AppRoleSqlExecutor(_sql,_roll, _passRoll);
         }
 
 
@@ -57,6 +63,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             Marcas                  = await ObtenerMarcasAsync(ct);
             TiposAdeudos            = await ObtenerTiposAdeudosAsync(ct);
             TiposLineasCaptura      = await ObtenerTiposLineasCapturaAsync(ct);
+            MotivosAcceso           = await MotivosAccesoAsync(ct);
         }
 
         public void Limpiar() {
@@ -66,6 +73,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             TiposAdeudos = Array.Empty<TiposAdeudosDto>();
             TiposLineasCaptura = Array.Empty<TiposLineasCapturaDto>();
             Submarcas = Array.Empty<SubmarcaDto>();
+            MotivosAcceso = Array.Empty<MotivosAccesoDto>();
         }
 
         #region Metodos SQL
@@ -78,7 +86,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppCombustiblesGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
@@ -105,7 +113,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }, ct);
             } catch (Exception e) {
                 try {
-                    await EjecutarSqlAsync(async connApp => {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
                         var bitacora = Bitacora.ErroresSQL(
                             estacionId: _estacionId,
                             centro: _centro,
@@ -132,7 +140,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppEntidadesFederativasGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
@@ -159,7 +167,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }, ct);
             } catch (Exception e) {
                 try {
-                    await EjecutarSqlAsync(async connApp => {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
                         var bitacora = Bitacora.ErroresSQL(
                             estacionId: _estacionId,
                             centro: _centro,
@@ -177,6 +185,62 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             return entidadesFederativas;
         }
         #endregion
+        
+        
+        #region Obtener Motivos Accesos
+        private async Task<IReadOnlyList<MotivosAccesoDto>> MotivosAccesoAsync(CancellationToken ct = default) {
+            int mensaje = 0;
+            short resultado = 0;
+
+            var _MotivosAcceso = new List<MotivosAccesoDto>();
+            var repo = new SivevRepository();
+
+            try {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
+                    var r = repo.SpAppTiposDocumentosGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
+
+                    mensaje = r.MensajeId;
+                    resultado = r.ResultadoId;
+                    _MotivosAcceso = r.Data;
+
+                    if (mensaje != 0) {
+                        try {
+                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppTiposDocumentosGet",  mensaje);
+                            var bitacora = Bitacora.ErroresSQL(
+                                estacionId: _estacionId,
+                                centro: _centro,
+                                opcionMenuId: _opcionMenu,
+                                descripcion: error.Mensaje,
+                                codigoSql: mensaje
+                            );
+                            await repo.SpSpAppBitacoraErroresSetAsync2026(connApp, bitacora, ct);
+                            Mostrar.Mensaje("SpAppTiposDocumentosGet", error.Mensaje);
+                        } catch (Exception logEx) {
+                            SivevLogger.Error($"Falló la bitácora en SpAppTiposDocumentosGet: {logEx.Message}", SivevOrigen.Captura);
+                        }
+                    }
+
+                }, ct);
+            } catch (Exception e) {
+                try {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
+                        var bitacora = Bitacora.ErroresSQL(
+                            estacionId: _estacionId,
+                            centro: _centro,
+                            opcionMenuId: _opcionMenu,
+                            descripcion: $"Error al obtener las motivos de accesos: {e.Message}",
+                            codigoSql: mensaje
+                        );
+                        await repo.SpSpAppBitacoraErroresSetAsync2026(connApp, bitacora, ct);
+                    }, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en catch de SpAppTiposDocumentosGet: {logEx}", SivevOrigen.Captura);
+                }
+                Mostrar.Mensaje("Error en SpAppTiposDocumentosGet", $"Error al obtener las motivos de accesos: {e.Message}");
+            }
+            return _MotivosAcceso;
+        }
+        #endregion
         #region Marcas
         private async Task<IReadOnlyList<MarcasDto>> ObtenerMarcasAsync(CancellationToken ct = default) {
             int mensaje = 0;
@@ -186,7 +250,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppMarcasGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
@@ -213,7 +277,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }, ct);
             } catch (Exception e) {
                 try {
-                    await EjecutarSqlAsync(async connApp => {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
                         var bitacora = Bitacora.ErroresSQL(
                             estacionId: _estacionId,
                             centro: _centro,
@@ -242,7 +306,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppSubmarcasGet(
                         cnn: connApp,
                         uiEstacionId: _estacionId,
@@ -276,7 +340,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppTiposAdeudosGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
@@ -303,7 +367,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }, ct);
             } catch (Exception e) {
                 try {
-                    await EjecutarSqlAsync(async connApp => {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
                         var bitacora = Bitacora.ErroresSQL(
                             estacionId: _estacionId,
                             centro: _centro,
@@ -330,7 +394,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var repo = new SivevRepository();
 
             try {
-                await EjecutarSqlAsync(async connApp => {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
                     var r = repo.SpAppTiposLineasCapturaGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
@@ -357,7 +421,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }, ct);
             } catch (Exception e) {
                 try {
-                    await EjecutarSqlAsync(async connApp => {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
                         var bitacora = Bitacora.ErroresSQL(
                             estacionId: _estacionId,
                             centro: _centro,
@@ -378,89 +442,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         #endregion
 
 
-        /*
 
-        #region Consulta de Adeudos 
-        private async void ucAccesoConsulta1_CrearVerificacion(object? sender, EventArgs e) {
-            try {
-                await EjecutarSqlAsync(async connApp => {
-                    var repo = new SivevRepository();
-
-                    var r = await repo.SpAppCapturaIniciaWebSrvNewAsync(
-                        cnn: connApp,
-                        estacionId: _estacionId,
-                        accesoId: _accesoId,
-                        placa:"",// txtPlaca.Text.Trim(),
-
-                        pet: false,
-                        consultasSemoviId: 0,
-
-                        vin: string.Empty,
-                        modelo: 0,
-                        tipoServicio: string.Empty,
-                        folioAuto: string.Empty,
-                        fechaTC: new DateTime(1900, 1, 1),
-
-                        testFM: false,
-
-                        conexionWs: false,
-                        conexionWebSrv: 1,
-
-                        adeudoFotoCivicas: false,
-                        adeudoTenencia: false,
-                        adeudoInfraccion: false,
-                        gdfNoRegistrado: false
-                    );
-
-                    if (r.MensajeId != 0) {
-                        var error = await repo.PrintIfMsgAsync(connApp, $"Error en SpAppCapturaIniciaWebSrvNew {r.MensajeId}", r.MensajeId);
-                        Mostrar.Mensaje("Error al iniciar verificación", error.Mensaje);
-                        return;
-                    }
-
-                    if (r.VerificacionId is null) {
-                        Mostrar.Mensaje("Error", "No se recibió un identificador de verificación.");
-                        return;
-                    }
-
-                    _verificacionId = r.VerificacionId.Value;
-
-                    // Continuar el flujo
-                    FlujoGrama(EtapaCaptura.Vehiculo);
-                });
-            } catch (Exception ex) {
-                Mostrar.Mensaje("Error al iniciar verificación", ex.Message);
-                SivevLogger.Error($"SpAppCapturaIniciaWebSrvNew: {ex}", SivevOrigen.Captura);
-            }
-        }
-        #endregion
-        */
-
-
-
-
-        #region Ejecutar SQL
-        private async Task EjecutarSqlAsync(Func<SqlConnection, Task> accion, CancellationToken ct = default) {
-
-            await using var session = await _sql.OpenSessionAsync( new AppRoleConfig {
-                Nombre = _roll,
-                Password = _passRoll,
-                Habilitado = true
-            }
-            );
-
-            await accion(session.Connection);
-        }
-
-        private async Task<T> EjecutarSqlAsync<T>(Func<SqlConnection, Task<T>> accion, CancellationToken ct = default) {
-            await using var session = await _sql.OpenSessionAsync( new AppRoleConfig {
-                Nombre = _roll,
-                Password = _passRoll,
-                Habilitado = true
-            }
-            );
-            return await accion(session.Connection);
-        }
-        #endregion
     }
 }

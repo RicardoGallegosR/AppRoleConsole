@@ -24,6 +24,9 @@
         /// </summary>
         private void InitializeComponent() {
             pnlPrincipal = new Panel();
+            pnlDocumento = new Panel();
+            flpPaginas = new FlowLayoutPanel();
+            pbDocumento = new PictureBox();
             lblEstadoScanner = new Label();
             flpAcciones = new FlowLayoutPanel();
             cbScanners = new ComboBox();
@@ -31,14 +34,16 @@
             ibEscanear = new FontAwesome.Sharp.IconButton();
             ibRecortar = new FontAwesome.Sharp.IconButton();
             ibAgregar = new FontAwesome.Sharp.IconButton();
+            ibEliminar = new FontAwesome.Sharp.IconButton();
             ibAceptar = new FontAwesome.Sharp.IconButton();
             ibCancelar = new FontAwesome.Sharp.IconButton();
-            pbDocumento = new PictureBox();
-            pnlDocumento = new Panel();
+            ibZoomMas = new FontAwesome.Sharp.IconButton();
+            ibZoomMenos = new FontAwesome.Sharp.IconButton();
+            ibGuardar = new FontAwesome.Sharp.IconButton();
             pnlPrincipal.SuspendLayout();
-            flpAcciones.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbDocumento).BeginInit();
             pnlDocumento.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pbDocumento).BeginInit();
+            flpAcciones.SuspendLayout();
             SuspendLayout();
             // 
             // pnlPrincipal
@@ -52,8 +57,39 @@
             pnlPrincipal.ForeColor = Color.FromArgb(45, 55, 65);
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
-            pnlPrincipal.Size = new Size(605, 343);
+            pnlPrincipal.Size = new Size(605, 531);
             pnlPrincipal.TabIndex = 0;
+            // 
+            // pnlDocumento
+            // 
+            pnlDocumento.AutoScroll = true;
+            pnlDocumento.Controls.Add(flpPaginas);
+            pnlDocumento.Controls.Add(pbDocumento);
+            pnlDocumento.Dock = DockStyle.Fill;
+            pnlDocumento.Location = new Point(0, 37);
+            pnlDocumento.Name = "pnlDocumento";
+            pnlDocumento.Size = new Size(463, 494);
+            pnlDocumento.TabIndex = 2;
+            // 
+            // flpPaginas
+            // 
+            flpPaginas.AutoScroll = true;
+            flpPaginas.Dock = DockStyle.Bottom;
+            flpPaginas.Location = new Point(0, 374);
+            flpPaginas.Name = "flpPaginas";
+            flpPaginas.Size = new Size(463, 120);
+            flpPaginas.TabIndex = 1;
+            flpPaginas.WrapContents = false;
+            // 
+            // pbDocumento
+            // 
+            pbDocumento.BackColor = Color.White;
+            pbDocumento.Location = new Point(0, 0);
+            pbDocumento.Name = "pbDocumento";
+            pbDocumento.Size = new Size(202, 192);
+            pbDocumento.SizeMode = PictureBoxSizeMode.AutoSize;
+            pbDocumento.TabIndex = 0;
+            pbDocumento.TabStop = false;
             // 
             // lblEstadoScanner
             // 
@@ -72,15 +108,19 @@
             flpAcciones.Controls.Add(ibEscanear);
             flpAcciones.Controls.Add(ibRecortar);
             flpAcciones.Controls.Add(ibAgregar);
+            flpAcciones.Controls.Add(ibEliminar);
             flpAcciones.Controls.Add(ibAceptar);
             flpAcciones.Controls.Add(ibCancelar);
+            flpAcciones.Controls.Add(ibZoomMas);
+            flpAcciones.Controls.Add(ibZoomMenos);
+            flpAcciones.Controls.Add(ibGuardar);
             flpAcciones.Dock = DockStyle.Right;
             flpAcciones.FlowDirection = FlowDirection.TopDown;
             flpAcciones.Location = new Point(463, 0);
             flpAcciones.Margin = new Padding(1);
             flpAcciones.Name = "flpAcciones";
             flpAcciones.Padding = new Padding(5);
-            flpAcciones.Size = new Size(142, 343);
+            flpAcciones.Size = new Size(142, 531);
             flpAcciones.TabIndex = 1;
             flpAcciones.WrapContents = false;
             // 
@@ -146,7 +186,7 @@
             ibRecortar.FlatStyle = FlatStyle.Flat;
             ibRecortar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             ibRecortar.ForeColor = Color.FromArgb(45, 55, 65);
-            ibRecortar.IconChar = FontAwesome.Sharp.IconChar.CubesStacked;
+            ibRecortar.IconChar = FontAwesome.Sharp.IconChar.CropAlt;
             ibRecortar.IconColor = Color.Crimson;
             ibRecortar.IconFont = FontAwesome.Sharp.IconFont.Auto;
             ibRecortar.IconSize = 40;
@@ -167,7 +207,7 @@
             ibAgregar.FlatStyle = FlatStyle.Flat;
             ibAgregar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             ibAgregar.ForeColor = Color.FromArgb(45, 55, 65);
-            ibAgregar.IconChar = FontAwesome.Sharp.IconChar.Soap;
+            ibAgregar.IconChar = FontAwesome.Sharp.IconChar.FileCirclePlus;
             ibAgregar.IconColor = Color.Crimson;
             ibAgregar.IconFont = FontAwesome.Sharp.IconFont.Auto;
             ibAgregar.IconSize = 40;
@@ -179,6 +219,27 @@
             ibAgregar.Text = "Agregar";
             ibAgregar.TextAlign = ContentAlignment.MiddleRight;
             ibAgregar.UseVisualStyleBackColor = false;
+            // 
+            // ibEliminar
+            // 
+            ibEliminar.BackColor = Color.White;
+            ibEliminar.Enabled = false;
+            ibEliminar.FlatAppearance.BorderColor = Color.Crimson;
+            ibEliminar.FlatStyle = FlatStyle.Flat;
+            ibEliminar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            ibEliminar.ForeColor = Color.FromArgb(45, 55, 65);
+            ibEliminar.IconChar = FontAwesome.Sharp.IconChar.FileCircleXmark;
+            ibEliminar.IconColor = Color.Crimson;
+            ibEliminar.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            ibEliminar.IconSize = 40;
+            ibEliminar.ImageAlign = ContentAlignment.MiddleLeft;
+            ibEliminar.Location = new Point(8, 253);
+            ibEliminar.Name = "ibEliminar";
+            ibEliminar.Size = new Size(123, 44);
+            ibEliminar.TabIndex = 8;
+            ibEliminar.Text = "Eliminar";
+            ibEliminar.TextAlign = ContentAlignment.MiddleRight;
+            ibEliminar.UseVisualStyleBackColor = false;
             // 
             // ibAceptar
             // 
@@ -193,7 +254,7 @@
             ibAceptar.IconFont = FontAwesome.Sharp.IconFont.Auto;
             ibAceptar.IconSize = 40;
             ibAceptar.ImageAlign = ContentAlignment.MiddleLeft;
-            ibAceptar.Location = new Point(8, 253);
+            ibAceptar.Location = new Point(8, 303);
             ibAceptar.Name = "ibAceptar";
             ibAceptar.Size = new Size(123, 44);
             ibAceptar.TabIndex = 3;
@@ -214,7 +275,7 @@
             ibCancelar.IconFont = FontAwesome.Sharp.IconFont.Auto;
             ibCancelar.IconSize = 40;
             ibCancelar.ImageAlign = ContentAlignment.MiddleLeft;
-            ibCancelar.Location = new Point(8, 303);
+            ibCancelar.Location = new Point(8, 353);
             ibCancelar.Name = "ibCancelar";
             ibCancelar.Size = new Size(123, 44);
             ibCancelar.TabIndex = 4;
@@ -223,25 +284,65 @@
             ibCancelar.UseVisualStyleBackColor = false;
             ibCancelar.Click += ibCancelar_Click;
             // 
-            // pbDocumento
+            // ibZoomMas
             // 
-            pbDocumento.BackColor = Color.White;
-            pbDocumento.Location = new Point(0, 0);
-            pbDocumento.Name = "pbDocumento";
-            pbDocumento.Size = new Size(202, 192);
-            pbDocumento.SizeMode = PictureBoxSizeMode.AutoSize;
-            pbDocumento.TabIndex = 0;
-            pbDocumento.TabStop = false;
+            ibZoomMas.BackColor = Color.White;
+            ibZoomMas.FlatAppearance.BorderColor = Color.Crimson;
+            ibZoomMas.FlatStyle = FlatStyle.Flat;
+            ibZoomMas.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            ibZoomMas.ForeColor = Color.FromArgb(45, 55, 65);
+            ibZoomMas.IconChar = FontAwesome.Sharp.IconChar.CirclePlus;
+            ibZoomMas.IconColor = Color.Crimson;
+            ibZoomMas.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            ibZoomMas.IconSize = 40;
+            ibZoomMas.ImageAlign = ContentAlignment.MiddleLeft;
+            ibZoomMas.Location = new Point(8, 403);
+            ibZoomMas.Name = "ibZoomMas";
+            ibZoomMas.Size = new Size(123, 44);
+            ibZoomMas.TabIndex = 11;
+            ibZoomMas.Text = "Zoom +";
+            ibZoomMas.TextAlign = ContentAlignment.MiddleRight;
+            ibZoomMas.UseVisualStyleBackColor = false;
             // 
-            // pnlDocumento
+            // ibZoomMenos
             // 
-            pnlDocumento.AutoScroll = true;
-            pnlDocumento.Controls.Add(pbDocumento);
-            pnlDocumento.Dock = DockStyle.Fill;
-            pnlDocumento.Location = new Point(0, 37);
-            pnlDocumento.Name = "pnlDocumento";
-            pnlDocumento.Size = new Size(463, 306);
-            pnlDocumento.TabIndex = 2;
+            ibZoomMenos.BackColor = Color.White;
+            ibZoomMenos.FlatAppearance.BorderColor = Color.Crimson;
+            ibZoomMenos.FlatStyle = FlatStyle.Flat;
+            ibZoomMenos.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            ibZoomMenos.ForeColor = Color.FromArgb(45, 55, 65);
+            ibZoomMenos.IconChar = FontAwesome.Sharp.IconChar.MinusCircle;
+            ibZoomMenos.IconColor = Color.Crimson;
+            ibZoomMenos.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            ibZoomMenos.IconSize = 40;
+            ibZoomMenos.ImageAlign = ContentAlignment.MiddleLeft;
+            ibZoomMenos.Location = new Point(8, 453);
+            ibZoomMenos.Name = "ibZoomMenos";
+            ibZoomMenos.Size = new Size(123, 44);
+            ibZoomMenos.TabIndex = 10;
+            ibZoomMenos.Text = "Zoom -";
+            ibZoomMenos.TextAlign = ContentAlignment.MiddleRight;
+            ibZoomMenos.UseVisualStyleBackColor = false;
+            // 
+            // ibGuardar
+            // 
+            ibGuardar.BackColor = Color.White;
+            ibGuardar.FlatAppearance.BorderColor = Color.Crimson;
+            ibGuardar.FlatStyle = FlatStyle.Flat;
+            ibGuardar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            ibGuardar.ForeColor = Color.FromArgb(45, 55, 65);
+            ibGuardar.IconChar = FontAwesome.Sharp.IconChar.Save;
+            ibGuardar.IconColor = Color.Crimson;
+            ibGuardar.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            ibGuardar.IconSize = 40;
+            ibGuardar.ImageAlign = ContentAlignment.MiddleLeft;
+            ibGuardar.Location = new Point(8, 503);
+            ibGuardar.Name = "ibGuardar";
+            ibGuardar.Size = new Size(123, 44);
+            ibGuardar.TabIndex = 9;
+            ibGuardar.Text = "Guardar";
+            ibGuardar.TextAlign = ContentAlignment.MiddleRight;
+            ibGuardar.UseVisualStyleBackColor = false;
             // 
             // ucEscaneoDocumentos
             // 
@@ -249,13 +350,13 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(pnlPrincipal);
             Name = "ucEscaneoDocumentos";
-            Size = new Size(605, 343);
+            Size = new Size(605, 531);
             Load += ucEscaneoDocumentos_Load;
             pnlPrincipal.ResumeLayout(false);
-            flpAcciones.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pbDocumento).EndInit();
             pnlDocumento.ResumeLayout(false);
             pnlDocumento.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pbDocumento).EndInit();
+            flpAcciones.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -273,5 +374,10 @@
         private FontAwesome.Sharp.IconButton ibRecortar;
         private FontAwesome.Sharp.IconButton ibAgregar;
         private Panel pnlDocumento;
+        private FlowLayoutPanel flpPaginas;
+        private FontAwesome.Sharp.IconButton ibEliminar;
+        private FontAwesome.Sharp.IconButton ibGuardar;
+        private FontAwesome.Sharp.IconButton ibZoomMas;
+        private FontAwesome.Sharp.IconButton ibZoomMenos;
     }
 }

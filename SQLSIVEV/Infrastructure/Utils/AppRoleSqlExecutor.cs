@@ -2,7 +2,7 @@
 using SQLSIVEV.Infrastructure.Sql.Vicente;
 using static SQLSIVEV.Infrastructure.Config.AppConfig;
 
-namespace SQLSIVEV.Infrastructure.Sql {
+namespace SQLSIVEV.Infrastructure.Utils {
     public sealed class AppRoleSqlExecutor {
         private readonly SivevConnectionFactory _sql;
         private readonly string _roll;
@@ -26,6 +26,33 @@ namespace SQLSIVEV.Infrastructure.Sql {
             ct.ThrowIfCancellationRequested();
             await accion(session.Connection);
         }
+
+        /*
+         private async Task EjecutarSqlAsync(Func<SqlConnection, Task> accion, CancellationToken ct = default) {
+
+            await using var session = await _sql.OpenSessionAsync( new AppRoleConfig {
+                Nombre = _roll,
+                Password = _passRoll,
+                Habilitado = true
+            }
+            );
+
+            await accion(session.Connection);
+        }
+
+        private async Task<T> EjecutarSqlAsync<T>(Func<SqlConnection, Task<T>> accion, CancellationToken ct = default) {
+            await using var session = await _sql.OpenSessionAsync( new AppRoleConfig {
+                Nombre = _roll,
+                Password = _passRoll,
+                Habilitado = true
+            }
+            );
+            return await accion(session.Connection);
+        }
+         */
+
+
+
 
         public async Task<T> EjecutarAsync<T>(Func<SqlConnection, Task<T>> accion, CancellationToken ct = default) {
             ArgumentNullException.ThrowIfNull(accion);

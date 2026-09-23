@@ -20,19 +20,9 @@ namespace FrmComun.CapturaCentralizada {
         private readonly AppRoleSqlExecutor _sqlExecutor;
         private Guid _verificacionId;
         private Guid _verificacionAnteriorId;
+        private string _rutaDocumentos;
 
-
-        private enum EtapaCaptura {
-            Inicio = 0,
-            Visitante = 1,
-            Acceso = 2,
-            Vehiculo = 3,
-            TarjetaCirculacion = 4,
-            Documentos = 5,
-            Escaneo = 6,
-            Finalizado = 7
-        }
-        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, Guid accesoId, short centro) {
+        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, Guid accesoId, short centro, string ruta) {
             _sql = sql ?? throw new ArgumentNullException(nameof(sql));
             _roll = roll ?? throw new ArgumentNullException(nameof(roll));
             _passRoll = (passRoll ?? throw new ArgumentNullException(nameof(passRoll))).ToUpperInvariant();
@@ -40,6 +30,8 @@ namespace FrmComun.CapturaCentralizada {
             _estacionId = estacionId;
             _accesoId = accesoId;
             _centro = centro;
+            _rutaDocumentos = ruta;
+
 
             InitializeComponent();
 
@@ -55,7 +47,6 @@ namespace FrmComun.CapturaCentralizada {
 
             gbVinModelo.Visible = false;
             gbAcceso.Visible = false;
-            gbAcciones.Visible = false;
 
             tcPrincipal.TabPages.Remove(tpTC);
             tcPrincipal.TabPages.Remove(tpDocumentosAdicionales);
@@ -68,7 +59,7 @@ namespace FrmComun.CapturaCentralizada {
 
             ucTarjetaCirculacion1.Editar += btnEditarTarjetaCirculacion_Click;
             ucTarjetaCirculacion1.Guardar += btnGuardarTarjetaCirculacion_Click;
-
+            ucEscaneoDocumentos1.GuardarClick += ucEscaneoDocumentos1_GuardarClick;
         }
 
        
@@ -79,8 +70,9 @@ namespace FrmComun.CapturaCentralizada {
                 ucTarjetaCirculacion1.CargarMarcas(_catalogos.Marcas);
                 ucTarjetaCirculacion1.CargarCombustibles(_catalogos.Combustibles);
                 ucTarjetaCirculacion1.FiltroSubmarcaChanged += Tarjeta_FiltroSubmarcaChanged;
-
                 ucTarjetaCirculacion1.SubmarcaSeleccionada += ucTarjetaCirculacion1_SubmarcaSeleccionada;
+                ucAccesoConsulta1.CargarMotivosAcceso(_catalogos.MotivosAcceso);
+
 
                 BeginInvoke(() => {
                     txtPlaca.Focus();
@@ -168,7 +160,7 @@ namespace FrmComun.CapturaCentralizada {
                         accesoId: _accesoId,
                         placa: txtPlaca.Text.Trim(),
 
-                        pet: cbPET.Checked,
+                        pet: ucVinModelo1.PET,
                         
                         // Son datos que vienen de la consulta de acceso, no del formulario de captura
                         consultasSemoviId: datos.ConsultasSemoviId,
@@ -461,7 +453,20 @@ namespace FrmComun.CapturaCentralizada {
         }
         #endregion
 
+        #region Ruta PDF
+        private void ucEscaneoDocumentos1_GuardarClick(object? sender, EventArgs e) {
+            try {
+                ucEscaneoDocumentos1.VerificacionId = _verificacionId;
+                ucEscaneoDocumentos1.RutaBase =      _rutaDocumentos;
+                string ruta = ucEscaneoDocumentos1.GuardarPdf();
+                Mostrar.Mensaje("Documento guardado", $"El documento se guardó correctamente:\n\n{ruta}");
 
+            } catch (Exception ex) {
+                Mostrar.Mensaje("Error",$"No se pudo guardar el documento.\n\n{ex.Message}");
+                SivevLogger.Error($"Error al guardar documento PDF: {ex}", SivevOrigen.Captura);
+            }
+        }
+        #endregion
         #endregion
 
     }

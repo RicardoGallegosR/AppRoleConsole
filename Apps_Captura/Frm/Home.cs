@@ -228,10 +228,9 @@ namespace Apps_Captura.Frm {
 
         #region Registro Vehicular 
         private void registroVehicular() {
+            string rutaBase = ObtenerRutaBaseEscaneo();
 
-            //var tcs = new TaskCompletionSource<Guid>(TaskCreationOptions.RunContinuationsAsynchronously);
             _barraLateral.MostrarVista("RegistroVehicular", "RegistroVehicular", () => {
-
                 var registro = new ucRegistroVehicular(
                     sql: _sql,
                     roll: _capturaRegistroWindows.dvar17,
@@ -239,10 +238,52 @@ namespace Apps_Captura.Frm {
                     opcionMenu: _capturaRegistroWindows.dvar8,
                     estacionId: _capturaRegistroWindows.dvar15,
                     accesoId: _capturaRegistroWindows.dvar22,
-                    centro: _capturaRegistroWindows.dvar12
+                    centro: _capturaRegistroWindows.dvar12,
+                    ruta: rutaBase
                 );
                 return registro;
             });
+        }
+
+        private string ObtenerRutaBaseEscaneo() {
+            const string rutaLocal = @"C:\SIVEV\ESCANER";
+
+            //string? rutaConfigurada = _capturaRegistroWindows.dvar20?.Trim();
+            string? rutaConfigurada = rutaLocal;
+
+            if (!string.IsNullOrWhiteSpace(rutaConfigurada) &&  RutaDisponibleParaEscritura(rutaConfigurada)) {
+                return rutaConfigurada;
+            }
+
+            // Fallback local
+            Directory.CreateDirectory(rutaLocal);
+            /*
+            Mostrar.Mensaje("Ruta de escaneo",
+                "No se encontró o no se tienen permisos sobre la ruta base de escaneo.\n\n" +
+                $"Los documentos se guardarán temporalmente" +
+                "Genere un ticket de soporte para corregir la ruta y eliminar este mensaje."
+             );
+            */
+            SivevLogger.Warning(
+                $"No fue posible utilizar la ruta de escaneo configurada: " +
+                $"'{rutaConfigurada ?? "SIN CONFIGURAR"}'. " +
+                $"Se utilizará la ruta local '{rutaLocal}'.",
+                SivevOrigen.Captura);
+
+            return rutaLocal;
+        }
+        private static bool RutaDisponibleParaEscritura(string ruta) {
+            try {
+                if (!Directory.Exists(ruta))
+                    return false;
+
+                string archivoPrueba = Path.Combine(ruta, $".sivev_test_{Guid.NewGuid():N}.tmp");
+                using (File.Create(archivoPrueba)) { }
+                File.Delete(archivoPrueba);
+                return true;
+            } catch {
+                return false;
+            }
         }
         #endregion
 

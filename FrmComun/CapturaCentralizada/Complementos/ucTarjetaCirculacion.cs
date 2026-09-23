@@ -124,6 +124,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbMarcas.DataSource = marcas.ToList();
             //cbMarcas.SelectedIndex = -1;
         }
+
+        
+
+
         public void EstablecerPersonaFisica(string nombre, string apellidoPaterno, string apellidoMaterno) {
             cbTipoPersona.Checked = true;
             txtNombre.Text = nombre;

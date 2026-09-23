@@ -5,6 +5,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
     public partial class ucSeleccionVehiculo : UserControl {
         public event EventHandler? NuevoVehiculo;
         public event EventHandler? Seleccionar;
+
+        public bool PET;
         //public VerificacionAnteriorDto? VehiculoSeleccionado;
 
         public record ColumnaGrid(string Name, string Header, string DataProperty, int Width );

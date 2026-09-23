@@ -36,7 +36,7 @@
             lblInfCitas = new Label();
             tableLayoutPanel1 = new TableLayoutPanel();
             pnlTipoAccso = new Panel();
-            comboBox1 = new ComboBox();
+            cbMotivoAcceso = new ComboBox();
             lblTipoAcceso = new Label();
             pnlMonetarias = new Panel();
             lblStatusMonetarias = new Label();
@@ -225,7 +225,7 @@
             // 
             // pnlTipoAccso
             // 
-            pnlTipoAccso.Controls.Add(comboBox1);
+            pnlTipoAccso.Controls.Add(cbMotivoAcceso);
             pnlTipoAccso.Controls.Add(lblTipoAcceso);
             pnlTipoAccso.Dock = DockStyle.Fill;
             pnlTipoAccso.Location = new Point(3, 3);
@@ -233,17 +233,17 @@
             pnlTipoAccso.Size = new Size(337, 64);
             pnlTipoAccso.TabIndex = 0;
             // 
-            // comboBox1
+            // cbMotivoAcceso
             // 
-            comboBox1.Dock = DockStyle.Fill;
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox1.Font = new Font("Segoe UI", 11F);
-            comboBox1.ForeColor = Color.FromArgb(45, 55, 65);
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(0, 20);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(337, 28);
-            comboBox1.TabIndex = 1;
+            cbMotivoAcceso.Dock = DockStyle.Fill;
+            cbMotivoAcceso.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbMotivoAcceso.Font = new Font("Segoe UI", 11F);
+            cbMotivoAcceso.ForeColor = Color.FromArgb(45, 55, 65);
+            cbMotivoAcceso.FormattingEnabled = true;
+            cbMotivoAcceso.Location = new Point(0, 20);
+            cbMotivoAcceso.Name = "cbMotivoAcceso";
+            cbMotivoAcceso.Size = new Size(337, 28);
+            cbMotivoAcceso.TabIndex = 1;
             // 
             // lblTipoAcceso
             // 
@@ -425,7 +425,7 @@
         private Label lblTipoAcceso;
         private TableLayoutPanel tableLayoutPanel1;
         private Panel pnlTipoAccso;
-        private ComboBox comboBox1;
+        private ComboBox cbMotivoAcceso;
         private Label lblTenencias;
         private Label lblAmbientales;
         private Label lblMonetarias;

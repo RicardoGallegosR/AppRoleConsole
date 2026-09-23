@@ -408,6 +408,49 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 Data = entidadesFederativas
             };
         }
+        public StoreResult<List<MotivosAccesoDto>> SpAppTiposDocumentosGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var motivosAccesos = new List<MotivosAccesoDto>();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppTiposDocumentosGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int MotivoAccesoId = reader.GetOrdinal("TipoDocumentoId");
+                int MotivoAcceso = reader.GetOrdinal("TipoDocumento");
+
+                while (reader.Read()) {
+                    motivosAccesos.Add(new MotivosAccesoDto {
+                        MotivoAccesoId = reader.IsDBNull(MotivoAccesoId) ? (short)0: reader.GetInt16(MotivoAccesoId),
+                        MotivoAcceso = reader.IsDBNull(MotivoAcceso) ? string.Empty : reader.GetString(MotivoAcceso),
+                    });
+                }
+            }
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<MotivosAccesoDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = motivosAccesos
+            };
+        }
+
 
 
         public StoreResult<List<MarcasDto>> SpAppMarcasGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {

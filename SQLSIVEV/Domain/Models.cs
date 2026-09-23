@@ -59,6 +59,11 @@
         public string Abreviacion { get; init; } = string.Empty;
     }
 
+    public sealed class MotivosAccesoDto {
+        public short MotivoAccesoId { get; init; }
+        public string MotivoAcceso { get; init; } = string.Empty;
+    }
+
     public sealed class MarcasDto {
         public int MarcaId { get; init; }
         public string Marca { get; init; } = string.Empty;

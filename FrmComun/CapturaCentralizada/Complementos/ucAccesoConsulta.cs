@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLSIVEV.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -42,7 +43,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         public ucAccesoConsulta() {
             InitializeComponent();
-
             btnCrearVerificacion.Click += btnCrearVerificacion_Click;
         }
 
@@ -51,6 +51,13 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             CrearVerificacion?.Invoke(this, new CrearVerificacionEventArgs(datos));
         }
 
+        public void CargarMotivosAcceso(IEnumerable<MotivosAccesoDto> motivosAccesos) {
+            cbMotivoAcceso.DataSource = null;
+            cbMotivoAcceso.DisplayMember = nameof(MotivosAccesoDto.MotivoAcceso);
+            cbMotivoAcceso.ValueMember = nameof(MotivosAccesoDto.MotivoAccesoId);
+            cbMotivoAcceso.DataSource = motivosAccesos.ToList();
+            //cbMarcas.SelectedIndex = -1;
+        }
         
 
     }
