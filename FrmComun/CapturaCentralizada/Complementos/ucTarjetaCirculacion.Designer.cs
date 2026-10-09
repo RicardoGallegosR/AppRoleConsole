@@ -49,6 +49,8 @@
             lblTipoPersona = new Label();
             txtApellidoPaterno = new TextBox();
             cbTipoPersona = new CheckBox();
+            lblConfirmarCV = new Label();
+            txtConfirmarClaveVehicular = new TextBox();
             pnlFooter = new Panel();
             flpSeleecionVehicular = new FlowLayoutPanel();
             btnGuardar = new Button();
@@ -104,16 +106,19 @@
             tlpTarjetaCirculacion.Controls.Add(lblTipoPersona, 2, 0);
             tlpTarjetaCirculacion.Controls.Add(txtApellidoPaterno, 1, 1);
             tlpTarjetaCirculacion.Controls.Add(cbTipoPersona, 3, 0);
+            tlpTarjetaCirculacion.Controls.Add(lblConfirmarCV, 2, 6);
+            tlpTarjetaCirculacion.Controls.Add(txtConfirmarClaveVehicular, 3, 6);
             tlpTarjetaCirculacion.Dock = DockStyle.Fill;
             tlpTarjetaCirculacion.Location = new Point(0, 0);
             tlpTarjetaCirculacion.Name = "tlpTarjetaCirculacion";
-            tlpTarjetaCirculacion.RowCount = 6;
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlpTarjetaCirculacion.RowCount = 7;
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
+            tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
             tlpTarjetaCirculacion.Size = new Size(789, 215);
             tlpTarjetaCirculacion.TabIndex = 1;
             // 
@@ -122,9 +127,9 @@
             lblApellidoMaterno.Dock = DockStyle.Fill;
             lblApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
             lblApellidoMaterno.ForeColor = Color.FromArgb(45, 55, 65);
-            lblApellidoMaterno.Location = new Point(397, 35);
+            lblApellidoMaterno.Location = new Point(397, 30);
             lblApellidoMaterno.Name = "lblApellidoMaterno";
-            lblApellidoMaterno.Size = new Size(191, 35);
+            lblApellidoMaterno.Size = new Size(191, 30);
             lblApellidoMaterno.TabIndex = 17;
             lblApellidoMaterno.Text = "APELLIDO MATERNO";
             lblApellidoMaterno.TextAlign = ContentAlignment.MiddleLeft;
@@ -133,7 +138,7 @@
             // 
             txtNombre.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtNombre.Font = new Font("Segoe UI", 10.5F);
-            txtNombre.Location = new Point(197, 4);
+            txtNombre.Location = new Point(197, 2);
             txtNombre.Margin = new Padding(0);
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(197, 26);
@@ -143,7 +148,7 @@
             // 
             txtApellidoMaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtApellidoMaterno.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoMaterno.Location = new Point(591, 39);
+            txtApellidoMaterno.Location = new Point(591, 32);
             txtApellidoMaterno.Margin = new Padding(0);
             txtApellidoMaterno.Name = "txtApellidoMaterno";
             txtApellidoMaterno.Size = new Size(198, 26);
@@ -156,7 +161,7 @@
             lblNombre.ForeColor = Color.FromArgb(45, 55, 65);
             lblNombre.Location = new Point(3, 0);
             lblNombre.Name = "lblNombre";
-            lblNombre.Size = new Size(191, 35);
+            lblNombre.Size = new Size(191, 30);
             lblNombre.TabIndex = 0;
             lblNombre.Text = "NOMBRE";
             lblNombre.TextAlign = ContentAlignment.MiddleLeft;
@@ -165,9 +170,9 @@
             // 
             lblClaveVehicular.Dock = DockStyle.Fill;
             lblClaveVehicular.Font = new Font("Segoe UI", 10.5F);
-            lblClaveVehicular.Location = new Point(397, 175);
+            lblClaveVehicular.Location = new Point(397, 150);
             lblClaveVehicular.Name = "lblClaveVehicular";
-            lblClaveVehicular.Size = new Size(191, 40);
+            lblClaveVehicular.Size = new Size(191, 30);
             lblClaveVehicular.TabIndex = 0;
             lblClaveVehicular.Text = "CLAVE VEHICULAR";
             lblClaveVehicular.TextAlign = ContentAlignment.MiddleLeft;
@@ -176,9 +181,9 @@
             // 
             lblTubosEscape.Dock = DockStyle.Fill;
             lblTubosEscape.Font = new Font("Segoe UI", 10.5F);
-            lblTubosEscape.Location = new Point(397, 140);
+            lblTubosEscape.Location = new Point(397, 120);
             lblTubosEscape.Name = "lblTubosEscape";
-            lblTubosEscape.Size = new Size(191, 35);
+            lblTubosEscape.Size = new Size(191, 30);
             lblTubosEscape.TabIndex = 0;
             lblTubosEscape.Text = "TUBOS DE ESCAPE";
             lblTubosEscape.TextAlign = ContentAlignment.MiddleLeft;
@@ -187,9 +192,9 @@
             // 
             lblFolioTC.Dock = DockStyle.Fill;
             lblFolioTC.Font = new Font("Segoe UI", 10.5F);
-            lblFolioTC.Location = new Point(397, 105);
+            lblFolioTC.Location = new Point(397, 90);
             lblFolioTC.Name = "lblFolioTC";
-            lblFolioTC.Size = new Size(191, 35);
+            lblFolioTC.Size = new Size(191, 30);
             lblFolioTC.TabIndex = 0;
             lblFolioTC.Text = "FOLIO TARJETA CIRCULACION";
             lblFolioTC.TextAlign = ContentAlignment.MiddleLeft;
@@ -198,9 +203,9 @@
             // 
             lblModelo.Dock = DockStyle.Fill;
             lblModelo.Font = new Font("Segoe UI", 10.5F);
-            lblModelo.Location = new Point(397, 70);
+            lblModelo.Location = new Point(397, 60);
             lblModelo.Name = "lblModelo";
-            lblModelo.Size = new Size(191, 35);
+            lblModelo.Size = new Size(191, 30);
             lblModelo.TabIndex = 0;
             lblModelo.Text = "MODELO";
             lblModelo.TextAlign = ContentAlignment.MiddleLeft;
@@ -208,7 +213,7 @@
             // nudTubosEscape
             // 
             nudTubosEscape.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            nudTubosEscape.Location = new Point(594, 146);
+            nudTubosEscape.Location = new Point(594, 123);
             nudTubosEscape.Maximum = new decimal(new int[] { 2, 0, 0, 0 });
             nudTubosEscape.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudTubosEscape.Name = "nudTubosEscape";
@@ -220,17 +225,19 @@
             // 
             txtClaveVehicular.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtClaveVehicular.Font = new Font("Segoe UI", 10.5F);
-            txtClaveVehicular.Location = new Point(591, 182);
+            txtClaveVehicular.Location = new Point(591, 152);
             txtClaveVehicular.Margin = new Padding(0);
             txtClaveVehicular.Name = "txtClaveVehicular";
             txtClaveVehicular.Size = new Size(198, 26);
             txtClaveVehicular.TabIndex = 9;
+            txtClaveVehicular.Text = "123456";
+            txtClaveVehicular.TextChanged += txtClaveVehicular_TextChanged;
             // 
             // nudModelo
             // 
             nudModelo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             nudModelo.Enabled = false;
-            nudModelo.Location = new Point(594, 76);
+            nudModelo.Location = new Point(594, 63);
             nudModelo.Maximum = new decimal(new int[] { 3000, 0, 0, 0 });
             nudModelo.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
             nudModelo.Name = "nudModelo";
@@ -242,7 +249,7 @@
             // 
             txtFolioTC.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtFolioTC.Font = new Font("Segoe UI", 10.5F);
-            txtFolioTC.Location = new Point(591, 109);
+            txtFolioTC.Location = new Point(591, 92);
             txtFolioTC.Margin = new Padding(0);
             txtFolioTC.Name = "txtFolioTC";
             txtFolioTC.Size = new Size(198, 26);
@@ -251,9 +258,9 @@
             // lblFTC
             // 
             lblFTC.Font = new Font("Segoe UI", 10.5F);
-            lblFTC.Location = new Point(3, 175);
+            lblFTC.Location = new Point(3, 150);
             lblFTC.Name = "lblFTC";
-            lblFTC.Size = new Size(191, 40);
+            lblFTC.Size = new Size(191, 30);
             lblFTC.TabIndex = 0;
             lblFTC.Text = "FECHA TARJETA CIRCULACION";
             lblFTC.TextAlign = ContentAlignment.MiddleLeft;
@@ -261,9 +268,9 @@
             // lblCombustible
             // 
             lblCombustible.Font = new Font("Segoe UI", 10.5F);
-            lblCombustible.Location = new Point(3, 140);
+            lblCombustible.Location = new Point(3, 120);
             lblCombustible.Name = "lblCombustible";
-            lblCombustible.Size = new Size(191, 35);
+            lblCombustible.Size = new Size(191, 30);
             lblCombustible.TabIndex = 0;
             lblCombustible.Text = "COMBUSTIBLE";
             lblCombustible.TextAlign = ContentAlignment.MiddleLeft;
@@ -272,9 +279,9 @@
             // 
             lblSubMarca.Font = new Font("Segoe UI", 10.5F);
             lblSubMarca.ForeColor = Color.FromArgb(45, 55, 65);
-            lblSubMarca.Location = new Point(3, 105);
+            lblSubMarca.Location = new Point(3, 90);
             lblSubMarca.Name = "lblSubMarca";
-            lblSubMarca.Size = new Size(191, 35);
+            lblSubMarca.Size = new Size(191, 30);
             lblSubMarca.TabIndex = 0;
             lblSubMarca.Text = "SUBMARCA";
             lblSubMarca.TextAlign = ContentAlignment.MiddleLeft;
@@ -283,16 +290,16 @@
             // 
             lblMarca.Font = new Font("Segoe UI", 10.5F);
             lblMarca.ForeColor = Color.FromArgb(45, 55, 65);
-            lblMarca.Location = new Point(3, 70);
+            lblMarca.Location = new Point(3, 60);
             lblMarca.Name = "lblMarca";
-            lblMarca.Size = new Size(191, 35);
+            lblMarca.Size = new Size(191, 30);
             lblMarca.TabIndex = 0;
             lblMarca.Text = "MARCA";
             lblMarca.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // dtpFTC
             // 
-            dtpFTC.Location = new Point(200, 178);
+            dtpFTC.Location = new Point(200, 153);
             dtpFTC.Name = "dtpFTC";
             dtpFTC.Size = new Size(191, 23);
             dtpFTC.TabIndex = 12;
@@ -304,7 +311,7 @@
             cbCombustibles.Font = new Font("Segoe UI", 12F);
             cbCombustibles.ForeColor = Color.Black;
             cbCombustibles.FormattingEnabled = true;
-            cbCombustibles.Location = new Point(200, 143);
+            cbCombustibles.Location = new Point(200, 123);
             cbCombustibles.Name = "cbCombustibles";
             cbCombustibles.Size = new Size(191, 29);
             cbCombustibles.TabIndex = 15;
@@ -316,7 +323,7 @@
             cbSubmarcas.Font = new Font("Segoe UI", 12F);
             cbSubmarcas.ForeColor = Color.Black;
             cbSubmarcas.FormattingEnabled = true;
-            cbSubmarcas.Location = new Point(200, 108);
+            cbSubmarcas.Location = new Point(200, 93);
             cbSubmarcas.Name = "cbSubmarcas";
             cbSubmarcas.Size = new Size(191, 29);
             cbSubmarcas.TabIndex = 14;
@@ -328,7 +335,7 @@
             cbMarcas.Font = new Font("Segoe UI", 12F);
             cbMarcas.ForeColor = Color.Black;
             cbMarcas.FormattingEnabled = true;
-            cbMarcas.Location = new Point(200, 73);
+            cbMarcas.Location = new Point(200, 63);
             cbMarcas.Name = "cbMarcas";
             cbMarcas.Size = new Size(191, 29);
             cbMarcas.TabIndex = 13;
@@ -338,9 +345,9 @@
             lblApellidoPaterno.Dock = DockStyle.Fill;
             lblApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
             lblApellidoPaterno.ForeColor = Color.FromArgb(45, 55, 65);
-            lblApellidoPaterno.Location = new Point(3, 35);
+            lblApellidoPaterno.Location = new Point(3, 30);
             lblApellidoPaterno.Name = "lblApellidoPaterno";
-            lblApellidoPaterno.Size = new Size(191, 35);
+            lblApellidoPaterno.Size = new Size(191, 30);
             lblApellidoPaterno.TabIndex = 16;
             lblApellidoPaterno.Text = "APELLIDO PATERNO";
             lblApellidoPaterno.TextAlign = ContentAlignment.MiddleLeft;
@@ -352,7 +359,7 @@
             lblTipoPersona.ForeColor = Color.FromArgb(45, 55, 65);
             lblTipoPersona.Location = new Point(397, 0);
             lblTipoPersona.Name = "lblTipoPersona";
-            lblTipoPersona.Size = new Size(191, 35);
+            lblTipoPersona.Size = new Size(191, 30);
             lblTipoPersona.TabIndex = 20;
             lblTipoPersona.Text = "TIPO PERSONA";
             lblTipoPersona.TextAlign = ContentAlignment.MiddleLeft;
@@ -361,7 +368,7 @@
             // 
             txtApellidoPaterno.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             txtApellidoPaterno.Font = new Font("Segoe UI", 10.5F);
-            txtApellidoPaterno.Location = new Point(197, 39);
+            txtApellidoPaterno.Location = new Point(197, 32);
             txtApellidoPaterno.Margin = new Padding(0);
             txtApellidoPaterno.Name = "txtApellidoPaterno";
             txtApellidoPaterno.Size = new Size(197, 26);
@@ -374,10 +381,34 @@
             cbTipoPersona.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             cbTipoPersona.Location = new Point(594, 3);
             cbTipoPersona.Name = "cbTipoPersona";
-            cbTipoPersona.Size = new Size(192, 29);
+            cbTipoPersona.Size = new Size(192, 24);
             cbTipoPersona.TabIndex = 21;
             cbTipoPersona.Text = "Moral";
             cbTipoPersona.UseVisualStyleBackColor = true;
+            // 
+            // lblConfirmarCV
+            // 
+            lblConfirmarCV.Font = new Font("Segoe UI", 10.5F);
+            lblConfirmarCV.Location = new Point(397, 180);
+            lblConfirmarCV.Name = "lblConfirmarCV";
+            lblConfirmarCV.Size = new Size(191, 30);
+            lblConfirmarCV.TabIndex = 22;
+            lblConfirmarCV.Text = "CONFIRMAR CLAVE VEHICULAR";
+            lblConfirmarCV.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // txtConfirmarClaveVehicular
+            // 
+            txtConfirmarClaveVehicular.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            txtConfirmarClaveVehicular.Font = new Font("Segoe UI", 10.5F);
+            txtConfirmarClaveVehicular.Location = new Point(591, 184);
+            txtConfirmarClaveVehicular.Margin = new Padding(0);
+            txtConfirmarClaveVehicular.Name = "txtConfirmarClaveVehicular";
+            txtConfirmarClaveVehicular.Size = new Size(198, 26);
+            txtConfirmarClaveVehicular.TabIndex = 23;
+            txtConfirmarClaveVehicular.Text = "123456";
+            txtConfirmarClaveVehicular.TextChanged += txtConfirmarClaveVehicular_TextChanged;
+            txtConfirmarClaveVehicular.KeyDown += txtConfirmarClaveVehicular_KeyDown;
+            txtConfirmarClaveVehicular.KeyPress += txtConfirmarClaveVehicular_KeyPress;
             // 
             // pnlFooter
             // 
@@ -488,5 +519,7 @@
         private TextBox txtApellidoPaterno;
         private Label lblTipoPersona;
         private CheckBox cbTipoPersona;
+        private Label lblConfirmarCV;
+        private TextBox txtConfirmarClaveVehicular;
     }
 }

@@ -89,7 +89,7 @@
             txtVinConfirmar.Size = new Size(219, 26);
             txtVinConfirmar.TabIndex = 3;
             txtVinConfirmar.TabStop = false;
-            txtVinConfirmar.Text = "3U5AFCFY5R2006740";
+            txtVinConfirmar.Text = "3U5AFCFY5R200674";
             txtVinConfirmar.TextChanged += txtVinConfirmar_TextChanged;
             txtVinConfirmar.KeyPress += txtVinConfirmar_KeyPress;
             // 
@@ -125,8 +125,9 @@
             txtVin.Size = new Size(219, 26);
             txtVin.TabIndex = 2;
             txtVin.TabStop = false;
-            txtVin.Text = "3U5AFCFY5R2006740";
+            txtVin.Text = "3U5AFCFY5R200674";
             txtVin.TextChanged += txtVin_TextChanged;
+            txtVin.KeyDown += txtVin_KeyDown;
             // 
             // lblVin
             // 

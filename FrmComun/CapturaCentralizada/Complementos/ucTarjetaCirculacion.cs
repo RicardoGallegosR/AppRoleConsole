@@ -13,7 +13,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public string Nombre => txtNombre.Text.Trim();
         public string ApellidoPaterno => txtApellidoPaterno.Text.Trim();
         public string ApellidoMaterno => txtApellidoMaterno.Text.Trim();
-        public bool EsPersonaFisica =>   cbTipoPersona.Checked;
+        public bool EsPersonaFisica => cbTipoPersona.Checked;
 
         public DateTime FechaTC => dtpFTC.Value;
         public int Modelo => (int)nudModelo.Value;
@@ -21,6 +21,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public int TubosEscape => (int)nudTubosEscape.Value;
         public string ClaveVehicular => txtClaveVehicular.Text.Trim();
         public event EventHandler? SubmarcaSeleccionada;
+
+        private const int LongitudMinClaveVehicular = 3;
+        private const int LongitudClaveVehicular = 7;
+        private const int MaxErroresClaveVehicular = 3;
+        private int _erroresConfirmacionClaveVehicular = 0;
+
+
+
 
 
         public ucTarjetaCirculacion() {
@@ -43,6 +51,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             btnGuardar.Click += btnGuardar_Click;
 
             txtClaveVehicular.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtClaveVehicular, @"[^0-9]");
+            txtConfirmarClaveVehicular.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtConfirmarClaveVehicular, @"[^0-9]");
+
             txtNombre.TextChanged += txtNombre_TextChanged;
             txtFolioTC.TextChanged += (s, ev) => Expresiones.SanitizeByRegex(txtFolioTC, @"[^0-9]");
 
@@ -57,7 +67,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             txtNombre.MaxLength = 50;
             txtFolioTC.MaxLength = 12;
-            txtClaveVehicular.MaxLength = 7; 
+
             nudTubosEscape.Minimum = 1;
             nudTubosEscape.Value = 1;
 
@@ -74,7 +84,37 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbTipoPersona.Checked = true;
             ConfigurarTipoPersona();
             EstablecerModoEdicion(false);
+
+
+            Load += uucTarjetaCirculacion_Load;
         }
+
+        private void uucTarjetaCirculacion_Load(object sender, EventArgs e) {
+            lblConfirmarCV.Visible = false;
+            txtConfirmarClaveVehicular.Visible = false;
+
+            btnGuardar.Enabled = false;
+
+            txtClaveVehicular.MaxLength = LongitudClaveVehicular;
+            txtConfirmarClaveVehicular.MaxLength = LongitudClaveVehicular;
+
+            //*
+            // Bloquea Ctrl+C, Ctrl+V, Ctrl+X, Shift+Insert, etc.
+            txtClaveVehicular.ShortcutsEnabled = false;
+            txtConfirmarClaveVehicular.ShortcutsEnabled = false;
+
+            // Evita copiar/pegar desde el menú del botón derecho.
+            txtClaveVehicular.ContextMenuStrip = new ContextMenuStrip();
+            txtConfirmarClaveVehicular.ContextMenuStrip = new ContextMenuStrip();
+            //*/
+
+            txtClaveVehicular.PasswordChar = '\0';
+            _erroresConfirmacionClaveVehicular = 0;
+        }
+
+
+
+
         public void SeleccionarMarca(int marcaId) {
             if (cbMarcas.DataSource is null)
                 return;
@@ -125,7 +165,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             //cbMarcas.SelectedIndex = -1;
         }
 
-        
+
 
 
         public void EstablecerPersonaFisica(string nombre, string apellidoPaterno, string apellidoMaterno) {
@@ -143,11 +183,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public int? MarcaId => cbMarcas.SelectedValue is int id ? id : null;
         public string Marca => cbMarcas.SelectedItem is MarcasDto marca ? marca.Marca : string.Empty;
 
-        public void CargarSubmarcas( IEnumerable<SubmarcaDto> submarcas) {
+        public void CargarSubmarcas(IEnumerable<SubmarcaDto> submarcas) {
             cbSubmarcas.DataSource = null;
             cbSubmarcas.DisplayMember = nameof(SubmarcaDto.Submarca);
             cbSubmarcas.ValueMember = nameof(SubmarcaDto.SubmarcaId);
-            cbSubmarcas.DataSource =   submarcas.ToList();
+            cbSubmarcas.DataSource = submarcas.ToList();
             //cbSubmarcas.SelectedIndex = -1;
         }
 
@@ -158,7 +198,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             cbCombustibles.DataSource = combustibleDtos.ToList();
             //cbCombustibles.SelectedIndex = -1;
         }
-        public byte? CombustibleId => cbCombustibles.SelectedValue is null  ? null : Convert.ToByte(cbCombustibles.SelectedValue);
+        public byte? CombustibleId => cbCombustibles.SelectedValue is null ? null : Convert.ToByte(cbCombustibles.SelectedValue);
 
         private void cbSubmarcas_KeyDown(object? sender, KeyEventArgs e) {
             if (e.KeyCode != Keys.Enter)
@@ -183,7 +223,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
 
 
-        private void txtNombre_TextChanged(object? sender,EventArgs e) {
+        private void txtNombre_TextChanged(object? sender, EventArgs e) {
             if (EsPersonaFisica) {
                 Expresiones.SanitizeByRegex(txtNombre, @"[^A-ZÁÉÍÓÚÜÑ ]");
             } else {
@@ -213,9 +253,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             nudTubosEscape.Enabled = editar;
 
             dtpFTC.Enabled = editar;
-
             txtFolioTC.Enabled = editar;
-
             btnEditar.Enabled = !editar;
             //btnGuardar.Enabled = editar;
         }
@@ -224,12 +262,101 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             pnlPrincipal.Enabled = flag;
         }
 
-        public int? SubmarcaId =>  cbSubmarcas.SelectedValue is null ? null : Convert.ToInt32(cbSubmarcas.SelectedValue);
-        public string Submarca =>  cbSubmarcas.SelectedItem is SubmarcaDto submarca ? submarca.Submarca : string.Empty;
+        public int? SubmarcaId => cbSubmarcas.SelectedValue is null ? null : Convert.ToInt32(cbSubmarcas.SelectedValue);
+        public string Submarca => cbSubmarcas.SelectedItem is SubmarcaDto submarca ? submarca.Submarca : string.Empty;
 
-        private void btnEditar_Click(object sender, EventArgs e) =>
-           Editar?.Invoke(this, e);
-        private void btnGuardar_Click(object sender, EventArgs e) =>
-           Guardar?.Invoke(this, e);
+        private void btnEditar_Click(object sender, EventArgs e) => Editar?.Invoke(this, e);
+        private void btnGuardar_Click(object sender, EventArgs e) => Guardar?.Invoke(this, e);
+
+        private void txtClaveVehicular_TextChanged(object sender, EventArgs e) {
+            btnGuardar.Enabled = false;
+
+            if (txtClaveVehicular.Text.Length <= LongitudClaveVehicular && txtClaveVehicular.Text.Length >= LongitudMinClaveVehicular) {
+                txtClaveVehicular.PasswordChar = '●';
+                lblConfirmarCV.Visible = true;
+                txtConfirmarClaveVehicular.Visible = true;
+                txtConfirmarClaveVehicular.Clear();
+
+                _erroresConfirmacionClaveVehicular = 0;
+                //txtConfirmarClaveVehicular.Focus();
+
+                return;
+            }
+
+            txtClaveVehicular.PasswordChar = '\0';
+            lblConfirmarCV.Visible = false;
+            txtConfirmarClaveVehicular.Visible = false;
+            txtConfirmarClaveVehicular.Clear();
+            _erroresConfirmacionClaveVehicular = 0;
+        }
+
+        private void txtConfirmarClaveVehicular_KeyPress(object sender, KeyPressEventArgs e) {
+
+            // Permitir Backspace y otras teclas de control.
+            if (char.IsControl(e.KeyChar))
+                return;
+
+            string claveOriginal = txtClaveVehicular.Text;
+
+            // La clave original debe estar dentro del rango permitido.
+            if (claveOriginal.Length < LongitudMinClaveVehicular || claveOriginal.Length > LongitudClaveVehicular) {
+                e.Handled = true;
+                return;
+            }
+
+            int posicion = txtConfirmarClaveVehicular.TextLength;
+
+            // No permitir escribir más caracteres que la clave original.
+            if (posicion >= claveOriginal.Length) {
+                e.Handled = true;
+                return;
+            }
+
+            char caracterIngresado = char.ToUpperInvariant(e.KeyChar);
+            char caracterEsperado = char.ToUpperInvariant(claveOriginal[posicion]);
+
+            if (caracterIngresado != caracterEsperado) {
+                e.Handled = true;
+                _erroresConfirmacionClaveVehicular++;
+                Mostrar.Mensaje("Advertencia", "Anotaste mal un digito :(");
+                if (_erroresConfirmacionClaveVehicular >= MaxErroresClaveVehicular) {
+                    ReiniciarConfirmacionClaveVehicular();
+                    Mostrar.Mensaje("Clave vehicular", "La clave vehicular fue confirmada incorrectamente tres veces.\nDebe capturarla nuevamente.");
+                    return;
+                }
+                return;
+            }
+            e.KeyChar = caracterIngresado;
+        }
+
+        private void ReiniciarConfirmacionClaveVehicular() {
+            _erroresConfirmacionClaveVehicular = 0;
+            txtConfirmarClaveVehicular.Clear();
+            txtClaveVehicular.Clear();
+            txtClaveVehicular.PasswordChar = '\0';
+            lblConfirmarCV.Visible = false;
+            txtConfirmarClaveVehicular.Visible = false;
+            btnGuardar.Enabled = false;
+
+            txtClaveVehicular.Focus();
+        }
+
+        private void txtConfirmarClaveVehicular_TextChanged(object sender, EventArgs e) {
+            btnGuardar.Enabled = txtClaveVehicular.Text.Length >= LongitudMinClaveVehicular && txtClaveVehicular.Text.Length <= LongitudClaveVehicular && txtClaveVehicular.Text.Equals(txtConfirmarClaveVehicular.Text, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void txtConfirmarClaveVehicular_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.SuppressKeyPress = true;
+            e.Handled = true;
+
+            if (!btnGuardar.Enabled)
+                return;
+
+            btnGuardar.PerformClick();
+        }
+
     }
 }

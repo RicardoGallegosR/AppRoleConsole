@@ -60,8 +60,66 @@
     }
 
     public sealed class MotivosAccesoDto {
-        public short MotivoAccesoId { get; init; }
+        public byte MotivoAccesoId { get; init; }
         public string MotivoAcceso { get; init; } = string.Empty;
+    }
+
+    public sealed class TiposDocumentosDto {
+        public short TipoDocumentoId { get; init; }
+        public string TipoDocumento { get; init; } = string.Empty;
+    }
+
+    public class ConsultaFotocivicasDto {
+        public string? Placa { get; set; }
+
+        public bool AdeudoTenencia { get; set; }
+        public bool AdeudoSancion { get; set; }
+        public bool AdeudoInfraccion { get; set; }
+
+        public bool Verifica { get; set; }
+        public bool Taxi { get; set; }
+
+        public string? MensajeTenencia { get; set; }
+
+        public FotocivicasDto? Fotocivicas { get; set; }
+
+        public List<EconomicaDto> Economicas { get; set; } = new();
+        public List<object> Sanciones { get; set; } = new();
+        public List<string> Tenencias { get; set; } = new();
+    }
+    public class FotocivicasDto {
+        public int Puntos { get; set; }
+        public bool TieneAdeudo { get; set; }
+        public bool DebeAmonestaciones { get; set; }
+        public bool DebePresencial { get; set; }
+        public bool DebeEnLinea { get; set; }
+    }
+    public class EconomicaDto {
+        public string? Folio { get; set; }
+        public DateTime Fecha { get; set; }
+        public string? Status { get; set; }
+    }
+
+    public class CitasDto {
+        public string placa { get; set; } = string.Empty;
+        public string centro { get; set; } = string.Empty;
+        public string codigoRespuesta { get; set; } = string.Empty;
+
+        public bool existeCita { get; set; }
+        public bool marcaAsistencia { get; set; }
+        public string mensaje { get; set; } = string.Empty;
+
+        public DateTime? fechaCita { get; set; }
+        public TimeSpan? horaCita { get; set; }
+    }
+
+
+
+    public class FisicoMecanicaDto {
+        public string placa { get; set; } = string.Empty;
+        public bool documentalAprobada { get; set; } = false;
+        public string origen { get; set; } = string.Empty;
+        public string mensaje { get; set; } = string.Empty;
     }
 
     public sealed class MarcasDto {

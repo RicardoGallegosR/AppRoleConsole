@@ -72,6 +72,8 @@ namespace SQLSIVEV.Infrastructure.Services {
         public string dvar20 { get; set; } = string.Empty;
         public int dvar21 { get; set; } = 0;
         public Guid dvar22 { get; set; } = Guid.Empty;
+        public string dvar26 { get; set; } = string.Empty;
+        public Guid dvar24 { get; set; } = Guid.Empty;
 
 
     }

@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Presentation;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Security;
@@ -9,7 +10,6 @@ using SQLSIVEV.Infrastructure.Utils;
 using System.Data;
 using System.Linq.Expressions;
 using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
-
 
 namespace SQLSIVEV.Infrastructure.Sql {
     public sealed class SivevRepository {
@@ -94,7 +94,6 @@ namespace SQLSIVEV.Infrastructure.Sql {
             pMensaje.Direction = ParameterDirection.Output;
 
             var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
-
             pResultado.Direction = ParameterDirection.Output;
 
             cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
@@ -104,16 +103,34 @@ namespace SQLSIVEV.Infrastructure.Sql {
 
             var pModelo = cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt);
             pModelo.Direction = ParameterDirection.Output;
+
             cmd.Parameters.Add("@iOdometro", SqlDbType.Int).Value = odometro;
 
             var pMarcaId = cmd.Parameters.Add("@iMarcaId",SqlDbType.Int);
             pMarcaId.Direction = ParameterDirection.Output;
 
+            var pReturn = cmd.Parameters.Add("@RETURN_VALUE", SqlDbType.Int);
+            pReturn.Direction = ParameterDirection.ReturnValue;
+
             await cmd.ExecuteNonQueryAsync(ct);
 
+            SivevLogger.Warning(
+                "DEBUG SpAppCapturaVinModeloSet\n" +
+                $"MensajeId: {pMensaje.Value}\n" +
+                $"Resultado: {pResultado.Value}\n" +
+                $"Modelo: {pModelo.Value}\n" +
+                $"MarcaId: {pMarcaId.Value}\n" +
+                $"Return: {pReturn.Value}",
+                SivevOrigen.Captura
+            );
+
+
+            int mensajeId = pMensaje.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensaje.Value);
+            short resultadoId = pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value);
+
             return new CapturaVinModeloResult {
-                MensajeId =     pMensaje.Value == DBNull.Value ? 0          : Convert.ToInt32(pMensaje.Value),
-                ResultadoId =   pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value),
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
                 Modelo =        pModelo.Value == DBNull.Value  ? (short)0   : Convert.ToInt16(pModelo.Value),
                 MarcaId =       pMarcaId.Value == DBNull.Value ? 0          : Convert.ToInt32(pMarcaId.Value)
             };
@@ -122,7 +139,56 @@ namespace SQLSIVEV.Infrastructure.Sql {
 
 
 
-        
+        #region bitacora de visitas
+        public async Task<StoreResult<Guid>> SpAppCapturaBitacoraVisitasSet(SqlConnection cnn, Guid estacionId, Guid accesoId, Guid verificacionId, string Nombre, string Paterno, string Materno, CancellationToken ct = default) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaBitacoraVisitasSet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pResultado.Direction = ParameterDirection.Output;
+
+            var uiEmpresaPersonaId = cmd.Parameters.Add("@uiEmpresaPersonaId", SqlDbType.UniqueIdentifier);
+            uiEmpresaPersonaId.Direction = ParameterDirection.Output;
+
+            //
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier).Value = verificacionId;
+
+            cmd.Parameters.Add("@vcNombre", SqlDbType.VarChar, 50).Value = Nombre;
+            cmd.Parameters.Add("@vcPaterno", SqlDbType.VarChar, 50).Value = Paterno;
+            cmd.Parameters.Add("@vcMaterno", SqlDbType.VarChar, 50).Value = Materno;
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            int mensajeId = pMensaje.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensaje.Value);
+            short resultadoId = pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value);
+
+            return new StoreResult<Guid> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = uiEmpresaPersonaId.Value is Guid id ? id : Guid.Empty
+            };
+        }
+        #endregion
+
+
+
+
+
+
+
+
+
 
 
         #region bitacora de adeudos
@@ -408,11 +474,56 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 Data = entidadesFederativas
             };
         }
-        public StoreResult<List<MotivosAccesoDto>> SpAppTiposDocumentosGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+        public StoreResult<List<MotivosAccesoDto>> SpAppMotivosAccesoGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
             if (cnn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");
 
             var motivosAccesos = new List<MotivosAccesoDto>();
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SivAppComun.SpAppMotivosAccesoGet";
+            cmd.CommandTimeout = _timeout;
+
+            var pMsg = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMsg.Direction = ParameterDirection.Output;
+
+            var pRes = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pRes.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
+
+            using (var reader = cmd.ExecuteReader()) {
+                int MotivoAccesoId = reader.GetOrdinal("MotivoAccesoId");
+                int MotivoAcceso = reader.GetOrdinal("MotivoAcceso");
+
+                while (reader.Read()) {
+                    motivosAccesos.Add(new MotivosAccesoDto {
+                        MotivoAccesoId = reader.IsDBNull(MotivoAccesoId) ? (byte)0 : reader.GetByte(MotivoAccesoId),
+                        MotivoAcceso = reader.IsDBNull(MotivoAcceso) ? string.Empty : reader.GetString(MotivoAcceso),
+                    });
+                }
+            }
+
+            int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
+            short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
+
+            return new StoreResult<List<MotivosAccesoDto>> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = motivosAccesos
+            };
+        }
+
+
+        #region Tipos Documentos
+        public StoreResult<List<TiposDocumentosDto>> SpAppTiposDocumentosGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            var TiposDocumentos = new List<TiposDocumentosDto>();
 
             using var cmd = cnn.CreateCommand();
 
@@ -430,13 +541,13 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = uiEstacionId;
 
             using (var reader = cmd.ExecuteReader()) {
-                int MotivoAccesoId = reader.GetOrdinal("TipoDocumentoId");
-                int MotivoAcceso = reader.GetOrdinal("TipoDocumento");
+                int TipoDocumentoId = reader.GetOrdinal("TipoDocumentoId");
+                int TipoDocumento = reader.GetOrdinal("TipoDocumento");
 
                 while (reader.Read()) {
-                    motivosAccesos.Add(new MotivosAccesoDto {
-                        MotivoAccesoId = reader.IsDBNull(MotivoAccesoId) ? (short)0: reader.GetInt16(MotivoAccesoId),
-                        MotivoAcceso = reader.IsDBNull(MotivoAcceso) ? string.Empty : reader.GetString(MotivoAcceso),
+                    TiposDocumentos.Add(new TiposDocumentosDto {
+                        TipoDocumentoId = reader.IsDBNull(TipoDocumentoId) ? (short)0 : reader.GetInt16(TipoDocumentoId),
+                        TipoDocumento = reader.IsDBNull(TipoDocumento) ? string.Empty : reader.GetString(TipoDocumento),
                     });
                 }
             }
@@ -444,13 +555,14 @@ namespace SQLSIVEV.Infrastructure.Sql {
             int mensajeId = pMsg.Value == DBNull.Value ? 0: Convert.ToInt32(pMsg.Value);
             short resultadoId = pRes.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pRes.Value);
 
-            return new StoreResult<List<MotivosAccesoDto>> {
+            return new StoreResult<List<TiposDocumentosDto>> {
                 MensajeId = mensajeId,
                 ResultadoId = resultadoId,
-                Data = motivosAccesos
+                Data = TiposDocumentos
             };
         }
 
+        #endregion
 
 
         public StoreResult<List<MarcasDto>> SpAppMarcasGet(SqlConnection cnn, Guid uiEstacionId, Guid accesoId) {
@@ -1525,7 +1637,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
                 MensajeId = _MensajeId,
             };
         }
-
+       
         public async Task<SpAppBitacoraErroresSet> SpSpAppBitacoraErroresSetAsync(VisualRegistroWindows V, SpAppBitacoraErroresSet A, CancellationToken ct = default) {
             short _Resultado = 0;
             int   _MensajeId = 0;
@@ -1587,7 +1699,58 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
 
 
+        public async Task<ResultadoSql> SpAppCapturaAbandona2026Async(SqlConnection connApp, Guid uiAccesoId, Guid uiEstacionId, Guid uiVerificacionId, CancellationToken ct = default) {
+            if (connApp is null) {
+                SivevLogger.Error($"SpAppCapturaAbandona2026Async: connApp is null");
+                throw new ArgumentNullException(nameof(connApp));
+            }
+            if (connApp.State != ConnectionState.Open) {
+                SivevLogger.Error($"SpAppCapturaAbandona2026Async: connApp is not open");
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
+            short _Resultado = 0;
+            int   _MensajeId = 0;
+            try {
+                using (var cmd = connApp.CreateCommand()) {
+                    cmd.CommandText = "VfcCaptura.SpAppCapturaAbandona";
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Entradas
+                    cmd.Parameters.Add(new SqlParameter("@uiAccesoId", SqlDbType.UniqueIdentifier) { Value = uiAccesoId });
+                    cmd.Parameters.Add(new SqlParameter("@uiEstacionId", SqlDbType.UniqueIdentifier) { Value = uiEstacionId });
+                    cmd.Parameters.Add(new SqlParameter("@uiVerificacionId", SqlDbType.UniqueIdentifier) { Value = uiVerificacionId });
+
+                    // Salidas
+                    var pMensajeId = new SqlParameter("@iMensajeId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                    var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) { Direction = ParameterDirection.Output };
+
+                    cmd.Parameters.Add(pMensajeId);
+                    cmd.Parameters.Add(pResultado);
+
+                    await cmd.ExecuteNonQueryAsync(ct);
+                    _Resultado = (pResultado.Value == DBNull.Value) ? (short)0 : Convert.ToInt16(pResultado.Value);
+                    _MensajeId = (pMensajeId.Value == DBNull.Value) ? 0 : Convert.ToInt32(pMensajeId.Value);
+
+                }                
+            } catch (Exception e) {
+                SivevLogger.Error($"VfcCaptura.SpAppCapturaAbandona {e.Message}", SivevOrigen.Captura);
+            }
+            return new ResultadoSql {
+                Resultado = _Resultado,
+                MensajeId = _MensajeId,
+            };
+        }
+
         public async Task<SpAppBitacoraErroresSet> SpSpAppBitacoraErroresSetAsync2026(SqlConnection cnn, SpAppBitacoraErroresSet A, CancellationToken ct = default) {
+            if (cnn is null) {
+                SivevLogger.Error($"SpSpAppBitacoraErroresSetAsync2026: connApp is null", SivevOrigen.Configurador);
+                throw new ArgumentNullException(nameof(cnn));
+            }
+            if (cnn.State != ConnectionState.Open) {
+                SivevLogger.Error($"SpSpAppBitacoraErroresSetAsync2026: connApp is not open", SivevOrigen.Configurador);
+                throw new InvalidOperationException("La conexión SQL debe estar abierta y enrolada al AppRole.");
+            }
+
             short _Resultado = 0;
             int   _MensajeId = 0;
             try {

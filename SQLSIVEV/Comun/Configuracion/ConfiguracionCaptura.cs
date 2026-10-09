@@ -1,13 +1,24 @@
-﻿using SQLSIVEV.Infrastructure.Services;
+﻿using SQLSIVEV.Comun;
+using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Utils;
-using SQLSIVEV.Comun;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SQLSIVEV.Comun.Configuracion {
+    public class VerificentroApiConfig {
+        public string DnsHost { get; set; } = string.Empty;
+        public string FallbackIp { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
+
+        public string Accept { get; set; } = "application/json";
+        [JsonPropertyName("x-api-key")]
+        public string ApiKey { get; set; } = string.Empty;
+    }
+
     public class ConfiguracionCaptura {
         Regedit regedit = new Regedit(origen: SivevOrigen.Captura);
 

@@ -257,6 +257,7 @@
             ucAcciones1.TextoAutoLogon = "Auto Logon";
             ucAcciones1.TextoBitacora = "Bitácora ";
             ucAcciones1.TextoBuscarEstacion = "Buscar estación";
+            ucAcciones1.Load += ucAcciones1_Load;
             // 
             // Captura
             // 

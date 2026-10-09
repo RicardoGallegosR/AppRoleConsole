@@ -14,12 +14,20 @@
 
   <ItemGroup>
     <PackageReference Include="fontawesome.sharp" Version="6.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
   </ItemGroup>
 	
 
   <ItemGroup>
     <ProjectReference Include="..\FrmComun\FrmComun.csproj" />
     <ProjectReference Include="..\SQLSIVEV\SQLSIVEV.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <None Update="appsettings.json">
+	       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
   </ItemGroup>
 
 </Project>

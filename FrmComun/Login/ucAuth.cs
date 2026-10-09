@@ -307,16 +307,6 @@ namespace FrmComun.Login {
 
             await accion(session.Connection);
         }
-
-        private async Task<T> EjecutarSqlAsync<T>(Func<SqlConnection, Task<T>> accion, CancellationToken ct = default) {
-            await using var session = await _sql.OpenSessionAsync( new AppRoleConfig {
-                    Nombre = _roll,
-                    Password = _passRoll,
-                    Habilitado = true
-                }
-            );
-            return await accion(session.Connection);
-        }
         #endregion
     }
 }

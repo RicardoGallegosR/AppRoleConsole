@@ -31,9 +31,15 @@
             txtPlaca = new TextBox();
             ibServicios = new FontAwesome.Sharp.IconButton();
             btnCrearVerificacion = new Button();
+            scWeb = new SplitContainer();
             pnlCitas = new Panel();
+            lblStatusCitas = new Label();
             pnlMargen = new Panel();
             lblInfCitas = new Label();
+            pnlFM = new Panel();
+            lblStatusFM = new Label();
+            pnlMargen2 = new Panel();
+            lblInfFM = new Label();
             tableLayoutPanel1 = new TableLayoutPanel();
             pnlTipoAccso = new Panel();
             cbMotivoAcceso = new ComboBox();
@@ -57,7 +63,12 @@
             scPrincipal.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             flpPlacasServicios.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)scWeb).BeginInit();
+            scWeb.Panel1.SuspendLayout();
+            scWeb.Panel2.SuspendLayout();
+            scWeb.SuspendLayout();
             pnlCitas.SuspendLayout();
+            pnlFM.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             pnlTipoAccso.SuspendLayout();
             pnlMonetarias.SuspendLayout();
@@ -73,7 +84,7 @@
             pnlPrincipal.Dock = DockStyle.Fill;
             pnlPrincipal.Location = new Point(0, 0);
             pnlPrincipal.Name = "pnlPrincipal";
-            pnlPrincipal.Size = new Size(669, 351);
+            pnlPrincipal.Size = new Size(861, 327);
             pnlPrincipal.TabIndex = 0;
             // 
             // scPrincipal
@@ -89,9 +100,10 @@
             // 
             // scPrincipal.Panel2
             // 
+            scPrincipal.Panel2.AutoScroll = true;
             scPrincipal.Panel2.Controls.Add(tableLayoutPanel1);
-            scPrincipal.Size = new Size(669, 351);
-            scPrincipal.SplitterDistance = 325;
+            scPrincipal.Size = new Size(861, 327);
+            scPrincipal.SplitterDistance = 417;
             scPrincipal.SplitterWidth = 1;
             scPrincipal.TabIndex = 0;
             scPrincipal.TabStop = false;
@@ -101,14 +113,14 @@
             tableLayoutPanel2.ColumnCount = 1;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel2.Controls.Add(flpPlacasServicios, 0, 0);
-            tableLayoutPanel2.Controls.Add(pnlCitas, 0, 1);
+            tableLayoutPanel2.Controls.Add(scWeb, 0, 1);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(0, 0);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.RowCount = 2;
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 15F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 85F));
-            tableLayoutPanel2.Size = new Size(325, 351);
+            tableLayoutPanel2.Size = new Size(417, 327);
             tableLayoutPanel2.TabIndex = 0;
             // 
             // flpPlacasServicios
@@ -120,7 +132,7 @@
             flpPlacasServicios.Dock = DockStyle.Fill;
             flpPlacasServicios.Location = new Point(3, 3);
             flpPlacasServicios.Name = "flpPlacasServicios";
-            flpPlacasServicios.Size = new Size(319, 46);
+            flpPlacasServicios.Size = new Size(411, 43);
             flpPlacasServicios.TabIndex = 0;
             // 
             // lblPlaca
@@ -157,6 +169,7 @@
             ibServicios.Size = new Size(37, 30);
             ibServicios.TabIndex = 2;
             ibServicios.UseVisualStyleBackColor = false;
+            ibServicios.Click += ibServicios_Click;
             // 
             // btnCrearVerificacion
             // 
@@ -170,15 +183,47 @@
             btnCrearVerificacion.Text = "Cont";
             btnCrearVerificacion.UseVisualStyleBackColor = true;
             // 
+            // scWeb
+            // 
+            scWeb.Dock = DockStyle.Fill;
+            scWeb.Location = new Point(3, 52);
+            scWeb.Name = "scWeb";
+            scWeb.Orientation = Orientation.Horizontal;
+            // 
+            // scWeb.Panel1
+            // 
+            scWeb.Panel1.Controls.Add(pnlCitas);
+            // 
+            // scWeb.Panel2
+            // 
+            scWeb.Panel2.Controls.Add(pnlFM);
+            scWeb.Size = new Size(411, 272);
+            scWeb.SplitterDistance = 98;
+            scWeb.SplitterWidth = 1;
+            scWeb.TabIndex = 0;
+            scWeb.TabStop = false;
+            // 
             // pnlCitas
             // 
+            pnlCitas.Controls.Add(lblStatusCitas);
             pnlCitas.Controls.Add(pnlMargen);
             pnlCitas.Controls.Add(lblInfCitas);
             pnlCitas.Dock = DockStyle.Fill;
-            pnlCitas.Location = new Point(3, 55);
+            pnlCitas.Location = new Point(0, 0);
             pnlCitas.Name = "pnlCitas";
-            pnlCitas.Size = new Size(319, 293);
+            pnlCitas.Size = new Size(411, 98);
             pnlCitas.TabIndex = 1;
+            // 
+            // lblStatusCitas
+            // 
+            lblStatusCitas.Dock = DockStyle.Fill;
+            lblStatusCitas.Font = new Font("Segoe UI", 12F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            lblStatusCitas.ForeColor = Color.Black;
+            lblStatusCitas.Location = new Point(0, 23);
+            lblStatusCitas.Name = "lblStatusCitas";
+            lblStatusCitas.Size = new Size(411, 75);
+            lblStatusCitas.TabIndex = 2;
+            lblStatusCitas.Text = ".";
             // 
             // pnlMargen
             // 
@@ -186,7 +231,7 @@
             pnlMargen.Dock = DockStyle.Top;
             pnlMargen.Location = new Point(0, 21);
             pnlMargen.Name = "pnlMargen";
-            pnlMargen.Size = new Size(319, 2);
+            pnlMargen.Size = new Size(411, 2);
             pnlMargen.TabIndex = 1;
             // 
             // lblInfCitas
@@ -196,13 +241,57 @@
             lblInfCitas.ForeColor = Color.Black;
             lblInfCitas.Location = new Point(0, 0);
             lblInfCitas.Name = "lblInfCitas";
-            lblInfCitas.Size = new Size(319, 21);
+            lblInfCitas.Size = new Size(411, 21);
             lblInfCitas.TabIndex = 0;
             lblInfCitas.Text = "INFORMACIÓN DEL SERVICIO DE CITAS";
             lblInfCitas.TextAlign = ContentAlignment.TopCenter;
             // 
+            // pnlFM
+            // 
+            pnlFM.Controls.Add(lblStatusFM);
+            pnlFM.Controls.Add(pnlMargen2);
+            pnlFM.Controls.Add(lblInfFM);
+            pnlFM.Dock = DockStyle.Fill;
+            pnlFM.Location = new Point(0, 0);
+            pnlFM.Name = "pnlFM";
+            pnlFM.Size = new Size(411, 173);
+            pnlFM.TabIndex = 0;
+            // 
+            // lblStatusFM
+            // 
+            lblStatusFM.Dock = DockStyle.Fill;
+            lblStatusFM.Font = new Font("Segoe UI", 12F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            lblStatusFM.ForeColor = Color.Black;
+            lblStatusFM.Location = new Point(0, 43);
+            lblStatusFM.Name = "lblStatusFM";
+            lblStatusFM.Size = new Size(411, 130);
+            lblStatusFM.TabIndex = 3;
+            lblStatusFM.Text = ".";
+            // 
+            // pnlMargen2
+            // 
+            pnlMargen2.BackColor = Color.Crimson;
+            pnlMargen2.Dock = DockStyle.Top;
+            pnlMargen2.Location = new Point(0, 41);
+            pnlMargen2.Name = "pnlMargen2";
+            pnlMargen2.Size = new Size(411, 2);
+            pnlMargen2.TabIndex = 2;
+            // 
+            // lblInfFM
+            // 
+            lblInfFM.Dock = DockStyle.Top;
+            lblInfFM.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblInfFM.ForeColor = Color.Black;
+            lblInfFM.Location = new Point(0, 0);
+            lblInfFM.Name = "lblInfFM";
+            lblInfFM.Size = new Size(411, 41);
+            lblInfFM.TabIndex = 1;
+            lblInfFM.Text = "INFORMACIÓN DEL SERVICIO DE\r\n FISICO MECANICA\r\n";
+            lblInfFM.TextAlign = ContentAlignment.TopCenter;
+            // 
             // tableLayoutPanel1
             // 
+            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(pnlTipoAccso, 0, 0);
@@ -210,17 +299,16 @@
             tableLayoutPanel1.Controls.Add(pnlAmbientales, 0, 2);
             tableLayoutPanel1.Controls.Add(pnlTenencias, 0, 3);
             tableLayoutPanel1.Controls.Add(pnlFotocivicas, 0, 4);
-            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Dock = DockStyle.Top;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 5;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tableLayoutPanel1.Size = new Size(343, 351);
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.Size = new Size(443, 327);
             tableLayoutPanel1.TabIndex = 0;
             // 
             // pnlTipoAccso
@@ -230,7 +318,7 @@
             pnlTipoAccso.Dock = DockStyle.Fill;
             pnlTipoAccso.Location = new Point(3, 3);
             pnlTipoAccso.Name = "pnlTipoAccso";
-            pnlTipoAccso.Size = new Size(337, 64);
+            pnlTipoAccso.Size = new Size(437, 54);
             pnlTipoAccso.TabIndex = 0;
             // 
             // cbMotivoAcceso
@@ -242,8 +330,9 @@
             cbMotivoAcceso.FormattingEnabled = true;
             cbMotivoAcceso.Location = new Point(0, 20);
             cbMotivoAcceso.Name = "cbMotivoAcceso";
-            cbMotivoAcceso.Size = new Size(337, 28);
+            cbMotivoAcceso.Size = new Size(437, 28);
             cbMotivoAcceso.TabIndex = 1;
+            cbMotivoAcceso.SelectionChangeCommitted += cbMotivoAcceso_SelectionChangeCommitted;
             // 
             // lblTipoAcceso
             // 
@@ -252,7 +341,7 @@
             lblTipoAcceso.ForeColor = Color.Black;
             lblTipoAcceso.Location = new Point(0, 0);
             lblTipoAcceso.Name = "lblTipoAcceso";
-            lblTipoAcceso.Size = new Size(337, 20);
+            lblTipoAcceso.Size = new Size(437, 20);
             lblTipoAcceso.TabIndex = 0;
             lblTipoAcceso.Text = "Tipo de acceso";
             lblTipoAcceso.TextAlign = ContentAlignment.MiddleLeft;
@@ -262,19 +351,19 @@
             pnlMonetarias.Controls.Add(lblStatusMonetarias);
             pnlMonetarias.Controls.Add(lblMonetarias);
             pnlMonetarias.Dock = DockStyle.Fill;
-            pnlMonetarias.Location = new Point(3, 73);
+            pnlMonetarias.Location = new Point(3, 63);
             pnlMonetarias.Name = "pnlMonetarias";
-            pnlMonetarias.Size = new Size(337, 64);
+            pnlMonetarias.Size = new Size(437, 59);
             pnlMonetarias.TabIndex = 1;
             // 
             // lblStatusMonetarias
             // 
-            lblStatusMonetarias.Dock = DockStyle.Fill;
+            lblStatusMonetarias.Dock = DockStyle.Top;
             lblStatusMonetarias.Font = new Font("Segoe UI", 10.5F);
             lblStatusMonetarias.ForeColor = Color.FromArgb(45, 55, 65);
             lblStatusMonetarias.Location = new Point(0, 20);
             lblStatusMonetarias.Name = "lblStatusMonetarias";
-            lblStatusMonetarias.Size = new Size(337, 44);
+            lblStatusMonetarias.Size = new Size(437, 39);
             lblStatusMonetarias.TabIndex = 1;
             lblStatusMonetarias.Text = "STATUS MONETARIAS\r\n";
             lblStatusMonetarias.TextAlign = ContentAlignment.TopCenter;
@@ -286,7 +375,7 @@
             lblMonetarias.ForeColor = Color.Black;
             lblMonetarias.Location = new Point(0, 0);
             lblMonetarias.Name = "lblMonetarias";
-            lblMonetarias.Size = new Size(337, 20);
+            lblMonetarias.Size = new Size(437, 20);
             lblMonetarias.TabIndex = 0;
             lblMonetarias.Text = "Infracciones Monetarias";
             lblMonetarias.TextAlign = ContentAlignment.MiddleLeft;
@@ -296,20 +385,20 @@
             pnlAmbientales.Controls.Add(lblStatusAmbientales);
             pnlAmbientales.Controls.Add(lblAmbientales);
             pnlAmbientales.Dock = DockStyle.Fill;
-            pnlAmbientales.Location = new Point(3, 143);
+            pnlAmbientales.Location = new Point(3, 128);
             pnlAmbientales.Name = "pnlAmbientales";
-            pnlAmbientales.Size = new Size(337, 64);
+            pnlAmbientales.Size = new Size(437, 59);
             pnlAmbientales.TabIndex = 2;
             // 
             // lblStatusAmbientales
             // 
-            lblStatusAmbientales.Dock = DockStyle.Fill;
+            lblStatusAmbientales.Dock = DockStyle.Top;
             lblStatusAmbientales.Font = new Font("Segoe UI", 10.5F);
             lblStatusAmbientales.ForeColor = Color.FromArgb(45, 55, 65);
             lblStatusAmbientales.Location = new Point(0, 20);
             lblStatusAmbientales.Name = "lblStatusAmbientales";
-            lblStatusAmbientales.Size = new Size(337, 44);
-            lblStatusAmbientales.TabIndex = 2;
+            lblStatusAmbientales.Size = new Size(437, 39);
+            lblStatusAmbientales.TabIndex = 0;
             lblStatusAmbientales.Text = "STATUS AMBIENTALES";
             lblStatusAmbientales.TextAlign = ContentAlignment.TopCenter;
             // 
@@ -320,30 +409,32 @@
             lblAmbientales.ForeColor = Color.Black;
             lblAmbientales.Location = new Point(0, 0);
             lblAmbientales.Name = "lblAmbientales";
-            lblAmbientales.Size = new Size(337, 20);
+            lblAmbientales.Size = new Size(437, 20);
             lblAmbientales.TabIndex = 0;
             lblAmbientales.Text = "Infracciones Ambientales";
             lblAmbientales.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pnlTenencias
             // 
+            pnlTenencias.AutoSize = true;
+            pnlTenencias.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             pnlTenencias.Controls.Add(lblStatusTenencias);
             pnlTenencias.Controls.Add(lblTenencias);
             pnlTenencias.Dock = DockStyle.Fill;
-            pnlTenencias.Location = new Point(3, 213);
+            pnlTenencias.Location = new Point(3, 193);
             pnlTenencias.Name = "pnlTenencias";
-            pnlTenencias.Size = new Size(337, 64);
-            pnlTenencias.TabIndex = 3;
+            pnlTenencias.Size = new Size(437, 39);
+            pnlTenencias.TabIndex = 0;
             // 
             // lblStatusTenencias
             // 
-            lblStatusTenencias.Dock = DockStyle.Fill;
+            lblStatusTenencias.Dock = DockStyle.Top;
             lblStatusTenencias.Font = new Font("Segoe UI", 10.5F);
             lblStatusTenencias.ForeColor = Color.FromArgb(45, 55, 65);
             lblStatusTenencias.Location = new Point(0, 20);
             lblStatusTenencias.Name = "lblStatusTenencias";
-            lblStatusTenencias.Size = new Size(337, 44);
-            lblStatusTenencias.TabIndex = 3;
+            lblStatusTenencias.Size = new Size(437, 19);
+            lblStatusTenencias.TabIndex = 0;
             lblStatusTenencias.Text = "STATUS TENENCIAS";
             lblStatusTenencias.TextAlign = ContentAlignment.TopCenter;
             // 
@@ -354,7 +445,7 @@
             lblTenencias.ForeColor = Color.Black;
             lblTenencias.Location = new Point(0, 0);
             lblTenencias.Name = "lblTenencias";
-            lblTenencias.Size = new Size(337, 20);
+            lblTenencias.Size = new Size(437, 20);
             lblTenencias.TabIndex = 0;
             lblTenencias.Text = "Infracciones Tenencias";
             lblTenencias.TextAlign = ContentAlignment.MiddleLeft;
@@ -364,20 +455,20 @@
             pnlFotocivicas.Controls.Add(lblStatusFotocivicas);
             pnlFotocivicas.Controls.Add(lblFotocivicas);
             pnlFotocivicas.Dock = DockStyle.Fill;
-            pnlFotocivicas.Location = new Point(3, 283);
+            pnlFotocivicas.Location = new Point(3, 238);
             pnlFotocivicas.Name = "pnlFotocivicas";
-            pnlFotocivicas.Size = new Size(337, 65);
+            pnlFotocivicas.Size = new Size(437, 86);
             pnlFotocivicas.TabIndex = 4;
             // 
             // lblStatusFotocivicas
             // 
-            lblStatusFotocivicas.Dock = DockStyle.Fill;
+            lblStatusFotocivicas.Dock = DockStyle.Top;
             lblStatusFotocivicas.Font = new Font("Segoe UI", 10.5F);
             lblStatusFotocivicas.ForeColor = Color.FromArgb(45, 55, 65);
             lblStatusFotocivicas.Location = new Point(0, 20);
             lblStatusFotocivicas.Name = "lblStatusFotocivicas";
-            lblStatusFotocivicas.Size = new Size(337, 45);
-            lblStatusFotocivicas.TabIndex = 4;
+            lblStatusFotocivicas.Size = new Size(437, 45);
+            lblStatusFotocivicas.TabIndex = 0;
             lblStatusFotocivicas.Text = "STATUS FOTOCIIVCAS";
             lblStatusFotocivicas.TextAlign = ContentAlignment.TopCenter;
             // 
@@ -388,7 +479,7 @@
             lblFotocivicas.ForeColor = Color.Black;
             lblFotocivicas.Location = new Point(0, 0);
             lblFotocivicas.Name = "lblFotocivicas";
-            lblFotocivicas.Size = new Size(337, 20);
+            lblFotocivicas.Size = new Size(437, 20);
             lblFotocivicas.TabIndex = 0;
             lblFotocivicas.Text = "Infracciones Fotocivicas ";
             lblFotocivicas.TextAlign = ContentAlignment.MiddleLeft;
@@ -399,7 +490,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(pnlPrincipal);
             Name = "ucAccesoConsulta";
-            Size = new Size(669, 351);
+            Size = new Size(861, 327);
             pnlPrincipal.ResumeLayout(false);
             scPrincipal.Panel1.ResumeLayout(false);
             scPrincipal.Panel2.ResumeLayout(false);
@@ -408,8 +499,14 @@
             tableLayoutPanel2.ResumeLayout(false);
             flpPlacasServicios.ResumeLayout(false);
             flpPlacasServicios.PerformLayout();
+            scWeb.Panel1.ResumeLayout(false);
+            scWeb.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)scWeb).EndInit();
+            scWeb.ResumeLayout(false);
             pnlCitas.ResumeLayout(false);
+            pnlFM.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             pnlTipoAccso.ResumeLayout(false);
             pnlMonetarias.ResumeLayout(false);
             pnlAmbientales.ResumeLayout(false);
@@ -447,5 +544,11 @@
         private Panel pnlMargen;
         private Label lblInfCitas;
         private Button btnCrearVerificacion;
+        private Label lblStatusCitas;
+        private SplitContainer scWeb;
+        private Panel pnlFM;
+        private Label lblInfFM;
+        private Label lblStatusFM;
+        private Panel pnlMargen2;
     }
 }

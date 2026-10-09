@@ -40,6 +40,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public IReadOnlyList<MotivosAccesoDto> MotivosAcceso { get; private set; }
             = Array.Empty<MotivosAccesoDto>();
 
+        public IReadOnlyList<TiposDocumentosDto> TiposDocumentos { get; private set; }
+            = Array.Empty<TiposDocumentosDto>();
+
 
 
         public CatalogosCaptura(SivevConnectionFactory sql, string roll, string passRoll, Guid estacion, Guid accesoId, short opcionMenu, short centro) {
@@ -64,6 +67,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             TiposAdeudos            = await ObtenerTiposAdeudosAsync(ct);
             TiposLineasCaptura      = await ObtenerTiposLineasCapturaAsync(ct);
             MotivosAcceso           = await MotivosAccesoAsync(ct);
+            TiposDocumentos         = await TiposDocumentosAsync(ct);
         }
 
         public void Limpiar() {
@@ -74,6 +78,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             TiposLineasCaptura = Array.Empty<TiposLineasCapturaDto>();
             Submarcas = Array.Empty<SubmarcaDto>();
             MotivosAcceso = Array.Empty<MotivosAccesoDto>();
+            TiposDocumentos = Array.Empty<TiposDocumentosDto>();
         }
 
         #region Metodos SQL
@@ -197,11 +202,66 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             try {
                 await _sqlExecutor.EjecutarAsync(async connApp => {
-                    var r = repo.SpAppTiposDocumentosGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
+                    var r = repo.SpAppMotivosAccesoGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
 
                     mensaje = r.MensajeId;
                     resultado = r.ResultadoId;
                     _MotivosAcceso = r.Data;
+
+                    if (mensaje != 0) {
+                        try {
+                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppMotivosAccesoGet",  mensaje);
+                            var bitacora = Bitacora.ErroresSQL(
+                                estacionId: _estacionId,
+                                centro: _centro,
+                                opcionMenuId: _opcionMenu,
+                                descripcion: error.Mensaje,
+                                codigoSql: mensaje
+                            );
+                            await repo.SpSpAppBitacoraErroresSetAsync2026(connApp, bitacora, ct);
+                            Mostrar.Mensaje("SpAppMotivosAccesoGet", error.Mensaje);
+                        } catch (Exception logEx) {
+                            SivevLogger.Error($"Falló la bitácora en SpAppMotivosAccesoGet: {logEx.Message}", SivevOrigen.Captura);
+                        }
+                    }
+
+                }, ct);
+            } catch (Exception e) {
+                try {
+                    await _sqlExecutor.EjecutarAsync(async connApp => {
+                        var bitacora = Bitacora.ErroresSQL(
+                            estacionId: _estacionId,
+                            centro: _centro,
+                            opcionMenuId: _opcionMenu,
+                            descripcion: $"Error al obtener las motivos de accesos: {e.Message}",
+                            codigoSql: mensaje
+                        );
+                        await repo.SpSpAppBitacoraErroresSetAsync2026(connApp, bitacora, ct);
+                    }, ct);
+                } catch (Exception logEx) {
+                    SivevLogger.Error($"Falló la bitácora en catch de SpAppMotivosAccesoGet: {logEx}", SivevOrigen.Captura);
+                }
+                Mostrar.Mensaje("Error en SpAppMotivosAccesoGet", $"Error al obtener las motivos de accesos: {e.Message}");
+            }
+            return _MotivosAcceso;
+        }
+        #endregion
+
+        #region Obtener Tipos Documentos 
+        private async Task<IReadOnlyList<TiposDocumentosDto>> TiposDocumentosAsync(CancellationToken ct = default) {
+            int mensaje = 0;
+            short resultado = 0;
+
+            var _TiposDocumentos = new List<TiposDocumentosDto>();
+            var repo = new SivevRepository();
+
+            try {
+                await _sqlExecutor.EjecutarAsync(async connApp => {
+                    var r = repo.SpAppTiposDocumentosGet(cnn: connApp, uiEstacionId: _estacionId, accesoId: _accesoId);
+
+                    mensaje = r.MensajeId;
+                    resultado = r.ResultadoId;
+                    _TiposDocumentos = r.Data;
 
                     if (mensaje != 0) {
                         try {
@@ -238,9 +298,16 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }
                 Mostrar.Mensaje("Error en SpAppTiposDocumentosGet", $"Error al obtener las motivos de accesos: {e.Message}");
             }
-            return _MotivosAcceso;
+            return _TiposDocumentos;
         }
         #endregion
+
+
+
+
+
+
+
         #region Marcas
         private async Task<IReadOnlyList<MarcasDto>> ObtenerMarcasAsync(CancellationToken ct = default) {
             int mensaje = 0;

@@ -14,7 +14,7 @@ namespace Apps_Regedit.Views.Verificentros {
         private readonly Encriptador encriptador;
 
         private const string UrlCaptura = "http://192.168.16.233/ClickOnce/Captura/Apps_Captura.application";
-        
+
         public Captura() {
             InitializeComponent();
             pnlFooter.BringToFront();
@@ -268,7 +268,7 @@ namespace Apps_Regedit.Views.Verificentros {
             };
         }
 
-        
+
 
         #endregion
         #region Abrir Bitácora
@@ -317,7 +317,7 @@ namespace Apps_Regedit.Views.Verificentros {
         }
         #endregion
         #endregion
-        
+
         #region Activador de directivas de seguridad
         private void VerificarActivador() {
             try {
@@ -342,6 +342,10 @@ namespace Apps_Regedit.Views.Verificentros {
         private void Captura_Load(object sender, EventArgs e) {
             ActualizarEstadoBitacora();
             VerificarActivador();
+        }
+
+        private void ucAcciones1_Load(object sender, EventArgs e) {
+
         }
     }
 }

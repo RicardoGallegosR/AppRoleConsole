@@ -34,11 +34,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         public VerificacionAnteriorDto? VehiculoSeleccionado {
             get {
-                if (dgvVehiculos.CurrentRow?.DataBoundItem
-                    is VerificacionAnteriorDto vehiculo) {
+                if (dgvVehiculos.CurrentRow?.DataBoundItem is VerificacionAnteriorDto vehiculo) {
                     return vehiculo;
                 }
-
                 return null;
             }
         }

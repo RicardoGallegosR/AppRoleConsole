@@ -1,4 +1,6 @@
-﻿namespace FrmComun.CapturaCentralizada {
+﻿using SQLSIVEV.Comun.Configuracion;
+
+namespace FrmComun.CapturaCentralizada {
     partial class ucRegistroVehicular {
         /// <summary> 
         /// Variable del diseñador necesaria.
@@ -28,17 +30,24 @@
             tpRegistroVehicular = new TabPage();
             tlpFila1 = new TableLayoutPanel();
             gbAcceso = new GroupBox();
+            ucAccesoConsulta1 = new FrmComun.CapturaCentralizada.Complementos.ucAccesoConsulta();
             pnlRegistro = new Panel();
             gbVinModelo = new GroupBox();
+            ucVinModelo1 = new FrmComun.CapturaCentralizada.Complementos.ucVinModelo();
             gbVisitante = new GroupBox();
+            ucVisitante1 = new FrmComun.CapturaCentralizada.Complementos.ucVisitante();
             tpTC = new TabPage();
             tlpFila2 = new TableLayoutPanel();
             gbTarjetaCirculacion = new GroupBox();
+            ucTarjetaCirculacion1 = new FrmComun.CapturaCentralizada.Complementos.ucTarjetaCirculacion();
             gbSeleccionVehicular = new GroupBox();
+            ucSeleccionVehiculo1 = new FrmComun.CapturaCentralizada.Complementos.ucSeleccionVehiculo();
             tpDocumentosAdicionales = new TabPage();
             tlpFila3 = new TableLayoutPanel();
             gbEscaneoDocumentos = new GroupBox();
+            ucEscaneoDocumentos1 = new FrmComun.CapturaCentralizada.Complementos.ucEscaneoDocumentos();
             gbDocumentosAdicionales = new GroupBox();
+            ucDocumentosAdicionales1 = new FrmComun.CapturaCentralizada.Complementos.ucDocumentosAdicionales();
             pnlHeader = new Panel();
             tlpHeader = new TableLayoutPanel();
             tlpPlacaHeader = new TableLayoutPanel();
@@ -48,13 +57,6 @@
             txtLinea = new TextBox();
             lblLinea = new Label();
             ipbLogo = new FontAwesome.Sharp.IconPictureBox();
-            ucVinModelo1 = new FrmComun.CapturaCentralizada.Complementos.ucVinModelo();
-            ucVisitante1 = new FrmComun.CapturaCentralizada.Complementos.ucVisitante();
-            ucAccesoConsulta1 = new FrmComun.CapturaCentralizada.Complementos.ucAccesoConsulta();
-            ucTarjetaCirculacion1 = new FrmComun.CapturaCentralizada.Complementos.ucTarjetaCirculacion();
-            ucSeleccionVehiculo1 = new FrmComun.CapturaCentralizada.Complementos.ucSeleccionVehiculo();
-            ucDocumentosAdicionales1 = new FrmComun.CapturaCentralizada.Complementos.ucDocumentosAdicionales();
-            ucEscaneoDocumentos1 = new FrmComun.CapturaCentralizada.Complementos.ucEscaneoDocumentos();
             pnlPrincipal.SuspendLayout();
             tcPrincipal.SuspendLayout();
             tpRegistroVehicular.SuspendLayout();
@@ -145,6 +147,19 @@
             gbAcceso.TabStop = false;
             gbAcceso.Text = "ACCESO / CONSULTA";
             // 
+            // ucAccesoConsulta1
+            // 
+            ucAccesoConsulta1.Ambientales = "STATUS AMBIENTALES";
+            ucAccesoConsulta1.Dock = DockStyle.Fill;
+            ucAccesoConsulta1.Fotocivicas = "STATUS FOTOCIIVCAS";
+            ucAccesoConsulta1.Location = new Point(10, 30);
+            ucAccesoConsulta1.Monetarias = "STATUS MONETARIAS\r\n";
+            ucAccesoConsulta1.Name = "ucAccesoConsulta1";
+            ucAccesoConsulta1.Placa = "";
+            ucAccesoConsulta1.Size = new Size(573, 512);
+            ucAccesoConsulta1.TabIndex = 0;
+            ucAccesoConsulta1.Tenencias = "STATUS TENENCIAS";
+            // 
             // pnlRegistro
             // 
             pnlRegistro.AutoScroll = true;
@@ -172,6 +187,14 @@
             gbVinModelo.TabStop = false;
             gbVinModelo.Text = "VIN / MODELO";
             // 
+            // ucVinModelo1
+            // 
+            ucVinModelo1.Dock = DockStyle.Fill;
+            ucVinModelo1.Location = new Point(10, 30);
+            ucVinModelo1.Name = "ucVinModelo1";
+            ucVinModelo1.Size = new Size(366, 210);
+            ucVinModelo1.TabIndex = 0;
+            // 
             // gbVisitante
             // 
             gbVisitante.BackColor = Color.White;
@@ -188,13 +211,21 @@
             gbVisitante.TabStop = false;
             gbVisitante.Text = "VISITANTE";
             // 
+            // ucVisitante1
+            // 
+            ucVisitante1.Dock = DockStyle.Fill;
+            ucVisitante1.Location = new Point(10, 30);
+            ucVisitante1.Name = "ucVisitante1";
+            ucVisitante1.Size = new Size(366, 187);
+            ucVisitante1.TabIndex = 0;
+            // 
             // tpTC
             // 
             tpTC.Controls.Add(tlpFila2);
-            tpTC.Location = new Point(4, 34);
+            tpTC.Location = new Point(4, 24);
             tpTC.Name = "tpTC";
             tpTC.Padding = new Padding(3);
-            tpTC.Size = new Size(1001, 568);
+            tpTC.Size = new Size(192, 72);
             tpTC.TabIndex = 1;
             tpTC.Text = "Tarjeta de Circulación";
             tpTC.UseVisualStyleBackColor = true;
@@ -212,7 +243,7 @@
             tlpFila2.RowCount = 1;
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpFila2.Size = new Size(995, 562);
+            tlpFila2.Size = new Size(186, 66);
             tlpFila2.TabIndex = 2;
             // 
             // gbTarjetaCirculacion
@@ -222,14 +253,22 @@
             gbTarjetaCirculacion.Dock = DockStyle.Fill;
             gbTarjetaCirculacion.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbTarjetaCirculacion.ForeColor = Color.Crimson;
-            gbTarjetaCirculacion.Location = new Point(517, 5);
+            gbTarjetaCirculacion.Location = new Point(100, 5);
             gbTarjetaCirculacion.Margin = new Padding(5);
             gbTarjetaCirculacion.Name = "gbTarjetaCirculacion";
             gbTarjetaCirculacion.Padding = new Padding(10);
-            gbTarjetaCirculacion.Size = new Size(473, 552);
+            gbTarjetaCirculacion.Size = new Size(81, 56);
             gbTarjetaCirculacion.TabIndex = 2;
             gbTarjetaCirculacion.TabStop = false;
             gbTarjetaCirculacion.Text = "TARJETA DE CIRCUALCIÓN";
+            // 
+            // ucTarjetaCirculacion1
+            // 
+            ucTarjetaCirculacion1.Dock = DockStyle.Fill;
+            ucTarjetaCirculacion1.Location = new Point(10, 30);
+            ucTarjetaCirculacion1.Name = "ucTarjetaCirculacion1";
+            ucTarjetaCirculacion1.Size = new Size(61, 16);
+            ucTarjetaCirculacion1.TabIndex = 0;
             // 
             // gbSeleccionVehicular
             // 
@@ -242,18 +281,26 @@
             gbSeleccionVehicular.Margin = new Padding(5);
             gbSeleccionVehicular.Name = "gbSeleccionVehicular";
             gbSeleccionVehicular.Padding = new Padding(10);
-            gbSeleccionVehicular.Size = new Size(502, 552);
+            gbSeleccionVehicular.Size = new Size(85, 56);
             gbSeleccionVehicular.TabIndex = 1;
             gbSeleccionVehicular.TabStop = false;
             gbSeleccionVehicular.Text = "SELECCION DE VEHICULO";
             // 
+            // ucSeleccionVehiculo1
+            // 
+            ucSeleccionVehiculo1.Dock = DockStyle.Fill;
+            ucSeleccionVehiculo1.Location = new Point(10, 30);
+            ucSeleccionVehiculo1.Name = "ucSeleccionVehiculo1";
+            ucSeleccionVehiculo1.Size = new Size(65, 16);
+            ucSeleccionVehiculo1.TabIndex = 0;
+            // 
             // tpDocumentosAdicionales
             // 
             tpDocumentosAdicionales.Controls.Add(tlpFila3);
-            tpDocumentosAdicionales.Location = new Point(4, 34);
+            tpDocumentosAdicionales.Location = new Point(4, 24);
             tpDocumentosAdicionales.Name = "tpDocumentosAdicionales";
             tpDocumentosAdicionales.Padding = new Padding(3);
-            tpDocumentosAdicionales.Size = new Size(1001, 568);
+            tpDocumentosAdicionales.Size = new Size(192, 72);
             tpDocumentosAdicionales.TabIndex = 2;
             tpDocumentosAdicionales.Text = "Documentos Adicionales";
             tpDocumentosAdicionales.UseVisualStyleBackColor = true;
@@ -270,7 +317,7 @@
             tlpFila3.Name = "tlpFila3";
             tlpFila3.RowCount = 1;
             tlpFila3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpFila3.Size = new Size(995, 562);
+            tlpFila3.Size = new Size(186, 66);
             tlpFila3.TabIndex = 3;
             // 
             // gbEscaneoDocumentos
@@ -280,14 +327,24 @@
             gbEscaneoDocumentos.Dock = DockStyle.Fill;
             gbEscaneoDocumentos.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbEscaneoDocumentos.ForeColor = Color.Crimson;
-            gbEscaneoDocumentos.Location = new Point(562, 5);
+            gbEscaneoDocumentos.Location = new Point(109, 5);
             gbEscaneoDocumentos.Margin = new Padding(5);
             gbEscaneoDocumentos.Name = "gbEscaneoDocumentos";
             gbEscaneoDocumentos.Padding = new Padding(10);
-            gbEscaneoDocumentos.Size = new Size(428, 552);
+            gbEscaneoDocumentos.Size = new Size(72, 56);
             gbEscaneoDocumentos.TabIndex = 2;
             gbEscaneoDocumentos.TabStop = false;
             gbEscaneoDocumentos.Text = "ESCANEO DE DOCUMENTOS";
+            // 
+            // ucEscaneoDocumentos1
+            // 
+            ucEscaneoDocumentos1.Dock = DockStyle.Fill;
+            ucEscaneoDocumentos1.Location = new Point(10, 30);
+            ucEscaneoDocumentos1.Name = "ucEscaneoDocumentos1";
+            ucEscaneoDocumentos1.RutaBase = "";
+            ucEscaneoDocumentos1.Size = new Size(52, 16);
+            ucEscaneoDocumentos1.TabIndex = 0;
+            ucEscaneoDocumentos1.VerificacionId = null;
             // 
             // gbDocumentosAdicionales
             // 
@@ -300,10 +357,18 @@
             gbDocumentosAdicionales.Margin = new Padding(5);
             gbDocumentosAdicionales.Name = "gbDocumentosAdicionales";
             gbDocumentosAdicionales.Padding = new Padding(10);
-            gbDocumentosAdicionales.Size = new Size(547, 552);
+            gbDocumentosAdicionales.Size = new Size(94, 56);
             gbDocumentosAdicionales.TabIndex = 1;
             gbDocumentosAdicionales.TabStop = false;
-            gbDocumentosAdicionales.Text = "DOCUMENTOS ADICIONALES";
+            gbDocumentosAdicionales.Text = "DOCUMENTOS ADICIONALES (EXPEDIENTE)";
+            // 
+            // ucDocumentosAdicionales1
+            // 
+            ucDocumentosAdicionales1.Dock = DockStyle.Fill;
+            ucDocumentosAdicionales1.Location = new Point(10, 30);
+            ucDocumentosAdicionales1.Name = "ucDocumentosAdicionales1";
+            ucDocumentosAdicionales1.Size = new Size(74, 16);
+            ucDocumentosAdicionales1.TabIndex = 0;
             // 
             // pnlHeader
             // 
@@ -431,69 +496,6 @@
             ipbLogo.Size = new Size(98, 94);
             ipbLogo.TabIndex = 1;
             ipbLogo.TabStop = false;
-            // 
-            // ucVinModelo1
-            // 
-            ucVinModelo1.Dock = DockStyle.Fill;
-            ucVinModelo1.Location = new Point(10, 30);
-            ucVinModelo1.Name = "ucVinModelo1";
-            ucVinModelo1.Size = new Size(366, 210);
-            ucVinModelo1.TabIndex = 0;
-            // 
-            // ucVisitante1
-            // 
-            ucVisitante1.Dock = DockStyle.Fill;
-            ucVisitante1.Location = new Point(10, 30);
-            ucVisitante1.Name = "ucVisitante1";
-            ucVisitante1.Size = new Size(366, 187);
-            ucVisitante1.TabIndex = 0;
-            // 
-            // ucAccesoConsulta1
-            // 
-            ucAccesoConsulta1.Ambientales = "STATUS AMBIENTALES";
-            ucAccesoConsulta1.Dock = DockStyle.Fill;
-            ucAccesoConsulta1.Fotocivicas = "STATUS FOTOCIIVCAS";
-            ucAccesoConsulta1.Location = new Point(10, 30);
-            ucAccesoConsulta1.Monetarias = "STATUS MONETARIAS\r\n";
-            ucAccesoConsulta1.Name = "ucAccesoConsulta1";
-            ucAccesoConsulta1.Placa = "";
-            ucAccesoConsulta1.Size = new Size(573, 512);
-            ucAccesoConsulta1.TabIndex = 0;
-            ucAccesoConsulta1.Tenencias = "STATUS TENENCIAS";
-            // 
-            // ucTarjetaCirculacion1
-            // 
-            ucTarjetaCirculacion1.Dock = DockStyle.Fill;
-            ucTarjetaCirculacion1.Location = new Point(10, 30);
-            ucTarjetaCirculacion1.Name = "ucTarjetaCirculacion1";
-            ucTarjetaCirculacion1.Size = new Size(453, 512);
-            ucTarjetaCirculacion1.TabIndex = 0;
-            // 
-            // ucSeleccionVehiculo1
-            // 
-            ucSeleccionVehiculo1.Dock = DockStyle.Fill;
-            ucSeleccionVehiculo1.Location = new Point(10, 30);
-            ucSeleccionVehiculo1.Name = "ucSeleccionVehiculo1";
-            ucSeleccionVehiculo1.Size = new Size(482, 512);
-            ucSeleccionVehiculo1.TabIndex = 0;
-            // 
-            // ucDocumentosAdicionales1
-            // 
-            ucDocumentosAdicionales1.Dock = DockStyle.Fill;
-            ucDocumentosAdicionales1.Location = new Point(10, 30);
-            ucDocumentosAdicionales1.Name = "ucDocumentosAdicionales1";
-            ucDocumentosAdicionales1.Size = new Size(527, 512);
-            ucDocumentosAdicionales1.TabIndex = 0;
-            // 
-            // ucEscaneoDocumentos1
-            // 
-            ucEscaneoDocumentos1.Dock = DockStyle.Fill;
-            ucEscaneoDocumentos1.Location = new Point(10, 30);
-            ucEscaneoDocumentos1.Name = "ucEscaneoDocumentos1";
-            ucEscaneoDocumentos1.RutaBase = "";
-            ucEscaneoDocumentos1.Size = new Size(408, 512);
-            ucEscaneoDocumentos1.TabIndex = 0;
-            ucEscaneoDocumentos1.VerificacionId = null;
             // 
             // ucRegistroVehicular
             // 

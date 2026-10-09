@@ -31,82 +31,6 @@ namespace FrmComun.Utils {
             _menu.WrapContents = false;
             _menu.AutoScroll = true;
         }
-        /*
-        public void CrearCabecera(string centro, Action? alHacerClick = null) {
-            Panel pnlCabecera = new() {
-                Width = ObtenerAnchoMenu(),
-                Height = 160,
-                BackColor = Color.White,
-                AutoSize = false,
-                Margin = new Padding(3, 3, 3, 12),
-                Padding = new Padding(10)
-            };
-            Label lblCentro = new() {
-                Dock = DockStyle.Top,
-                Height = 30,
-                AutoSize = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(45, 55, 65),
-                Text = $"{centro}",
-                Cursor = Cursors.Hand
-            };
-
-            _lblHora = new Label() {
-                Dock = DockStyle.Top,
-                Height = 30,
-                AutoSize = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font = new Font("Segoe UI", 10F),
-                ForeColor = Color.FromArgb(45, 55, 65)
-            };
-
-            Label lblInfo = new() {
-                Dock = DockStyle.Fill,
-                AutoSize = false,
-                TextAlign = ContentAlignment.TopLeft,
-                Font = new Font("Segoe UI", 9F),
-                ForeColor = Color.FromArgb(45, 55, 65),
-                Cursor = Cursors.Hand
-            };
-
-
-
-            if (alHacerClick != null) {
-                lblCentro.Click += (_, _) => alHacerClick();
-                _lblHora.Click += (_, _) => alHacerClick();
-                lblInfo.Click += (_, _) => alHacerClick();
-            }
-
-            try {
-                string exe = Application.ExecutablePath;
-                FileVersionInfo info = FileVersionInfo.GetVersionInfo(exe);
-                _versionTexto = $"v{info.FileVersion ?? Application.ProductVersion}";
-            } catch {
-                _versionTexto = "vDESCONOCIDA";
-            }
-            ActualizarHora();
-
-            _timerHora.Interval = 1000;
-            _timerHora.Tick += (_, _) => ActualizarHora();
-            _timerHora.Start();
-
-            lblInfo.Text =
-                $"{Environment.UserName}\r\n" +
-                $"{Environment.MachineName}\r\n" +
-                $"{Environment.UserDomainName}\r\n" +
-                //$"{centro}\r\n" +
-                $"{_versionTexto}";
-
-
-            pnlCabecera.Controls.Add(lblInfo);
-            pnlCabecera.Controls.Add(_lblHora);
-            pnlCabecera.Controls.Add(lblCentro);
-            _menu.Controls.Add(pnlCabecera);
-        }
-
-        */
-
         public void CrearCabecera(string centro,string _lblTitulo, Action? alHacerClick = null) {
 
             FlowLayoutPanel pnlCabecera = new() {
@@ -349,6 +273,32 @@ namespace FrmComun.Utils {
             }
 
             AjustarAnchoVistas();
+        }
+
+        public void Limpiar() {
+            _contenedor.SuspendLayout();
+            _menu.SuspendLayout();
+
+            try {
+                foreach (UserControl vista in _vistasAbiertas.Values.ToList()) {
+                    _contenedor.Controls.Remove(vista);
+                    vista.Dispose();
+                }
+
+                _vistasAbiertas.Clear();
+                
+                foreach (Button boton in _botonesVistas.Values.ToList()) {
+                    _menu.Controls.Remove(boton);
+                    boton.Dispose();
+                }
+                _botonesVistas.Clear();
+                _vistaActiva = null;
+
+            } finally {
+                _contenedor.ResumeLayout();
+                _menu.ResumeLayout();
+                AjustarAnchoVistas();
+            }
         }
     }
 }

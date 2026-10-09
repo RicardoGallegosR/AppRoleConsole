@@ -67,7 +67,7 @@ namespace Apps_Regedit.Views.Configuracion {
                 txtEstacionId.ReadOnly = value;
                 txtOpcionMenu.ReadOnly = value;
                 txtCentroId.ReadOnly = value;
-                txtCentro.ReadOnly = value;
+                //txtCentro.ReadOnly = value;
                 txtIp.ReadOnly = value;
                 //txtUsuarioDeLinea.ReadOnly = value;
                 //txtPasswordAutoLogin.ReadOnly = value;

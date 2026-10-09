@@ -30,5 +30,18 @@ namespace FrmComun.Utils {
 
             dlg.ShowDialog(owner);
         }
+
+        public static bool Pregunta(string titulo = "", string pregunta = "", string textoAceptar = "Sí", string textoNegativo = "No") {
+            using var dlg = new frmPreguntasSiNo();
+
+            dlg.Titulo = titulo;
+            dlg.Pregunta = pregunta;
+            dlg.TextoAceptar = textoAceptar;
+            dlg.TextoDenegar = textoNegativo;
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.TopMost = true;
+
+            return dlg.ShowDialog() == DialogResult.Yes;
+        }
     }
 }

@@ -13,7 +13,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
 
         private const int LongitudVin = 17;
+        private const int LongitudMinVin = 7;
         private const int MaxErroresVin = 3;
+
+       
         private int _erroresConfirmacionVin = 0;
 
 
@@ -40,7 +43,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             btnSeleccionVehiculo.Click += btnConsultarVin_Click;
 
             // Enter en VIN
-            txtVin.KeyDown += txtVin_KeyDown;
+            txtVinConfirmar.KeyDown += txtVinConfirmar_KeyDown;
 
             Load += ucVinModelo_Load;
         }
@@ -48,7 +51,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             SolicitarConsultaVin();
         }
 
-        private void txtVin_KeyDown(object? sender, KeyEventArgs e) {
+        private void txtVinConfirmar_KeyDown(object? sender, KeyEventArgs e) {
             if (e.KeyCode != Keys.Enter)
                 return;
 
@@ -59,11 +62,24 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private void SolicitarConsultaVin() {
-            if (txtVin.Text.Trim().Length != 17) {
-                Mostrar.Mensaje("VIN inválido", "El VIN debe contener 17 caracteres.");
+            int longitudVin = txtVin.TextLength;
+            if (!EsLongitudVinValida(longitudVin)) {
+                Mostrar.Mensaje("VIN inválido","Revisa la longitud del vin");
                 txtVin.Focus();
                 return;
             }
+
+            if (txtVinConfirmar.TextLength != longitudVin ||
+                !string.Equals(
+                    txtVin.Text,
+                    txtVinConfirmar.Text,
+                    StringComparison.OrdinalIgnoreCase)) {
+                Mostrar.Mensaje("VIN inválido", "La confirmación del VIN no coincide.");
+
+                txtVinConfirmar.Focus();
+                return;
+            }
+
             ConsultarVin?.Invoke(this, EventArgs.Empty);
         }
         public void EstablecerModelo(int modelo) {
@@ -75,13 +91,12 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
         private void ValidarDatos() {
             int modelo = (int)nudModelo.Value;
-
-            if (txtVin.Text.Length == 17 &&
-                modelo >= 1900 &&
-                modelo <= DateTime.Now.Year + 1) {
-
+            if (txtVin.Text.Length == 17 && modelo >= 1900 &&  modelo <= DateTime.Now.Year + 1) {
                 DatosCompletos?.Invoke(this, EventArgs.Empty);
             }
+        }
+        public void HabilitarModulo(bool flag = false) {
+            pnlPrincipal.Enabled = flag;
         }
 
         private void btnSeleccionVehiculo_Click(object sender, EventArgs e) =>
@@ -97,6 +112,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             txtVin.MaxLength = LongitudVin;
             txtVinConfirmar.MaxLength = LongitudVin;
 
+
+
+            /*
             // Bloquea Ctrl+C, Ctrl+V, Ctrl+X, Shift+Insert, etc.
             txtVin.ShortcutsEnabled = false;
             txtVinConfirmar.ShortcutsEnabled = false;
@@ -104,6 +122,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             // Evita copiar/pegar desde el menú del botón derecho.
             txtVin.ContextMenuStrip = new ContextMenuStrip();
             txtVinConfirmar.ContextMenuStrip = new ContextMenuStrip();
+            //*/
+
+
 
             txtVin.PasswordChar = '\0';
 
@@ -112,18 +133,19 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         private void txtVin_TextChanged(object? sender, EventArgs e) {
             btnSeleccionVehiculo.Enabled = false;
+            int longitud = txtVin.TextLength;
 
-            if (txtVin.Text.Length == LongitudVin) {
-
+            if (longitud >= LongitudMinVin) {
                 txtVin.PasswordChar = '●';
-
                 lblConfirmarVin.Visible = true;
                 txtVinConfirmar.Visible = true;
+
+                // Si cambia el VIN original, cualquier confirmación previa deja de servir.
                 txtVinConfirmar.Clear();
-
                 _erroresConfirmacionVin = 0;
-                txtVinConfirmar.Focus();
 
+                // IMPORTANTE:
+                // No hacemos Focus() aquí porque puede ser un VIN de 11 o 17.
                 return;
             }
 
@@ -135,42 +157,49 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private void txtVinConfirmar_KeyPress(object sender, KeyPressEventArgs e) {
-            // Permitir Backspace, Delete, etc.
             if (char.IsControl(e.KeyChar))
                 return;
 
-            if (txtVin.Text.Length != LongitudVin) {
+            int longitudVin = txtVin.TextLength;
+            if (!EsLongitudVinValida(longitudVin)) {
                 e.Handled = true;
                 return;
             }
 
             int posicion = txtVinConfirmar.TextLength;
 
-            if (posicion >= LongitudVin) {
+            if (posicion >= longitudVin) {
                 e.Handled = true;
                 return;
             }
-            char caracterIngresado = char.ToUpperInvariant(e.KeyChar);
-            char caracterEsperado = char.ToUpperInvariant(txtVin.Text[posicion]);
-            if (caracterIngresado != caracterEsperado) {
-                // No dejamos que el carácter incorrecto entre.
-                e.Handled = true;
 
+            char caracterIngresado = char.ToUpperInvariant(e.KeyChar);
+            char caracterEsperado =  char.ToUpperInvariant(txtVin.Text[posicion]);
+
+            if (caracterIngresado != caracterEsperado) {
+                e.Handled = true;
                 _erroresConfirmacionVin++;
+                Mostrar.Mensaje("Advertencia", "Anotaste mal un dígito :(");
 
                 if (_erroresConfirmacionVin >= MaxErroresVin) {
                     ReiniciarConfirmacionVin();
                     Mostrar.Mensaje("VIN", "El VIN fue confirmado incorrectamente tres veces.\nDebe capturarlo nuevamente.");
-                    return;
                 }
                 return;
             }
+
             e.KeyChar = caracterIngresado;
         }
-
+        private static bool EsLongitudVinValida(int longitud) {
+            return longitud == 7 || longitud == 11 || longitud == 17;
+        }
         private void txtVinConfirmar_TextChanged(object sender, EventArgs e) {
-            bool vinCorrecto =  txtVin.Text.Length == LongitudVin &&  txtVinConfirmar.Text.Length == LongitudVin && string.Equals(txtVin.Text, txtVinConfirmar.Text, StringComparison.OrdinalIgnoreCase);
-            btnSeleccionVehiculo.Enabled =  vinCorrecto;
+            bool vinCorrecto =  EsLongitudVinValida(
+                txtVin.TextLength) &&
+                txtVinConfirmar.TextLength == txtVin.TextLength &&
+                string.Equals(txtVin.Text, txtVinConfirmar.Text,  StringComparison.OrdinalIgnoreCase
+            );
+            btnSeleccionVehiculo.Enabled = vinCorrecto;
         }
         private void ReiniciarConfirmacionVin() {
             _erroresConfirmacionVin = 0;
@@ -182,6 +211,35 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             btnSeleccionVehiculo.Enabled = false;
 
             txtVin.Focus();
+        }
+
+        private void txtVin_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.SuppressKeyPress = true;
+            e.Handled = true;
+
+            if (!EsLongitudVinValida(txtVin.TextLength)) {
+                Mostrar.Mensaje("Error", $"Longitud invalida {txtVin.Text.Length}");
+                txtVin.Focus();
+                return;
+            }
+
+            IniciarConfirmacionVin();
+        }
+        private void IniciarConfirmacionVin() {
+            _erroresConfirmacionVin = 0;
+
+            txtVin.PasswordChar = '●';
+
+            lblConfirmarVin.Visible = true;
+            txtVinConfirmar.Visible = true;
+
+            txtVinConfirmar.Clear();
+            txtVinConfirmar.Focus();
+
+            btnSeleccionVehiculo.Enabled = false;
         }
     }
 }
