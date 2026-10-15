@@ -33,6 +33,13 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 txtNombre.SelectAll();
             });
         }
+        public void RegistoActivado (bool flag = false) {
+            txtNombre.Enabled = flag;
+            txtApellidoP.Enabled = flag;
+            txtApellidoM.Enabled = flag;
+            btnAcceso.Enabled = flag;
+        }
+
 
         private void txtApellidoM_KeyDown(object? sender, KeyEventArgs e) {
             if (e.KeyCode != Keys.Enter)

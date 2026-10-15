@@ -30,20 +30,44 @@ namespace SQLSIVEV.Comun.Servicios {
             return await GetAsync($"cita?Placa={placa}&Centro={centro}");
         }
 
-        /*
         private async Task<string> GetAsync(string endpoint) {
-            
             string dnsUrl = $"http://{_config.DnsHost}{_config.Path}{endpoint}";
-            string ipUrl =  $"http://{_config.FallbackIp}{_config.Path}{endpoint}";
+            string ipUrl = $"http://{_config.FallbackIp}{_config.Path}{endpoint}";
 
             try {
-                return await _client.GetStringAsync(dnsUrl);
-            } catch (HttpRequestException) {
-                return await _client.GetStringAsync(ipUrl);
+                return await EjecutarGetAsync(dnsUrl);
+            } catch (HttpRequestException ex) when (ex.StatusCode == null) {
+                // Solo aplicar fallback ante errores de transporte.
+                return await EjecutarGetAsync(ipUrl);
             }
         }
-        */
 
+        private async Task<string> EjecutarGetAsync(string url) {
+            using var response = await _client.GetAsync(url);
+
+            string contenido = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode) {
+                SivevLogger.Error(
+                    $"Error HTTP {(int)response.StatusCode} " +
+                    $"({response.ReasonPhrase})\n" +
+                    $"URL: {url}\n" +
+                    $"Respuesta: {contenido}",
+                    SivevOrigen.Captura
+                );
+
+                throw new HttpRequestException(
+                    $"Error HTTP {(int)response.StatusCode} ({response.ReasonPhrase})",
+                    null,
+                    response.StatusCode
+                );
+            }
+
+            return contenido;
+        }
+
+
+        /* CAMBIO POR MANEJO DE ERRORES Y LOGS
         private async Task<string> GetAsync(string endpoint) {
             string dnsUrl = $"http://{_config.DnsHost}{_config.Path}{endpoint}";
             string ipUrl = $"http://{_config.FallbackIp}{_config.Path}{endpoint}";
@@ -88,7 +112,7 @@ namespace SQLSIVEV.Comun.Servicios {
 
                 return contenido;
             }
-        }
+        }*/
 
     }
 }

@@ -103,7 +103,7 @@ namespace FrmComun.CapturaCentralizada {
             tcPrincipal.Name = "tcPrincipal";
             tcPrincipal.SelectedIndex = 0;
             tcPrincipal.Size = new Size(1009, 606);
-            tcPrincipal.TabIndex = 2;
+            tcPrincipal.TabIndex = 0;
             // 
             // tpRegistroVehicular
             // 
@@ -143,17 +143,21 @@ namespace FrmComun.CapturaCentralizada {
             gbAcceso.Name = "gbAcceso";
             gbAcceso.Padding = new Padding(10);
             gbAcceso.Size = new Size(593, 552);
-            gbAcceso.TabIndex = 1;
+            gbAcceso.TabIndex = 0;
             gbAcceso.TabStop = false;
             gbAcceso.Text = "ACCESO / CONSULTA";
             // 
             // ucAccesoConsulta1
             // 
+            ucAccesoConsulta1._accesoId = new Guid("00000000-0000-0000-0000-000000000000");
+            ucAccesoConsulta1._bitacoraVisitaId = new Guid("00000000-0000-0000-0000-000000000000");
+            ucAccesoConsulta1._estacionId = new Guid("00000000-0000-0000-0000-000000000000");
             ucAccesoConsulta1.Ambientales = "STATUS AMBIENTALES";
             ucAccesoConsulta1.Dock = DockStyle.Fill;
             ucAccesoConsulta1.Fotocivicas = "STATUS FOTOCIIVCAS";
             ucAccesoConsulta1.Location = new Point(10, 30);
             ucAccesoConsulta1.Monetarias = "STATUS MONETARIAS\r\n";
+            ucAccesoConsulta1.MotivoAccesoId = null;
             ucAccesoConsulta1.Name = "ucAccesoConsulta1";
             ucAccesoConsulta1.Placa = "";
             ucAccesoConsulta1.Size = new Size(573, 512);
@@ -183,7 +187,7 @@ namespace FrmComun.CapturaCentralizada {
             gbVinModelo.Name = "gbVinModelo";
             gbVinModelo.Padding = new Padding(10);
             gbVinModelo.Size = new Size(386, 250);
-            gbVinModelo.TabIndex = 2;
+            gbVinModelo.TabIndex = 0;
             gbVinModelo.TabStop = false;
             gbVinModelo.Text = "VIN / MODELO";
             // 
@@ -438,6 +442,7 @@ namespace FrmComun.CapturaCentralizada {
             txtPlaca.Size = new Size(165, 57);
             txtPlaca.TabIndex = 1;
             txtPlaca.Text = "75F880";
+            txtPlaca.KeyDown += txtPlaca_KeyDown;
             // 
             // tlpLinea
             // 
@@ -478,7 +483,7 @@ namespace FrmComun.CapturaCentralizada {
             lblLinea.Name = "lblLinea";
             lblLinea.Padding = new Padding(0, 0, 12, 0);
             lblLinea.Size = new Size(155, 94);
-            lblLinea.TabIndex = 1;
+            lblLinea.TabIndex = 0;
             lblLinea.Text = "Línea";
             lblLinea.TextAlign = ContentAlignment.MiddleLeft;
             // 

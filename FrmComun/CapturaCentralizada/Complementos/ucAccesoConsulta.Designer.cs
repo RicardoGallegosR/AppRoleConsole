@@ -28,7 +28,7 @@
             tableLayoutPanel2 = new TableLayoutPanel();
             flpPlacasServicios = new FlowLayoutPanel();
             lblPlaca = new Label();
-            txtPlaca = new TextBox();
+            cbPET = new CheckBox();
             ibServicios = new FontAwesome.Sharp.IconButton();
             btnCrearVerificacion = new Button();
             scWeb = new SplitContainer();
@@ -126,7 +126,7 @@
             // flpPlacasServicios
             // 
             flpPlacasServicios.Controls.Add(lblPlaca);
-            flpPlacasServicios.Controls.Add(txtPlaca);
+            flpPlacasServicios.Controls.Add(cbPET);
             flpPlacasServicios.Controls.Add(ibServicios);
             flpPlacasServicios.Controls.Add(btnCrearVerificacion);
             flpPlacasServicios.Dock = DockStyle.Fill;
@@ -143,17 +143,18 @@
             lblPlaca.Name = "lblPlaca";
             lblPlaca.Size = new Size(46, 30);
             lblPlaca.TabIndex = 0;
-            lblPlaca.Text = "Placa";
+            lblPlaca.Text = "PET";
             // 
-            // txtPlaca
+            // cbPET
             // 
-            txtPlaca.Font = new Font("Segoe UI", 12F);
-            txtPlaca.ForeColor = Color.FromArgb(45, 55, 65);
-            txtPlaca.Location = new Point(55, 3);
-            txtPlaca.MaxLength = 11;
-            txtPlaca.Name = "txtPlaca";
-            txtPlaca.Size = new Size(100, 29);
-            txtPlaca.TabIndex = 1;
+            cbPET.AutoSize = true;
+            cbPET.Dock = DockStyle.Fill;
+            cbPET.Location = new Point(55, 3);
+            cbPET.Name = "cbPET";
+            cbPET.Size = new Size(181, 30);
+            cbPET.TabIndex = 5;
+            cbPET.Text = "Prueba de Evaluación Técnica";
+            cbPET.UseVisualStyleBackColor = true;
             // 
             // ibServicios
             // 
@@ -164,7 +165,7 @@
             ibServicios.IconColor = Color.White;
             ibServicios.IconFont = FontAwesome.Sharp.IconFont.Auto;
             ibServicios.IconSize = 30;
-            ibServicios.Location = new Point(161, 3);
+            ibServicios.Location = new Point(242, 3);
             ibServicios.Name = "ibServicios";
             ibServicios.Size = new Size(37, 30);
             ibServicios.TabIndex = 2;
@@ -176,11 +177,11 @@
             btnCrearVerificacion.FlatAppearance.BorderColor = Color.Crimson;
             btnCrearVerificacion.FlatStyle = FlatStyle.Flat;
             btnCrearVerificacion.Font = new Font("Segoe UI", 12F);
-            btnCrearVerificacion.Location = new Point(204, 3);
+            btnCrearVerificacion.Location = new Point(285, 3);
             btnCrearVerificacion.Name = "btnCrearVerificacion";
-            btnCrearVerificacion.Size = new Size(57, 30);
+            btnCrearVerificacion.Size = new Size(89, 30);
             btnCrearVerificacion.TabIndex = 3;
-            btnCrearVerificacion.Text = "Cont";
+            btnCrearVerificacion.Text = "Continuar";
             btnCrearVerificacion.UseVisualStyleBackColor = true;
             // 
             // scWeb
@@ -538,7 +539,6 @@
         private Panel pnlFotocivicas;
         private FlowLayoutPanel flpPlacasServicios;
         private Label lblPlaca;
-        private TextBox txtPlaca;
         private FontAwesome.Sharp.IconButton ibServicios;
         private Panel pnlCitas;
         private Panel pnlMargen;
@@ -550,5 +550,6 @@
         private Label lblInfFM;
         private Label lblStatusFM;
         private Panel pnlMargen2;
+        private CheckBox cbPET;
     }
 }

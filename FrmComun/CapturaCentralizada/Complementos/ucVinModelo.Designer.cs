@@ -26,13 +26,11 @@
             pnlPrincipal = new Panel();
             tlpVinModelo = new TableLayoutPanel();
             txtVinConfirmar = new TextBox();
-            lblPET = new Label();
             lblConfirmarVin = new Label();
             txtVin = new TextBox();
             lblVin = new Label();
             lblModelo = new Label();
             nudModelo = new NumericUpDown();
-            cbPET = new CheckBox();
             pblFooter = new Panel();
             flpVinModelo = new FlowLayoutPanel();
             btnSeleccionVehiculo = new Button();
@@ -61,13 +59,11 @@
             tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlpVinModelo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlpVinModelo.Controls.Add(txtVinConfirmar, 1, 2);
-            tlpVinModelo.Controls.Add(lblPET, 0, 3);
             tlpVinModelo.Controls.Add(lblConfirmarVin, 0, 2);
             tlpVinModelo.Controls.Add(txtVin, 1, 1);
             tlpVinModelo.Controls.Add(lblVin, 0, 1);
             tlpVinModelo.Controls.Add(lblModelo, 0, 0);
             tlpVinModelo.Controls.Add(nudModelo, 1, 0);
-            tlpVinModelo.Controls.Add(cbPET, 1, 3);
             tlpVinModelo.Dock = DockStyle.Fill;
             tlpVinModelo.Location = new Point(0, 0);
             tlpVinModelo.Name = "tlpVinModelo";
@@ -92,17 +88,6 @@
             txtVinConfirmar.Text = "3U5AFCFY5R200674";
             txtVinConfirmar.TextChanged += txtVinConfirmar_TextChanged;
             txtVinConfirmar.KeyPress += txtVinConfirmar_KeyPress;
-            // 
-            // lblPET
-            // 
-            lblPET.Dock = DockStyle.Fill;
-            lblPET.Font = new Font("Segoe UI", 10.5F);
-            lblPET.Location = new Point(3, 120);
-            lblPET.Name = "lblPET";
-            lblPET.Size = new Size(212, 40);
-            lblPET.TabIndex = 0;
-            lblPET.Text = "PET";
-            lblPET.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblConfirmarVin
             // 
@@ -162,17 +147,6 @@
             nudModelo.Size = new Size(213, 23);
             nudModelo.TabIndex = 1;
             nudModelo.Value = new decimal(new int[] { 1900, 0, 0, 0 });
-            // 
-            // cbPET
-            // 
-            cbPET.AutoSize = true;
-            cbPET.Dock = DockStyle.Fill;
-            cbPET.Location = new Point(221, 123);
-            cbPET.Name = "cbPET";
-            cbPET.Size = new Size(213, 34);
-            cbPET.TabIndex = 4;
-            cbPET.Text = "Prueba de Evaluación Técnica";
-            cbPET.UseVisualStyleBackColor = true;
             // 
             // pblFooter
             // 
@@ -237,8 +211,6 @@
         private TextBox txtVin;
         private NumericUpDown nudModelo;
         private TextBox txtVinConfirmar;
-        private Label lblPET;
         private Label lblConfirmarVin;
-        private CheckBox cbPET;
     }
 }

@@ -9,6 +9,7 @@ using SQLSIVEV.Infrastructure.Sql.Configuracion;
 using SQLSIVEV.Infrastructure.Utils;
 using System.Data;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices.JavaScript;
 using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
 
 namespace SQLSIVEV.Infrastructure.Sql {
@@ -140,7 +141,7 @@ namespace SQLSIVEV.Infrastructure.Sql {
 
 
         #region bitacora de visitas
-        public async Task<StoreResult<Guid>> SpAppCapturaBitacoraVisitasSet(SqlConnection cnn, Guid estacionId, Guid accesoId, Guid verificacionId, string Nombre, string Paterno, string Materno, CancellationToken ct = default) {
+        public async Task<StoreResult<BitacoraVisitasDto>> SpAppCapturaBitacoraVisitasSet(SqlConnection cnn, Guid estacionId, Guid accesoId, string Nombre, string Paterno, string Materno, CancellationToken ct = default) {
             if (cnn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");
 
@@ -159,10 +160,15 @@ namespace SQLSIVEV.Infrastructure.Sql {
             var uiEmpresaPersonaId = cmd.Parameters.Add("@uiEmpresaPersonaId", SqlDbType.UniqueIdentifier);
             uiEmpresaPersonaId.Direction = ParameterDirection.Output;
 
+            var pBitacoraVisitaId = cmd.Parameters.Add("@uiBitacoraVisitaId",  SqlDbType.UniqueIdentifier);
+            pBitacoraVisitaId.Direction = ParameterDirection.Output;
+
+
+
             //
             cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
             cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
-            cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier).Value = verificacionId;
+            //cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier).Value = verificacionId;
 
             cmd.Parameters.Add("@vcNombre", SqlDbType.VarChar, 50).Value = Nombre;
             cmd.Parameters.Add("@vcPaterno", SqlDbType.VarChar, 50).Value = Paterno;
@@ -173,17 +179,79 @@ namespace SQLSIVEV.Infrastructure.Sql {
             int mensajeId = pMensaje.Value == DBNull.Value ? 0 : Convert.ToInt32(pMensaje.Value);
             short resultadoId = pResultado.Value == DBNull.Value ? (short)0 : Convert.ToInt16(pResultado.Value);
 
-            return new StoreResult<Guid> {
+            return new StoreResult<BitacoraVisitasDto> {
                 MensajeId = mensajeId,
                 ResultadoId = resultadoId,
-                Data = uiEmpresaPersonaId.Value is Guid id ? id : Guid.Empty
+                Data = new BitacoraVisitasDto {
+                    BitacoraVisitaId = pBitacoraVisitaId.Value is Guid id ? id : Guid.Empty,
+                    EmpresaPersonaId = uiEmpresaPersonaId.Value is Guid id2 ? id2 : Guid.Empty
+                }
             };
         }
         #endregion
 
 
 
+        #region bitacora de citas
+        public async Task<StoreResult<Guid>> SpAppBitacoraCitasSWSet(SqlConnection cnn, Guid estacionId, Guid accesoId, Guid bitacoraVisitaId, CitasDto citas, CancellationToken ct = default) {
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
 
+            ArgumentNullException.ThrowIfNull(citas);
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppBitacoraCitasSWSet";
+            cmd.CommandTimeout = _timeout;
+
+            // Parámetros OUTPUT
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pResultado.Direction = ParameterDirection.Output;
+
+            var pCitaId = cmd.Parameters.Add("@uiCitaId", SqlDbType.UniqueIdentifier);
+            pCitaId.Direction = ParameterDirection.Output;
+
+            // Identificadores
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiBitacoraVisitaId", SqlDbType.UniqueIdentifier).Value = bitacoraVisitaId;
+            cmd.Parameters.Add("@vcPlacaId", SqlDbType.VarChar, 11).Value = citas.placa ?? "DESCONOCIDO";
+            cmd.Parameters.Add("@vcVerificentro", SqlDbType.VarChar, 11).Value =  citas.centro ?? "DESCONOCIDO";
+            cmd.Parameters.Add("@vcCodigoRespuesta", SqlDbType.VarChar, 4).Value = citas.codigoRespuesta ?? "0000";
+            cmd.Parameters.Add("@bExisteCita", SqlDbType.Bit).Value = citas.existeCita;
+            cmd.Parameters.Add("@bMarcaAsistencia", SqlDbType.Bit).Value = citas.marcaAsistencia;
+            cmd.Parameters.Add("@vcMensaje", SqlDbType.VarChar, 300).Value = citas.mensaje ?? "DESCONOCIDO";
+
+            // Fecha de cita
+            DateTime fechaCita = citas.fechaCita?.Date ?? new DateTime(1900, 1, 1);
+            cmd.Parameters.Add("@dFechaCita", SqlDbType.Date).Value = fechaCita;
+
+            // Hora de cita
+            TimeSpan horaCita = citas.horaCita ?? TimeSpan.Zero;
+            var pHora = cmd.Parameters.Add("@tHoraCita", SqlDbType.Time);
+            pHora.Scale = 0;
+            pHora.Value = horaCita;
+
+
+            // Ejecutar procedimiento
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            // Recuperar OUTPUT
+            int mensajeId = pMensaje.Value is int m ? m : 0;
+            short resultadoId = pResultado.Value is short r ? r : (short)0;
+            Guid citaId = pCitaId.Value is Guid id ? id : Guid.Empty;
+
+            return new StoreResult<Guid> {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                Data = citaId
+            };
+        }
+        #endregion
 
 
 
@@ -249,6 +317,154 @@ namespace SQLSIVEV.Infrastructure.Sql {
             if (pVerificacionId.Value != DBNull.Value && Guid.TryParse(pVerificacionId.Value?.ToString(), out Guid guid)) {
                 verificacionId = guid;
             }
+
+            return new CapturaIniciaResult {
+                MensajeId = mensajeId,
+                ResultadoId = resultadoId,
+                VerificacionId = verificacionId,
+                TipoVerificacionId = tipoVerificacionId,
+                EstadoId = estadoId
+            };
+        }
+
+
+        private static DataTable CrearTablaEconomicas(IEnumerable<EconomicaDto>? economicas) {
+            var tabla = new DataTable();
+
+            tabla.Columns.Add("Folio", typeof(string));
+            tabla.Columns.Add("FechaInfraccion", typeof(DateTime));
+            tabla.Columns.Add("Estatus", typeof(string));
+
+            foreach (var e in economicas ?? Enumerable.Empty<EconomicaDto>()) {
+                tabla.Rows.Add(
+                    e.Folio?.Trim() ?? string.Empty,
+                    e.Fecha.Date,
+                    (object?)e.Status?.Trim() ?? DBNull.Value
+                );
+            }
+
+            return tabla;
+        }
+        private static DataTable CrearTablaTenencias(IEnumerable<short>? tenencias) {
+            var tabla = new DataTable();
+
+            tabla.Columns.Add("Tenencia", typeof(short));
+
+            foreach (short tenencia in tenencias ?? Enumerable.Empty<short>()) {
+                tabla.Rows.Add(tenencia);
+            }
+
+            return tabla;
+        }
+
+
+        public async Task<CapturaIniciaResult> SpAppCapturaIniciaWebSrv2026Async(
+            SqlConnection cnn, 
+            Guid estacionId, 
+            Guid accesoId, 
+            string placa,  
+            bool pet,
+            /*
+            int consultasSemoviId, 
+            string vin,
+            short modelo,
+            string tipoServicio, 
+            string folioAuto, 
+            DateTime fechaTC, 
+            bool testFM, 
+            bool conexionWs, 
+            byte conexionWebSrv, 
+            */
+            ConsultaFotocivicasDto respuesta, 
+            CancellationToken ct = default) { 
+            if (cnn.State != ConnectionState.Open)
+                throw new InvalidOperationException("La conexión debe estar abierta.");
+
+            ArgumentNullException.ThrowIfNull(respuesta);
+
+            using var cmd = cnn.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "VfcCaptura.SpAppCapturaIniciaWebSrv2026";
+            cmd.CommandTimeout = _timeout;
+
+            // PARÁMETROS DE SALIDA 
+            var pMensaje = cmd.Parameters.Add("@iMensajeId", SqlDbType.Int);
+            pMensaje.Direction = ParameterDirection.Output;
+
+            var pResultado = cmd.Parameters.Add("@siResultado", SqlDbType.SmallInt);
+            pResultado.Direction = ParameterDirection.Output;
+
+
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+
+            var pVerificacionId = cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier);
+            pVerificacionId.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@vcPlacaId", SqlDbType.VarChar, 11).Value = placa;
+            cmd.Parameters.Add("@bPet", SqlDbType.Bit).Value = pet;
+
+            var pTipoVerificacion = cmd.Parameters.Add("@tiTipoVerificacionId", SqlDbType.TinyInt);
+            pTipoVerificacion.Direction = ParameterDirection.Output;
+
+            var pEstado = cmd.Parameters.Add("@tiEstadoId", SqlDbType.TinyInt);
+            pEstado.Direction = ParameterDirection.Output;
+
+            cmd.Parameters.Add("@tiConexionWebSrv", SqlDbType.TinyInt).Value = respuesta.ConexionWebSrv;
+
+            cmd.Parameters.Add("@bAdeudoGdfFotoCivicas", SqlDbType.Bit).Value = respuesta.Fotocivicas?.TieneAdeudo ?? false;
+            cmd.Parameters.Add("@bAdeudoTenencia", SqlDbType.Bit).Value = respuesta.AdeudoTenencia;
+            cmd.Parameters.Add("@bAdeudoInfraccion", SqlDbType.Bit).Value = respuesta.AdeudoInfraccion;
+
+            // Nuevos indicadores 2026
+            cmd.Parameters.Add("@bVerifica", SqlDbType.Bit).Value = respuesta.Verifica;
+
+            cmd.Parameters.Add("@bAdeudoSancion", SqlDbType.Bit).Value = respuesta.AdeudoSancion;
+            cmd.Parameters.Add("@vcMensajeTenencia", SqlDbType.NVarChar, -1).Value = (object?)respuesta.MensajeTenencia ?? DBNull.Value;
+
+            cmd.Parameters.Add("@siPuntos", SqlDbType.SmallInt).Value = respuesta.Fotocivicas is null ? DBNull.Value : Convert.ToInt16(respuesta.Fotocivicas.Puntos);
+            cmd.Parameters.Add("@bDebeAmonestaciones", SqlDbType.Bit).Value = respuesta.Fotocivicas is null ? DBNull.Value : respuesta.Fotocivicas.DebeAmonestaciones;
+            cmd.Parameters.Add("@bDebePresencial", SqlDbType.Bit).Value = respuesta.Fotocivicas is null ? DBNull.Value : respuesta.Fotocivicas.DebePresencial;
+            cmd.Parameters.Add("@bDebeEnLinea", SqlDbType.Bit).Value = respuesta.Fotocivicas is null ? DBNull.Value : respuesta.Fotocivicas.DebeEnLinea;
+
+
+
+            var pEconomicas = cmd.Parameters.Add("@tbEconomicas",SqlDbType.Structured);
+            pEconomicas.TypeName = "Bitacoras.TpWebSrvEconomicas";
+            pEconomicas.Value = CrearTablaEconomicas(respuesta.Economicas);
+
+
+            var pTenencias = cmd.Parameters.Add("@tbTenencias", SqlDbType.Structured);
+            pTenencias.TypeName = "Bitacoras.TpWebSrvTenencias";
+            pTenencias.Value = CrearTablaTenencias(respuesta.Tenencias);
+
+
+
+            var pFinanzasId = cmd.Parameters.Add("@uiWebSrvFinanzasId", SqlDbType.UniqueIdentifier);
+            pFinanzasId.Direction = ParameterDirection.Output;
+
+            // DATOS DE ESTACIÓN Y VEHÍCULO
+            
+            /*
+            cmd.Parameters.Add("@iConsultasSemoviId", SqlDbType.Int).Value = consultasSemoviId;
+            cmd.Parameters.Add("@vcVin", SqlDbType.VarChar, 17).Value = vin;
+            cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt).Value = modelo;
+            cmd.Parameters.Add("@vcTipoServicio", SqlDbType.VarChar, 30).Value = tipoServicio;
+            cmd.Parameters.Add("@vcFolioAuto", SqlDbType.VarChar, 30).Value = folioAuto;
+            cmd.Parameters.Add("@dtFechaTC", SqlDbType.DateTime).Value = fechaTC;
+            cmd.Parameters.Add("@bTestFM", SqlDbType.Bit).Value = testFM;
+            cmd.Parameters.Add("@bConexionWs", SqlDbType.Bit).Value = conexionWs;
+            */
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            int mensajeId = pMensaje.Value is int m ? m : 0;
+            short resultadoId = pResultado.Value is short r ? r : (short)0;
+            byte tipoVerificacionId = pTipoVerificacion.Value is byte t ? t : (byte)0;
+            byte estadoId = pEstado.Value is byte e ? e : (byte)0;
+            Guid? verificacionId =  pVerificacionId.Value is Guid v && v != Guid.Empty ? v : null;
+            Guid? webSrvFinanzasId = pFinanzasId.Value is Guid f && f != Guid.Empty ? f : null;
 
             return new CapturaIniciaResult {
                 MensajeId = mensajeId,

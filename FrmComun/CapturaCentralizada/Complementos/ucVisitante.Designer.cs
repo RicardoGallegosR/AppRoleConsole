@@ -71,7 +71,7 @@
             tlpVisitante.RowStyles.Add(new RowStyle());
             tlpVisitante.RowStyles.Add(new RowStyle());
             tlpVisitante.Size = new Size(375, 127);
-            tlpVisitante.TabIndex = 1;
+            tlpVisitante.TabIndex = 0;
             // 
             // txtApellidoM
             // 
@@ -173,7 +173,7 @@
             btnAcceso.Name = "btnAcceso";
             btnAcceso.Padding = new Padding(5, 0, 0, 0);
             btnAcceso.Size = new Size(75, 34);
-            btnAcceso.TabIndex = 0;
+            btnAcceso.TabIndex = 4;
             btnAcceso.Text = "Acceso";
             btnAcceso.UseVisualStyleBackColor = false;
             // 

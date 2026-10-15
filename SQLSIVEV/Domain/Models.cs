@@ -28,6 +28,14 @@
         public short ResultadoId { get; init; }
         public T Data { get; init; } = default!;
     }
+
+
+    public sealed class BitacoraVisitasDto {
+        public Guid BitacoraVisitaId { get; init; }
+        public Guid EmpresaPersonaId { get; init; }
+    }
+
+
     #region Bitacoras de accesos
     public sealed class CapturaIniciaResult {
         public int MensajeId { get; init; }
@@ -64,6 +72,13 @@
         public string MotivoAcceso { get; init; } = string.Empty;
     }
 
+    public class ResultadoFotocivicasApi {
+        public byte ConexionWebSrv { get; init; }
+        public string? Json { get; init; }
+        public int? CodigoHttp { get; init; }
+        public string? Error { get; init; }
+    }
+
     public sealed class TiposDocumentosDto {
         public short TipoDocumentoId { get; init; }
         public string TipoDocumento { get; init; } = string.Empty;
@@ -78,14 +93,14 @@
 
         public bool Verifica { get; set; }
         public bool Taxi { get; set; }
-
+        public byte ConexionWebSrv { get; set; } = 1;
         public string? MensajeTenencia { get; set; }
 
         public FotocivicasDto? Fotocivicas { get; set; }
 
         public List<EconomicaDto> Economicas { get; set; } = new();
         public List<object> Sanciones { get; set; } = new();
-        public List<string> Tenencias { get; set; } = new();
+        public List<short> Tenencias { get; set; } = new();
     }
     public class FotocivicasDto {
         public int Puntos { get; set; }

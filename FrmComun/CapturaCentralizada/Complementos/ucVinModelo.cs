@@ -9,7 +9,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         public string Vin => txtVin.Text.Trim();
         public int Modelo => (int)nudModelo.Value;
-        public bool PET => cbPET.Checked;
 
 
         private const int LongitudVin = 17;
