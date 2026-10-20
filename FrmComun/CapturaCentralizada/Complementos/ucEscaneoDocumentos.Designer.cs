@@ -343,6 +343,7 @@
             ibGuardar.Text = "Guardar";
             ibGuardar.TextAlign = ContentAlignment.MiddleRight;
             ibGuardar.UseVisualStyleBackColor = false;
+            ibGuardar.Click += ibGuardar_Click_1;
             // 
             // ucEscaneoDocumentos
             // 

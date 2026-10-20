@@ -19,7 +19,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public int Modelo => (int)nudModelo.Value;
         public string FolioTarjetaCirculacion => txtFolioTC.Text.Trim();
         public int TubosEscape => (int)nudTubosEscape.Value;
-        public string ClaveVehicular => txtClaveVehicular.Text.Trim();
+        public int? ClaveVehicular => int.TryParse(txtClaveVehicular.Text.Trim(), out int clave) ? clave: 0; 
         public event EventHandler? SubmarcaSeleccionada;
 
         private const int LongitudMinClaveVehicular = 3;

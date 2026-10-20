@@ -77,17 +77,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
 
-        private void ibZoomMas_Click(
-    object sender,
-    EventArgs e) {
-            _zoom = Math.Min(
-                ZoomMaximo,
-                _zoom + PasoZoom);
-
+        private void ibZoomMas_Click(object sender, EventArgs e) {
+            _zoom = Math.Min(ZoomMaximo, _zoom + PasoZoom);
             AplicarZoom();
-
-            lblEstadoScanner.Text =
-                $"Zoom {(int)(_zoom * 100)}%";
+            lblEstadoScanner.Text = $"Zoom {(int)(_zoom * 100)}%";
         }
         #region Buscar escaneres 
         private void CargarScanners() {
@@ -204,7 +197,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             if (!recortado) {
                 _rectSeleccion = Rectangle.Empty;
                 _modoRecorte = false;
-                pbDocumento.Cursor =  Cursors.Default;
+                pbDocumento.Cursor = Cursors.Default;
                 pbDocumento.Invalidate();
                 lblEstadoScanner.Text = "No fue posible realizar el recorte";
                 return;
@@ -222,128 +215,73 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             if (_imagenTrabajo is null)
                 return;
             //_zoomVista = CalcularZoomVista();
-            int ancho = Math.Max(
-        1,
-        (int)(_imagenTrabajo.Width * _zoomVista));
+            int ancho = Math.Max(1, (int)(_imagenTrabajo.Width * _zoomVista));
+            int alto = Math.Max( 1, (int)(_imagenTrabajo.Height * _zoomVista));
 
-            int alto = Math.Max(
-        1,
-        (int)(_imagenTrabajo.Height * _zoomVista));
-
-            Bitmap vistaReducida =
-        new Bitmap(
-            _imagenTrabajo,
-            ancho,
-            alto);
-
-            Image? anterior =
-        pbDocumento.Image;
-
-            pbDocumento.Image =
-                vistaReducida;
-
+            Bitmap vistaReducida = new Bitmap(_imagenTrabajo, ancho, alto);
+            Image? anterior = pbDocumento.Image;
+            pbDocumento.Image = vistaReducida;
             anterior?.Dispose();
-
-            pbDocumento.SizeMode =
-                PictureBoxSizeMode.AutoSize;
-
+            pbDocumento.SizeMode = PictureBoxSizeMode.AutoSize;
             pbDocumento.Invalidate();
         }
         private bool RecortarSeleccion() {
-            if (_imagenTrabajo is null ||
-                pbDocumento.Image is null)
+            if (_imagenTrabajo is null || pbDocumento.Image is null)
                 return false;
 
-            float escalaX =
-        (float)_imagenTrabajo.Width /
-        pbDocumento.Image.Width;
-
-            float escalaY =
-        (float)_imagenTrabajo.Height /
-        pbDocumento.Image.Height;
+            float escalaX = (float)_imagenTrabajo.Width / pbDocumento.Image.Width;
+            float escalaY = (float)_imagenTrabajo.Height /pbDocumento.Image.Height;
 
             Rectangle areaReal = new Rectangle(
-        (int)(_rectSeleccion.X * escalaX),
-        (int)(_rectSeleccion.Y * escalaY),
-        (int)(_rectSeleccion.Width * escalaX),
-        (int)(_rectSeleccion.Height * escalaY)
-    );
+                (int)(_rectSeleccion.X * escalaX),
+                (int)(_rectSeleccion.Y * escalaY),
+                (int)(_rectSeleccion.Width * escalaX),
+                (int)(_rectSeleccion.Height * escalaY)
+            );
 
-            areaReal.Intersect(
-                new Rectangle(
-                    0,
-                    0,
-                    _imagenTrabajo.Width,
-                    _imagenTrabajo.Height));
+            areaReal.Intersect(new Rectangle(0, 0, _imagenTrabajo.Width, _imagenTrabajo.Height));
 
-            if (areaReal.Width <= 0 ||
-                areaReal.Height <= 0)
+            if (areaReal.Width <= 0 || areaReal.Height <= 0)
                 return false;
 
             const int margen = 20;
 
             areaReal = Rectangle.FromLTRB(
-                Math.Max(
-                    0,
-                    areaReal.Left - margen),
-
-                Math.Max(
-                    0,
-                    areaReal.Top - margen),
-
-                Math.Min(
-                    _imagenTrabajo.Width,
-                    areaReal.Right + margen),
-
-                Math.Min(
-                    _imagenTrabajo.Height,
-                    areaReal.Bottom + margen)
+                Math.Max(0, areaReal.Left - margen),
+                Math.Max(0, areaReal.Top - margen),
+                Math.Min(_imagenTrabajo.Width, areaReal.Right + margen),
+                Math.Min(_imagenTrabajo.Height, areaReal.Bottom + margen)
             );
 
-            Bitmap anterior =
-        _imagenTrabajo;
-
+            Bitmap anterior = _imagenTrabajo;
             Bitmap recortada;
 
             try {
-                recortada = anterior.Clone(
-                    areaReal,
-                    PixelFormat.Format24bppRgb);
+                recortada = anterior.Clone(areaReal, PixelFormat.Format24bppRgb);
             } catch {
                 return false;
             }
 
-            _imagenTrabajo =
-                recortada;
-
+            _imagenTrabajo = recortada;
             anterior.Dispose();
 
             return true;
         }
 
         private float CalcularZoomVista() {
-            if (_imagenTrabajo is null ||
-                pbDocumento.Parent is null)
+            if (_imagenTrabajo is null || pbDocumento.Parent is null)
                 return 1f;
 
-            Size disponible =
-        pbDocumento.Parent.ClientSize;
+            Size disponible = pbDocumento.Parent.ClientSize;
 
-            float zoomX =
-        (float)(disponible.Width - 20) /
-        _imagenTrabajo.Width;
+            float zoomX = (float)(disponible.Width - 20) / _imagenTrabajo.Width;
+            float zoomY = (float)(disponible.Height - 20) /_imagenTrabajo.Height;
 
-            float zoomY =
-        (float)(disponible.Height - 20) /
-        _imagenTrabajo.Height;
-
-            return Math.Min(
-                1f,
-                Math.Min(zoomX, zoomY));
+            return Math.Min(1f, Math.Min(zoomX, zoomY));
         }
         private void ibRecortar_Click(object? sender, EventArgs e) {
             if (_imagenTrabajo is null || pbDocumento.Image is null) {
-                Mostrar.Mensaje("Recortar","Primero debe escanear un documento.");
+                Mostrar.Mensaje("Recortar", "Primero debe escanear un documento.");
                 return;
             }
             _modoRecorte = true;
@@ -355,7 +293,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             lblEstadoScanner.Text = "Seleccione el área que desea recortar";
         }
-                
+
         private RectangleF ObtenerRectanguloImagenVisible() {
             if (pbDocumento.Image is null)
                 return RectangleF.Empty;
@@ -443,24 +381,18 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             if (device.Items.Count == 0)
                 throw new InvalidOperationException("El escáner no tiene elementos disponibles.");
-            
+
             WIA.Item item = device.Items[1];
             const int WIA_IPS_XRES = 6147;
             const int WIA_IPS_YRES = 6148;
 
-            EstablecerPropiedadWia(
-                item.Properties,
-                WIA_IPS_XRES,
-                300);
-            EstablecerPropiedadWia(
-                item.Properties,
-                WIA_IPS_YRES,
-                300);
+            EstablecerPropiedadWia(item.Properties, WIA_IPS_XRES, 300);
+            EstablecerPropiedadWia(item.Properties, WIA_IPS_YRES, 300);
             // JPEG en WIA.
             const string WiaFormatJpeg = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
             WIA.ImageFile image = (WIA.ImageFile)item.Transfer(WiaFormatJpeg);
             object binaryData = image.FileData.get_BinaryData();
-            
+
             if (binaryData is not byte[] bytes || bytes.Length == 0) {
                 throw new InvalidOperationException("El escáner no devolvió ninguna imagen.");
             }
@@ -469,33 +401,22 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private void MostrarPreview(byte[] imagen) {
-            using var ms =
-        new MemoryStream(imagen);
+            using var ms = new MemoryStream(imagen);
 
-            using var original =
-        Image.FromStream(ms);
+            using var original = Image.FromStream(ms);
 
             pbDocumento.Image?.Dispose();
             _imagenEscaneadaOriginal?.Dispose();
             _imagenTrabajo?.Dispose();
-
-            _imagenEscaneadaOriginal =
-                new Bitmap(original);
-
-            _imagenTrabajo =
-                new Bitmap(original);
-
-            pbDocumento.Image =
-                new Bitmap(_imagenTrabajo);
-
-            _rectSeleccion =
-                Rectangle.Empty;
+            _imagenEscaneadaOriginal = new Bitmap(original);
+            _imagenTrabajo = new Bitmap(original);
+            pbDocumento.Image = new Bitmap(_imagenTrabajo);
+            _rectSeleccion = Rectangle.Empty;
 
             _modoRecorte = false;
             _seleccionando = false;
 
-            pbDocumento.Cursor =
-                Cursors.Default;
+            pbDocumento.Cursor = Cursors.Default;
 
             pbDocumento.Invalidate();
         }
@@ -518,23 +439,16 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             pbDocumento.Invalidate();
             lblEstadoScanner.Text = "Documento original";
         }
-        private void ibAceptar_Click(
-    object sender,
-    EventArgs e) {
-            if (_imagenTrabajo is null ||
-                _paginaActual < 0) {
-                Mostrar.Mensaje(
-                    "Documento",
-                    "No existe una página para aceptar.");
-
+        private void ibAceptar_Click(object sender, EventArgs e) {
+            if (_imagenTrabajo is null || _paginaActual < 0) {
+                Mostrar.Mensaje("Documento", "No existe una página para aceptar.");
                 return;
             }
 
             GuardarCambiosPaginaActual();
             ActualizarMiniaturas();
 
-            lblEstadoScanner.Text =
-                $"Página {_paginaActual + 1} aceptada";
+            lblEstadoScanner.Text = $"Página {_paginaActual + 1} aceptada";
         }
 
         private void ibCancelar_Click(object sender, EventArgs e) {
@@ -566,103 +480,53 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         #region PDF
         public string GuardarPdf() {
             if (_paginas.Count == 0)
-                throw new InvalidOperationException(
-                    "No existen páginas para guardar.");
+                throw new InvalidOperationException("No existen páginas para guardar.");
 
-            if (VerificacionId is null ||
-                VerificacionId == Guid.Empty)
-                throw new InvalidOperationException(
-                    "No existe un identificador de verificación.");
+            if (VerificacionId is null || VerificacionId == Guid.Empty)
+                throw new InvalidOperationException("No existe un identificador de verificación.");
 
             if (string.IsNullOrWhiteSpace(RutaBase))
-                throw new InvalidOperationException(
-                    "No se ha configurado la ruta para guardar documentos.");
+                throw new InvalidOperationException("No se ha configurado la ruta para guardar documentos.");
 
             GuardarCambiosPaginaActual();
+            string carpeta = ObtenerCarpetaDelDia();
+            string rutaCompleta = Path.Combine(carpeta, $"1_{VerificacionId.Value}.pdf");
 
-            string carpeta =
-        ObtenerCarpetaDelDia();
-
-            string rutaCompleta =
-        Path.Combine(
-            carpeta,
-            $"1_{VerificacionId.Value}.pdf");
-
-            using var documento =
-        new PdfDocument();
+            using var documento = new PdfDocument();
 
             for (int i = 0; i < _paginas.Count; i++) {
-                PaginaEscaneada paginaDocumento =
-            _paginas[i];
+                PaginaEscaneada paginaDocumento = _paginas[i];
 
                 try {
-                    var pagina =
-                documento.AddPage();
-
-                    pagina.Size =
-                        PageSize.A4;
+                    var pagina = documento.AddPage();
+                    pagina.Size = PageSize.Letter;
 
                     // Siempre convertimos a JPEG estándar
-                    using var ms =
-                PrepararImagenParaPdf(
-                    paginaDocumento.Actual);
+                    using var ms =PrepararImagenParaPdf(paginaDocumento.Actual);
+                    using var imagenPdf = XImage.FromStream(ms);
 
-                    using var imagenPdf =
-                XImage.FromStream(ms);
-
-                    using var gfx =
-                XGraphics.FromPdfPage(pagina);
-
+                    using var gfx = XGraphics.FromPdfPage(pagina);
                     double margen = 20;
+                    double anchoDisponible = pagina.Width.Point - margen * 2;
+                    double altoDisponible = pagina.Height.Point - margen * 2;
 
-                    double anchoDisponible =
-                pagina.Width.Point -
-                margen * 2;
+                    double escala = Math.Min(
+                        anchoDisponible / imagenPdf.PixelWidth,
+                        altoDisponible /  imagenPdf.PixelHeight
+                    );
 
-                    double altoDisponible =
-                pagina.Height.Point -
-                margen * 2;
+                    double ancho = imagenPdf.PixelWidth * escala;
+                    double alto = imagenPdf.PixelHeight * escala;
 
-                    double escala =
-                Math.Min(
-                    anchoDisponible /
-                        imagenPdf.PixelWidth,
+                    double x = (pagina.Width.Point - ancho) / 2;
+                    double y = (pagina.Height.Point - alto) / 2;
 
-                    altoDisponible /
-                        imagenPdf.PixelHeight);
-
-                    double ancho =
-                imagenPdf.PixelWidth *
-                escala;
-
-                    double alto =
-                imagenPdf.PixelHeight *
-                escala;
-
-                    double x =
-                (pagina.Width.Point - ancho)
-                / 2;
-
-                    double y =
-                (pagina.Height.Point - alto)
-                / 2;
-
-                    gfx.DrawImage(
-                        imagenPdf,
-                        x,
-                        y,
-                        ancho,
-                        alto);
+                    gfx.DrawImage(imagenPdf, x, y, ancho, alto);
                 } catch (Exception ex) {
-                    throw new InvalidOperationException(
-                        $"No fue posible procesar la página {i + 1}. " +
-                        $"{ex.Message}",
-                        ex);
+                    throw new InvalidOperationException($"No fue posible procesar la página {i + 1}.\n{ex.Message}", ex);
                 }
             }
-
             documento.Save(rutaCompleta);
-
             return rutaCompleta;
         }
 
@@ -670,28 +534,15 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             using var entrada = new MemoryStream(datos);
             using var original = Image.FromStream(entrada);
 
-            using var bitmap = new Bitmap(
-        original.Width,
-        original.Height,
-        PixelFormat.Format24bppRgb);
+            using var bitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb);
 
             using (Graphics g = Graphics.FromImage(bitmap)) {
                 g.Clear(Color.White);
-
-                g.DrawImage(
-                    original,
-                    0,
-                    0,
-                    bitmap.Width,
-                    bitmap.Height);
+                g.DrawImage(original, 0, 0, bitmap.Width, bitmap.Height);
             }
 
-            using var salida =
-        new MemoryStream();
-
-            bitmap.Save(
-                salida,
-                ImageFormat.Jpeg);
+            using var salida = new MemoryStream();
+            bitmap.Save(salida, ImageFormat.Jpeg);
 
             return salida.ToArray();
         }
@@ -711,7 +562,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         private static byte[] BitmapABytes(Bitmap imagen) {
             using var ms = new MemoryStream();
-            imagen.Save(ms,ImageFormat.Jpeg);
+            imagen.Save(ms, ImageFormat.Jpeg);
 
             return ms.ToArray();
         }
@@ -724,23 +575,16 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private void AgregarPaginaEscaneada(byte[] imagen) {
-            byte[] jpeg =
-        NormalizarImagen(imagen);
+            byte[] jpeg = NormalizarImagen(imagen);
 
-            var pagina =
-        new PaginaEscaneada
-        {
-            Original = jpeg.ToArray(),
-            Actual = jpeg.ToArray()
-        };
+            var pagina = new PaginaEscaneada {
+                Original = jpeg.ToArray(),
+                Actual = jpeg.ToArray()
+            };
 
             _paginas.Add(pagina);
-
-            _paginaActual =
-                _paginas.Count - 1;
-
+            _paginaActual = _paginas.Count - 1;
             CargarPagina(_paginaActual);
-
             ActualizarMiniaturas();
         }
 
@@ -755,21 +599,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             pbDocumento.Image?.Dispose();
             _imagenEscaneadaOriginal?.Dispose();
             _imagenTrabajo?.Dispose();
-
             _imagenEscaneadaOriginal = BytesABitmap(pagina.Original);
-
             _imagenTrabajo = BytesABitmap(pagina.Actual);
-
             pbDocumento.Image = new Bitmap(_imagenTrabajo);
-
             _rectSeleccion = Rectangle.Empty;
             _modoRecorte = false;
             _seleccionando = false;
-
             pbDocumento.Cursor = Cursors.Default;
-
             pbDocumento.Invalidate();
-
             lblEstadoScanner.Text = $"Página {indice + 1} de {_paginas.Count}";
         }
 
@@ -791,7 +628,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                             picture.Image?.Dispose();
                     }
                 }
-
                 control.Dispose();
             }
 
@@ -819,7 +655,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     Cursor = Cursors.Hand
                 };
 
-                preview.Image = BytesABitmap( _paginas[indice].Actual);
+                preview.Image = BytesABitmap(_paginas[indice].Actual);
 
                 string titulo = indice switch  {
                     0 => "Frente",
@@ -859,7 +695,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
 
-        private void ibAgregar_Click( object? sender, EventArgs e) {
+        private void ibAgregar_Click(object? sender, EventArgs e) {
             Mostrar.Mensaje("Advertencia", "Rote o anexe el nuevo documento");
             ibEscanear.PerformClick();
         }
@@ -868,63 +704,38 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             using var entrada = new MemoryStream(datos);
             using var original = Image.FromStream(entrada);
 
-            using var bitmap = new Bitmap(
-        original.Width,
-        original.Height,
-        PixelFormat.Format24bppRgb);
+            using var bitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb);
 
             using (Graphics g = Graphics.FromImage(bitmap)) {
                 g.Clear(Color.White);
-
-                g.DrawImage(
-                    original,
-                    0,
-                    0,
-                    bitmap.Width,
-                    bitmap.Height);
+                g.DrawImage(original, 0, 0, bitmap.Width, bitmap.Height);
             }
-
             var salida = new MemoryStream();
-
-            bitmap.Save(
-                salida,
-                ImageFormat.Jpeg);
-
+            bitmap.Save(salida, ImageFormat.Jpeg);
             salida.Position = 0;
 
             return salida;
         }
 
         private void ibEliminar_Click(object? sender, EventArgs e) {
-            if (_paginas.Count == 0 ||
-                _paginaActual < 0 ||
-                _paginaActual >= _paginas.Count) {
-                Mostrar.Mensaje(
-                    "Eliminar",
-                    "No existe una página seleccionada.");
-
+            if (_paginas.Count == 0 || _paginaActual < 0 || _paginaActual >= _paginas.Count) {
+                Mostrar.Mensaje("Eliminar", "No existe una página seleccionada.");
                 return;
             }
 
             int paginaEliminada = _paginaActual;
-
             _paginas.RemoveAt(_paginaActual);
 
             if (_paginas.Count == 0) {
-                _paginaActual = -1;
 
+                _paginaActual = -1;
                 pbDocumento.Image?.Dispose();
                 pbDocumento.Image = null;
-
                 _imagenTrabajo?.Dispose();
                 _imagenTrabajo = null;
-
                 _imagenEscaneadaOriginal?.Dispose();
                 _imagenEscaneadaOriginal = null;
-
-                lblEstadoScanner.Text =
-                    "No existen páginas escaneadas";
-
+                lblEstadoScanner.Text = "No existen páginas escaneadas";
                 ActualizarMiniaturas();
 
                 return;
@@ -938,31 +749,20 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 _paginaActual = paginaEliminada;
 
             CargarPagina(_paginaActual);
-
             ActualizarMiniaturas();
-
-            lblEstadoScanner.Text =
-                $"Página {_paginaActual + 1} de {_paginas.Count}";
+            lblEstadoScanner.Text = $"Página {_paginaActual + 1} de {_paginas.Count}";
         }
 
-        private void ibGuardar_Click(
-    object sender,
-    EventArgs e) {
+        private void ibGuardar_Click(object sender, EventArgs e) {
             if (_paginas.Count == 0) {
-                Mostrar.Mensaje(
-                    "Guardar",
-                    "No existen páginas para guardar.");
-
+                Mostrar.Mensaje("Guardar", "No existen páginas para guardar.");
                 return;
             }
 
             // Asegurar que la página actualmente
             // visible tenga sus últimos cambios.
             GuardarCambiosPaginaActual();
-
-            GuardarClick?.Invoke(
-                this,
-                EventArgs.Empty);
+            GuardarClick?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -970,67 +770,29 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             if (_imagenTrabajo is null)
                 return;
 
-            int ancho = Math.Max(
-        1,
-        (int)(_imagenTrabajo.Width * _zoom));
+            int ancho = Math.Max(1,(int)(_imagenTrabajo.Width * _zoom));
+            int alto = Math.Max( 1,(int)(_imagenTrabajo.Height * _zoom));
 
-            int alto = Math.Max(
-        1,
-        (int)(_imagenTrabajo.Height * _zoom));
-
-            var preview = new Bitmap(
-        _imagenTrabajo,
-        ancho,
-        alto);
-
+            var preview = new Bitmap(_imagenTrabajo,ancho, alto);
             Image? anterior = pbDocumento.Image;
-
             pbDocumento.Image = preview;
-
             anterior?.Dispose();
 
-            pbDocumento.SizeMode =
-                PictureBoxSizeMode.AutoSize;
-
+            pbDocumento.SizeMode = PictureBoxSizeMode.AutoSize;
             pbDocumento.Invalidate();
         }
 
-        
 
 
-        private void ibZoomMenos_Click(
-    object sender,
-    EventArgs e) {
-            _zoom = Math.Max(
-                ZoomMinimo,
-                _zoom - PasoZoom);
 
+        private void ibZoomMenos_Click(object sender, EventArgs e) {
+            _zoom = Math.Max(ZoomMinimo, _zoom - PasoZoom);
             AplicarZoom();
-
-            lblEstadoScanner.Text =
-                $"Zoom {(int)(_zoom * 100)}%";
+            lblEstadoScanner.Text = $"Zoom {(int)(_zoom * 100)}%";
         }
 
+        private void ibGuardar_Click_1(object sender, EventArgs e) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        }
     }
-
-
-
 }

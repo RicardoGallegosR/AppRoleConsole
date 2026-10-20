@@ -129,10 +129,10 @@
             // 
             // msApagar
             // 
-            msApagar.Enabled = false;
             msApagar.Name = "msApagar";
             msApagar.Size = new Size(85, 29);
             msApagar.Text = "Apagar";
+            msApagar.Click += msApagar_Click;
             // 
             // Home
             // 
@@ -141,6 +141,7 @@
             AutoSize = true;
             BackColor = Color.Crimson;
             ClientSize = new Size(800, 450);
+            ControlBox = false;
             Controls.Add(pnlPrincipal);
             ForeColor = Color.White;
             Icon = (Icon)resources.GetObject("$this.Icon");

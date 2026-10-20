@@ -23,7 +23,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public event EventHandler<CrearVerificacionEventArgs>? CrearVerificacion;
         public AppRoleSqlExecutor _sqlExecutor;
         public event EventHandler<ConsultaFotocivicasDto>? FotocivicasConsultadas;
-        public event EventHandler<FisicoMecanicaDto>? FisicoMecanicaConsultada;
+        public event Action<FisicoMecanicaDto>? FisicoMecanicaConsultada;
+        public event Action<CitasDto>? CitasConsultada;
         public Guid _estacionId { get; set; }
         public Guid _accesoId { get; set; }
         public Guid _bitacoraVisitaId { get; set; }
@@ -49,8 +50,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             set => lblStatusFotocivicas.Text = value;
         }
         public bool PET => cbPET.Checked;
+        
         public int? MotivoAccesoId {
             get => cbMotivoAcceso.SelectedValue is int id ? id : null;
+            set => cbMotivoAcceso.SelectedValue = value;
+        }
+
+        public byte? byMotivoAccesoId {
+            get => cbMotivoAcceso.SelectedValue is byte id ? id : null;
             set => cbMotivoAcceso.SelectedValue = value;
         }
 
@@ -133,46 +140,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     Mostrar.Mensaje("Error", "No fue posible interpretar la respuesta del servicio de citas.");
                     return;
                 }
+                CitasConsultada?.Invoke(datosCitas);
 
-                try {
-                    await _sqlExecutor.EjecutarAsync(async connApp => {
-                        var repo = new SivevRepository();
-                        var r = await repo.SpAppBitacoraCitasSWSet(cnn: connApp, estacionId: _estacionId, accesoId: _accesoId, bitacoraVisitaId: _bitacoraVisitaId, citas:datosCitas);
-                        if (r.MensajeId != 0) {
-                            var error = await repo.MensajeIdSQL(connApp, $"Error en SpAppBitacoraCitasSWSet {r.MensajeId}", r.MensajeId);
-                            Mostrar.Mensaje("Error al consultar el servicio de citas", error.Mensaje);
-                            return;
-                        }
-                    });
-                } catch (Exception ex) {
-                    Mostrar.Mensaje("Error al consultar el servicio de citas", ex.Message);
-                    SivevLogger.Error($"SpAppBitacoraCitasSWSet: {ex}", SivevOrigen.Captura);
-                }
-
-                // =========================================================
-                // 2. VALIDAR RESPUESTA DE CITAS
-                // =========================================================
-                switch (datosCitas.codigoRespuesta) {
-                    // CASOS QUE NO PUEDEN CONTINUAR
-                    case "V03":
-                    case "V05":
-                        Mostrar.Mensaje("Acceso rechazado", $"Centro: {datosCitas.centro}\nFecha: {datosCitas.fechaCita} {datosCitas.horaCita}\n\n{datosCitas.mensaje}");
-                        StatusCaptura(true);
-                        return;
-
-
-                    // CASOS QUE SÍ PUEDEN CONTINUAR
-                    case "V06":
-                    case "S01":
-                        break;
-
-
-                    // RESPUESTA NO CONTEMPLADA
-                    default:
-                        SivevLogger.Warning($"Respuesta de citas no reconocida:\n{datosCitas.codigoRespuesta}\n\n{datosCitas.mensaje}", SivevOrigen.Captura);
-                        Mostrar.Mensaje("Advertencia", $"Respuesta de citas no reconocida:\n{datosCitas.codigoRespuesta}\n\n{datosCitas.mensaje}");
-                        return;
-                }
 
 
                 // =========================================================
@@ -250,12 +219,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 var datosFM = JsonSerializer.Deserialize<FisicoMecanicaDto>(FM, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 lblStatusFM.Text = datosFM?.documentalAprobada == true ? $"Origen: {datosFM.origen}\nPlaca: {datosFM.placa}\n{datosFM.mensaje}" : $"origen: {datosFM.origen}\nPlaca: {datosFM.placa}\n{datosFM.mensaje}";
 
-                if (datosFM?.documentalAprobada == false){
-                    StatusCaptura(true);
-                } else {
-                    FisicoMecanicaConsultada?.Invoke(this, datosFM);
-                }
-
+                // Invocar el evento para notificar que se ha consultado FisicoMecanica
+                FisicoMecanicaConsultada?.Invoke(datosFM);
             } else {
                 panelFisicoMecanica();
             }
@@ -265,18 +230,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             pnlFM.Visible = flags;
             pnlFM.Enabled = flags;
         }
-
-        private void ckPET(bool flags = false) {
-            cbPET.Visible = flags;
-            cbPET.Enabled = flags;
-        }
-
         
-        #region Cancelar prueba de verificación
-        private void StatusCaptura(bool status) {
-            Captura = status;
-            CapturaCancelada?.Invoke(status);
-        }
-        #endregion
     }
 }

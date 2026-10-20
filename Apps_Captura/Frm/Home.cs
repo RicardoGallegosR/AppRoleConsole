@@ -38,6 +38,7 @@ namespace Apps_Captura.Frm {
         private readonly System.Windows.Forms.Timer _tmrInactividad = new();
         private string _vistaActiva = "Home";
         private static readonly TimeSpan _tiempoInactividad =  TimeSpan.FromMinutes(5);
+        private bool _cerrandoAplicacion = false;
 
         private readonly SivevConnectionFactory _sql;
         private readonly AplicacionLifecycleService _cicloVida;
@@ -144,7 +145,7 @@ namespace Apps_Captura.Frm {
             };
             #endregion
 
-            
+
         }
         #region bloqueo de pantalla por inactividad
         private void ConfigurarInactividad() {
@@ -227,7 +228,7 @@ namespace Apps_Captura.Frm {
             } catch (Exception ex) {
                 SivevLogger.Error($"Error al iniciar captura: {ex}", SivevOrigen.Captura);
                 Mostrar.Mensaje("Error", $"No fue posible iniciar la captura.\n{ex.Message}");
-            }             
+            }
         }
         private async Task<Guid> IniciaCaptura() {
             _capturaRegistroWindows.dvar21 = 0;
@@ -267,23 +268,38 @@ namespace Apps_Captura.Frm {
             string rutaBase = ObtenerRutaBaseEscaneo();
 
             _barraLateral.MostrarVista("RegistroVehicular", "RegistroVehicular", () => {
-                 _registroVehicular  = new ucRegistroVehicular(
-                    sql: _sql,
-                    roll: _capturaRegistroWindows.dvar17,
-                    passRoll: _capturaRegistroWindows.dvar16.ToString().ToUpper(),
-                    opcionMenu: _capturaRegistroWindows.dvar8,
-                    estacionId: _capturaRegistroWindows.dvar15,
-                    accesoId: _capturaRegistroWindows.dvar22,
-                    centro: _capturaRegistroWindows.dvar12,
-                    ruta: rutaBase,
-                    verificentroApiConfig: _verificentroApiConfig,
-                    centroDomain: _capturaRegistroWindows.dvar18.ToUpper()
-                );
+                _registroVehicular = new ucRegistroVehicular(
+                   sql: _sql,
+                   roll: _capturaRegistroWindows.dvar17,
+                   passRoll: _capturaRegistroWindows.dvar16.ToString().ToUpper(),
+                   opcionMenu: _capturaRegistroWindows.dvar8,
+                   estacionId: _capturaRegistroWindows.dvar15,
+                   accesoId: _capturaRegistroWindows.dvar22,
+                   centro: _capturaRegistroWindows.dvar12,
+                   ruta: rutaBase,
+                   verificentroApiConfig: _verificentroApiConfig,
+                   centroDomain: _capturaRegistroWindows.dvar18.ToUpper()
+               );
                 _registroVehicular.CancelacionSolicitada += async () => {
                     await CancelarCapturaAsync();
                 };
+                _registroVehicular.CapturaFinalizada += FinalizarCaptura;
+
                 return _registroVehicular;
             });
+        }
+        private void FinalizarCaptura() {
+            _barraLateral.Limpiar();
+
+            _registroVehicular = null;
+            _capturaRegistroWindows.dvar21 = 0;
+            _capturaRegistroWindows.dvar22 = Guid.Empty;
+            HabilitarPestañas(true);
+            _barraLateral.MostrarVista("Home", "Home", () => new Views.Home(), mostrarEnMenu: false);
+
+            _vistaActiva = "Home";
+            _ultimaActividad = DateTime.Now;
+            msCaptura.Enabled = true;
         }
 
         private string ObtenerRutaBaseEscaneo() {
@@ -292,7 +308,7 @@ namespace Apps_Captura.Frm {
             //string? rutaConfigurada = _capturaRegistroWindows.dvar20?.Trim();
             string? rutaConfigurada = rutaLocal;
 
-            if (!string.IsNullOrWhiteSpace(rutaConfigurada) &&  RutaDisponibleParaEscritura(rutaConfigurada)) {
+            if (!string.IsNullOrWhiteSpace(rutaConfigurada) && RutaDisponibleParaEscritura(rutaConfigurada)) {
                 return rutaConfigurada;
             }
 
@@ -379,7 +395,7 @@ namespace Apps_Captura.Frm {
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        public void HabilitarPestañas(bool flag= false) {
+        public void HabilitarPestañas(bool flag = false) {
             msCaptura.Enabled = flag;
         }
 
@@ -430,6 +446,39 @@ namespace Apps_Captura.Frm {
             }
         }
 
+
+
+        #endregion
+
+        #region Apagar aplicación
+        private async void msApagar_Click(object sender, EventArgs e) {
+            var result = MessageBox.Show(
+                "¿Desea apagar la aplicación?",
+                "Confirmar salida",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2
+            );
+
+            if (result == DialogResult.Yes)
+                await CerrarAplicacionAsync(apagarEquipo: true);
+        }
+        private async Task CerrarAplicacionAsync(bool apagarEquipo = false) {
+            if (_cerrandoAplicacion) return;
+            _cerrandoAplicacion = true;
+            try {
+                if (!_cerrando) {
+                    await _cicloVida.FinalizarAsync();
+                    _cerrando = true;
+                }
+            } catch (Exception ex) {
+                SivevLogger.Error($"Error al finalizar bitácora: {ex.Message}");
+            }
+            if (apagarEquipo)
+                Process.Start("shutdown", "/s /t 0");
+            else
+                Application.Exit();
+        }
         #endregion
     }
 }

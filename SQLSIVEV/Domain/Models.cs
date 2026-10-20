@@ -196,6 +196,14 @@
     }
     #endregion
 
+    #region Obtener linea captura
+    public sealed class LineaCapturaDto {
+        public Guid EstacionPruebaId { get; init; }
+        public byte Linea { get; init; }
+        public bool BFM { get; init; }
+    }
+    #endregion
+
 
     #region Escaneres 
     public sealed class ScannerDeviceDto {

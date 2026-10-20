@@ -153,6 +153,7 @@ namespace FrmComun.CapturaCentralizada {
             ucAccesoConsulta1._bitacoraVisitaId = new Guid("00000000-0000-0000-0000-000000000000");
             ucAccesoConsulta1._estacionId = new Guid("00000000-0000-0000-0000-000000000000");
             ucAccesoConsulta1.Ambientales = "STATUS AMBIENTALES";
+            ucAccesoConsulta1.byMotivoAccesoId = null;
             ucAccesoConsulta1.Dock = DockStyle.Fill;
             ucAccesoConsulta1.Fotocivicas = "STATUS FOTOCIIVCAS";
             ucAccesoConsulta1.Location = new Point(10, 30);
@@ -465,13 +466,15 @@ namespace FrmComun.CapturaCentralizada {
             // 
             txtLinea.BorderStyle = BorderStyle.FixedSingle;
             txtLinea.Dock = DockStyle.Fill;
-            txtLinea.Font = new Font("Segoe UI", 28F);
+            txtLinea.Font = new Font("Segoe UI Semibold", 27.75F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             txtLinea.Location = new Point(165, 16);
             txtLinea.Margin = new Padding(0, 16, 0, 16);
             txtLinea.Name = "txtLinea";
+            txtLinea.ReadOnly = true;
             txtLinea.Size = new Size(165, 57);
             txtLinea.TabIndex = 0;
             txtLinea.TabStop = false;
+            txtLinea.TextAlign = HorizontalAlignment.Center;
             // 
             // lblLinea
             // 
