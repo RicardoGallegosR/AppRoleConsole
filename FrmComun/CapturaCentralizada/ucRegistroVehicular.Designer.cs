@@ -302,10 +302,10 @@ namespace FrmComun.CapturaCentralizada {
             // tpDocumentosAdicionales
             // 
             tpDocumentosAdicionales.Controls.Add(tlpFila3);
-            tpDocumentosAdicionales.Location = new Point(4, 24);
+            tpDocumentosAdicionales.Location = new Point(4, 34);
             tpDocumentosAdicionales.Name = "tpDocumentosAdicionales";
             tpDocumentosAdicionales.Padding = new Padding(3);
-            tpDocumentosAdicionales.Size = new Size(192, 72);
+            tpDocumentosAdicionales.Size = new Size(1001, 568);
             tpDocumentosAdicionales.TabIndex = 2;
             tpDocumentosAdicionales.Text = "Documentos Adicionales";
             tpDocumentosAdicionales.UseVisualStyleBackColor = true;
@@ -313,8 +313,8 @@ namespace FrmComun.CapturaCentralizada {
             // tlpFila3
             // 
             tlpFila3.ColumnCount = 2;
-            tlpFila3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55.9799F));
-            tlpFila3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44.0201F));
+            tlpFila3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            tlpFila3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
             tlpFila3.Controls.Add(gbEscaneoDocumentos, 1, 0);
             tlpFila3.Controls.Add(gbDocumentosAdicionales, 0, 0);
             tlpFila3.Dock = DockStyle.Fill;
@@ -322,7 +322,7 @@ namespace FrmComun.CapturaCentralizada {
             tlpFila3.Name = "tlpFila3";
             tlpFila3.RowCount = 1;
             tlpFila3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpFila3.Size = new Size(186, 66);
+            tlpFila3.Size = new Size(995, 562);
             tlpFila3.TabIndex = 3;
             // 
             // gbEscaneoDocumentos
@@ -332,11 +332,11 @@ namespace FrmComun.CapturaCentralizada {
             gbEscaneoDocumentos.Dock = DockStyle.Fill;
             gbEscaneoDocumentos.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbEscaneoDocumentos.ForeColor = Color.Crimson;
-            gbEscaneoDocumentos.Location = new Point(109, 5);
+            gbEscaneoDocumentos.Location = new Point(452, 5);
             gbEscaneoDocumentos.Margin = new Padding(5);
             gbEscaneoDocumentos.Name = "gbEscaneoDocumentos";
             gbEscaneoDocumentos.Padding = new Padding(10);
-            gbEscaneoDocumentos.Size = new Size(72, 56);
+            gbEscaneoDocumentos.Size = new Size(538, 552);
             gbEscaneoDocumentos.TabIndex = 2;
             gbEscaneoDocumentos.TabStop = false;
             gbEscaneoDocumentos.Text = "ESCANEO DE DOCUMENTOS";
@@ -347,7 +347,7 @@ namespace FrmComun.CapturaCentralizada {
             ucEscaneoDocumentos1.Location = new Point(10, 30);
             ucEscaneoDocumentos1.Name = "ucEscaneoDocumentos1";
             ucEscaneoDocumentos1.RutaBase = "";
-            ucEscaneoDocumentos1.Size = new Size(52, 16);
+            ucEscaneoDocumentos1.Size = new Size(518, 512);
             ucEscaneoDocumentos1.TabIndex = 0;
             ucEscaneoDocumentos1.VerificacionId = null;
             // 
@@ -362,7 +362,7 @@ namespace FrmComun.CapturaCentralizada {
             gbDocumentosAdicionales.Margin = new Padding(5);
             gbDocumentosAdicionales.Name = "gbDocumentosAdicionales";
             gbDocumentosAdicionales.Padding = new Padding(10);
-            gbDocumentosAdicionales.Size = new Size(94, 56);
+            gbDocumentosAdicionales.Size = new Size(437, 552);
             gbDocumentosAdicionales.TabIndex = 1;
             gbDocumentosAdicionales.TabStop = false;
             gbDocumentosAdicionales.Text = "DOCUMENTOS ADICIONALES (EXPEDIENTE)";
@@ -372,7 +372,7 @@ namespace FrmComun.CapturaCentralizada {
             ucDocumentosAdicionales1.Dock = DockStyle.Fill;
             ucDocumentosAdicionales1.Location = new Point(10, 30);
             ucDocumentosAdicionales1.Name = "ucDocumentosAdicionales1";
-            ucDocumentosAdicionales1.Size = new Size(74, 16);
+            ucDocumentosAdicionales1.Size = new Size(417, 512);
             ucDocumentosAdicionales1.TabIndex = 0;
             // 
             // pnlHeader

@@ -4,6 +4,7 @@ using FrmComun.Utils;
 using SQLSIVEV.Comun.Configuracion;
 using SQLSIVEV.Comun.Servicios;
 using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Config.Estaciones;
 using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql;
 using SQLSIVEV.Infrastructure.Sql.Vicente;
@@ -26,6 +27,7 @@ namespace FrmComun.CapturaCentralizada {
         private readonly CatalogosCaptura _catalogos;
         private readonly AppRoleSqlExecutor _sqlExecutor;
         private Guid _verificacionId;
+        private readonly string  _version;
         private Guid _empresaPersonaId;
         private Guid _BiatacoraVisitaId;
         private Guid _verificacionAnteriorId;
@@ -39,6 +41,7 @@ namespace FrmComun.CapturaCentralizada {
         public bool Captura { get; private set; } = false;
         private FisicoMecanicaDto? _datosFisicoMecanica;
         private CitasDto? _datosCitas;
+        private int _estacionIp;
 
 
         private void UcAccesoConsulta_FotocivicasConsultadas(object? sender, ConsultaFotocivicasDto datos) {
@@ -47,7 +50,7 @@ namespace FrmComun.CapturaCentralizada {
 
         #endregion
         #region Constructor
-        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, Guid accesoId, short centro, string ruta, VerificentroApiConfig verificentroApiConfig, string centroDomain) {
+        public ucRegistroVehicular(SivevConnectionFactory sql, string roll, string passRoll, short opcionMenu, Guid estacionId, Guid accesoId, short centro, string ruta, VerificentroApiConfig verificentroApiConfig, string centroDomain, string version, int estacionIp) {
             _sql = sql ?? throw new ArgumentNullException(nameof(sql));
             _roll = roll ?? throw new ArgumentNullException(nameof(roll));
             _passRoll = (passRoll ?? throw new ArgumentNullException(nameof(passRoll))).ToUpperInvariant();
@@ -62,8 +65,8 @@ namespace FrmComun.CapturaCentralizada {
             }
             _rutaDocumentos = ruta;
             _verificentroApiConfig = verificentroApiConfig;
-
-
+            _version = version;
+            _estacionIp = estacionIp;
 
             InitializeComponent();
 
@@ -630,7 +633,16 @@ namespace FrmComun.CapturaCentralizada {
             try {
                 ucEscaneoDocumentos1.VerificacionId = _verificacionId;
                 ucEscaneoDocumentos1.RutaBase = _rutaDocumentos;
-                string ruta = ucEscaneoDocumentos1.GuardarPdf();
+                ucEscaneoDocumentos1._placa = txtPlaca.Text.Trim();
+                ucEscaneoDocumentos1._Version = _version;
+                ucEscaneoDocumentos1._Verificentro = _CentroDomain;
+                ucEscaneoDocumentos1._EstacionIp = _estacionIp;
+                ucEscaneoDocumentos1.consultaFotocivicas = _datosFotocivicas;
+                ucEscaneoDocumentos1.consultaCitas = _datosCitas;
+
+
+
+        string ruta = ucEscaneoDocumentos1.GuardarPdf();
 
                 var repo = new SivevRepository();
 

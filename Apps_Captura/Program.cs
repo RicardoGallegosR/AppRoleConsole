@@ -1,3 +1,5 @@
+using PdfSharp.Fonts;
+
 namespace Apps_Captura {
     internal static class Program {
         /// <summary>
@@ -7,6 +9,8 @@ namespace Apps_Captura {
         static void Main() {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+
             ApplicationConfiguration.Initialize();
             Application.Run(new Frm.Home());
         }

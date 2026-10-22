@@ -1,16 +1,17 @@
-﻿using FrmComun.Utils;
-using SQLSIVEV.Domain.Models;
-using SQLSIVEV.Infrastructure.Utils;
-using WIA;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-
-
+﻿using DocumentFormat.OpenXml.Bibliography;
+using FrmComun.Utils;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
-using PdfSharp;
+using SQLSIVEV.Domain.Models;
+using SQLSIVEV.Infrastructure.Config.Estaciones;
+using SQLSIVEV.Infrastructure.Utils;
 using System.Drawing.Imaging;
-
-
+using WIA;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Net;
+using System.Net.Sockets;
+using PdfSharp.Fonts;
 /*
  MEJORAR LA VELOCIDAD DE SCANNER CON TWAIN 
  
@@ -31,6 +32,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private bool _modoRecorte;
         private Bitmap? _imagenEscaneadaOriginal;
         private Bitmap? _imagenTrabajo;
+        public string _placa ;
+        private string _autor = "RICARDO GALLEGOS RODRIGUEZ";
+        public string _Version;
+        public string _Verificentro;
         private sealed class PaginaEscaneada {
             public byte[] Original { get; set; } = Array.Empty<byte>();
             public byte[] Actual { get; set; } = Array.Empty<byte>();
@@ -42,12 +47,12 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private float _zoomVista = 0.35f;
         private float _zoom = 0.50f;
 
-        private const float ZoomMinimo = 0.25f;
+        private const float ZoomMinimo = 0.1f;
         private const float ZoomMaximo = 2.00f;
-        private const float PasoZoom = 0.25f;
-
-
-
+        private const float PasoZoom = 0.1f;
+        public int _EstacionIp;
+        public ConsultaFotocivicasDto? consultaFotocivicas;
+        public CitasDto? consultaCitas;
         public ucEscaneoDocumentos() {
             InitializeComponent();
 
@@ -73,10 +78,36 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             ibZoomMas.Click += ibZoomMas_Click;
             ibZoomMenos.Click += ibZoomMenos_Click;
+            pbDocumento.MouseWheel += pbDocumento_MouseWheel;
+            pbDocumento.MouseEnter += (s, e) => {
+                pbDocumento.Focus();
+            };
 
+            userControlBotones(
+                bScanners: true,
+                bActualizar: true,
+                bEscanear: true,
+                bRecortar: false,
+                bAgregar: false,
+                bEliminar: false,
+                bAceptar: false,
+                bCancelar: false,
+                bZoomMas: false,
+                bZoomMenos: false,
+                bGuardar: false
+            );
         }
 
+        private void pbDocumento_MouseWheel(object? sender, MouseEventArgs e) {
+            if ((ModifierKeys & Keys.Control) != Keys.Control)
+                return;
 
+            if (e.Delta > 0) {
+                ibZoomMas.PerformClick();
+            } else if (e.Delta < 0) {
+                ibZoomMenos.PerformClick();
+            }
+        }
         private void ibZoomMas_Click(object sender, EventArgs e) {
             _zoom = Math.Min(ZoomMaximo, _zoom + PasoZoom);
             AplicarZoom();
@@ -280,6 +311,20 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             return Math.Min(1f, Math.Min(zoomX, zoomY));
         }
         private void ibRecortar_Click(object? sender, EventArgs e) {
+            userControlBotones(
+                    bScanners: false,
+                    bActualizar: false,
+                    bEscanear: false,
+
+                    bRecortar: false,
+                    bAgregar: false,
+                    bEliminar: false,
+                    bAceptar: true,
+                    bCancelar: true,
+                    bZoomMas: false,
+                    bZoomMenos: false,
+                    bGuardar: false
+                );
             if (_imagenTrabajo is null || pbDocumento.Image is null) {
                 Mostrar.Mensaje("Recortar", "Primero debe escanear un documento.");
                 return;
@@ -318,6 +363,24 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             try {
                 //Mostrar.Mensaje("Informacion", "Se procedera a realizar un escaner en cuanto cierre esta ventana,\npuede tomar algunos segundos sea pasiente.");
                 lblEstadoScanner.Text = "Escaneando...";
+                userControlBotones(
+                    bScanners: false,
+                    bActualizar: false,
+                    bEscanear: false,
+
+                    bRecortar: true,
+                    bAgregar: true,
+                    bEliminar: true,
+                    bAceptar: false,
+                    bCancelar: false,
+                    bZoomMas: true,
+                    bZoomMenos: true,
+                    bGuardar: true
+                );
+
+
+
+
                 Cursor = Cursors.WaitCursor;
                 await Task.Yield();
                 BotonesHabilitados();
@@ -330,11 +393,44 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 //MostrarPreview(_paginaEscaneada);
                 lblEstadoScanner.Text = "Documento escaneado";
             } catch (Exception ex) {
-                Mostrar.Mensaje("Error al escanear", ex.Message);
+                lblEstadoScanner.Text = "Error al escanear intente nuevamente o cambie de escáner";
                 SivevLogger.Warning($"Error al escanear\n{ex.Message}", SivevOrigen.Captura);
+                Mostrar.Mensaje("Error al escanear", ex.Message);
             } finally {
+                if (_paginas.Count == 0) {
+                    userControlBotones(
+                        bScanners: true,
+                        bActualizar: true,
+                        bEscanear: true,
+
+                        bRecortar: false,
+                        bAgregar: false,
+                        bEliminar: false,
+                        bAceptar: false,
+                        bCancelar: false,
+                        bZoomMas: false,
+                        bZoomMenos: false,
+                        bGuardar: false
+                    );
+                } else {
+                    userControlBotones(
+                        bScanners: false,
+                        bActualizar: false,
+                        bEscanear: false,
+
+                        bRecortar: true,
+                        bAgregar: true,
+                        bEliminar: true,
+                        bAceptar: false,
+                        bCancelar: false,
+                        bZoomMas: true,
+                        bZoomMenos: true,
+                        bGuardar: true
+                    );
+                }
                 BotonesHabilitados(true);
                 Cursor = Cursors.Default;
+
             }
         }
 
@@ -345,11 +441,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             ibActualizar.Enabled = flag;
             ibRecortar.Enabled = flag;
             ibAgregar.Enabled = flag;
-
+            ibZoomMas.Enabled = flag;
+            ibZoomMenos.Enabled = flag;
             ibEliminar.Enabled = flag;
             ibGuardar.Enabled = flag;
-
-
             cbScanners.Enabled = flag;
         }
         private static void EstablecerPropiedadWia(WIA.Properties propiedades, int id, object valor) {
@@ -440,6 +535,20 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             lblEstadoScanner.Text = "Documento original";
         }
         private void ibAceptar_Click(object sender, EventArgs e) {
+            userControlBotones(
+                    bScanners: false,
+                    bActualizar: false,
+                    bEscanear: false,
+
+                    bRecortar: true,
+                    bAgregar: true,
+                    bEliminar: true,
+                    bAceptar: false,
+                    bCancelar: false,
+                    bZoomMas: true,
+                    bZoomMenos: true,
+                    bGuardar: true
+                );
             if (_imagenTrabajo is null || _paginaActual < 0) {
                 Mostrar.Mensaje("Documento", "No existe una página para aceptar.");
                 return;
@@ -452,6 +561,20 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private void ibCancelar_Click(object sender, EventArgs e) {
+            userControlBotones(
+                    bScanners: false,
+                    bActualizar: false,
+                    bEscanear: false,
+
+                    bRecortar: true,
+                    bAgregar: true,
+                    bEliminar: true,
+                    bAceptar: false,
+                    bCancelar: false,
+                    bZoomMas: true,
+                    bZoomMenos: true,
+                    bGuardar: true
+                );
             RestaurarImagenOriginal();
         }
 
@@ -493,6 +616,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             string rutaCompleta = Path.Combine(carpeta, $"1_{VerificacionId.Value}.pdf");
 
             using var documento = new PdfDocument();
+            documento.Info.Title = $"Verificación Vehicular - Placa {_placa}";
+            documento.Info.Author = $"SEDEMA Verificentro: {_Verificentro}";
+            documento.Info.Subject = "Documento digitalizado de Verificación Vehicular";
+            documento.Info.Keywords = $"Verificación Vehicular, {_placa}, Captura Centralizada\nDiseñado por ing. {_autor}\nSupervisado por el ing. Aldo Moreno Rodríguez\nAutorizado por el Mtro. Antonio Galvan Zacarias";
+            documento.Info.Creator = $"Captura Centralizada v{_Version}";
 
             for (int i = 0; i < _paginas.Count; i++) {
                 PaginaEscaneada paginaDocumento = _paginas[i];
@@ -526,6 +654,21 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     throw new InvalidOperationException($"No fue posible procesar la página {i + 1}.\n{ex.Message}", ex);
                 }
             }
+            var seguridad = documento.SecuritySettings;
+
+            seguridad.OwnerPassword = "Randy.23";
+
+            seguridad.PermitExtractContent = false;          // No copiar contenido
+            seguridad.PermitModifyDocument = false;          // No modificar
+            seguridad.PermitAssembleDocument = false;        // No reorganizar páginas
+            seguridad.PermitPrint = true;                    // Permitir impresión
+            seguridad.PermitFullQualityPrint = true;         // Impresión en alta calidad
+
+
+
+            AgregarResumenServicios(documento, consultaFotocivicas, consultaCitas);
+            AgregarEncabezadoPie(documento, _Verificentro.ToString(), _Version, _EstacionIp.ToString(), _placa);
+
             documento.Save(rutaCompleta);
             return rutaCompleta;
         }
@@ -581,7 +724,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 Original = jpeg.ToArray(),
                 Actual = jpeg.ToArray()
             };
-
+            
             _paginas.Add(pagina);
             _paginaActual = _paginas.Count - 1;
             CargarPagina(_paginaActual);
@@ -697,7 +840,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         private void ibAgregar_Click(object? sender, EventArgs e) {
             Mostrar.Mensaje("Advertencia", "Rote o anexe el nuevo documento");
+            ibEscanear.Visible = true;
             ibEscanear.PerformClick();
+            ibEscanear.Visible = false;
         }
 
         private static MemoryStream PrepararImagenParaPdf(byte[] datos) {
@@ -727,7 +872,19 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             _paginas.RemoveAt(_paginaActual);
 
             if (_paginas.Count == 0) {
-
+                userControlBotones(
+                    bScanners: true,
+                    bActualizar: true,
+                    bEscanear: true,
+                    bRecortar: false,
+                    bAgregar: false,
+                    bEliminar: false,
+                    bAceptar: false,
+                    bCancelar: false,
+                    bZoomMas: false,
+                    bZoomMenos: false,
+                    bGuardar: false
+                );
                 _paginaActual = -1;
                 pbDocumento.Image?.Dispose();
                 pbDocumento.Image = null;
@@ -794,5 +951,652 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private void ibGuardar_Click_1(object sender, EventArgs e) {
 
         }
-    }
+    
+        private void userControlBotones(
+            bool bScanners = false,
+            bool bActualizar = false,
+            bool bEscanear = false, 
+            bool bRecortar = false, 
+            bool bAgregar = false,
+            bool bEliminar = false,
+            bool bAceptar = false,
+            bool bCancelar = false,
+            bool bZoomMas = false,
+            bool bZoomMenos = false,
+            bool bGuardar = false) {
+            
+            
+            cbScanners.Visible = bScanners;
+            ibActualizar.Visible = bActualizar;
+            ibEscanear.Visible = bEscanear;
+            ibRecortar.Visible = bRecortar;
+            ibAgregar.Visible = bAgregar;
+            ibEliminar.Visible = bEliminar;
+            ibAceptar.Visible = bAceptar;
+            ibCancelar.Visible = bCancelar;
+            ibZoomMas.Visible = bZoomMas;
+            ibZoomMenos.Visible = bZoomMenos;
+            ibGuardar.Visible = bGuardar;
+        }
+
+
+        #region Configuracion de PDF
+        private static void AgregarEncabezadoPie(PdfDocument documento, string verificentro, string version, string estacion, string placa) {
+            var fuente = new XFont("Arial", 8, XFontStyleEx.Regular);
+            var fuenteNegrita = new XFont("Arial", 8, XFontStyleEx.Bold);
+
+            const double margen = 30;
+            int totalPaginas = documento.PageCount;
+            // Fecha y hora de generación del expediente
+            DateTime fechaGeneracion = DateTime.Now;
+
+           
+
+            for (int i = 0; i < totalPaginas; i++) {
+                PdfPage pagina = documento.Pages[i];
+
+                using var gfx = XGraphics.FromPdfPage(pagina, XGraphicsPdfPageOptions.Append);
+
+                double ancho = pagina.Width.Point;
+                double alto = pagina.Height.Point;
+
+                // Encabezado izquierdo
+                gfx.DrawString(
+                    $"Verificentro: {verificentro}",
+                    fuenteNegrita,
+                    XBrushes.Black,
+                    new XRect(margen, 12, ancho / 2 - margen, 12),
+                    XStringFormats.TopLeft
+                );
+
+                gfx.DrawString(
+                    $"Captura Centralizada v{version}",
+                    fuente,
+                    XBrushes.Gray,
+                    new XRect(margen, 25, ancho / 2 - margen, 12),
+                    XStringFormats.TopLeft
+                );
+
+                // Encabezado derecho
+                gfx.DrawString(
+                    $"Placa: {placa}",
+                    fuenteNegrita,
+                    XBrushes.Black,
+                    new XRect(ancho / 2, 12, ancho / 2 - margen, 12),
+                    XStringFormats.TopRight
+                );
+
+                gfx.DrawString(
+                    $"Estación: {estacion}",
+                    fuente,
+                    XBrushes.Gray,
+                    new XRect(ancho / 2, 25, ancho / 2 - margen, 12),
+                    XStringFormats.TopRight
+                );
+
+                // Encabezado central: fecha
+                gfx.DrawString(
+                    fechaGeneracion.ToString("dd/MM/yyyy"),
+                    fuenteNegrita,
+                    XBrushes.Black,
+                    new XRect(0, 12, ancho, 12),
+                    XStringFormats.TopCenter
+                );
+
+                // Encabezado central: hora
+                gfx.DrawString(
+                    fechaGeneracion.ToString("HH:mm:ss"),
+                    fuente,
+                    XBrushes.Gray,
+                    new XRect(0, 25, ancho, 12),
+                    XStringFormats.TopCenter
+                );
+
+
+                // Línea separadora del encabezado
+                gfx.DrawLine(
+                    XPens.Crimson,
+                    margen, 43,
+                    ancho - margen, 43
+                );
+
+                // Línea separadora del pie
+                gfx.DrawLine(
+                    XPens.Crimson,
+                    margen, alto - 35,
+                    ancho - margen, alto - 35
+                );
+
+                // Numeración
+                gfx.DrawString(
+                    $"Página {i + 1} de {totalPaginas}",
+                    fuente,
+                    XBrushes.Gray,
+                    new XRect(margen, alto - 30, ancho - 2 * margen, 15),
+                    XStringFormats.Center
+                );
+            }
+        }
+        #endregion
+
+        #region Servicios de citas y finanzas
+        private static void AgregarResumenServicios(PdfDocument documento, ConsultaFotocivicasDto? fotocivicas, CitasDto? citas) {
+            ArgumentNullException.ThrowIfNull(documento);
+
+            // Fuentes
+            var titulo = new XFont("Arial", 13, XFontStyleEx.Bold);
+            var subtitulo = new XFont("Arial", 10, XFontStyleEx.Bold);
+            var normal = new XFont("Arial", 8, XFontStyleEx.Regular);
+            var negrita = new XFont("Arial", 8, XFontStyleEx.Bold);
+            var pequeno = new XFont("Arial", 7, XFontStyleEx.Regular);
+
+            // Colores
+            var negro = XBrushes.Black;
+            var gris = XBrushes.DimGray;
+            var blanco = new XSolidBrush(XColors.White);
+            var rojo = new XSolidBrush(XColor.FromArgb(170, 35, 45));
+            var verde = new XSolidBrush(XColor.FromArgb(25, 110, 65));
+            var fondo = new XSolidBrush(XColors.Crimson);
+
+
+            const double margen = 35;
+            const double inicioContenido = 78;
+            const double altoFila = 21;
+            const double altoLinea = 12;
+
+            PdfPage? pagina = null;
+            XGraphics? gfx = null;
+
+            double ancho = 0;
+            double y = 0;
+            int numeroAnexo = 0;
+
+            // Inicia una página nueva del anexo.
+            void NuevaPagina() {
+                gfx?.Dispose();
+
+                pagina = documento.AddPage();
+                pagina.Size = PdfSharp.PageSize.Letter;
+
+                gfx = XGraphics.FromPdfPage(pagina);
+
+                ancho = pagina.Width.Point;
+                y = inicioContenido;
+                numeroAnexo++;
+
+                gfx.DrawString(
+                    "ANEXO INFORMATIVO - CONSULTAS A SERVICIOS EXTERNOS",
+                    titulo,
+                    negro,
+                    new XRect(margen, y, ancho - 2 * margen, 20),
+                    XStringFormats.TopLeft
+                );
+
+                y += 24;
+
+                gfx.DrawLine(
+                    new XPen(XColors.LightGray, 0.7),
+                    margen, y, ancho - margen, y
+                );
+
+                y += 15;
+
+                if (numeroAnexo > 1) {
+                    gfx.DrawString(
+                        "Continuación del anexo informativo",
+                        pequeno,
+                        gris,
+                        new XRect(margen, y, ancho - 2 * margen, 13),
+                        XStringFormats.TopLeft
+                    );
+                    y += 19;
+                }
+            }
+
+            // Comprueba si existe espacio suficiente.
+            void AsegurarEspacio(double necesario) {
+                if (pagina is null || y + necesario > pagina.Height.Point - 65)
+                    NuevaPagina();
+            }
+
+            // Sección con fondo gris.
+            void Seccion(string texto) {
+                AsegurarEspacio(34);
+
+                gfx!.DrawRectangle(
+                    fondo,
+                    margen, y,
+                    ancho - 2 * margen, 25
+                );
+
+                gfx.DrawString(
+                    texto,
+                    subtitulo,
+                    blanco,
+                    new XRect(margen + 9, y + 5, ancho - 2 * margen - 18, 16),
+                    XStringFormats.TopLeft
+                );
+
+                y += 34;
+            }
+
+            // Fila de información con dos columnas.
+            void Fila(string concepto, string valor, bool destacar = false, bool negativo = false) {
+                
+                AsegurarEspacio(altoFila);
+                var fuenteValor = destacar ? negrita : normal;
+
+                XBrush colorValor = negativo ? rojo : destacar ? verde : negro;
+
+                gfx!.DrawString(
+                    concepto,
+                    normal,
+                    negro,
+                    new XRect(margen + 5, y + 4, 280, 14),
+                    XStringFormats.TopLeft
+                );
+
+                gfx.DrawString(
+                    valor,
+                    fuenteValor,
+                    colorValor,
+                    new XRect(
+                        margen + 290,
+                        y + 4,
+                        ancho - 2 * margen - 295,
+                        14
+                    ),
+                    XStringFormats.TopRight
+                );
+
+                gfx.DrawLine(
+                    new XPen(XColors.WhiteSmoke, 0.35),
+                    margen, y + altoFila,
+                    ancho - margen, y + altoFila
+                );
+
+                y += altoFila;
+            }
+
+            // Texto que se ajusta al ancho disponible.
+            void TextoAjustado(string texto, XBrush? color = null) {
+                if (string.IsNullOrWhiteSpace(texto))
+                    return;
+
+                double anchoDisponible = ancho - 2 * margen - 12;
+
+                // Normalizar espacios, conservando separadores de párrafo.
+                texto = texto.Replace("|", "\n")
+                             .Replace("\r\n", "\n")
+                             .Replace("\r", "\n");
+
+                foreach (string parrafo in texto.Split('\n')) {
+                    if (string.IsNullOrWhiteSpace(parrafo))
+                        continue;
+
+                    string linea = "";
+
+                    foreach (string palabraOriginal in parrafo.Split(
+                        ' ', StringSplitOptions.RemoveEmptyEntries)) {
+                        string palabra = palabraOriginal;
+
+                        // Divide palabras excepcionalmente largas.
+                        while (gfx!.MeasureString(palabra, pequeno).Width
+                               > anchoDisponible) {
+                            if (!string.IsNullOrEmpty(linea)) {
+                                DibujarLinea(linea);
+                                linea = "";
+                            }
+
+                            int longitud = palabra.Length;
+
+                            while (longitud > 1 &&
+                                   gfx.MeasureString(
+                                       palabra[..longitud], pequeno).Width
+                                   > anchoDisponible) {
+                                longitud--;
+                            }
+
+                            DibujarLinea(palabra[..longitud]);
+                            palabra = palabra[longitud..];
+                        }
+
+                        string candidato = string.IsNullOrEmpty(linea) ? palabra : $"{linea} {palabra}";
+
+                        if (gfx.MeasureString(candidato, pequeno).Width > anchoDisponible) {
+                            if (!string.IsNullOrEmpty(linea))
+                                DibujarLinea(linea);
+                            linea = palabra;
+                        } else {
+                            linea = candidato;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(linea))
+                        DibujarLinea(linea);
+
+                    y += 3;
+                }
+
+                void DibujarLinea(string lineaTexto) {
+                    AsegurarEspacio(altoLinea);
+
+                    gfx!.DrawString(
+                        lineaTexto,
+                        pequeno,
+                        color ?? gris,
+                        new XRect(margen + 6, y, anchoDisponible, altoLinea),
+                        XStringFormats.TopLeft
+                    );
+
+                    y += altoLinea;
+                }
+            }
+
+            static string SiNo(bool valor) => valor ? "Sí" : "No";
+
+            // --------------------------------------------------------
+            // INICIO DEL ANEXO
+            // --------------------------------------------------------
+
+            NuevaPagina();
+
+            // Datos generales
+            string placa = fotocivicas?.Placa ?? citas?.placa ?? "No disponible";
+
+            Fila("Placa consultada", placa);
+            Fila("Fecha de generación", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+
+            y += 12;
+
+            // --------------------------------------------------------
+            // 1. ADEUDOS Y FOTOCÍVICAS
+            // --------------------------------------------------------
+
+            Seccion("1. CONSULTA DE ADEUDOS Y FOTOCÍVICAS");
+
+            if (fotocivicas is null) {
+                TextoAjustado("No se dispone de información del servicio de adeudos y fotocívicas.", rojo);
+            } else {
+                // ConexionWebSrv es un estado definido por tu sistema.
+                // No se interpreta aquí porque desconocemos su catálogo.
+
+                Fila(
+                    "Resultado del servicio",
+                    fotocivicas.Verifica ? "Puede verificar" : "No puede verificar",
+                    destacar: fotocivicas.Verifica,
+                    negativo: !fotocivicas.Verifica
+                );
+
+                Fila(
+                    "Adeudos de tenencia",
+                    SiNo(fotocivicas.AdeudoTenencia),
+                    negativo: fotocivicas.AdeudoTenencia
+                );
+
+                Fila(
+                    "Infracciones económicas",
+                    SiNo(fotocivicas.AdeudoInfraccion),
+                    negativo: fotocivicas.AdeudoInfraccion
+                );
+
+                Fila(
+                    "Sanciones",
+                    SiNo(fotocivicas.AdeudoSancion),
+                    negativo: fotocivicas.AdeudoSancion
+                );
+
+                Fila(
+                    "Servicio de taxi",
+                    SiNo(fotocivicas.Taxi)
+                );
+
+                y += 10;
+
+                // Tenencias
+                Seccion("TENENCIAS");
+
+                if (fotocivicas.Tenencias.Count > 0) {
+                    TextoAjustado($"Ejercicios reportados: {string.Join(", ", fotocivicas.Tenencias)}");
+                } else {
+                    TextoAjustado(fotocivicas.AdeudoTenencia ? "Se reporta adeudo, sin ejercicios detallados." : "No se reportaron ejercicios pendientes." );
+                }
+
+                if (!string.IsNullOrWhiteSpace(fotocivicas.MensajeTenencia)) {
+                    y += 5;
+                    TextoAjustado(fotocivicas.MensajeTenencia);
+                }
+                y += 10;
+
+                // Fotocívicas
+                Seccion("FOTOCÍVICAS");
+
+                if (fotocivicas.Fotocivicas is { } fc) {
+                    Fila("Puntos reportados", fc.Puntos.ToString());
+
+                    Fila(
+                        "Adeudo de fotocívicas",
+                        SiNo(fc.TieneAdeudo),
+                        negativo: fc.TieneAdeudo
+                    );
+
+                    Fila(
+                        "Amonestaciones pendientes",
+                        SiNo(fc.DebeAmonestaciones),
+                        negativo: fc.DebeAmonestaciones
+                    );
+
+                    Fila(
+                        "Actividades presenciales",
+                        SiNo(fc.DebePresencial),
+                        negativo: fc.DebePresencial
+                    );
+
+                    Fila(
+                        "Actividades en línea",
+                        SiNo(fc.DebeEnLinea),
+                        negativo: fc.DebeEnLinea
+                    );
+                } else {
+                    TextoAjustado(
+                        "No se recibieron detalles de fotocívicas."
+                    );
+                }
+
+                y += 10;
+
+                // ----------------------------------------------------
+                // INFRACCIONES ECONÓMICAS
+                // ----------------------------------------------------
+
+                Seccion("INFRACCIONES ECONÓMICAS");
+
+                if (fotocivicas.Economicas.Count == 0) {
+                    TextoAjustado(
+                        fotocivicas.AdeudoInfraccion ? "Se reportan infracciones, sin folios detallados." : "No se reportaron infracciones económicas.");
+                } else {
+                    // Encabezado de la tabla.
+                    void EncabezadoInfracciones() {
+                        AsegurarEspacio(25);
+                        gfx!.DrawRectangle(fondo, margen, y, ancho - 2 * margen, 22);
+
+                        gfx.DrawString(
+                            "Folio", negrita, negro,
+                            new XRect(margen + 6, y + 5, 190, 13),
+                            XStringFormats.TopLeft
+                        );
+
+                        gfx.DrawString(
+                            "Fecha", negrita, negro,
+                            new XRect(margen + 205, y + 5, 105, 13),
+                            XStringFormats.TopLeft
+                        );
+
+                        gfx.DrawString(
+                            "Estado", negrita, negro,
+                            new XRect(margen + 320, y + 5, ancho - 2 * margen - 326, 13),
+                            XStringFormats.TopRight
+                        );
+
+                        y += 22;
+                    }
+
+                    EncabezadoInfracciones();
+
+                    foreach (var infraccion in fotocivicas.Economicas) {
+                        if (pagina is null ||
+                            y + altoFila > pagina.Height.Point - 65) {
+                            NuevaPagina();
+                            EncabezadoInfracciones();
+                        }
+
+                        string estado = infraccion.Status?.Trim() ?? "Sin información";
+
+                        // Mostrar el folio sin truncarlo silenciosamente.
+                        string folio = infraccion.Folio?.Trim() ?? "Sin folio";
+
+                        if (gfx!.MeasureString(folio, pequeno).Width > 190) {
+                            folio = "Folio extenso: ver registro original";
+                        }
+
+                        gfx.DrawString(
+                            folio,
+                            pequeno,
+                            negro,
+                            new XRect(margen + 6, y + 5, 190, 13),
+                            XStringFormats.TopLeft
+                        );
+
+                        gfx.DrawString(
+                            infraccion.Fecha.ToString("dd/MM/yyyy"),
+                            pequeno,
+                            negro,
+                            new XRect(margen + 205, y + 5, 105, 13),
+                            XStringFormats.TopLeft
+                        );
+
+                        gfx.DrawString(
+                            estado,
+                            pequeno,
+                            estado.Equals(
+                                "NO PAGADA",
+                                StringComparison.OrdinalIgnoreCase)
+                                ? rojo : gris,
+                            new XRect( margen + 320, y + 5, ancho - 2 * margen - 326, 13),
+                            XStringFormats.TopRight
+                        );
+
+                        gfx.DrawLine(
+                            new XPen(XColors.LightGray, 0.35),
+                            margen, y + altoFila,
+                            ancho - margen, y + altoFila
+                        );
+
+                        y += altoFila;
+                    }
+
+                    y += 5;
+                    TextoAjustado($"Total de registros reportados: {fotocivicas.Economicas.Count}");
+                }
+
+                y += 10;
+
+                // Sanciones sin estructura tipada.
+                Seccion("SANCIONES");
+
+                if (fotocivicas.Sanciones.Count > 0) {
+                    TextoAjustado(
+                        $"Se reportaron {fotocivicas.Sanciones.Count} " +
+                        "registros de sanciones. El detalle está disponible " +
+                        "en la respuesta original del servicio."
+                    );
+                } else {
+                    TextoAjustado(
+                        fotocivicas.AdeudoSancion
+                            ? "Se reportan sanciones, sin registros detallados."
+                            : "No se reportaron sanciones."
+                    );
+                }
+            }
+
+            y += 15;
+
+            // --------------------------------------------------------
+            // 2. CONSULTA DE CITAS
+            // --------------------------------------------------------
+            NuevaPagina();
+            Seccion("2. CONSULTA DE CITAS");
+
+            if (citas is null) {
+                TextoAjustado("No se dispone de información del servicio de citas.",  rojo);
+            } else {
+                Fila("Placa", citas.placa);
+
+                Fila(
+                    "Existe cita",
+                    SiNo(citas.existeCita),
+                    destacar: citas.existeCita
+                );
+
+                Fila(
+                    "Verificentro reportado",
+                    string.IsNullOrWhiteSpace(citas.centro)
+                        ? "No disponible"
+                        : citas.centro
+                );
+
+                Fila(
+                    "Fecha de cita",
+                    citas.fechaCita?.ToString("dd/MM/yyyy")
+                        ?? "No disponible"
+                );
+
+                Fila(
+                    "Hora de cita",
+                    citas.horaCita?.ToString(@"hh\:mm")
+                        ?? "No disponible"
+                );
+
+                Fila(
+                    "Asistencia registrada",
+                    SiNo(citas.marcaAsistencia),
+                    destacar: citas.marcaAsistencia
+                );
+
+                if (!string.IsNullOrWhiteSpace(citas.mensaje)) {
+                    y += 10;
+                    Seccion("OBSERVACIONES DEL SERVICIO");
+                    TextoAjustado(citas.mensaje);
+                }
+            }
+
+            // --------------------------------------------------------
+            // NOTA INFORMATIVA
+            // --------------------------------------------------------
+
+            y += 18;
+
+            AsegurarEspacio(55);
+
+            gfx!.DrawLine(
+                new XPen(XColors.LightGray, 0.7),
+                margen, y,
+                ancho - margen, y
+            );
+
+            y += 10;
+
+            TextoAjustado(
+                "La información contenida en el presente documento corresponde a la información proporcionada " +
+                "por servicios a externos a la  Dirección General de Calidad del Aire" +
+                "durante el proceso de captura. " +
+                "Este anexo tiene carácter informativo y no constituye " +
+                "un dictamen administrativo oficial."
+            );
+
+            gfx.Dispose();
+        }
+        #endregion
+
+        }
 }

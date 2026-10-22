@@ -130,6 +130,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 // 1. CONSULTAR CITA
                 // =========================================================
 
+                cbPET.Enabled = false;
+                cbMotivoAcceso.Enabled = false;
+
+
                 var respuestaCitas = await _verificentroApiService.ConsultarCitaAsync(Placa, _centro);
 
                 var datosCitas = JsonSerializer.Deserialize<CitasDto>(respuestaCitas, new JsonSerializerOptions {
@@ -208,6 +212,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
             } finally {
                 Cursor.Current = Cursors.Default;
+                cbPET.Enabled = true;
+                cbMotivoAcceso.Enabled = true;
             }
         }
 

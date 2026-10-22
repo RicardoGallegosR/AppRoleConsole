@@ -9,6 +9,7 @@
 	  <Version>7.$([System.DateTime]::Now.ToString("yy")).$([System.DateTime]::Now.ToString("MM")).$([System.DateTime]::Now.ToString("ddHH"))</Version>
 	  <FileVersion>$(Version)</FileVersion>
 	  <AssemblyVersion>7.0.0.0</AssemblyVersion>
+	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	  <InformationalVersion>$(Version)</InformationalVersion>
   </PropertyGroup>
 

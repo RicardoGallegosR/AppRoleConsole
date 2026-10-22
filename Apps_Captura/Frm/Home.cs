@@ -278,7 +278,9 @@ namespace Apps_Captura.Frm {
                    centro: _capturaRegistroWindows.dvar12,
                    ruta: rutaBase,
                    verificentroApiConfig: _verificentroApiConfig,
-                   centroDomain: _capturaRegistroWindows.dvar18.ToUpper()
+                   centroDomain: _capturaRegistroWindows.dvar18.ToUpper(),
+                   version: Application.ProductVersion,
+                   estacionIp: ObtenerEstacion()
                );
                 _registroVehicular.CancelacionSolicitada += async () => {
                     await CancelarCapturaAsync();
@@ -480,6 +482,20 @@ namespace Apps_Captura.Frm {
                 Application.Exit();
         }
         #endregion
+
+        private int ObtenerEstacion() {
+            string ip = _capturaRegistroWindows.dvar11.ToString();
+
+            if (!int.TryParse(ip.Split('.').Last(), out int ultimoOcteto))
+                throw new InvalidOperationException($"IP no válida: {ip}");
+
+            int estacion = ultimoOcteto - 17;
+
+            if (estacion <= 0)
+                throw new InvalidOperationException($"Número de estación no válido: {estacion}");
+
+            return estacion;
+        }
     }
 }
 

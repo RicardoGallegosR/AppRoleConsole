@@ -96,7 +96,7 @@ namespace FrmComun.Login {
                     mensaje = r.MensajeId;
 
                     if (mensaje != 0) {
-                        var error = await repo.PrintIfMsgAsync(conn, "CicloVidaAplicacion.IniciarAsync", mensaje);
+                        var error = await repo.MensajeIdSQL(conn, "CicloVidaAplicacion.IniciarAsync", mensaje);
                         var bitacora = Bitacora.ErroresSQL(estacionId: _estacionId,  centro: _centro, opcionMenuId: _opcionMenu, descripcion: error.Mensaje, codigoSql: mensaje);
                         await repo.SpSpAppBitacoraErroresSetAsync2026(conn, bitacora, ct);
                     }
