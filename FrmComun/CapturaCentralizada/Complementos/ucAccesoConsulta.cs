@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -95,7 +96,12 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             // Seleccionar por defecto MotivoAccesoId = 9 (VERIFICACIÓN VEHICULAR)
             cbMotivoAcceso.SelectedValue = defecto;
         }
-
+        public void EnfocarMotivoAcceso() {
+            BeginInvoke(() => {
+                cbMotivoAcceso.Focus();
+                cbMotivoAcceso.SelectAll();
+            });
+        }
 
 
 
@@ -112,11 +118,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         private async void ibServicios_Click(object sender, EventArgs e) {
-            await ConsultarCitasYAdesdos();
+            await ConsultarCitasYAdeudos();
         }
 
 
-        public async Task ConsultarCitasYAdesdos() {
+        public async Task ConsultarCitasYAdeudos() {
             if (_verificentroApiService == null) {
                 Mostrar.Mensaje("Advertencia", "El servicio de Verificentro API no ha sido configurado.");
                 return;
@@ -125,17 +131,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             try {
 
                 Cursor.Current = Cursors.WaitCursor;
-
-                // =========================================================
-                // 1. CONSULTAR CITA
-                // =========================================================
-
                 cbPET.Enabled = false;
                 cbMotivoAcceso.Enabled = false;
-
-
                 var respuestaCitas = await _verificentroApiService.ConsultarCitaAsync(Placa, _centro);
-
                 var datosCitas = JsonSerializer.Deserialize<CitasDto>(respuestaCitas, new JsonSerializerOptions {
                     PropertyNameCaseInsensitive = true
                 });
@@ -145,33 +143,25 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     return;
                 }
                 CitasConsultada?.Invoke(datosCitas);
+                lblStatusCitas.Text = datosCitas?.existeCita switch {
+                    true => $"Cita: {datosCitas.fechaCita} {datosCitas.horaCita}",
 
+                    false => $"Sin cita para el centro: {datosCitas.centro}\n" +
+                             $"Placa: {datosCitas.placa}\n{datosCitas.mensaje}",
 
-
-                // =========================================================
-                // 3. MOSTRAR INFORMACIÓN DE CITA
-                // =========================================================
-                lblStatusCitas.Text = datosCitas.existeCita
-                    // True
-                    ? $"Cita: {datosCitas.fechaCita} {datosCitas.horaCita}"
-                    // False
-                    : $"Sin cita para el centro: {datosCitas.centro}\n" +
-                      $"Placa: {datosCitas.placa}\n{datosCitas.mensaje}";
-
-
-                // =========================================================
-                // 4. CONSULTAR FINANZAS
-                // =========================================================
-                //var respuestaFotocivicas = await _verificentroApiService.ConsultarFotocivicasAsync(Placa);
+                    null => "No fue posible obtener información del servicio web de citas."
+                };
                 ConsultaFotocivicasDto datosFotocivicas;
                 string? respuestaFotocivicas = "";
 
                 try {
-                     respuestaFotocivicas = await _verificentroApiService.ConsultarFotocivicasAsync(Placa);
+                    Cursor.Current = Cursors.WaitCursor;
+                    respuestaFotocivicas = await _verificentroApiService.ConsultarFotocivicasAsync(Placa);
 
                     datosFotocivicas = JsonSerializer.Deserialize<ConsultaFotocivicasDto>(
                             respuestaFotocivicas, new JsonSerializerOptions {
-                                PropertyNameCaseInsensitive = true
+                                PropertyNameCaseInsensitive = true,
+                                NumberHandling = JsonNumberHandling.AllowReadingFromString
                             }
                         ) ?? throw new JsonException("Respuesta vacía.");
 
@@ -182,32 +172,33 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.ServiceUnavailable) {
                     datosFotocivicas = new ConsultaFotocivicasDto {
                         Placa = Placa,
-                        ConexionWebSrv = 2
+                        ConexionWebSrv = 2,
+                        MensajeTenencia = "No fue posible establecer conexión con el servidor de SEDEMA."
                     };
-                    SivevLogger.Error($"Error HTTP al consultar SEDEMA: {ex.Message}", SivevOrigen.Captura);
+                    SivevLogger.Error($"Error HTTP al consultar SEDEMA: {ex.Message}", SivevOrigen.WebServicesCaptura);
                 } catch (HttpRequestException ex) {
-                    SivevLogger.Error($"Error HTTP al consultar Finanzas: {ex.Message}", SivevOrigen.Captura);
+                    SivevLogger.Error($"Error HTTP al consultar Finanzas: {ex.Message}", SivevOrigen.WebServicesCaptura);
                     datosFotocivicas = new ConsultaFotocivicasDto {
                         Placa = Placa, 
-                        ConexionWebSrv = 3
+                        ConexionWebSrv = 3,
+                        MensajeTenencia = "No fue posible establecer conexión con el servidor de Finanzas."
                     };
                 }
 
                 if (datosFotocivicas == null) {
-                    SivevLogger.Error($"No fue posible interpretar la respuesta del servicio de finanzas:\n{respuestaFotocivicas}", SivevOrigen.Captura);
+                    SivevLogger.Error($"No fue posible interpretar la respuesta del servicio de finanzas:\n{respuestaFotocivicas}", SivevOrigen.WebServicesCaptura);
                     Mostrar.Mensaje("Error", "No fue posible interpretar la respuesta del servicio de finanzas.");
                     return;
                 }
 
-
-                lblStatusAmbientales.Text = datosFotocivicas.AdeudoSancion ? "Con adeudo" : "Sin adeudo";
-                lblStatusFotocivicas.Text = datosFotocivicas.Fotocivicas.TieneAdeudo ? "Con adeudo" : "Sin adeudo";
-                lblStatusTenencias.Text = datosFotocivicas.AdeudoTenencia ? "Con adeudo" : "Sin adeudo";
-                lblStatusMonetarias.Text = datosFotocivicas.AdeudoInfraccion ? "Con adeudo" : "Sin adeudo";
+                ConfigurarEstadoAdeudo(lblStatusAmbientales, datosFotocivicas?.AdeudoSancion);
+                ConfigurarEstadoAdeudo(lblStatusFotocivicas, datosFotocivicas?.Fotocivicas?.TieneAdeudo);
+                ConfigurarEstadoAdeudo(lblStatusTenencias,   datosFotocivicas?.AdeudoTenencia);
+                ConfigurarEstadoAdeudo(lblStatusMonetarias,  datosFotocivicas?.AdeudoInfraccion);
 
                 FotocivicasConsultadas?.Invoke(this, datosFotocivicas);
             } catch (Exception ex) {
-                SivevLogger.Error($"Ocurrió un error durante la consulta:\n\n{ex.Message}", SivevOrigen.Captura);
+                SivevLogger.Error($"Ocurrió un error durante la consulta:\n\n{ex.Message}", SivevOrigen.WebServicesCaptura);
                 Mostrar.Mensaje("Error", $"Ocurrió un error durante la consulta:\n\n{ex.Message}");
 
             } finally {
@@ -216,17 +207,58 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 cbMotivoAcceso.Enabled = true;
             }
         }
+        private static void ConfigurarEstadoAdeudo(Label label, bool? tieneAdeudo) {
+            label.Text = tieneAdeudo switch {
+                true => "Con adeudo",
+                false => "Sin adeudo",
+                null => "Sin conexión"
+            };
 
+            label.ForeColor = tieneAdeudo switch {
+                true => Color.Crimson,
+                false => Color.SteelBlue,
+                null => Color.Black
+            };
+
+            label.Font = new Font(label.Font, FontStyle.Bold);
+        }
         private async void cbMotivoAcceso_SelectionChangeCommitted(object sender, EventArgs e) {
             if (cbMotivoAcceso.SelectedValue is byte motivoAccesoId && motivoAccesoId == 8) {
-                
-                panelFisicoMecanica(true);
-                var FM = await _verificentroApiService.ConsultarFisicoMecanicaAsync(Placa);
-                var datosFM = JsonSerializer.Deserialize<FisicoMecanicaDto>(FM, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                lblStatusFM.Text = datosFM?.documentalAprobada == true ? $"Origen: {datosFM.origen}\nPlaca: {datosFM.placa}\n{datosFM.mensaje}" : $"origen: {datosFM.origen}\nPlaca: {datosFM.placa}\n{datosFM.mensaje}";
 
-                // Invocar el evento para notificar que se ha consultado FisicoMecanica
-                FisicoMecanicaConsultada?.Invoke(datosFM);
+                panelFisicoMecanica(true);
+                Cursor.Current = Cursors.WaitCursor;
+
+                try {
+                    var datosFM = await _verificentroApiService.ConsultarFisicoMecanicaAsync(Placa);
+
+                    if (datosFM is null) {
+                        throw new InvalidOperationException("No se pudo deserializar la respuesta de SEMOVI.");
+                    }
+
+                    lblStatusFM.Text = datosFM.documentalAprobada switch {
+                        true =>
+                            $"Origen: {datosFM.origen ?? "DESCONOCIDO"}\n" +
+                            $"Placa: {datosFM.placa}\n" +
+                            $"Mensaje: {datosFM.mensaje ?? "Revista documental aprobada."}",
+
+                        false =>
+                            $"Placa: {datosFM.placa}\n" +
+                            "La placa no cuenta con revista documental aprobada.",
+
+                        null =>
+                            $"Placa: {datosFM.placa}\n" +
+                            "No fue posible obtener el resultado de la consulta."
+                    };
+
+                    FisicoMecanicaConsultada?.Invoke(datosFM);
+
+                } catch (Exception ex) {
+                    lblStatusFM.Text = "No fue posible establecer conexión con el servidor de SEMOVI.";
+                    SivevLogger.Error($"Error al consultar físico-mecánica: {ex}", SivevOrigen.WebServicesCaptura);
+
+                } finally {
+                    Cursor.Current = Cursors.Default;
+                }
             } else {
                 panelFisicoMecanica();
             }
@@ -235,6 +267,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private void panelFisicoMecanica(bool flags = false) {
             pnlFM.Visible = flags;
             pnlFM.Enabled = flags;
+            if (flags) {
+                cbPET.Checked = false;
+                cbPET.Enabled = false;
+            } else {
+                cbPET.Enabled = true;
+            }
+            
+            
         }
         
     }

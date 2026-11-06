@@ -53,7 +53,7 @@ namespace FrmComun.Login {
                 var r = repo.SpAppRollClaveGet(session.Connection);
 
                 if (r.MensajeId != 0) {
-                    var mensajeSql = await repo.PrintIfMsgAsync(session.Connection, "AplicacionLifecycleService.InicializarAsync", r.MensajeId);
+                    var mensajeSql = await repo.MensajeIdSQL(session.Connection, "AplicacionLifecycleService.InicializarAsync", r.MensajeId);
                     Mostrar.Mensaje("Error al obtener AppRole", mensajeSql.Mensaje);
                     SivevLogger.Error($"Error en SpAppRollClaveGet.\nMensajeId: {r.MensajeId}. {mensajeSql.Mensaje}", _origen);
                     return false;

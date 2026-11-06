@@ -120,7 +120,7 @@
             tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
             tlpTarjetaCirculacion.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2857141F));
             tlpTarjetaCirculacion.Size = new Size(789, 215);
-            tlpTarjetaCirculacion.TabIndex = 1;
+            tlpTarjetaCirculacion.TabIndex = 0;
             // 
             // lblApellidoMaterno
             // 
@@ -130,7 +130,7 @@
             lblApellidoMaterno.Location = new Point(397, 30);
             lblApellidoMaterno.Name = "lblApellidoMaterno";
             lblApellidoMaterno.Size = new Size(191, 30);
-            lblApellidoMaterno.TabIndex = 17;
+            lblApellidoMaterno.TabIndex = 0;
             lblApellidoMaterno.Text = "APELLIDO MATERNO";
             lblApellidoMaterno.TextAlign = ContentAlignment.MiddleLeft;
             // 
@@ -142,7 +142,7 @@
             txtNombre.Margin = new Padding(0);
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(197, 26);
-            txtNombre.TabIndex = 1;
+            txtNombre.TabIndex = 2;
             // 
             // txtApellidoMaterno
             // 
@@ -152,7 +152,7 @@
             txtApellidoMaterno.Margin = new Padding(0);
             txtApellidoMaterno.Name = "txtApellidoMaterno";
             txtApellidoMaterno.Size = new Size(198, 26);
-            txtApellidoMaterno.TabIndex = 19;
+            txtApellidoMaterno.TabIndex = 4;
             // 
             // lblNombre
             // 
@@ -218,7 +218,7 @@
             nudTubosEscape.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudTubosEscape.Name = "nudTubosEscape";
             nudTubosEscape.Size = new Size(192, 23);
-            nudTubosEscape.TabIndex = 11;
+            nudTubosEscape.TabIndex = 10;
             nudTubosEscape.Value = new decimal(new int[] { 2, 0, 0, 0 });
             // 
             // txtClaveVehicular
@@ -229,8 +229,7 @@
             txtClaveVehicular.Margin = new Padding(0);
             txtClaveVehicular.Name = "txtClaveVehicular";
             txtClaveVehicular.Size = new Size(198, 26);
-            txtClaveVehicular.TabIndex = 9;
-            txtClaveVehicular.Text = "123456";
+            txtClaveVehicular.TabIndex = 12;
             txtClaveVehicular.TextChanged += txtClaveVehicular_TextChanged;
             // 
             // nudModelo
@@ -242,7 +241,7 @@
             nudModelo.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
             nudModelo.Name = "nudModelo";
             nudModelo.Size = new Size(192, 23);
-            nudModelo.TabIndex = 10;
+            nudModelo.TabIndex = 8;
             nudModelo.Value = new decimal(new int[] { 1900, 0, 0, 0 });
             // 
             // txtFolioTC
@@ -253,7 +252,7 @@
             txtFolioTC.Margin = new Padding(0);
             txtFolioTC.Name = "txtFolioTC";
             txtFolioTC.Size = new Size(198, 26);
-            txtFolioTC.TabIndex = 7;
+            txtFolioTC.TabIndex = 9;
             // 
             // lblFTC
             // 
@@ -302,7 +301,7 @@
             dtpFTC.Location = new Point(200, 153);
             dtpFTC.Name = "dtpFTC";
             dtpFTC.Size = new Size(191, 23);
-            dtpFTC.TabIndex = 12;
+            dtpFTC.TabIndex = 11;
             // 
             // cbCombustibles
             // 
@@ -314,7 +313,7 @@
             cbCombustibles.Location = new Point(200, 123);
             cbCombustibles.Name = "cbCombustibles";
             cbCombustibles.Size = new Size(191, 29);
-            cbCombustibles.TabIndex = 15;
+            cbCombustibles.TabIndex = 7;
             // 
             // cbSubmarcas
             // 
@@ -326,7 +325,7 @@
             cbSubmarcas.Location = new Point(200, 93);
             cbSubmarcas.Name = "cbSubmarcas";
             cbSubmarcas.Size = new Size(191, 29);
-            cbSubmarcas.TabIndex = 14;
+            cbSubmarcas.TabIndex = 6;
             // 
             // cbMarcas
             // 
@@ -338,7 +337,7 @@
             cbMarcas.Location = new Point(200, 63);
             cbMarcas.Name = "cbMarcas";
             cbMarcas.Size = new Size(191, 29);
-            cbMarcas.TabIndex = 13;
+            cbMarcas.TabIndex = 5;
             // 
             // lblApellidoPaterno
             // 
@@ -348,7 +347,7 @@
             lblApellidoPaterno.Location = new Point(3, 30);
             lblApellidoPaterno.Name = "lblApellidoPaterno";
             lblApellidoPaterno.Size = new Size(191, 30);
-            lblApellidoPaterno.TabIndex = 16;
+            lblApellidoPaterno.TabIndex = 0;
             lblApellidoPaterno.Text = "APELLIDO PATERNO";
             lblApellidoPaterno.TextAlign = ContentAlignment.MiddleLeft;
             // 
@@ -360,7 +359,7 @@
             lblTipoPersona.Location = new Point(397, 0);
             lblTipoPersona.Name = "lblTipoPersona";
             lblTipoPersona.Size = new Size(191, 30);
-            lblTipoPersona.TabIndex = 20;
+            lblTipoPersona.TabIndex = 0;
             lblTipoPersona.Text = "TIPO PERSONA";
             lblTipoPersona.TextAlign = ContentAlignment.MiddleLeft;
             // 
@@ -372,7 +371,7 @@
             txtApellidoPaterno.Margin = new Padding(0);
             txtApellidoPaterno.Name = "txtApellidoPaterno";
             txtApellidoPaterno.Size = new Size(197, 26);
-            txtApellidoPaterno.TabIndex = 18;
+            txtApellidoPaterno.TabIndex = 3;
             // 
             // cbTipoPersona
             // 
@@ -382,7 +381,7 @@
             cbTipoPersona.Location = new Point(594, 3);
             cbTipoPersona.Name = "cbTipoPersona";
             cbTipoPersona.Size = new Size(192, 24);
-            cbTipoPersona.TabIndex = 21;
+            cbTipoPersona.TabIndex = 1;
             cbTipoPersona.Text = "Moral";
             cbTipoPersona.UseVisualStyleBackColor = true;
             // 
@@ -392,7 +391,7 @@
             lblConfirmarCV.Location = new Point(397, 180);
             lblConfirmarCV.Name = "lblConfirmarCV";
             lblConfirmarCV.Size = new Size(191, 30);
-            lblConfirmarCV.TabIndex = 22;
+            lblConfirmarCV.TabIndex = 0;
             lblConfirmarCV.Text = "CONFIRMAR CLAVE VEHICULAR";
             lblConfirmarCV.TextAlign = ContentAlignment.MiddleLeft;
             // 
@@ -404,8 +403,7 @@
             txtConfirmarClaveVehicular.Margin = new Padding(0);
             txtConfirmarClaveVehicular.Name = "txtConfirmarClaveVehicular";
             txtConfirmarClaveVehicular.Size = new Size(198, 26);
-            txtConfirmarClaveVehicular.TabIndex = 23;
-            txtConfirmarClaveVehicular.Text = "123456";
+            txtConfirmarClaveVehicular.TabIndex = 13;
             txtConfirmarClaveVehicular.TextChanged += txtConfirmarClaveVehicular_TextChanged;
             txtConfirmarClaveVehicular.KeyDown += txtConfirmarClaveVehicular_KeyDown;
             txtConfirmarClaveVehicular.KeyPress += txtConfirmarClaveVehicular_KeyPress;
@@ -430,7 +428,7 @@
             flpSeleecionVehicular.Name = "flpSeleecionVehicular";
             flpSeleecionVehicular.Padding = new Padding(10, 5, 10, 5);
             flpSeleecionVehicular.Size = new Size(789, 50);
-            flpSeleecionVehicular.TabIndex = 1;
+            flpSeleecionVehicular.TabIndex = 0;
             flpSeleecionVehicular.WrapContents = false;
             // 
             // btnGuardar
@@ -445,7 +443,7 @@
             btnGuardar.Margin = new Padding(3, 3, 20, 3);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(158, 34);
-            btnGuardar.TabIndex = 1;
+            btnGuardar.TabIndex = 14;
             btnGuardar.Text = "Guardar/Siguiente";
             btnGuardar.UseVisualStyleBackColor = false;
             // 
@@ -458,7 +456,7 @@
             btnEditar.Margin = new Padding(3, 3, 20, 3);
             btnEditar.Name = "btnEditar";
             btnEditar.Size = new Size(92, 34);
-            btnEditar.TabIndex = 0;
+            btnEditar.TabIndex = 15;
             btnEditar.Text = "Editar";
             btnEditar.UseVisualStyleBackColor = true;
             // 

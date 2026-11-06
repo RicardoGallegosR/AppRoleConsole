@@ -11,7 +11,16 @@
 	  <AssemblyVersion>7.0.0.0</AssemblyVersion>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	  <InformationalVersion>$(Version)</InformationalVersion>
+	  <!--ApplicationIcon>san-vicente-y-las-granadinas-_1_.ico</ApplicationIcon-->
+	  
+	  <StartupObject>Apps_Captura.Program</StartupObject>
+	  
+	  <ApplicationIcon>carro-deportivo.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="carro-deportivo.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="fontawesome.sharp" Version="6.6.0" />

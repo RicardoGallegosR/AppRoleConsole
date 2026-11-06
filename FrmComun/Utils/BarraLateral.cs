@@ -181,12 +181,15 @@ namespace FrmComun.Utils {
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = new Font("Segoe UI", 12F),
                 Cursor = Cursors.Hand,
+                TabStop = false,
                 Margin = new Padding(3)
+                
             };
             boton.FlatAppearance.BorderSize = 0;
             boton.Click += (_, _) => ActivarVista(clave);
             _menu.Controls.Add(boton);
             _botonesVistas.Add(clave, boton);
+            
         }
 
         public void ActivarVista(string clave) {

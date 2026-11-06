@@ -8,9 +8,12 @@ using SQLSIVEV.Infrastructure.Services;
 using SQLSIVEV.Infrastructure.Sql.Configuracion;
 using SQLSIVEV.Infrastructure.Utils;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.JavaScript;
 using static SQLSIVEV.Domain.Models.SpAppProgramOnResult;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SQLSIVEV.Infrastructure.Sql {
     public sealed class SivevRepository {
@@ -362,31 +365,25 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
 
 
-        public async Task<CapturaIniciaResult> SpAppCapturaIniciaWebSrv2026Async(
-            SqlConnection cnn, 
-            Guid estacionId, 
-            Guid accesoId, 
-            string placa,  
-            bool pet,
-            /*
-            int consultasSemoviId, 
-            string vin,
-            short modelo,
-            string tipoServicio, 
-            string folioAuto, 
-            DateTime fechaTC, 
-            bool testFM, 
-            bool conexionWs, 
-            byte conexionWebSrv, 
-            */
-            ConsultaFotocivicasDto respuesta, 
-            CancellationToken ct = default) { 
+        public async Task<CapturaIniciaResult> SpAppCapturaIniciaWebSrv2026Async(SqlConnection cnn, Guid estacionId, Guid accesoId, string placa, bool pet, ConsultaFotocivicasDto respuesta, byte? HaceFisicoMecanica, bool SrvWebFisicoMecanica, CancellationToken ct = default) { 
             if (cnn.State != ConnectionState.Open)
                 throw new InvalidOperationException("La conexión debe estar abierta.");
+            
+            if (respuesta == null) {
+                throw new ArgumentNullException(nameof(respuesta));
+            }
+            if (HaceFisicoMecanica == null) {
+                SivevLogger.Warning("HaceFisicoMecanica es null, se asignará 0 por defecto.", SivevOrigen.Captura);
+                HaceFisicoMecanica = 0;
+            }
 
-            ArgumentNullException.ThrowIfNull(respuesta);
+
+
+
 
             using var cmd = cnn.CreateCommand();
+
+
 
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "VfcCaptura.SpAppCapturaIniciaWebSrv2026";
@@ -416,7 +413,10 @@ namespace SQLSIVEV.Infrastructure.Sql {
             pEstado.Direction = ParameterDirection.Output;
 
             cmd.Parameters.Add("@tiConexionWebSrv", SqlDbType.TinyInt).Value = respuesta.ConexionWebSrv;
-
+            
+            cmd.Parameters.Add("@tiHaceFisicoMecanica", SqlDbType.TinyInt).Value = HaceFisicoMecanica;
+            cmd.Parameters.Add("@bSrvWebFisicoMecanica", SqlDbType.Bit).Value = SrvWebFisicoMecanica;
+            
             cmd.Parameters.Add("@bAdeudoGdfFotoCivicas", SqlDbType.Bit).Value = respuesta.Fotocivicas?.TieneAdeudo ?? false;
             cmd.Parameters.Add("@bAdeudoTenencia", SqlDbType.Bit).Value = respuesta.AdeudoTenencia;
             cmd.Parameters.Add("@bAdeudoInfraccion", SqlDbType.Bit).Value = respuesta.AdeudoInfraccion;
@@ -448,18 +448,10 @@ namespace SQLSIVEV.Infrastructure.Sql {
             var pFinanzasId = cmd.Parameters.Add("@uiWebSrvFinanzasId", SqlDbType.UniqueIdentifier);
             pFinanzasId.Direction = ParameterDirection.Output;
 
-            // DATOS DE ESTACIÓN Y VEHÍCULO
-            
-            /*
-            cmd.Parameters.Add("@iConsultasSemoviId", SqlDbType.Int).Value = consultasSemoviId;
-            cmd.Parameters.Add("@vcVin", SqlDbType.VarChar, 17).Value = vin;
-            cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt).Value = modelo;
-            cmd.Parameters.Add("@vcTipoServicio", SqlDbType.VarChar, 30).Value = tipoServicio;
-            cmd.Parameters.Add("@vcFolioAuto", SqlDbType.VarChar, 30).Value = folioAuto;
-            cmd.Parameters.Add("@dtFechaTC", SqlDbType.DateTime).Value = fechaTC;
-            cmd.Parameters.Add("@bTestFM", SqlDbType.Bit).Value = testFM;
-            cmd.Parameters.Add("@bConexionWs", SqlDbType.Bit).Value = conexionWs;
-            */
+
+
+
+
 
             await cmd.ExecuteNonQueryAsync(ct);
 
@@ -528,9 +520,61 @@ namespace SQLSIVEV.Infrastructure.Sql {
         }
         #endregion
 
+        #region FISICO MECANICA
+        public async Task<SpAppCapturaDatosSetResult> SpAppCapturaConsultaSemovi2026Set(
+               SqlConnection cnn, Guid estacionId, Guid accesoId, Guid verificacionId, string placa = "DESCONOCIDO", 
+               string vin = "DESCONOCIDO", short modelo = 0, string tipoServicio = "DESCONOCIDO", DateTime fechaTC = default, 
+               bool testFM = false, bool ConexionWs = false, string MensajeFM = "DESCONOCIDO", short? Status = 0,
+               CancellationToken ct = default) {
+            ArgumentNullException.ThrowIfNull(cnn);
+            using var cmd = new SqlCommand("VfcCaptura.SpAppCapturaConsultaSemovi2026Set", cnn) {
+                CommandType = CommandType.StoredProcedure
+            };
 
+            // OUTPUT
+            var pMensaje = new SqlParameter("@iMensajeId", SqlDbType.Int){
+                Direction = ParameterDirection.InputOutput,
+                Value = 0
+            };
+
+            var pResultado = new SqlParameter("@siResultado", SqlDbType.SmallInt) {
+                Direction = ParameterDirection.InputOutput,
+                Value = (short)0
+            };
+
+            cmd.Parameters.Add(pMensaje);
+            cmd.Parameters.Add(pResultado);
+
+            // Identificadores
+            cmd.Parameters.Add("@uiEstacionId", SqlDbType.UniqueIdentifier).Value = estacionId;
+            cmd.Parameters.Add("@uiAccesoId", SqlDbType.UniqueIdentifier).Value = accesoId;
+            cmd.Parameters.Add("@uiVerificacionId", SqlDbType.UniqueIdentifier).Value = verificacionId;
+
+            cmd.Parameters.Add("@vcPlaca", SqlDbType.VarChar, 11).Value = placa;
+            cmd.Parameters.Add("@vcVin", SqlDbType.VarChar, 17).Value = vin;
+            cmd.Parameters.Add("@vcTipoServicio", SqlDbType.VarChar, 30).Value = tipoServicio;
+            cmd.Parameters.Add("@vcMensajeFM", SqlDbType.VarChar, 500).Value = MensajeFM;
+
+            cmd.Parameters.Add("@bConexionWs", SqlDbType.Bit).Value = ConexionWs;
+
+            cmd.Parameters.Add("@dtFechaTC", SqlDbType.DateTime).Value = fechaTC == default ? new DateTime(1900, 1, 1) : fechaTC;
+            cmd.Parameters.Add("@siModelo", SqlDbType.SmallInt).Value = modelo;
+            cmd.Parameters.Add("@siStatus", SqlDbType.SmallInt).Value = (object?)Status ?? DBNull.Value;
+
+            cmd.Parameters.Add("@bTestFM", SqlDbType.Bit).Value = testFM;
+
+
+            await cmd.ExecuteNonQueryAsync(ct);
+
+            return new SpAppCapturaDatosSetResult {
+                MensajeId = Convert.ToInt32(pMensaje.Value),
+                ResultadoId = Convert.ToInt16(pResultado.Value)
+            };
+        }
+
+        #endregion
         #region Captura de datos de Tarjeta de circulación
-        public async Task<SpAppCapturaDatosSetResult> SpAppCapturaDatosSet2026Async(SqlConnection cnn, Guid estacionId,  Guid accesoId, Guid verificacionId, Guid verificacionAntId, int submarcaId, int ClaveVehicular, byte combustibleId, bool esEmpresa, string nombre, string apelPaterno, string apelMaterno, string tarjetaFolio, DateTime tarjetaFecha, short tubosEscape, byte[] imagenFactura, byte[] imagenTarjetaCirculacion, CancellationToken ct = default) {
+        public async Task<SpAppCapturaDatosSetResult> SpAppCapturaDatosSet2026Async(SqlConnection cnn, Guid estacionId,  Guid accesoId, Guid verificacionId, Guid verificacionAntId, int submarcaId, int ClaveVehicular, byte combustibleId, bool esEmpresa, string nombre, string apelPaterno, string apelMaterno, string tarjetaFolio, string FacturaFolio, DateTime tarjetaFecha, byte tubosEscape, byte[] imagenFactura, byte[] imagenTarjetaCirculacion, CancellationToken ct = default) {
             ArgumentNullException.ThrowIfNull(cnn);
             using var cmd = new SqlCommand("VfcCaptura.SpAppCapturaDatos2026Set", cnn) {
                 CommandType = CommandType.StoredProcedure
@@ -568,16 +612,24 @@ namespace SQLSIVEV.Infrastructure.Sql {
             cmd.Parameters.Add("@vcApelMaterno",SqlDbType.VarChar,  50).Value = apelMaterno;
 
             // Tarjeta de circulación
-            cmd.Parameters.Add("@vcTarjetaFolio", SqlDbType.VarChar, 12).Value = tarjetaFolio;
+            cmd.Parameters.Add("@vcTarjetaFolio", SqlDbType.VarChar, 15).Value = tarjetaFolio;
+            cmd.Parameters.Add("@vcFacturaFolio", SqlDbType.VarChar, 11).Value = FacturaFolio;
             cmd.Parameters.Add("@sdTarjetaFecha", SqlDbType.SmallDateTime).Value = tarjetaFecha;
-            cmd.Parameters.Add("@siTubosEscape",  SqlDbType.SmallInt).Value = tubosEscape;
-
+            cmd.Parameters.Add("@tiTubosEscape",  SqlDbType.TinyInt).Value = tubosEscape;
+            SivevLogger.Information($"TubosEscape: {tubosEscape}, Tipo: {tubosEscape.GetType().Name}", SivevOrigen.Captura);
             // Imágenes
             cmd.Parameters.Add("@imagenFactura",SqlDbType.Image).Value = imagenFactura ?? Array.Empty<byte>();
             cmd.Parameters.Add("@imagenTarjetaCirculacion", SqlDbType.Image).Value = imagenTarjetaCirculacion ?? Array.Empty<byte>();
 
             await cmd.ExecuteNonQueryAsync(ct);
-
+            SivevLogger.Information(
+                $"SpAppCapturaDatos2026Set\n" +
+                $"VerificacionId: {verificacionId}\n" +
+                $"TubosEscape enviados: {tubosEscape}\n" +
+                $"MensajeId: {pMensaje.Value}\n" +
+                $"ResultadoId: {pResultado.Value}",
+                SivevOrigen.Captura
+            );
             return new SpAppCapturaDatosSetResult {
                 MensajeId = Convert.ToInt32(pMensaje.Value),
                 ResultadoId = Convert.ToInt16(pResultado.Value)

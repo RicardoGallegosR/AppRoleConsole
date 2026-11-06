@@ -9,7 +9,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public event EventHandler? FiltroSubmarcaChanged;
         private bool _editando;
 
-
+        private List<CombustibleDto> _combustiblesOriginales = new();
         public string Nombre => txtNombre.Text.Trim();
         public string ApellidoPaterno => txtApellidoPaterno.Text.Trim();
         public string ApellidoMaterno => txtApellidoMaterno.Text.Trim();
@@ -18,7 +18,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public DateTime FechaTC => dtpFTC.Value;
         public int Modelo => (int)nudModelo.Value;
         public string FolioTarjetaCirculacion => txtFolioTC.Text.Trim();
-        public int TubosEscape => (int)nudTubosEscape.Value;
+        public byte TubosEscape => (byte)nudTubosEscape.Value;
         public int? ClaveVehicular => int.TryParse(txtClaveVehicular.Text.Trim(), out int clave) ? clave: 0; 
         public event EventHandler? SubmarcaSeleccionada;
 
@@ -192,12 +192,20 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
         public void CargarCombustibles(IEnumerable<CombustibleDto> combustibleDtos) {
+            _combustiblesOriginales = combustibleDtos.ToList();
+            ActualizarCombustibles(_combustiblesOriginales);
+        }
+        private void ActualizarCombustibles(IEnumerable<CombustibleDto> combustibles) {
             cbCombustibles.DataSource = null;
             cbCombustibles.DisplayMember = nameof(CombustibleDto.Combustible);
             cbCombustibles.ValueMember = nameof(CombustibleDto.CombustibleId);
-            cbCombustibles.DataSource = combustibleDtos.ToList();
-            //cbCombustibles.SelectedIndex = -1;
+            cbCombustibles.DataSource = combustibles.ToList();
+            cbCombustibles.SelectedIndex = -1;
         }
+
+
+
+
         public byte? CombustibleId => cbCombustibles.SelectedValue is null ? null : Convert.ToByte(cbCombustibles.SelectedValue);
 
         private void cbSubmarcas_KeyDown(object? sender, KeyEventArgs e) {
@@ -257,6 +265,26 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             btnEditar.Enabled = !editar;
             //btnGuardar.Enabled = editar;
         }
+
+        public void LimitarCombustiblesTubosDeEscape(byte? MotivoAcceso) {
+            if (MotivoAcceso == 1) {
+                // Vehículo a diésel
+                nudTubosEscape.Minimum = 1;
+                nudTubosEscape.Maximum = 2;
+                nudTubosEscape.Value = 1;
+                ActualizarCombustibles(_combustiblesOriginales.Where(c => c.CombustibleId == 2));
+                cbCombustibles.SelectedValue = (byte)2;
+            } else {
+                // Otros motivos de acceso
+                nudTubosEscape.Minimum = 0;
+                nudTubosEscape.Maximum = 0;
+                nudTubosEscape.Value = 0;
+                var combustiblesSinDiesel = _combustiblesOriginales.Where(c => c.CombustibleId != 2).ToList();
+                ActualizarCombustibles(combustiblesSinDiesel);
+            }
+        }
+
+
 
         public void EsperarStore(bool flag = false) {
             pnlPrincipal.Enabled = flag;

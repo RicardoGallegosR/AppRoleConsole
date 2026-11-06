@@ -9,7 +9,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         public bool PET;
         //public VerificacionAnteriorDto? VehiculoSeleccionado;
 
-        public record ColumnaGrid(string Name, string Header, string DataProperty, int Width );
+        public record ColumnaGrid(string Name, string Header, string DataProperty, int Width);
         public ucSeleccionVehiculo() {
             InitializeComponent();
             ConfigurarDgvVehiculos();
@@ -53,10 +53,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         private void ConfirmarSeleccion() {
             if (VehiculoSeleccionado is null) {
-                Mostrar.Mensaje("Vehículo","Debe seleccionar un vehículo.");
+                Mostrar.Mensaje("Vehículo", "Debe seleccionar un vehículo.");
                 return;
             }
-            Seleccionar?.Invoke(this,EventArgs.Empty);
+            Seleccionar?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -64,7 +64,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         private void CrearColumnas() {
 
             dgvVehiculos.Columns.Clear();
-
+            /*
             dgvVehiculos.Columns.Add(
                 new DataGridViewCheckBoxColumn {
                     Name = "Seleccion",
@@ -73,7 +73,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     AutoSizeMode = DataGridViewAutoSizeColumnMode.None
                 }
             );
-
+            */
             foreach (var columna in ColumnasVehiculo) {
 
                 dgvVehiculos.Columns.Add(
@@ -153,5 +153,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             new("Propietario", "Propietario", "Propietario", 220)
         };
         #endregion
+
+        private void btnSeleccionar_Click_1(object sender, EventArgs e) {
+
+        }
     }
 }

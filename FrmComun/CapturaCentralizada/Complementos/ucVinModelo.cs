@@ -50,6 +50,13 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             SolicitarConsultaVin();
         }
 
+        public void EnfocarVin() {
+            BeginInvoke(() => {
+                txtVin.Focus();
+                txtVin.SelectAll();
+            });
+        }
+
         private void txtVinConfirmar_KeyDown(object? sender, KeyEventArgs e) {
             if (e.KeyCode != Keys.Enter)
                 return;
@@ -85,7 +92,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             if (modelo < nudModelo.Minimum || modelo > nudModelo.Maximum) {
                 return;
             }
-
             nudModelo.Value = modelo;
         }
         private void ValidarDatos() {
@@ -113,7 +119,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
 
 
-            /*
+            //*
             // Bloquea Ctrl+C, Ctrl+V, Ctrl+X, Shift+Insert, etc.
             txtVin.ShortcutsEnabled = false;
             txtVinConfirmar.ShortcutsEnabled = false;
@@ -126,7 +132,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
 
             txtVin.PasswordChar = '\0';
-
             _erroresConfirmacionVin = 0;
         }
 
@@ -190,7 +195,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             e.KeyChar = caracterIngresado;
         }
         private static bool EsLongitudVinValida(int longitud) {
-            return longitud == 7 || longitud == 11 || longitud == 17;
+            return longitud >= 7 && longitud <= 17;
         }
         private void txtVinConfirmar_TextChanged(object sender, EventArgs e) {
             bool vinCorrecto =  EsLongitudVinValida(

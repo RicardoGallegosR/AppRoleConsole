@@ -69,7 +69,7 @@
             pnlDocumento.Location = new Point(0, 37);
             pnlDocumento.Name = "pnlDocumento";
             pnlDocumento.Size = new Size(463, 494);
-            pnlDocumento.TabIndex = 2;
+            pnlDocumento.TabIndex = 0;
             // 
             // flpPaginas
             // 
@@ -78,7 +78,7 @@
             flpPaginas.Location = new Point(0, 374);
             flpPaginas.Name = "flpPaginas";
             flpPaginas.Size = new Size(463, 120);
-            flpPaginas.TabIndex = 1;
+            flpPaginas.TabIndex = 0;
             flpPaginas.WrapContents = false;
             // 
             // pbDocumento
@@ -121,7 +121,7 @@
             flpAcciones.Name = "flpAcciones";
             flpAcciones.Padding = new Padding(5);
             flpAcciones.Size = new Size(142, 531);
-            flpAcciones.TabIndex = 1;
+            flpAcciones.TabIndex = 0;
             flpAcciones.WrapContents = false;
             // 
             // cbScanners

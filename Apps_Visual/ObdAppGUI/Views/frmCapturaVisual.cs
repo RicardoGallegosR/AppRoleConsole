@@ -128,7 +128,7 @@ namespace Apps_Visual.ObdAppGUI.Views {
 
                 _verificacionId2?.Invoke(_verificacionId);
                 _placa2?.Invoke(_placa);
-                _checkOBD?.Invoke(r.CheckObd);
+                _checkOBD.Invoke(r.CheckObd);
 
                 _tcsResultado?.TrySetResult(true);
             }else {

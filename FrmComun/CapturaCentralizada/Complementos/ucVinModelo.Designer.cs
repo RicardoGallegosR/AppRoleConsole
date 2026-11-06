@@ -73,7 +73,7 @@
             tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             tlpVinModelo.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             tlpVinModelo.Size = new Size(437, 160);
-            tlpVinModelo.TabIndex = 1;
+            tlpVinModelo.TabIndex = 0;
             // 
             // txtVinConfirmar
             // 
@@ -83,9 +83,7 @@
             txtVinConfirmar.Margin = new Padding(0);
             txtVinConfirmar.Name = "txtVinConfirmar";
             txtVinConfirmar.Size = new Size(219, 26);
-            txtVinConfirmar.TabIndex = 3;
-            txtVinConfirmar.TabStop = false;
-            txtVinConfirmar.Text = "3U5AFCFY5R200674";
+            txtVinConfirmar.TabIndex = 2;
             txtVinConfirmar.TextChanged += txtVinConfirmar_TextChanged;
             txtVinConfirmar.KeyPress += txtVinConfirmar_KeyPress;
             // 
@@ -108,9 +106,7 @@
             txtVin.Margin = new Padding(0);
             txtVin.Name = "txtVin";
             txtVin.Size = new Size(219, 26);
-            txtVin.TabIndex = 2;
-            txtVin.TabStop = false;
-            txtVin.Text = "3U5AFCFY5R200674";
+            txtVin.TabIndex = 1;
             txtVin.TextChanged += txtVin_TextChanged;
             txtVin.KeyDown += txtVin_KeyDown;
             // 
@@ -139,13 +135,12 @@
             // nudModelo
             // 
             nudModelo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            nudModelo.Enabled = false;
             nudModelo.Location = new Point(221, 8);
             nudModelo.Maximum = new decimal(new int[] { 3000, 0, 0, 0 });
             nudModelo.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
             nudModelo.Name = "nudModelo";
             nudModelo.Size = new Size(213, 23);
-            nudModelo.TabIndex = 1;
+            nudModelo.TabIndex = 0;
             nudModelo.Value = new decimal(new int[] { 1900, 0, 0, 0 });
             // 
             // pblFooter
@@ -180,6 +175,7 @@
             btnSeleccionVehiculo.Name = "btnSeleccionVehiculo";
             btnSeleccionVehiculo.Size = new Size(148, 34);
             btnSeleccionVehiculo.TabIndex = 3;
+            btnSeleccionVehiculo.TabStop = false;
             btnSeleccionVehiculo.Text = "Selección de Vehiculo";
             btnSeleccionVehiculo.UseVisualStyleBackColor = false;
             // 

@@ -60,14 +60,18 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         public async Task CargarAsync(CancellationToken ct = default) {
             Limpiar();
-
-            Combustibles            = await ObtenerCombustiblesAsync(ct);
-            EntidadesFederativas    = await ObtenerEntidadesFederativasAsync(ct);
-            Marcas                  = await ObtenerMarcasAsync(ct);
-            TiposAdeudos            = await ObtenerTiposAdeudosAsync(ct);
-            TiposLineasCaptura      = await ObtenerTiposLineasCapturaAsync(ct);
-            MotivosAcceso           = await MotivosAccesoAsync(ct);
-            TiposDocumentos         = await TiposDocumentosAsync(ct);
+            try {
+                Cursor.Current = Cursors.WaitCursor;
+                Combustibles = await ObtenerCombustiblesAsync(ct);
+                EntidadesFederativas = await ObtenerEntidadesFederativasAsync(ct);
+                Marcas = await ObtenerMarcasAsync(ct);
+                TiposAdeudos = await ObtenerTiposAdeudosAsync(ct);
+                TiposLineasCaptura = await ObtenerTiposLineasCapturaAsync(ct);
+                MotivosAcceso = await MotivosAccesoAsync(ct);
+                TiposDocumentos = await TiposDocumentosAsync(ct);
+            } finally {
+                Cursor.Current = Cursors.Default;
+            }
         }
 
         public void Limpiar() {
@@ -154,7 +158,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppEntidadesFederativasGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppEntidadesFederativasGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,
@@ -210,7 +214,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppMotivosAccesoGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppMotivosAccesoGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,
@@ -265,7 +269,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppTiposDocumentosGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppTiposDocumentosGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,
@@ -326,7 +330,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppMarcasGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppMarcasGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,
@@ -386,7 +390,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     submarcas = r.Data;
 
                     if (mensaje != 0) {
-                        var error = await repo.PrintIfMsgAsync(connApp,  $"Error en SpAppSubmarcasGet {mensaje}",     mensaje);
+                        var error = await repo.MensajeIdSQL(connApp,  $"Error en SpAppSubmarcasGet {mensaje}",     mensaje);
                         Mostrar.Mensaje("SpAppSubmarcasGet", error.Mensaje);
                     }
 
@@ -416,7 +420,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppTiposAdeudosGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppTiposAdeudosGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,
@@ -470,7 +474,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     if (mensaje != 0) {
                         try {
-                            var error = await repo.PrintIfMsgAsync(connApp, "Error en SpAppTiposLineasCapturaGet",  mensaje);
+                            var error = await repo.MensajeIdSQL(connApp, "Error en SpAppTiposLineasCapturaGet",  mensaje);
                             var bitacora = Bitacora.ErroresSQL(
                                 estacionId: _estacionId,
                                 centro: _centro,

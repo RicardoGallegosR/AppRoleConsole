@@ -82,14 +82,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     }
                 });
-
-            dgvDocumentos.Columns.Add(
-                new DataGridViewCheckBoxColumn {
-                    Name = "NoPresenta",
-                    HeaderText = "No Presenta",
-                    DataPropertyName = nameof(DocumentoAdicionalDto.NoPresenta),
-                    FillWeight = 65
-                });
         }
 
         private void dgvDocumentos_CellContentClick(object sender, DataGridViewCellEventArgs e) {

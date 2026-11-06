@@ -104,6 +104,7 @@ namespace FrmComun.CapturaCentralizada {
             tcPrincipal.SelectedIndex = 0;
             tcPrincipal.Size = new Size(1009, 606);
             tcPrincipal.TabIndex = 0;
+            tcPrincipal.TabStop = false;
             // 
             // tpRegistroVehicular
             // 
@@ -129,7 +130,7 @@ namespace FrmComun.CapturaCentralizada {
             tlpFila1.RowCount = 1;
             tlpFila1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpFila1.Size = new Size(995, 562);
-            tlpFila1.TabIndex = 1;
+            tlpFila1.TabIndex = 0;
             // 
             // gbAcceso
             // 
@@ -174,7 +175,7 @@ namespace FrmComun.CapturaCentralizada {
             pnlRegistro.Location = new Point(3, 3);
             pnlRegistro.Name = "pnlRegistro";
             pnlRegistro.Size = new Size(386, 556);
-            pnlRegistro.TabIndex = 4;
+            pnlRegistro.TabIndex = 0;
             // 
             // gbVinModelo
             // 
@@ -227,11 +228,11 @@ namespace FrmComun.CapturaCentralizada {
             // tpTC
             // 
             tpTC.Controls.Add(tlpFila2);
-            tpTC.Location = new Point(4, 24);
+            tpTC.Location = new Point(4, 34);
             tpTC.Name = "tpTC";
             tpTC.Padding = new Padding(3);
-            tpTC.Size = new Size(192, 72);
-            tpTC.TabIndex = 1;
+            tpTC.Size = new Size(1001, 568);
+            tpTC.TabIndex = 0;
             tpTC.Text = "Tarjeta de Circulación";
             tpTC.UseVisualStyleBackColor = true;
             // 
@@ -248,8 +249,8 @@ namespace FrmComun.CapturaCentralizada {
             tlpFila2.RowCount = 1;
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpFila2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpFila2.Size = new Size(186, 66);
-            tlpFila2.TabIndex = 2;
+            tlpFila2.Size = new Size(995, 562);
+            tlpFila2.TabIndex = 0;
             // 
             // gbTarjetaCirculacion
             // 
@@ -258,21 +259,21 @@ namespace FrmComun.CapturaCentralizada {
             gbTarjetaCirculacion.Dock = DockStyle.Fill;
             gbTarjetaCirculacion.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbTarjetaCirculacion.ForeColor = Color.Crimson;
-            gbTarjetaCirculacion.Location = new Point(100, 5);
+            gbTarjetaCirculacion.Location = new Point(517, 5);
             gbTarjetaCirculacion.Margin = new Padding(5);
             gbTarjetaCirculacion.Name = "gbTarjetaCirculacion";
             gbTarjetaCirculacion.Padding = new Padding(10);
-            gbTarjetaCirculacion.Size = new Size(81, 56);
-            gbTarjetaCirculacion.TabIndex = 2;
+            gbTarjetaCirculacion.Size = new Size(473, 552);
+            gbTarjetaCirculacion.TabIndex = 0;
             gbTarjetaCirculacion.TabStop = false;
-            gbTarjetaCirculacion.Text = "TARJETA DE CIRCUALCIÓN";
+            gbTarjetaCirculacion.Text = "TARJETA DE CIRCULACIÓN";
             // 
             // ucTarjetaCirculacion1
             // 
             ucTarjetaCirculacion1.Dock = DockStyle.Fill;
             ucTarjetaCirculacion1.Location = new Point(10, 30);
             ucTarjetaCirculacion1.Name = "ucTarjetaCirculacion1";
-            ucTarjetaCirculacion1.Size = new Size(61, 16);
+            ucTarjetaCirculacion1.Size = new Size(453, 512);
             ucTarjetaCirculacion1.TabIndex = 0;
             // 
             // gbSeleccionVehicular
@@ -286,8 +287,8 @@ namespace FrmComun.CapturaCentralizada {
             gbSeleccionVehicular.Margin = new Padding(5);
             gbSeleccionVehicular.Name = "gbSeleccionVehicular";
             gbSeleccionVehicular.Padding = new Padding(10);
-            gbSeleccionVehicular.Size = new Size(85, 56);
-            gbSeleccionVehicular.TabIndex = 1;
+            gbSeleccionVehicular.Size = new Size(502, 552);
+            gbSeleccionVehicular.TabIndex = 0;
             gbSeleccionVehicular.TabStop = false;
             gbSeleccionVehicular.Text = "SELECCION DE VEHICULO";
             // 
@@ -296,17 +297,17 @@ namespace FrmComun.CapturaCentralizada {
             ucSeleccionVehiculo1.Dock = DockStyle.Fill;
             ucSeleccionVehiculo1.Location = new Point(10, 30);
             ucSeleccionVehiculo1.Name = "ucSeleccionVehiculo1";
-            ucSeleccionVehiculo1.Size = new Size(65, 16);
+            ucSeleccionVehiculo1.Size = new Size(482, 512);
             ucSeleccionVehiculo1.TabIndex = 0;
             // 
             // tpDocumentosAdicionales
             // 
             tpDocumentosAdicionales.Controls.Add(tlpFila3);
-            tpDocumentosAdicionales.Location = new Point(4, 34);
+            tpDocumentosAdicionales.Location = new Point(4, 24);
             tpDocumentosAdicionales.Name = "tpDocumentosAdicionales";
             tpDocumentosAdicionales.Padding = new Padding(3);
-            tpDocumentosAdicionales.Size = new Size(1001, 568);
-            tpDocumentosAdicionales.TabIndex = 2;
+            tpDocumentosAdicionales.Size = new Size(192, 72);
+            tpDocumentosAdicionales.TabIndex = 0;
             tpDocumentosAdicionales.Text = "Documentos Adicionales";
             tpDocumentosAdicionales.UseVisualStyleBackColor = true;
             // 
@@ -322,8 +323,8 @@ namespace FrmComun.CapturaCentralizada {
             tlpFila3.Name = "tlpFila3";
             tlpFila3.RowCount = 1;
             tlpFila3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpFila3.Size = new Size(995, 562);
-            tlpFila3.TabIndex = 3;
+            tlpFila3.Size = new Size(186, 66);
+            tlpFila3.TabIndex = 0;
             // 
             // gbEscaneoDocumentos
             // 
@@ -332,12 +333,12 @@ namespace FrmComun.CapturaCentralizada {
             gbEscaneoDocumentos.Dock = DockStyle.Fill;
             gbEscaneoDocumentos.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic);
             gbEscaneoDocumentos.ForeColor = Color.Crimson;
-            gbEscaneoDocumentos.Location = new Point(452, 5);
+            gbEscaneoDocumentos.Location = new Point(88, 5);
             gbEscaneoDocumentos.Margin = new Padding(5);
             gbEscaneoDocumentos.Name = "gbEscaneoDocumentos";
             gbEscaneoDocumentos.Padding = new Padding(10);
-            gbEscaneoDocumentos.Size = new Size(538, 552);
-            gbEscaneoDocumentos.TabIndex = 2;
+            gbEscaneoDocumentos.Size = new Size(93, 56);
+            gbEscaneoDocumentos.TabIndex = 0;
             gbEscaneoDocumentos.TabStop = false;
             gbEscaneoDocumentos.Text = "ESCANEO DE DOCUMENTOS";
             // 
@@ -347,7 +348,7 @@ namespace FrmComun.CapturaCentralizada {
             ucEscaneoDocumentos1.Location = new Point(10, 30);
             ucEscaneoDocumentos1.Name = "ucEscaneoDocumentos1";
             ucEscaneoDocumentos1.RutaBase = "";
-            ucEscaneoDocumentos1.Size = new Size(518, 512);
+            ucEscaneoDocumentos1.Size = new Size(73, 16);
             ucEscaneoDocumentos1.TabIndex = 0;
             ucEscaneoDocumentos1.VerificacionId = null;
             // 
@@ -362,8 +363,8 @@ namespace FrmComun.CapturaCentralizada {
             gbDocumentosAdicionales.Margin = new Padding(5);
             gbDocumentosAdicionales.Name = "gbDocumentosAdicionales";
             gbDocumentosAdicionales.Padding = new Padding(10);
-            gbDocumentosAdicionales.Size = new Size(437, 552);
-            gbDocumentosAdicionales.TabIndex = 1;
+            gbDocumentosAdicionales.Size = new Size(73, 56);
+            gbDocumentosAdicionales.TabIndex = 0;
             gbDocumentosAdicionales.TabStop = false;
             gbDocumentosAdicionales.Text = "DOCUMENTOS ADICIONALES (EXPEDIENTE)";
             // 
@@ -372,7 +373,7 @@ namespace FrmComun.CapturaCentralizada {
             ucDocumentosAdicionales1.Dock = DockStyle.Fill;
             ucDocumentosAdicionales1.Location = new Point(10, 30);
             ucDocumentosAdicionales1.Name = "ucDocumentosAdicionales1";
-            ucDocumentosAdicionales1.Size = new Size(417, 512);
+            ucDocumentosAdicionales1.Size = new Size(53, 16);
             ucDocumentosAdicionales1.TabIndex = 0;
             // 
             // pnlHeader
@@ -387,10 +388,9 @@ namespace FrmComun.CapturaCentralizada {
             // tlpHeader
             // 
             tlpHeader.ColumnCount = 3;
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
-            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+            tlpHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
             tlpHeader.Controls.Add(tlpPlacaHeader, 0, 0);
             tlpHeader.Controls.Add(tlpLinea, 1, 0);
             tlpHeader.Controls.Add(ipbLogo, 2, 0);
@@ -415,7 +415,7 @@ namespace FrmComun.CapturaCentralizada {
             tlpPlacaHeader.RowCount = 1;
             tlpPlacaHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tlpPlacaHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpPlacaHeader.Size = new Size(330, 94);
+            tlpPlacaHeader.Size = new Size(397, 94);
             tlpPlacaHeader.TabIndex = 0;
             // 
             // lblPlaca
@@ -426,7 +426,7 @@ namespace FrmComun.CapturaCentralizada {
             lblPlaca.Location = new Point(3, 0);
             lblPlaca.Name = "lblPlaca";
             lblPlaca.Padding = new Padding(0, 0, 12, 0);
-            lblPlaca.Size = new Size(159, 94);
+            lblPlaca.Size = new Size(192, 94);
             lblPlaca.TabIndex = 0;
             lblPlaca.Text = "Placa";
             lblPlaca.TextAlign = ContentAlignment.MiddleLeft;
@@ -437,12 +437,11 @@ namespace FrmComun.CapturaCentralizada {
             txtPlaca.CharacterCasing = CharacterCasing.Upper;
             txtPlaca.Dock = DockStyle.Fill;
             txtPlaca.Font = new Font("Segoe UI", 28F);
-            txtPlaca.Location = new Point(165, 16);
+            txtPlaca.Location = new Point(198, 16);
             txtPlaca.Margin = new Padding(0, 16, 0, 16);
             txtPlaca.Name = "txtPlaca";
-            txtPlaca.Size = new Size(165, 57);
+            txtPlaca.Size = new Size(199, 57);
             txtPlaca.TabIndex = 1;
-            txtPlaca.Text = "75F880";
             txtPlaca.KeyDown += txtPlaca_KeyDown;
             // 
             // tlpLinea
@@ -453,25 +452,24 @@ namespace FrmComun.CapturaCentralizada {
             tlpLinea.Controls.Add(txtLinea, 1, 0);
             tlpLinea.Controls.Add(lblLinea, 0, 0);
             tlpLinea.Dock = DockStyle.Fill;
-            tlpLinea.Location = new Point(339, 3);
+            tlpLinea.Location = new Point(406, 3);
             tlpLinea.Name = "tlpLinea";
             tlpLinea.RowCount = 1;
             tlpLinea.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tlpLinea.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpLinea.Size = new Size(330, 94);
+            tlpLinea.Size = new Size(296, 94);
             tlpLinea.TabIndex = 0;
-            tlpLinea.TabStop = true;
             // 
             // txtLinea
             // 
             txtLinea.BorderStyle = BorderStyle.FixedSingle;
             txtLinea.Dock = DockStyle.Fill;
             txtLinea.Font = new Font("Segoe UI Semibold", 27.75F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            txtLinea.Location = new Point(165, 16);
+            txtLinea.Location = new Point(148, 16);
             txtLinea.Margin = new Padding(0, 16, 0, 16);
             txtLinea.Name = "txtLinea";
             txtLinea.ReadOnly = true;
-            txtLinea.Size = new Size(165, 57);
+            txtLinea.Size = new Size(148, 57);
             txtLinea.TabIndex = 0;
             txtLinea.TabStop = false;
             txtLinea.TextAlign = HorizontalAlignment.Center;
@@ -485,7 +483,7 @@ namespace FrmComun.CapturaCentralizada {
             lblLinea.Margin = new Padding(0, 0, 10, 0);
             lblLinea.Name = "lblLinea";
             lblLinea.Padding = new Padding(0, 0, 12, 0);
-            lblLinea.Size = new Size(155, 94);
+            lblLinea.Size = new Size(138, 94);
             lblLinea.TabIndex = 0;
             lblLinea.Text = "Línea";
             lblLinea.TextAlign = ContentAlignment.MiddleLeft;
@@ -502,7 +500,7 @@ namespace FrmComun.CapturaCentralizada {
             ipbLogo.Location = new Point(908, 3);
             ipbLogo.Name = "ipbLogo";
             ipbLogo.Size = new Size(98, 94);
-            ipbLogo.TabIndex = 1;
+            ipbLogo.TabIndex = 0;
             ipbLogo.TabStop = false;
             // 
             // ucRegistroVehicular
@@ -556,7 +554,6 @@ namespace FrmComun.CapturaCentralizada {
         private TabPage tpDocumentosAdicionales;
         private TableLayoutPanel tlpFila1;
         private GroupBox gbVinModelo;
-        private GroupBox gbAcceso;
         private GroupBox gbVisitante;
         private TableLayoutPanel tlpFila2;
         private GroupBox gbTarjetaCirculacion;
@@ -565,12 +562,13 @@ namespace FrmComun.CapturaCentralizada {
         private GroupBox gbEscaneoDocumentos;
         private GroupBox gbDocumentosAdicionales;
         private Panel pnlRegistro;
-        private Complementos.ucAccesoConsulta ucAccesoConsulta1;
         private Complementos.ucVinModelo ucVinModelo1;
         private Complementos.ucVisitante ucVisitante1;
         private Complementos.ucTarjetaCirculacion ucTarjetaCirculacion1;
         private Complementos.ucSeleccionVehiculo ucSeleccionVehiculo1;
         private Complementos.ucEscaneoDocumentos ucEscaneoDocumentos1;
         private Complementos.ucDocumentosAdicionales ucDocumentosAdicionales1;
+        private GroupBox gbAcceso;
+        private Complementos.ucAccesoConsulta ucAccesoConsulta1;
     }
 }

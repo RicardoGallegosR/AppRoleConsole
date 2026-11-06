@@ -12,6 +12,10 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Net;
 using System.Net.Sockets;
 using PdfSharp.Fonts;
+using SQLSIVEV.Infrastructure.Devices.Obd;
+
+
+
 /*
  MEJORAR LA VELOCIDAD DE SCANNER CON TWAIN 
  
@@ -355,13 +359,17 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
         #region Escanear
         private async void ibEscanear_Click(object sender, EventArgs e) {
+            
+            await EscanearDocumentoAsync();
+        }
+
+        private async Task EscanearDocumentoAsync() {
             if (string.IsNullOrWhiteSpace(ScannerId)) {
                 Mostrar.Mensaje("Escáner", "Debe seleccionar un escáner.");
-                SivevLogger.Error("El usuario no selecciono ningun escaner", SivevOrigen.Captura);
+                SivevLogger.Error("El usuario no selecciono ningun escaner", SivevOrigen.Scanner);
                 return;
             }
             try {
-                //Mostrar.Mensaje("Informacion", "Se procedera a realizar un escaner en cuanto cierre esta ventana,\npuede tomar algunos segundos sea pasiente.");
                 lblEstadoScanner.Text = "Escaneando...";
                 userControlBotones(
                     bScanners: false,
@@ -377,10 +385,6 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     bZoomMenos: true,
                     bGuardar: true
                 );
-
-
-
-
                 Cursor = Cursors.WaitCursor;
                 await Task.Yield();
                 BotonesHabilitados();
@@ -389,12 +393,10 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 AgregarPaginaEscaneada(_paginaEscaneada);
 
                 lblEstadoScanner.Text = $"Página {_paginaActual + 1} de {_paginas.Count}";
-
-                //MostrarPreview(_paginaEscaneada);
                 lblEstadoScanner.Text = "Documento escaneado";
             } catch (Exception ex) {
                 lblEstadoScanner.Text = "Error al escanear intente nuevamente o cambie de escáner";
-                SivevLogger.Warning($"Error al escanear\n{ex.Message}", SivevOrigen.Captura);
+                SivevLogger.Warning($"Error al escanear\n{ex.Message}", SivevOrigen.Scanner);
                 Mostrar.Mensaje("Error al escanear", ex.Message);
             } finally {
                 if (_paginas.Count == 0) {
@@ -430,9 +432,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }
                 BotonesHabilitados(true);
                 Cursor = Cursors.Default;
-
             }
         }
+
 
         private void BotonesHabilitados(bool flag = false) {
             ibEscanear.Enabled = flag;
@@ -670,6 +672,12 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             AgregarEncabezadoPie(documento, _Verificentro.ToString(), _Version, _EstacionIp.ToString(), _placa);
 
             documento.Save(rutaCompleta);
+            string password = new string(
+                VerificacionId.ToString().ToUpper().Reverse().ToArray()
+            );
+            var logger = new ObdTxtLogger(rutaCompleta, password);
+            logger.ComprimirZip();
+
             return rutaCompleta;
         }
 
@@ -838,11 +846,9 @@ namespace FrmComun.CapturaCentralizada.Complementos {
         }
 
 
-        private void ibAgregar_Click(object? sender, EventArgs e) {
+        private async void ibAgregar_Click(object? sender, EventArgs e) {
             Mostrar.Mensaje("Advertencia", "Rote o anexe el nuevo documento");
-            ibEscanear.Visible = true;
-            ibEscanear.PerformClick();
-            ibEscanear.Visible = false;
+            await EscanearDocumentoAsync();
         }
 
         private static MemoryStream PrepararImagenParaPdf(byte[] datos) {
@@ -1087,7 +1093,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             var titulo = new XFont("Arial", 13, XFontStyleEx.Bold);
             var subtitulo = new XFont("Arial", 10, XFontStyleEx.Bold);
             var normal = new XFont("Arial", 8, XFontStyleEx.Regular);
-            var negrita = new XFont("Arial", 8, XFontStyleEx.Bold);
+            var negrita = new XFont("Arial", 9, XFontStyleEx.Bold);
             var pequeno = new XFont("Arial", 7, XFontStyleEx.Regular);
 
             // Colores
@@ -1181,7 +1187,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             }
 
             // Fila de información con dos columnas.
-            void Fila(string concepto, string valor, bool destacar = false, bool negativo = false) {
+            void Fila(string concepto, string valor, bool destacar = false, bool negativo = false ) {
                 
                 AsegurarEspacio(altoFila);
                 var fuenteValor = destacar ? negrita : normal;
@@ -1236,13 +1242,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     string linea = "";
 
-                    foreach (string palabraOriginal in parrafo.Split(
-                        ' ', StringSplitOptions.RemoveEmptyEntries)) {
+                    foreach (string palabraOriginal in parrafo.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
                         string palabra = palabraOriginal;
 
                         // Divide palabras excepcionalmente largas.
-                        while (gfx!.MeasureString(palabra, pequeno).Width
-                               > anchoDisponible) {
+                        while (gfx!.MeasureString(palabra, pequeno).Width > anchoDisponible) {
                             if (!string.IsNullOrEmpty(linea)) {
                                 DibujarLinea(linea);
                                 linea = "";
@@ -1250,10 +1254,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                             int longitud = palabra.Length;
 
-                            while (longitud > 1 &&
-                                   gfx.MeasureString(
-                                       palabra[..longitud], pequeno).Width
-                                   > anchoDisponible) {
+                            while (longitud > 1 && gfx.MeasureString(palabra[..longitud], pequeno).Width > anchoDisponible) {
                                 longitud--;
                             }
 
@@ -1293,7 +1294,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 }
             }
 
-            static string SiNo(bool valor) => valor ? "Sí" : "No";
+            static string SiNo(bool? valor) => valor switch {
+                true => "Sí",
+                false => "No",
+                null => "Sin conexión"
+            };
 
             // --------------------------------------------------------
             // INICIO DEL ANEXO
@@ -1304,8 +1309,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
             // Datos generales
             string placa = fotocivicas?.Placa ?? citas?.placa ?? "No disponible";
 
-            Fila("Placa consultada", placa);
-            Fila("Fecha de generación", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            Fila("Placa consultada", placa, destacar: true);
+            Fila("Fecha de generación", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),  destacar: true);
 
             y += 12;
 
@@ -1323,32 +1328,36 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                 Fila(
                     "Resultado del servicio",
-                    fotocivicas.Verifica ? "Puede verificar" : "No puede verificar",
-                    destacar: fotocivicas.Verifica,
-                    negativo: !fotocivicas.Verifica
+                    fotocivicas?.Verifica switch {
+                        true => "Puede verificar",
+                        false => "No puede verificar",
+                        null => $"Se intentó consultar el servicio web el {DateTime.Now:dd/MM/yyyy} a las {DateTime.Now:HH:mm:ss}, pero no se obtuvo respuesta."
+                    },
+                    destacar: fotocivicas?.Verifica == true,
+                    negativo: fotocivicas?.Verifica == false
                 );
 
                 Fila(
                     "Adeudos de tenencia",
                     SiNo(fotocivicas.AdeudoTenencia),
-                    negativo: fotocivicas.AdeudoTenencia
+                    negativo: fotocivicas?.AdeudoTenencia == true
                 );
 
                 Fila(
                     "Infracciones económicas",
-                    SiNo(fotocivicas.AdeudoInfraccion),
-                    negativo: fotocivicas.AdeudoInfraccion
+                    SiNo(fotocivicas?.AdeudoInfraccion),
+                    negativo: fotocivicas?.AdeudoInfraccion == true
                 );
 
                 Fila(
                     "Sanciones",
-                    SiNo(fotocivicas.AdeudoSancion),
-                    negativo: fotocivicas.AdeudoSancion
+                    SiNo(fotocivicas?.AdeudoSancion),
+                    negativo: fotocivicas?.AdeudoSancion == true
                 );
 
                 Fila(
                     "Servicio de taxi",
-                    SiNo(fotocivicas.Taxi)
+                    SiNo(fotocivicas?.Taxi)
                 );
 
                 y += 10;
@@ -1356,10 +1365,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                 // Tenencias
                 Seccion("TENENCIAS");
 
-                if (fotocivicas.Tenencias.Count > 0) {
+                if (fotocivicas?.Tenencias.Count > 0) {
                     TextoAjustado($"Ejercicios reportados: {string.Join(", ", fotocivicas.Tenencias)}");
                 } else {
-                    TextoAjustado(fotocivicas.AdeudoTenencia ? "Se reporta adeudo, sin ejercicios detallados." : "No se reportaron ejercicios pendientes." );
+                    TextoAjustado(fotocivicas?.AdeudoTenencia switch {
+                        true => "Se reporta adeudo, sin ejercicios detallados.",
+                        false => "No se reportaron ejercicios pendientes.",
+                        null => "No fue posible consultar los adeudos de tenencia debido a que no se estableció conexión con el servicio web."
+                    });
                 }
 
                 if (!string.IsNullOrWhiteSpace(fotocivicas.MensajeTenencia)) {
@@ -1376,26 +1389,30 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                     Fila(
                         "Adeudo de fotocívicas",
-                        SiNo(fc.TieneAdeudo),
-                        negativo: fc.TieneAdeudo
+                        fc.TieneAdeudo switch {
+                            true => "Sí",
+                            false => "No",
+                            null => "Sin conexión"
+                        },
+                        negativo: fc.TieneAdeudo == true
                     );
 
                     Fila(
                         "Amonestaciones pendientes",
-                        SiNo(fc.DebeAmonestaciones),
-                        negativo: fc.DebeAmonestaciones
+                        SiNo(fc?.DebeAmonestaciones),
+                        negativo: fc?.DebeAmonestaciones == true
                     );
 
                     Fila(
                         "Actividades presenciales",
-                        SiNo(fc.DebePresencial),
-                        negativo: fc.DebePresencial
+                        SiNo(fc?.DebePresencial),
+                        negativo: fc?.DebePresencial == true
                     );
 
                     Fila(
                         "Actividades en línea",
-                        SiNo(fc.DebeEnLinea),
-                        negativo: fc.DebeEnLinea
+                        SiNo(fc?.DebeEnLinea),
+                        negativo: fc?.DebeEnLinea == true
                     );
                 } else {
                     TextoAjustado(
@@ -1411,9 +1428,14 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                 Seccion("INFRACCIONES ECONÓMICAS");
 
-                if (fotocivicas.Economicas.Count == 0) {
+                if (fotocivicas?.Economicas.Count == 0) {
                     TextoAjustado(
-                        fotocivicas.AdeudoInfraccion ? "Se reportan infracciones, sin folios detallados." : "No se reportaron infracciones económicas.");
+                        fotocivicas?.AdeudoInfraccion switch {
+                            true => "Se reportan infracciones, sin folios detallados.",
+                            false => "No se reportaron infracciones económicas.",
+                            null => "No fue posible obtener información sobre infracciones económicas del servicio web."
+                        }
+                    );
                 } else {
                     // Encabezado de la tabla.
                     void EncabezadoInfracciones() {
@@ -1478,10 +1500,7 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                         gfx.DrawString(
                             estado,
                             pequeno,
-                            estado.Equals(
-                                "NO PAGADA",
-                                StringComparison.OrdinalIgnoreCase)
-                                ? rojo : gris,
+                            estado.Equals("NO PAGADA", StringComparison.OrdinalIgnoreCase) ? rojo : gris,
                             new XRect( margen + 320, y + 5, ancho - 2 * margen - 326, 13),
                             XStringFormats.TopRight
                         );
@@ -1512,9 +1531,11 @@ namespace FrmComun.CapturaCentralizada.Complementos {
                     );
                 } else {
                     TextoAjustado(
-                        fotocivicas.AdeudoSancion
-                            ? "Se reportan sanciones, sin registros detallados."
-                            : "No se reportaron sanciones."
+                        fotocivicas?.AdeudoSancion switch {
+                            true => "Se reportan sanciones, sin registros detallados.",
+                            false => "No se reportaron sanciones.",
+                            null => "No fue posible obtener información sobre sanciones ambientales del servicio web."
+                        }
                     );
                 }
             }
@@ -1534,8 +1555,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                 Fila(
                     "Existe cita",
-                    SiNo(citas.existeCita),
-                    destacar: citas.existeCita
+                    SiNo(citas?.existeCita),
+                    destacar: citas?.existeCita == true
                 );
 
                 Fila(
@@ -1559,8 +1580,8 @@ namespace FrmComun.CapturaCentralizada.Complementos {
 
                 Fila(
                     "Asistencia registrada",
-                    SiNo(citas.marcaAsistencia),
-                    destacar: citas.marcaAsistencia
+                    SiNo(citas?.marcaAsistencia),
+                    destacar: citas?.marcaAsistencia == true
                 );
 
                 if (!string.IsNullOrWhiteSpace(citas.mensaje)) {

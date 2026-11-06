@@ -84,9 +84,14 @@ namespace Apps_Captura.Frm {
                 InitialCatalog =  _capturaRegistroWindows.dvar2,
 
                 // Autenticación SQL
+                /*
                 UserID = _capturaRegistroWindows.dvar3,
                 Password = _capturaRegistroWindows.dvar4,
                 IntegratedSecurity = false,
+                //*/
+                // Autenticación de Windows
+                IntegratedSecurity = true,
+
 
                 // TLS
                 Encrypt = false,
@@ -307,8 +312,8 @@ namespace Apps_Captura.Frm {
         private string ObtenerRutaBaseEscaneo() {
             const string rutaLocal = @"C:\SIVEV\ESCANER";
 
-            //string? rutaConfigurada = _capturaRegistroWindows.dvar20?.Trim();
-            string? rutaConfigurada = rutaLocal;
+            string? rutaConfigurada = _capturaRegistroWindows.dvar20?.Trim();
+            //string? rutaConfigurada = rutaLocal;
 
             if (!string.IsNullOrWhiteSpace(rutaConfigurada) && RutaDisponibleParaEscritura(rutaConfigurada)) {
                 return rutaConfigurada;
@@ -316,13 +321,13 @@ namespace Apps_Captura.Frm {
 
             // Fallback local
             Directory.CreateDirectory(rutaLocal);
-            /*
-            Mostrar.Mensaje("Ruta de escaneo",
-                "No se encontró o no se tienen permisos sobre la ruta base de escaneo.\n\n" +
-                $"Los documentos se guardarán temporalmente" +
-                "Genere un ticket de soporte para corregir la ruta y eliminar este mensaje."
+            //*
+            Mostrar.Mensaje("Advertencia: ruta de escaneo no disponible",
+    "No se encontró la ruta de escaneo configurada o no se tienen permisos de escritura.\n\n" +
+    $"Los documentos se guardarán temporalmente.\n\n" +
+    "Genere un ticket de soporte para corregir la ruta de red y eliminar esta advertencia."
              );
-            */
+            //*/
             SivevLogger.Warning(
                 $"No fue posible utilizar la ruta de escaneo configurada: " +
                 $"'{rutaConfigurada ?? "SIN CONFIGURAR"}'. " +

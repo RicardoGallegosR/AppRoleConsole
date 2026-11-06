@@ -55,7 +55,7 @@
             flpVisita.Name = "flpVisita";
             flpVisita.Padding = new Padding(5);
             flpVisita.Size = new Size(855, 50);
-            flpVisita.TabIndex = 1;
+            flpVisita.TabIndex = 0;
             flpVisita.WrapContents = false;
             // 
             // btnAgregar
@@ -74,6 +74,7 @@
             btnAgregar.TabIndex = 1;
             btnAgregar.Text = "Agregar";
             btnAgregar.UseVisualStyleBackColor = false;
+            btnAgregar.Visible = false;
             // 
             // btnEliminar
             // 
@@ -91,6 +92,7 @@
             btnEliminar.TabIndex = 2;
             btnEliminar.Text = "Eliminar";
             btnEliminar.UseVisualStyleBackColor = false;
+            btnEliminar.Visible = false;
             // 
             // dgvDocumentos
             // 

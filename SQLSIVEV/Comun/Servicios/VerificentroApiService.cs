@@ -1,6 +1,9 @@
 ﻿using SQLSIVEV.Comun.Configuracion;
+using SQLSIVEV.Domain.Models;
 using SQLSIVEV.Infrastructure.Utils;
 using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
+using System.Text.Json;
 
 namespace SQLSIVEV.Comun.Servicios {
     public class VerificentroApiService {
@@ -18,19 +21,28 @@ namespace SQLSIVEV.Comun.Servicios {
             _client.DefaultRequestHeaders.Add("x-api-key", _config.ApiKey);
         }
 
-        public async Task<string> ConsultarFisicoMecanicaAsync(string placa) {
-            return await GetAsync($"documental?Placa={placa}");
+        public async Task<FisicoMecanicaDto> ConsultarFisicoMecanicaAsync(string placa) {
+            var (Contenido, Status) = await GetAsync($"documental?Placa={placa}");
+            var datosFM = JsonSerializer.Deserialize<FisicoMecanicaDto>(Contenido, new JsonSerializerOptions {
+                PropertyNameCaseInsensitive = true
+            }) ?? throw new JsonException("Respuesta inválida de físico-mecánica.");
+
+            datosFM.status = Status;
+            return datosFM;
         }
 
         public async Task<string> ConsultarFotocivicasAsync(string placa) {
-            return await GetAsync($"fotocivicas?Placa={placa}");
+            var (contenido, _) = await GetAsync($"fotocivicas?Placa={Uri.EscapeDataString(placa)}");
+            return contenido;
         }
 
         public async Task<string> ConsultarCitaAsync(string placa, string centro) {
-            return await GetAsync($"cita?Placa={placa}&Centro={centro}");
+            var (contenido, _) = await GetAsync($"cita?Placa={Uri.EscapeDataString(placa)}&Centro={Uri.EscapeDataString(centro)}");
+
+            return contenido;
         }
 
-        private async Task<string> GetAsync(string endpoint) {
+        private async Task<(string Contenido, short Status)> GetAsync(string endpoint) {
             string dnsUrl = $"http://{_config.DnsHost}{_config.Path}{endpoint}";
             string ipUrl = $"http://{_config.FallbackIp}{_config.Path}{endpoint}";
 
@@ -42,77 +54,25 @@ namespace SQLSIVEV.Comun.Servicios {
             }
         }
 
-        private async Task<string> EjecutarGetAsync(string url) {
+        private async Task<(string Contenido, short Status)> EjecutarGetAsync(string url) {
             using var response = await _client.GetAsync(url);
 
             string contenido = await response.Content.ReadAsStringAsync();
+            short status = (short)response.StatusCode;
 
             if (!response.IsSuccessStatusCode) {
                 SivevLogger.Error(
                     $"Error HTTP {(int)response.StatusCode} " +
                     $"({response.ReasonPhrase})\n" +
                     $"URL: {url}\n" +
-                    $"Respuesta: {contenido}",
-                    SivevOrigen.Captura
+                    $"Respuesta: {WebServicesHelp.DecodificarUnicode(contenido)}",
+                    SivevOrigen.WebServicesCaptura
                 );
 
-                throw new HttpRequestException(
-                    $"Error HTTP {(int)response.StatusCode} ({response.ReasonPhrase})",
-                    null,
-                    response.StatusCode
-                );
+                throw new HttpRequestException($"Error HTTP {(int)response.StatusCode} ({response.ReasonPhrase})", null, response.StatusCode);
             }
 
-            return contenido;
+            return (contenido, status);
         }
-
-
-        /* CAMBIO POR MANEJO DE ERRORES Y LOGS
-        private async Task<string> GetAsync(string endpoint) {
-            string dnsUrl = $"http://{_config.DnsHost}{_config.Path}{endpoint}";
-            string ipUrl = $"http://{_config.FallbackIp}{_config.Path}{endpoint}";
-
-            try {
-                using var response = await _client.GetAsync(dnsUrl);
-
-                string contenido = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode) {
-                    SivevLogger.Error(
-                        $"Error HTTP {(int)response.StatusCode} " +
-                        $"({response.ReasonPhrase})\n" +
-                        $"URL: {dnsUrl}\n" +
-                        $"Respuesta: {contenido}", SivevOrigen.Captura);
-                    throw new Exception(
-                        $"Error HTTP {(int)response.StatusCode} " +
-                        $"({response.ReasonPhrase})\n" +
-                        $"URL: {dnsUrl}\n" +
-                        $"Respuesta: {contenido}");
-                }
-
-                return contenido;
-            } catch (HttpRequestException ex)
-                  when (ex.StatusCode == null) {
-                using var response = await _client.GetAsync(ipUrl);
-
-                string contenido = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode) {
-                    SivevLogger.Error(
-                        $"Error HTTP {(int)response.StatusCode} " +
-                        $"({response.ReasonPhrase})\n" +
-                        $"URL: {ipUrl}\n" +
-                        $"Respuesta: {contenido}", SivevOrigen.Captura);
-                    throw new Exception(
-                        $"Error HTTP {(int)response.StatusCode} " +
-                        $"({response.ReasonPhrase})\n" +
-                        $"URL: {ipUrl}\n" +
-                        $"Respuesta: {contenido}");
-                }
-
-                return contenido;
-            }
-        }*/
-
     }
 }

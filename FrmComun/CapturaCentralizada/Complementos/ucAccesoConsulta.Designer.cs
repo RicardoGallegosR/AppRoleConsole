@@ -152,7 +152,7 @@
             cbPET.Location = new Point(55, 3);
             cbPET.Name = "cbPET";
             cbPET.Size = new Size(181, 30);
-            cbPET.TabIndex = 5;
+            cbPET.TabIndex = 1;
             cbPET.Text = "Prueba de Evaluación Técnica";
             cbPET.UseVisualStyleBackColor = true;
             // 
@@ -168,7 +168,8 @@
             ibServicios.Location = new Point(242, 3);
             ibServicios.Name = "ibServicios";
             ibServicios.Size = new Size(37, 30);
-            ibServicios.TabIndex = 2;
+            ibServicios.TabIndex = 0;
+            ibServicios.TabStop = false;
             ibServicios.UseVisualStyleBackColor = false;
             ibServicios.Click += ibServicios_Click;
             // 
@@ -180,7 +181,7 @@
             btnCrearVerificacion.Location = new Point(285, 3);
             btnCrearVerificacion.Name = "btnCrearVerificacion";
             btnCrearVerificacion.Size = new Size(89, 30);
-            btnCrearVerificacion.TabIndex = 3;
+            btnCrearVerificacion.TabIndex = 2;
             btnCrearVerificacion.Text = "Continuar";
             btnCrearVerificacion.UseVisualStyleBackColor = true;
             // 
@@ -213,7 +214,7 @@
             pnlCitas.Location = new Point(0, 0);
             pnlCitas.Name = "pnlCitas";
             pnlCitas.Size = new Size(411, 98);
-            pnlCitas.TabIndex = 1;
+            pnlCitas.TabIndex = 0;
             // 
             // lblStatusCitas
             // 
@@ -223,7 +224,7 @@
             lblStatusCitas.Location = new Point(0, 23);
             lblStatusCitas.Name = "lblStatusCitas";
             lblStatusCitas.Size = new Size(411, 75);
-            lblStatusCitas.TabIndex = 2;
+            lblStatusCitas.TabIndex = 0;
             lblStatusCitas.Text = ".";
             // 
             // pnlMargen
@@ -233,7 +234,7 @@
             pnlMargen.Location = new Point(0, 21);
             pnlMargen.Name = "pnlMargen";
             pnlMargen.Size = new Size(411, 2);
-            pnlMargen.TabIndex = 1;
+            pnlMargen.TabIndex = 0;
             // 
             // lblInfCitas
             // 
@@ -266,7 +267,7 @@
             lblStatusFM.Location = new Point(0, 43);
             lblStatusFM.Name = "lblStatusFM";
             lblStatusFM.Size = new Size(411, 130);
-            lblStatusFM.TabIndex = 3;
+            lblStatusFM.TabIndex = 0;
             lblStatusFM.Text = ".";
             // 
             // pnlMargen2
@@ -276,7 +277,7 @@
             pnlMargen2.Location = new Point(0, 41);
             pnlMargen2.Name = "pnlMargen2";
             pnlMargen2.Size = new Size(411, 2);
-            pnlMargen2.TabIndex = 2;
+            pnlMargen2.TabIndex = 0;
             // 
             // lblInfFM
             // 
@@ -286,7 +287,7 @@
             lblInfFM.Location = new Point(0, 0);
             lblInfFM.Name = "lblInfFM";
             lblInfFM.Size = new Size(411, 41);
-            lblInfFM.TabIndex = 1;
+            lblInfFM.TabIndex = 0;
             lblInfFM.Text = "INFORMACIÓN DEL SERVICIO DE\r\n FISICO MECANICA\r\n";
             lblInfFM.TextAlign = ContentAlignment.TopCenter;
             // 
@@ -332,7 +333,7 @@
             cbMotivoAcceso.Location = new Point(0, 20);
             cbMotivoAcceso.Name = "cbMotivoAcceso";
             cbMotivoAcceso.Size = new Size(437, 28);
-            cbMotivoAcceso.TabIndex = 1;
+            cbMotivoAcceso.TabIndex = 0;
             cbMotivoAcceso.SelectionChangeCommitted += cbMotivoAcceso_SelectionChangeCommitted;
             // 
             // lblTipoAcceso
@@ -355,7 +356,7 @@
             pnlMonetarias.Location = new Point(3, 63);
             pnlMonetarias.Name = "pnlMonetarias";
             pnlMonetarias.Size = new Size(437, 59);
-            pnlMonetarias.TabIndex = 1;
+            pnlMonetarias.TabIndex = 0;
             // 
             // lblStatusMonetarias
             // 
@@ -365,7 +366,7 @@
             lblStatusMonetarias.Location = new Point(0, 20);
             lblStatusMonetarias.Name = "lblStatusMonetarias";
             lblStatusMonetarias.Size = new Size(437, 39);
-            lblStatusMonetarias.TabIndex = 1;
+            lblStatusMonetarias.TabIndex = 0;
             lblStatusMonetarias.Text = "STATUS MONETARIAS\r\n";
             lblStatusMonetarias.TextAlign = ContentAlignment.TopCenter;
             // 
@@ -389,7 +390,7 @@
             pnlAmbientales.Location = new Point(3, 128);
             pnlAmbientales.Name = "pnlAmbientales";
             pnlAmbientales.Size = new Size(437, 59);
-            pnlAmbientales.TabIndex = 2;
+            pnlAmbientales.TabIndex = 0;
             // 
             // lblStatusAmbientales
             // 
@@ -459,7 +460,7 @@
             pnlFotocivicas.Location = new Point(3, 238);
             pnlFotocivicas.Name = "pnlFotocivicas";
             pnlFotocivicas.Size = new Size(437, 86);
-            pnlFotocivicas.TabIndex = 4;
+            pnlFotocivicas.TabIndex = 0;
             // 
             // lblStatusFotocivicas
             // 

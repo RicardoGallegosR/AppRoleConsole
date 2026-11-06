@@ -1,4 +1,6 @@
-﻿namespace SQLSIVEV.Domain.Models {
+﻿using System.Text.Json.Serialization;
+
+namespace SQLSIVEV.Domain.Models {
 
     public sealed class SpAppRollClaveGetResult {
         public int ReturnCode { get; init; }
@@ -87,14 +89,14 @@
     public class ConsultaFotocivicasDto {
         public string? Placa { get; set; }
 
-        public bool AdeudoTenencia { get; set; }
-        public bool AdeudoSancion { get; set; }
-        public bool AdeudoInfraccion { get; set; }
+        public bool? AdeudoTenencia { get; set; }
+        public bool? AdeudoSancion { get; set; } 
+        public bool? AdeudoInfraccion { get; set; }
 
-        public bool Verifica { get; set; }
-        public bool Taxi { get; set; }
+        public bool? Verifica { get; set; } 
+        public bool? Taxi { get; set; } 
         public byte ConexionWebSrv { get; set; } = 1;
-        public string? MensajeTenencia { get; set; }
+        public string? MensajeTenencia { get; set; } = "DESCONOCIDO";
 
         public FotocivicasDto? Fotocivicas { get; set; }
 
@@ -103,11 +105,11 @@
         public List<short> Tenencias { get; set; } = new();
     }
     public class FotocivicasDto {
-        public int Puntos { get; set; }
-        public bool TieneAdeudo { get; set; }
-        public bool DebeAmonestaciones { get; set; }
-        public bool DebePresencial { get; set; }
-        public bool DebeEnLinea { get; set; }
+        public int Puntos { get; set; } = 11;
+        public bool? TieneAdeudo { get; set; }
+        public bool? DebeAmonestaciones { get; set; } 
+        public bool?  DebePresencial { get; set; } 
+        public bool? DebeEnLinea { get; set; } 
     }
     public class EconomicaDto {
         public string? Folio { get; set; }
@@ -120,8 +122,8 @@
         public string centro { get; set; } = string.Empty;
         public string codigoRespuesta { get; set; } = string.Empty;
 
-        public bool existeCita { get; set; }
-        public bool marcaAsistencia { get; set; }
+        public bool? existeCita { get; set; }
+        public bool? marcaAsistencia { get; set; }
         public string mensaje { get; set; } = string.Empty;
 
         public DateTime? fechaCita { get; set; }
@@ -132,9 +134,28 @@
 
     public class FisicoMecanicaDto {
         public string placa { get; set; } = string.Empty;
-        public bool documentalAprobada { get; set; } = false;
+        public bool? documentalAprobada { get; set; } = false;
         public string origen { get; set; } = string.Empty;
         public string mensaje { get; set; } = string.Empty;
+        public short? status { get; set; }
+
+    }
+
+    public class RespuestaFisicoMecanicaDto {
+        public DatosFisicoMecanicaDto? data { get; set; }
+        public MetaFisicoMecanicaDto? meta { get; set; }
+    }
+
+    public class DatosFisicoMecanicaDto {
+        [JsonPropertyName("aprobo_documental")]
+        public bool? documentalAprobada { get; set; }
+
+        public string origen { get; set; } = string.Empty;
+    }
+
+    public class MetaFisicoMecanicaDto {
+        public string title { get; set; } = string.Empty;
+        public short? status { get; set; }
     }
 
     public sealed class MarcasDto {
@@ -157,8 +178,8 @@
         public string TipoLineaCaptura { get; init; } = string.Empty;
         public byte Vigencia { get; init; }
         public string Mascara { get; init; } = string.Empty;
-        public bool Conciliable { get; init; }
-        public bool Verificable { get; init; }
+        public bool? Conciliable { get; init; }
+        public bool? Verificable { get; init; }
         public string Url { get; init; } = string.Empty;
     }
 
@@ -183,7 +204,7 @@
         public DateTime? TarjetaFecha { get; init; }
         public int CertificadoFolio { get; init; }
         public string Propietario => $"{Nombre} {ApelPaterno} {ApelMaterno}".Trim();
-        public bool EsPersonaFisica { get; init; }
+        public bool? EsPersonaFisica { get; init; }
         public string RazonSocial { get; init; } = string.Empty;
 
     }
@@ -200,7 +221,7 @@
     public sealed class LineaCapturaDto {
         public Guid EstacionPruebaId { get; init; }
         public byte Linea { get; init; }
-        public bool BFM { get; init; }
+        public bool? BFM { get; init; }
     }
     #endregion
 
@@ -223,13 +244,13 @@
         public string Referencia { get; init; } = string.Empty;
         public int TipoAdeudoId { get; init; }
         public Guid AdeudoId { get; init; }
-        public bool RequiereImagen { get; init; }
+        public bool? RequiereImagen { get; init; }
 
         // Campos de captura de la UI.
         // No vienen del GET actual.
         public string ValorReferencia { get; set; }  = string.Empty;
         public DateTime? Fecha { get; set; }
-        public bool NoPresenta { get; set; }
+        public bool? NoPresenta { get; set; }
     }
     #endregion
 
@@ -285,7 +306,7 @@
         public short Resultado { get; set; }
         public int MensajeId { get; set; }
         public int ReturnCode { get; set; }
-        public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
+        public bool? Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
 
     public sealed class VerificacionPruebaObdFinaliza {
@@ -331,7 +352,7 @@
         public int MensajeId { get; set; }
         public int ReturnCode { get; set; }
         public List<CapturaVisualItem> Items { get; } = new();
-        public bool Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
+        public bool? Ok => Resultado >= 0 && MensajeId == 0 && ReturnCode == 0;
     }
 
     public sealed class AppTextoMensajeResult {
@@ -347,7 +368,7 @@
         public short Resultado { get; set; }
         public bool CheckObd { get; set; }
         public int ReturnCode { get; set; }
-        public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
+        public bool? Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
     }
 
 
@@ -355,7 +376,7 @@
         public int MensajeId { get; set; }
         public short Resultado { get; set; }
         public int ReturnCode { get; set; }
-        public bool Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
+        public bool? Ok => Resultado >= 0 && ReturnCode == 0 && MensajeId == 0;
     }
     public sealed class ResultadoSql {
         public short Resultado { get; set; }

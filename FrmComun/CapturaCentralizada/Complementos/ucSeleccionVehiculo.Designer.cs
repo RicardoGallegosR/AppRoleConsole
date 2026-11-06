@@ -54,7 +54,7 @@
             dgvVehiculos.Name = "dgvVehiculos";
             dgvVehiculos.ReadOnly = true;
             dgvVehiculos.Size = new Size(938, 141);
-            dgvVehiculos.TabIndex = 1;
+            dgvVehiculos.TabIndex = 0;
             // 
             // pblFoother
             // 
@@ -90,9 +90,10 @@
             btnSeleccionar.Margin = new Padding(3, 3, 20, 3);
             btnSeleccionar.Name = "btnSeleccionar";
             btnSeleccionar.Size = new Size(158, 34);
-            btnSeleccionar.TabIndex = 2;
+            btnSeleccionar.TabIndex = 1;
             btnSeleccionar.Text = "Seleccionar";
             btnSeleccionar.UseVisualStyleBackColor = false;
+            btnSeleccionar.Click += btnSeleccionar_Click_1;
             // 
             // ucSeleccionVehiculo
             // 
